@@ -42,13 +42,13 @@ const FilterBar = () => {
     <div ref={barRef} className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
       {/* Popover panels */}
       {openFilter && (
-        <div className="absolute bottom-full left-1/2 z-50 mb-3 -translate-x-1/2">
-          <div className="rounded-2xl border border-border bg-card p-5 shadow-xl min-w-[280px]">
+        <div className="absolute bottom-full left-1/2 z-50 mb-3 -translate-x-1/2 w-full">
+          <div className={`rounded-2xl border border-border bg-card p-5 shadow-xl ${openFilter === "extensions" ? "w-full" : "min-w-[280px] mx-auto w-fit"}`}>
             {openFilter === "extensions" && (
               <div>
                 <h3 className="text-sm font-bold text-foreground">Domain Extensions</h3>
                 <p className="mb-3 text-xs text-muted-foreground">Select one or more TLDs</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-5 gap-2">
                   {TLD_LIST.map((tld) => (
                     <div
                       key={tld.extension}
