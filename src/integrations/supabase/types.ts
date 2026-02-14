@@ -44,6 +44,51 @@ export type Database = {
         }
         Relationships: []
       }
+      registrar_prices: {
+        Row: {
+          affiliate_url: string | null
+          created_at: string
+          icann_fee: number | null
+          id: string
+          promo_code: string | null
+          reg_price: number
+          registrar: string
+          renew_price: number
+          tld: string
+          transfer_price: number | null
+          updated_at: string
+          whois_privacy: boolean | null
+        }
+        Insert: {
+          affiliate_url?: string | null
+          created_at?: string
+          icann_fee?: number | null
+          id?: string
+          promo_code?: string | null
+          reg_price: number
+          registrar: string
+          renew_price: number
+          tld: string
+          transfer_price?: number | null
+          updated_at?: string
+          whois_privacy?: boolean | null
+        }
+        Update: {
+          affiliate_url?: string | null
+          created_at?: string
+          icann_fee?: number | null
+          id?: string
+          promo_code?: string | null
+          reg_price?: number
+          registrar?: string
+          renew_price?: number
+          tld?: string
+          transfer_price?: number | null
+          updated_at?: string
+          whois_privacy?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
