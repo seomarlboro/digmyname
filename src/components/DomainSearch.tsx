@@ -100,7 +100,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       </section>
 
       {/* Sticky search bar */}
-      <div className={`sticky top-0 z-40 transition-all duration-500 ease-in-out ${hasQuery ? "py-4 bg-background/80 backdrop-blur-xl border-b border-border/50" : "pb-8 hero-gradient"}`}>
+      <div className={`sticky top-16 z-40 transition-all duration-500 ease-in-out ${hasQuery ? "py-4 bg-background/80 backdrop-blur-xl border-b border-border/50" : "pb-8 hero-gradient"}`}>
         <div className="container mx-auto px-4">
           <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
