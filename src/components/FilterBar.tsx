@@ -11,11 +11,11 @@ interface FilterConfig {
 }
 
 const filterConfigs: FilterConfig[] = [
-  { id: "extensions", label: "EXTENSIONS", color: "bg-primary/8 border-primary/15" },
-  { id: "price", label: "PRICE", color: "bg-available/8 border-available/15" },
-  { id: "length", label: "LENGTH", color: "bg-purple-500/8 border-purple-500/15" },
-  { id: "features", label: "FEATURES", color: "bg-warning/8 border-warning/15" },
-  { id: "status", label: "STATUS", color: "bg-secondary border-border" },
+  { id: "extensions", label: "EXTENSIONS", color: "bg-primary/15 border-primary/20" },
+  { id: "price", label: "PRICE", color: "bg-available/15 border-available/20" },
+  { id: "length", label: "LENGTH", color: "bg-purple-500/15 border-purple-500/20" },
+  { id: "features", label: "FEATURES", color: "bg-warning/15 border-warning/20" },
+  { id: "status", label: "STATUS", color: "bg-secondary/80 border-border" },
 ];
 
 const featureOptions = ["Premium", "Free SSL", "Instant activation", "Trending"];
@@ -181,7 +181,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
       <div className="absolute inset-0 -z-10 rounded-3xl blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(262 83% 58% / 0.25), hsl(280 90% 55% / 0.2))" }} />
 
       {/* Floating bar */}
-      <div className="relative flex items-stretch gap-3 rounded-[28px] border border-border/30 bg-card/90 p-3.5 backdrop-blur-2xl shadow-2xl">
+      <div className="relative flex items-stretch gap-3 rounded-[28px] border border-border/30 bg-card/80 p-3.5 backdrop-blur-2xl shadow-2xl">
         {/* Popovers */}
         {openFilter && openFilter !== "extensions" && (
           <div
