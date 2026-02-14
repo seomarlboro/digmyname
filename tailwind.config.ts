@@ -47,6 +47,20 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        available: {
+          DEFAULT: "hsl(var(--available))",
+          foreground: "hsl(var(--available-foreground))",
+        },
+        taken: {
+          DEFAULT: "hsl(var(--taken))",
+          foreground: "hsl(var(--taken-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        hero: "hsl(var(--hero-bg))",
+        "search-bg": "hsl(var(--search-bg))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
