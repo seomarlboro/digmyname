@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, X, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
+import { Search, X, Loader2, Sparkles, CheckCircle2, LayoutGrid, List } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import DomainCard from "@/components/DomainCard";
 import { generateDomainList, checkDomainsAvailability, type DomainResult } from "@/lib/domainData";
@@ -10,6 +10,7 @@ const DomainSearch = () => {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<DomainResult[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState(false);
+  const [viewMode, setViewMode] = useState<"cards" | "compact">("cards");
 
   // Debounce
   useEffect(() => {
@@ -158,15 +159,29 @@ const DomainSearch = () => {
             {availableCount > 0 && (
               <div className="mb-4 flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-available" />
-                <h2 className="text-lg font-bold text-foreground">Available Domains</h2>
+                <h2 className="text-lg font-bold text-foreground flex-1">Available Domains</h2>
+                <div className="flex items-center rounded-lg border border-border bg-card p-0.5">
+                  <button
+                    onClick={() => setViewMode("cards")}
+                    className={`rounded-md p-1.5 transition-colors ${viewMode === "cards" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode("compact")}
+                    className={`rounded-md p-1.5 transition-colors ${viewMode === "compact" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    <List className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             )}
-            <div className="space-y-3">
+            <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
               {results
                 .filter((r) => !r.checking && r.available)
                 .slice(0, 20)
                 .map((r) => (
-                  <DomainCard key={r.domain} result={r} />
+                  <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} />
                 ))}
             </div>
 
@@ -177,12 +192,12 @@ const DomainSearch = () => {
                   <X className="h-5 w-5 text-taken" />
                   <h2 className="text-lg font-bold text-foreground">Taken Domains</h2>
                 </div>
-                <div className="space-y-3">
+                <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && !r.available)
                     .slice(0, 10)
                     .map((r) => (
-                      <DomainCard key={r.domain} result={r} />
+                      <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} />
                     ))}
                 </div>
               </>
