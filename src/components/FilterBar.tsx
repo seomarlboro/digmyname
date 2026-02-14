@@ -12,11 +12,11 @@ interface FilterConfig {
 }
 
 const filterConfigs: FilterConfig[] = [
-  { id: "extensions", label: "EXTENSIONS", value: "All TLDs", color: "bg-available/15 text-available" },
-  { id: "price", label: "PRICE", value: "$0-$200", color: "bg-primary/10 text-primary" },
-  { id: "length", label: "LENGTH", value: "1-63 chars", color: "bg-primary/10 text-primary" },
-  { id: "features", label: "FEATURES", value: "Any", color: "bg-warning/15 text-warning" },
-  { id: "status", label: "STATUS", value: "All", color: "bg-secondary text-muted-foreground" },
+  { id: "extensions", label: "EXTENSIONS", value: "All TLDs", color: "bg-primary/8 border-primary/15" },
+  { id: "price", label: "PRICE", value: "$0-$200", color: "bg-available/8 border-available/15" },
+  { id: "length", label: "LENGTH", value: "1-63 chars", color: "bg-purple-500/8 border-purple-500/15" },
+  { id: "features", label: "FEATURES", value: "Any", color: "bg-warning/8 border-warning/15" },
+  { id: "status", label: "STATUS", value: "All", color: "bg-secondary border-border" },
 ];
 
 const featureOptions = ["Premium", "Free SSL", "Instant activation", "Trending"];
@@ -126,7 +126,7 @@ const FilterBar = () => {
       <div className="absolute inset-0 -z-10 rounded-3xl blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(262 83% 58% / 0.25), hsl(280 90% 55% / 0.2))" }} />
 
       {/* Floating bar */}
-      <div className="relative flex items-stretch gap-2.5 rounded-3xl border border-border/40 bg-card/60 p-3 backdrop-blur-2xl">
+      <div className="relative flex items-stretch gap-3 rounded-[28px] border border-border/30 bg-card/50 p-3.5 backdrop-blur-2xl shadow-2xl">
         {/* All popovers rendered at bar level */}
         {openFilter && openFilter !== "extensions" && (
           <div
@@ -149,27 +149,31 @@ const FilterBar = () => {
           </div>
         )}
 
-        {filterConfigs.map((f) => (
-          <div
-            key={f.id}
-            ref={(el) => { if (el) buttonRefs.current[f.id] = el; }}
-          >
-            <button
-              onClick={() => toggle(f.id)}
-              className={`flex min-w-[140px] h-full items-center justify-between gap-3 rounded-2xl px-4 py-2 text-left whitespace-nowrap transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/30 scale-[1.02]" : "hover:scale-[1.01]"}`}
+        {filterConfigs.map((f) => {
+          const labelColor = f.id === "extensions" ? "text-primary" 
+            : f.id === "price" ? "text-available" 
+            : f.id === "length" ? "text-purple-500" 
+            : f.id === "features" ? "text-warning" 
+            : "text-muted-foreground";
+
+          return (
+            <div
+              key={f.id}
+              ref={(el) => { if (el) buttonRefs.current[f.id] = el; }}
             >
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider opacity-70">{f.label}</p>
-                <p className="text-base font-semibold">{f.value}</p>
-              </div>
-              {openFilter === f.id ? (
-                <ChevronDown className="h-4 w-4 shrink-0 opacity-60" />
-              ) : (
-                <ChevronUp className="h-4 w-4 shrink-0 opacity-60" />
-              )}
-            </button>
-          </div>
-        ))}
+              <button
+                onClick={() => toggle(f.id)}
+                className={`flex min-w-[150px] h-full items-center justify-between gap-4 rounded-2xl border px-5 py-3 text-left whitespace-nowrap transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/20 scale-[1.02] shadow-lg" : "hover:scale-[1.01] hover:shadow-md"}`}
+              >
+                <div>
+                  <p className={`text-[11px] font-extrabold uppercase tracking-widest ${labelColor}`}>{f.label}</p>
+                  <p className="text-lg font-bold text-foreground mt-0.5">{f.value}</p>
+                </div>
+                <ChevronUp className={`h-4 w-4 shrink-0 transition-transform ${labelColor} opacity-50 ${openFilter === f.id ? "rotate-180" : ""}`} />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
