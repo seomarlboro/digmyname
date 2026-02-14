@@ -77,22 +77,34 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const takenCount = useMemo(() => checkedResults.filter((r) => !r.available).length, [checkedResults]);
   const stillChecking = useMemo(() => results.some((r) => r.checking), [results]);
 
+  const hasQuery = query.trim().length > 0;
+
   return (
     <div className="w-full">
       {/* Hero */}
-      <section className="hero-gradient pb-8 pt-16 md:pb-12 md:pt-24">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
-            Find your perfect
-            <br />
-            domain in seconds
-          </h1>
-          <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground md:text-lg">
-            Smart search across thousands of domains with instant availability checks
-          </p>
+      <section
+        className={`hero-gradient transition-all duration-500 ease-in-out ${
+          hasQuery ? "pb-4 pt-6" : "pb-8 pt-16 md:pb-12 md:pt-24 min-h-[60vh] flex items-center"
+        }`}
+      >
+        <div className="container mx-auto px-4 text-center w-full">
+          <div
+            className={`transition-all duration-500 ease-in-out overflow-hidden ${
+              hasQuery ? "max-h-0 opacity-0 mb-0" : "max-h-60 opacity-100 mb-8"
+            }`}
+          >
+            <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
+              Find your perfect
+              <br />
+              domain in seconds
+            </h1>
+            <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground md:text-lg">
+              Smart search across thousands of domains with instant availability checks
+            </p>
+          </div>
 
           {/* Search bar */}
-          <div className="mx-auto mt-8 flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow">
+          <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
               <Search className="h-6 w-6 text-primary" />
             </div>
