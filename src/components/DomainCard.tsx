@@ -16,20 +16,19 @@ const DomainCard = ({ result }: DomainCardProps) => {
   const ext = parts[parts.length - 1];
 
   return (
-    <div className="card-hover rounded-xl border border-border bg-card p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="card-hover rounded-xl border border-border bg-card">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-6">
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-foreground">
+          <h3 className="text-xl font-bold text-foreground">
             {name}.<span className="text-primary">{ext}</span>
           </h3>
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             {tld.features.map((f) => (
               <Badge key={f} variant="secondary" className="text-xs font-normal">
                 {f}
               </Badge>
             ))}
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">Registrar: DomainHub</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -66,6 +65,9 @@ const DomainCard = ({ result }: DomainCardProps) => {
             </Button>
           )}
         </div>
+      </div>
+      <div className="border-t border-border px-6 py-3">
+        <p className="text-xs text-muted-foreground">Registrar: <span className="font-semibold text-foreground">DomainHub</span></p>
       </div>
     </div>
   );
