@@ -78,9 +78,9 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-4 text-xs text-muted-foreground">Annual registration cost</p>
         <Slider defaultValue={[0, 200]} max={200} step={1} className="mb-3" />
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-primary">$0</span>
+          <span className="text-base font-bold text-foreground">$0</span>
           <span className="text-xs text-muted-foreground">to</span>
-          <span className="text-sm font-semibold text-primary">$200</span>
+          <span className="text-base font-bold text-foreground">$200</span>
         </div>
       </div>
     );
@@ -92,9 +92,9 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-4 text-xs text-muted-foreground">Number of characters</p>
         <Slider defaultValue={[1, 63]} max={63} min={1} step={1} className="mb-3" />
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-primary">1 char</span>
+          <span className="text-base font-bold text-foreground">1 char</span>
           <span className="text-xs text-muted-foreground">to</span>
-          <span className="text-sm font-semibold text-primary">63 chars</span>
+          <span className="text-base font-bold text-foreground">63 chars</span>
         </div>
       </div>
     );
