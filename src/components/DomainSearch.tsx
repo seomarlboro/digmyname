@@ -5,7 +5,7 @@ import DomainCard from "@/components/DomainCard";
 import { generateDomainList, checkDomainsAvailability, type DomainResult } from "@/lib/domainData";
 
 const DomainSearch = () => {
-  const [query, setQuery] = useState("name");
+  const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<DomainResult[]>([]);
