@@ -128,7 +128,7 @@ const FilterBar = () => {
       <div className="relative flex items-stretch gap-2.5 rounded-3xl border border-border/60 bg-card p-3 backdrop-blur-lg">
         {/* Extensions popover - full width, centered above bar */}
         {openFilter === "extensions" && (
-          <div className="absolute bottom-full left-0 right-0 z-50 mb-4">
+          <div className="absolute left-0 right-0 z-50" style={{ bottom: "calc(100% + 16px)" }}>
             <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
               <PopoverContent id="extensions" />
             </div>
@@ -138,7 +138,7 @@ const FilterBar = () => {
           <div key={f.id} className="relative">
             {/* Per-button popover (not extensions) */}
             {openFilter === f.id && f.id !== "extensions" && (
-              <div className="absolute bottom-full left-1/2 z-50 mb-4 -translate-x-1/2">
+              <div className="absolute left-1/2 z-50 -translate-x-1/2" style={{ bottom: "calc(100% + 16px)" }}>
                 <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
                   <PopoverContent id={f.id} />
                 </div>
