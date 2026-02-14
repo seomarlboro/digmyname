@@ -25,7 +25,7 @@ const statusOptions = ["Available", "Taken"];
 const PopoverContent = ({ id }: { id: string }) => {
   if (id === "extensions") {
     return (
-      <div className="w-[580px]">
+      <div>
         <h3 className="text-base font-bold text-foreground">Domain Extensions</h3>
         <p className="mb-4 text-sm text-muted-foreground">Select one or more TLDs</p>
         <div className="grid grid-cols-5 gap-3">
