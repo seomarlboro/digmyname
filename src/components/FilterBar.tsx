@@ -132,16 +132,16 @@ const FilterBar = () => {
       <div className="absolute inset-0 -z-10 rounded-3xl blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(262 83% 58% / 0.25), hsl(280 90% 55% / 0.2))" }} />
 
       {/* Floating bar */}
-      <div className="flex items-center gap-2.5 rounded-3xl border border-border/60 bg-card px-4 py-3 backdrop-blur-lg">
+      <div className="flex items-stretch gap-3 rounded-3xl border border-border/60 bg-card px-5 py-4 backdrop-blur-lg">
         {filterConfigs.map((f) => (
           <button
             key={f.id}
             onClick={() => toggle(f.id)}
-            className={`flex min-w-[130px] items-center justify-between gap-3 rounded-2xl px-5 py-3 text-left transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/30 scale-[1.02]" : "hover:scale-[1.01]"}`}
+            className={`flex flex-1 min-w-[140px] items-center justify-between gap-4 rounded-2xl px-6 py-4 text-left transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/30 scale-[1.02]" : "hover:scale-[1.01]"}`}
           >
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">{f.label}</p>
-              <p className="text-sm font-semibold">{f.value}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider opacity-70">{f.label}</p>
+              <p className="text-base font-semibold">{f.value}</p>
             </div>
             {openFilter === f.id ? (
               <ChevronDown className="h-4 w-4 shrink-0 opacity-60" />
