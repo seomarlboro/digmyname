@@ -26,13 +26,13 @@ const PopoverContent = ({ id }: { id: string }) => {
   if (id === "extensions") {
     return (
       <div className="w-[580px]">
-        <h3 className="text-sm font-bold text-foreground">Domain Extensions</h3>
-        <p className="mb-3 text-xs text-muted-foreground">Select one or more TLDs</p>
-        <div className="grid grid-cols-5 gap-2">
+        <h3 className="text-base font-bold text-foreground">Domain Extensions</h3>
+        <p className="mb-4 text-sm text-muted-foreground">Select one or more TLDs</p>
+        <div className="grid grid-cols-5 gap-3">
           {TLD_LIST.map((tld) => (
-            <div key={tld.extension} className="flex items-center justify-between rounded-lg border border-border px-3 py-2 transition-colors hover:bg-secondary cursor-pointer">
-              <span className="text-sm font-medium text-primary">.{tld.extension}</span>
-              <span className="text-xs text-muted-foreground">${tld.regPrice}/yr</span>
+            <div key={tld.extension} className="flex flex-1 items-center justify-between gap-2 rounded-xl border border-border px-4 py-3 transition-colors hover:bg-secondary cursor-pointer">
+              <span className="text-base font-bold text-primary">.{tld.extension}</span>
+              <span className="text-sm text-muted-foreground">${tld.regPrice}/yr</span>
             </div>
           ))}
         </div>
