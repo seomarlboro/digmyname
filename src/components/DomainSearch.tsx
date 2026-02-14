@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Search, X, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import DomainCard from "@/components/DomainCard";
-import { generateResults, VARIATION_PREFIXES, type DomainResult } from "@/lib/domainData";
+import { generateDomainList, checkDomainsAvailability, VARIATION_PREFIXES, type DomainResult } from "@/lib/domainData";
 
 const DomainSearch = () => {
   const [query, setQuery] = useState("name");
@@ -25,23 +24,52 @@ const DomainSearch = () => {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Generate results
+  // Generate domain list + check availability
   useEffect(() => {
     if (!debouncedQuery.trim()) {
       setResults([]);
       setLoading(false);
       return;
     }
-    // Simulate network delay
-    const timer = setTimeout(() => {
-      setResults(generateResults(debouncedQuery));
+
+    let cancelled = false;
+
+    const run = async () => {
+      // Step 1: Show domains immediately with "checking" state
+      const domains = generateDomainList(debouncedQuery);
+      if (cancelled) return;
+      setResults(domains);
       setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
+
+      // Step 2: Check real availability in batches
+      const domainNames = domains.map((d) => d.domain);
+      const batchSize = 20;
+
+      for (let i = 0; i < domainNames.length; i += batchSize) {
+        if (cancelled) return;
+        const batch = domainNames.slice(i, i + batchSize);
+        const availMap = await checkDomainsAvailability(batch);
+
+        if (cancelled) return;
+        setResults((prev) =>
+          prev.map((r) => {
+            if (availMap.has(r.domain)) {
+              return { ...r, available: availMap.get(r.domain)!, checking: false };
+            }
+            return r;
+          })
+        );
+      }
+    };
+
+    run();
+    return () => { cancelled = true; };
   }, [debouncedQuery]);
 
-  const availableCount = useMemo(() => results.filter((r) => r.available).length, [results]);
-  const takenCount = useMemo(() => results.filter((r) => !r.available).length, [results]);
+  const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
+  const availableCount = useMemo(() => checkedResults.filter((r) => r.available).length, [checkedResults]);
+  const takenCount = useMemo(() => checkedResults.filter((r) => !r.available).length, [checkedResults]);
+  const stillChecking = useMemo(() => results.some((r) => r.checking), [results]);
 
   const cleanQuery = query.toLowerCase().replace(/[^a-z0-9-]/g, "");
   const variations = useMemo(
@@ -140,6 +168,12 @@ const DomainSearch = () => {
                 <p className="text-xs text-muted-foreground">Taken</p>
                 <p className="text-2xl font-bold text-muted-foreground">{takenCount}</p>
               </div>
+              {stillChecking && (
+                <div className="flex items-center gap-2 ml-auto">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-sm text-muted-foreground">Checking...</span>
+                </div>
+              )}
             </div>
 
             {/* Available */}
@@ -151,7 +185,7 @@ const DomainSearch = () => {
             )}
             <div className="space-y-3">
               {results
-                .filter((r) => r.available)
+                .filter((r) => !r.checking && r.available)
                 .slice(0, 20)
                 .map((r) => (
                   <DomainCard key={r.domain} result={r} />
@@ -167,7 +201,7 @@ const DomainSearch = () => {
                 </div>
                 <div className="space-y-3">
                   {results
-                    .filter((r) => !r.available)
+                    .filter((r) => !r.checking && !r.available)
                     .slice(0, 10)
                     .map((r) => (
                       <DomainCard key={r.domain} result={r} />
