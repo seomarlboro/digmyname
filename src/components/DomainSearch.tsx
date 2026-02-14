@@ -81,29 +81,27 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   return (
     <div className="w-full">
-      {/* Hero */}
+      {/* Hero title */}
       <section
-        className={`hero-gradient transition-all duration-500 ease-in-out ${
-          hasQuery ? "pb-4 pt-6" : "pb-8 pt-16 md:pb-12 md:pt-24 min-h-[60vh] flex items-center"
+        className={`hero-gradient transition-all duration-500 ease-in-out overflow-hidden ${
+          hasQuery ? "max-h-0 opacity-0" : "max-h-[60vh] opacity-100 min-h-[calc(60vh-80px)] flex items-center pb-8 pt-16 md:pb-12 md:pt-24"
         }`}
       >
         <div className="container mx-auto px-4 text-center w-full">
-          <div
-            className={`transition-all duration-500 ease-in-out overflow-hidden ${
-              hasQuery ? "max-h-0 opacity-0 mb-0" : "max-h-60 opacity-100 mb-8"
-            }`}
-          >
-            <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
-              Find your perfect
-              <br />
-              domain in seconds
-            </h1>
-            <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground md:text-lg">
-              Smart search across thousands of domains with instant availability checks
-            </p>
-          </div>
+          <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
+            Find your perfect
+            <br />
+            domain in seconds
+          </h1>
+          <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground md:text-lg">
+            Smart search across thousands of domains with instant availability checks
+          </p>
+        </div>
+      </section>
 
-          {/* Search bar */}
+      {/* Sticky search bar */}
+      <div className={`sticky top-0 z-40 transition-all duration-500 ease-in-out ${hasQuery ? "py-4 bg-background/80 backdrop-blur-xl border-b border-border/50" : "pb-8 hero-gradient"}`}>
+        <div className="container mx-auto px-4">
           <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
               <Search className="h-6 w-6 text-primary" />
@@ -127,7 +125,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Results */}
       <section className="mx-auto max-w-[968px] px-4 pb-20">
