@@ -108,20 +108,28 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     <div className="w-full">
       {/* Hero centered (empty state) */}
       {!hasQuery && (
-        <section className="hero-gradient flex min-h-[calc(100vh-64px)] flex-col items-center justify-center px-4 pb-20">
-          <div className="text-center">
-            <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
-              Find your perfect
-              <br />
-              domain in seconds
-            </h1>
-            <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground md:text-lg">
-              Smart search across thousands of domains with instant availability checks
-            </p>
+        <section className="hero-gradient grid min-h-[calc(100vh-64px)] grid-rows-[1fr_auto_1fr] px-4">
+          {/* Title centered between header and search */}
+          <div className="flex items-end justify-center pb-8">
+            <div className="text-center">
+              <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
+                Find your perfect
+                <br />
+                domain in seconds
+              </h1>
+              <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground md:text-lg">
+                Smart search across thousands of domains with instant availability checks
+              </p>
+            </div>
           </div>
-          <div className="mt-8 w-full max-w-2xl">
-            {searchBar}
+          {/* Search bar at vertical center */}
+          <div className="flex items-center justify-center">
+            <div className="w-full max-w-2xl">
+              {searchBar}
+            </div>
           </div>
+          {/* Spacer bottom */}
+          <div />
         </section>
       )}
 
