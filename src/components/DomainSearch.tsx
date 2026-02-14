@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Search, X, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import DomainCard from "@/components/DomainCard";
-import { generateDomainList, checkDomainsAvailability, VARIATION_PREFIXES, type DomainResult } from "@/lib/domainData";
+import { generateDomainList, checkDomainsAvailability, type DomainResult } from "@/lib/domainData";
 
 const DomainSearch = () => {
   const [query, setQuery] = useState("name");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<DomainResult[]>([]);
+  const [aiSuggestions, setAiSuggestions] = useState(false);
 
   // Debounce
   useEffect(() => {
@@ -36,7 +37,7 @@ const DomainSearch = () => {
 
     const run = async () => {
       // Step 1: Show domains immediately with "checking" state
-      const domains = generateDomainList(debouncedQuery);
+      const domains = generateDomainList(debouncedQuery, aiSuggestions);
       if (cancelled) return;
       setResults(domains);
       setLoading(false);
@@ -64,20 +65,12 @@ const DomainSearch = () => {
 
     run();
     return () => { cancelled = true; };
-  }, [debouncedQuery]);
+  }, [debouncedQuery, aiSuggestions]);
 
   const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
   const availableCount = useMemo(() => checkedResults.filter((r) => r.available).length, [checkedResults]);
   const takenCount = useMemo(() => checkedResults.filter((r) => !r.available).length, [checkedResults]);
   const stillChecking = useMemo(() => results.some((r) => r.checking), [results]);
-
-  const cleanQuery = query.toLowerCase().replace(/[^a-z0-9-]/g, "");
-  const variations = useMemo(
-    () => (cleanQuery ? VARIATION_PREFIXES.slice(0, 7).map((p) => p + cleanQuery) : []),
-    [cleanQuery]
-  );
-
-  const handleVariation = useCallback((v: string) => setQuery(v), []);
 
   return (
     <div className="w-full">
@@ -110,27 +103,12 @@ const DomainSearch = () => {
                 <X className="h-4 w-4" />
               </button>
             )}
-            <Button className="gap-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
-              <Sparkles className="h-4 w-4" />
-              AI Suggestions
-            </Button>
-          </div>
-
-          {/* Variations */}
-          {variations.length > 0 && !loading && results.length > 0 && (
-            <div className="mx-auto mt-4 flex max-w-2xl flex-wrap items-center justify-center gap-2">
-              <span className="text-sm text-muted-foreground">Popular variations:</span>
-              {variations.map((v) => (
-                <button
-                  key={v}
-                  onClick={() => handleVariation(v)}
-                  className="rounded-full border border-border bg-card px-3 py-1 text-sm text-foreground transition-colors hover:bg-secondary"
-                >
-                  {v}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
+              <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} />
             </div>
-          )}
+          </div>
         </div>
       </section>
 

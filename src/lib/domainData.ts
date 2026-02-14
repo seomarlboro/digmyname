@@ -32,12 +32,14 @@ export interface DomainResult {
 const tldMap = new Map(TLD_LIST.map((t) => [t.extension, t]));
 
 /** Generate domain list with placeholder availability (all unknown/checking) */
-export function generateDomainList(query: string): DomainResult[] {
+export function generateDomainList(query: string, withVariations = false): DomainResult[] {
   if (!query.trim()) return [];
   const q = query.toLowerCase().replace(/[^a-z0-9-]/g, "");
   if (!q) return [];
 
-  const names = [q, ...VARIATION_PREFIXES.slice(0, 5).map((p) => p + q)];
+  const names = withVariations
+    ? [q, ...VARIATION_PREFIXES.slice(0, 5).map((p) => p + q)]
+    : [q];
   const results: DomainResult[] = [];
 
   for (const name of names) {
