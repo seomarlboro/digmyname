@@ -105,6 +105,7 @@ const PopoverContent = ({ id }: { id: string }) => {
 const FilterBar = () => {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const barRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<Record<string, HTMLDivElement>>({});
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -126,7 +127,20 @@ const FilterBar = () => {
 
       {/* Floating bar */}
       <div className="relative flex items-stretch gap-2.5 rounded-3xl border border-border/60 bg-card p-3 backdrop-blur-lg">
-        {/* Extensions popover - full width, centered above bar */}
+        {/* All popovers rendered at bar level */}
+        {openFilter && openFilter !== "extensions" && (
+          <div
+            className="absolute z-50"
+            style={{
+              bottom: "calc(100% + 16px)",
+              left: `${buttonRefs.current[openFilter]?.offsetLeft ?? 0}px`,
+            }}
+          >
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
+              <PopoverContent id={openFilter} />
+            </div>
+          </div>
+        )}
         {openFilter === "extensions" && (
           <div className="absolute left-0 right-0 z-50" style={{ bottom: "calc(100% + 16px)" }}>
             <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
@@ -134,17 +148,12 @@ const FilterBar = () => {
             </div>
           </div>
         )}
-        {filterConfigs.map((f) => (
-          <div key={f.id} className="relative">
-            {/* Per-button popover (not extensions) */}
-            {openFilter === f.id && f.id !== "extensions" && (
-              <div className="absolute left-1/2 z-50 -translate-x-1/2" style={{ bottom: "calc(100% + 16px)" }}>
-                <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
-                  <PopoverContent id={f.id} />
-                </div>
-              </div>
-            )}
 
+        {filterConfigs.map((f) => (
+          <div
+            key={f.id}
+            ref={(el) => { if (el) buttonRefs.current[f.id] = el; }}
+          >
             <button
               onClick={() => toggle(f.id)}
               className={`flex min-w-[140px] h-full items-center justify-between gap-3 rounded-2xl px-4 py-2 text-left whitespace-nowrap transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/30 scale-[1.02]" : "hover:scale-[1.01]"}`}
