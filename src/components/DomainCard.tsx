@@ -35,7 +35,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           {available && !checking && (
             <>
               <span className="text-sm font-bold text-foreground">${tld.regPrice}</span>
-              <Button size="sm" className="h-7 gap-1 rounded-md bg-primary text-primary-foreground text-xs hover:bg-primary/90">
+              <Button size="sm" className="h-7 gap-1 rounded-md btn-gradient text-xs border-0">
                 <ExternalLink className="h-3 w-3" />
                 Buy
               </Button>
@@ -91,7 +91,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           </Button>
 
           {available ? (
-            <Button className="gap-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button className="gap-1.5 rounded-lg btn-gradient border-0">
               <ExternalLink className="h-4 w-4" />
               Buy Now
             </Button>

@@ -177,8 +177,8 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
   return (
     <div ref={barRef} className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
       {/* Gradient glow behind */}
-      <div className="absolute inset-0 -z-10 rounded-3xl blur-xl opacity-60" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(262 83% 58% / 0.35), hsl(280 90% 55% / 0.3), hsl(30 90% 50% / 0.25), hsl(262 83% 58% / 0.2))" }} />
-      <div className="absolute inset-0 -z-10 rounded-3xl blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(262 83% 58% / 0.25), hsl(280 90% 55% / 0.2))" }} />
+      <div className="absolute inset-0 -z-10 rounded-3xl blur-xl opacity-60" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(225 85% 55% / 0.35), hsl(270 80% 58% / 0.3), hsl(30 90% 50% / 0.25), hsl(225 85% 55% / 0.2))" }} />
+      <div className="absolute inset-0 -z-10 rounded-3xl blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(225 85% 55% / 0.25), hsl(270 80% 58% / 0.2))" }} />
 
       {/* Floating bar */}
       <div className="relative flex items-stretch gap-3 rounded-[28px] border border-border/30 bg-card/80 p-3.5 backdrop-blur-2xl shadow-2xl">

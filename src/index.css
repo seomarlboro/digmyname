@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 230 25% 15%;
 
-    --primary: 262 83% 58%;
+    --primary: 225 85% 55%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 240 15% 95%;
@@ -32,13 +32,13 @@
 
     --border: 240 10% 90%;
     --input: 240 10% 90%;
-    --ring: 262 83% 58%;
+    --ring: 225 85% 55%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --gradient-start: 262 83% 58%;
-    --gradient-end: 280 90% 55%;
+    --gradient-start: 225 85% 55%;
+    --gradient-end: 270 80% 58%;
     --available: 152 60% 45%;
     --available-foreground: 0 0% 100%;
     --taken: 0 70% 55%;
@@ -46,7 +46,7 @@
     --warning: 30 90% 50%;
     --warning-foreground: 0 0% 100%;
     --search-bg: 240 20% 97%;
-    --hero-bg: 250 30% 96%;
+    --hero-bg: 225 30% 96%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -68,7 +68,7 @@
     --popover: 230 20% 12%;
     --popover-foreground: 210 20% 92%;
 
-    --primary: 262 83% 65%;
+    --primary: 225 85% 62%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 230 15% 18%;
@@ -85,7 +85,7 @@
 
     --border: 230 15% 20%;
     --input: 230 15% 20%;
-    --ring: 262 83% 65%;
+    --ring: 225 85% 62%;
 
     --hero-bg: 230 25% 10%;
     --search-bg: 230 20% 14%;
@@ -114,18 +114,29 @@
 
 @layer utilities {
   .text-gradient {
-    background: linear-gradient(135deg, hsl(262, 83%, 58%), hsl(280, 90%, 55%));
+    background: linear-gradient(135deg, hsl(225, 85%, 55%), hsl(270, 80%, 58%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .hero-gradient {
-    background: radial-gradient(ellipse at top, hsl(262 83% 58% / 0.08) 0%, hsl(280 90% 55% / 0.04) 40%, transparent 70%);
+    background: radial-gradient(ellipse at top, hsl(225 85% 55% / 0.08) 0%, hsl(270 80% 58% / 0.04) 40%, transparent 70%);
   }
 
   .search-shadow {
-    box-shadow: 0 4px 30px hsl(262 83% 58% / 0.12), 0 1px 3px hsl(0 0% 0% / 0.05);
+    box-shadow: 0 4px 30px hsl(225 85% 55% / 0.12), 0 1px 3px hsl(0 0% 0% / 0.05);
+  }
+
+  .btn-gradient {
+    background: linear-gradient(135deg, hsl(225, 85%, 55%), hsl(270, 80%, 58%));
+    color: white;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .btn-gradient:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
   }
 
   .card-hover {
@@ -133,7 +144,7 @@
   }
 
   .card-hover:hover {
-    box-shadow: 0 8px 30px hsl(262 83% 58% / 0.1);
+    box-shadow: 0 8px 30px hsl(225 85% 55% / 0.1);
     transform: translateY(-1px);
   }
 }
