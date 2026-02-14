@@ -126,7 +126,7 @@ const FilterBar = () => {
       <div className="absolute inset-0 -z-10 rounded-3xl blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(262 83% 58% / 0.25), hsl(280 90% 55% / 0.2))" }} />
 
       {/* Floating bar */}
-      <div className="relative flex items-stretch gap-2.5 rounded-3xl border border-border/60 bg-card p-3 backdrop-blur-lg">
+      <div className="relative flex items-stretch gap-2.5 rounded-3xl border border-border/40 bg-card/60 p-3 backdrop-blur-2xl">
         {/* All popovers rendered at bar level */}
         {openFilter && openFilter !== "extensions" && (
           <div
