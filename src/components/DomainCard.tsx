@@ -104,7 +104,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
         </div>
       </div>
       <div className="border-t border-border px-6 py-3">
-        <p className="text-xs text-muted-foreground">Registrar: <span className="font-semibold text-foreground">DomainHub</span></p>
+        <p className="text-xs text-muted-foreground">Registrar: <span className="font-semibold text-foreground">DigMyName</span></p>
       </div>
     </div>
   );
