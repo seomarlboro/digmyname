@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,20 +22,37 @@ const filterConfigs: FilterConfig[] = [
 const featureOptions = ["Premium", "Free SSL", "Instant activation", "Trending"];
 const statusOptions = ["All domains", "Available only", "Taken only"];
 
+const INITIAL_TLD_COUNT = 15;
+
 const PopoverContent = ({ id }: { id: string }) => {
+  const [showAll, setShowAll] = useState(false);
+
+  const visibleTlds = useMemo(
+    () => (showAll ? TLD_LIST : TLD_LIST.slice(0, INITIAL_TLD_COUNT)),
+    [showAll]
+  );
+
   if (id === "extensions") {
     return (
       <div>
         <h3 className="text-base font-bold text-foreground">Domain Extensions</h3>
         <p className="mb-4 text-sm text-muted-foreground">Select one or more TLDs</p>
         <div className="grid grid-cols-5 gap-3">
-          {TLD_LIST.map((tld) => (
+          {visibleTlds.map((tld) => (
             <div key={tld.extension} className="flex flex-1 items-center justify-between gap-2 rounded-xl border border-border px-4 py-3 transition-colors hover:bg-secondary cursor-pointer">
               <span className="text-base font-bold text-primary">.{tld.extension}</span>
               <span className="text-sm text-muted-foreground">${tld.regPrice}/yr</span>
             </div>
           ))}
         </div>
+        {TLD_LIST.length > INITIAL_TLD_COUNT && (
+          <button
+            onClick={() => setShowAll((v) => !v)}
+            className="mt-4 w-full text-center text-sm font-semibold text-primary hover:underline"
+          >
+            {showAll ? "Show less" : `Show all ${TLD_LIST.length} extensions`}
+          </button>
+        )}
       </div>
     );
   }
