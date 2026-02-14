@@ -31,9 +31,6 @@ const Header = () => {
           <Button variant="ghost" size="icon" className="text-muted-foreground">
             <Heart className="h-5 w-5" />
           </Button>
-          <Button size="sm" className="rounded-full bg-primary px-5 text-primary-foreground hover:bg-primary/90">
-            Sign In
-          </Button>
         </div>
       </div>
     </header>
