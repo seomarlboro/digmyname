@@ -79,53 +79,60 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   const hasQuery = query.trim().length > 0;
 
+  const searchBar = (
+    <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+        <Search className="h-6 w-6 text-primary" />
+      </div>
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Enter domain name..."
+        className="flex-1 bg-transparent px-2 text-lg font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
+      />
+      {query && (
+        <button onClick={() => setQuery("")} className="p-1 text-muted-foreground hover:text-foreground">
+          <X className="h-4 w-4" />
+        </button>
+      )}
+      <div className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2">
+        <Sparkles className="h-4 w-4 text-primary" />
+        <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
+        <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} />
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full">
-      {/* Hero title */}
-      <section
-        className={`hero-gradient transition-all duration-500 ease-in-out overflow-hidden ${
-          hasQuery ? "max-h-0 opacity-0" : "max-h-[60vh] opacity-100 min-h-[calc(60vh-80px)] flex items-center pb-8 pt-16 md:pb-12 md:pt-24"
-        }`}
-      >
-        <div className="container mx-auto px-4 text-center w-full">
-          <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
-            Find your perfect
-            <br />
-            domain in seconds
-          </h1>
-          <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground md:text-lg">
-            Smart search across thousands of domains with instant availability checks
-          </p>
-        </div>
-      </section>
+      {/* Hero centered (empty state) */}
+      {!hasQuery && (
+        <section className="hero-gradient flex min-h-[calc(100vh-64px)] flex-col items-center justify-center px-4 pb-20">
+          <div className="text-center">
+            <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
+              Find your perfect
+              <br />
+              domain in seconds
+            </h1>
+            <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground md:text-lg">
+              Smart search across thousands of domains with instant availability checks
+            </p>
+          </div>
+          <div className="mt-8 w-full max-w-2xl">
+            {searchBar}
+          </div>
+        </section>
+      )}
 
-      {/* Sticky search bar */}
-      <div className={`sticky top-16 z-40 transition-all duration-500 ease-in-out ${hasQuery ? "py-4 bg-background/80 backdrop-blur-xl border-b border-border/50" : "pb-8 hero-gradient"}`}>
-        <div className="container mx-auto px-4">
-          <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-              <Search className="h-6 w-6 text-primary" />
-            </div>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Enter domain name..."
-              className="flex-1 bg-transparent px-2 text-lg font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
-            />
-            {query && (
-              <button onClick={() => setQuery("")} className="p-1 text-muted-foreground hover:text-foreground">
-                <X className="h-4 w-4" />
-              </button>
-            )}
-            <div className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
-              <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} />
-            </div>
+      {/* Sticky search bar (with query) */}
+      {hasQuery && (
+        <div className="sticky top-16 z-40 border-b border-border/50 bg-background/80 py-4 backdrop-blur-xl">
+          <div className="container mx-auto px-4">
+            {searchBar}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Results */}
       <section className="mx-auto max-w-[968px] px-4 pb-20">
@@ -133,15 +140,6 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="mt-3 text-sm text-muted-foreground">Searching domains...</p>
-          </div>
-        )}
-
-        {!loading && !query && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <Search className="h-8 w-8 text-primary/40" />
-            </div>
-            <p className="mt-4 text-muted-foreground">Start searching to find your perfect domain</p>
           </div>
         )}
 
