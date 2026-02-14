@@ -124,13 +124,22 @@ const FilterBar = () => {
       <div className="absolute inset-0 -z-10 rounded-3xl blur-xl opacity-60" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(262 83% 58% / 0.35), hsl(280 90% 55% / 0.3), hsl(30 90% 50% / 0.25), hsl(262 83% 58% / 0.2))" }} />
       <div className="absolute inset-0 -z-10 rounded-3xl blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(262 83% 58% / 0.25), hsl(280 90% 55% / 0.2))" }} />
 
+      {/* Extensions popover - full width, centered */}
+      {openFilter === "extensions" && (
+        <div className="absolute bottom-full left-0 right-0 z-50 mb-5">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
+            <PopoverContent id="extensions" />
+          </div>
+        </div>
+      )}
+
       {/* Floating bar */}
       <div className="flex items-stretch gap-2.5 rounded-3xl border border-border/60 bg-card p-3 backdrop-blur-lg">
         {filterConfigs.map((f) => (
           <div key={f.id} className="relative">
-            {/* Popover above this button */}
-            {openFilter === f.id && (
-              <div className="absolute bottom-full left-1/2 z-50 mb-3 -translate-x-1/2">
+            {/* Per-button popover (not extensions) */}
+            {openFilter === f.id && f.id !== "extensions" && (
+              <div className="absolute bottom-full left-1/2 z-50 mb-5 -translate-x-1/2">
                 <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
                   <PopoverContent id={f.id} />
                 </div>
