@@ -21,7 +21,7 @@ const filterConfigs: FilterConfig[] = [
 const featureOptions = ["Premium", "Free SSL", "Instant activation", "Trending"];
 const statusOptions = ["All domains", "Available only", "Taken only"];
 
-const INITIAL_TLD_COUNT = 15;
+const INITIAL_TLD_COUNT = 12;
 
 interface ExtensionsPopoverProps {
   selectedTlds: Set<string>;
@@ -39,7 +39,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle }: ExtensionsPopoverProps) =
     <div>
       <h3 className="text-base font-bold text-foreground">Domain Extensions</h3>
       <p className="mb-4 text-sm text-muted-foreground">Select one or more TLDs</p>
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {visibleTlds.map((tld) => {
           const selected = selectedTlds.has(tld.extension);
           return (
@@ -49,10 +49,10 @@ const ExtensionsPopover = ({ selectedTlds, onToggle }: ExtensionsPopoverProps) =
               className={`flex flex-1 items-center justify-between gap-2 rounded-xl border px-4 py-3 transition-colors cursor-pointer ${
                 selected
                   ? "border-primary bg-primary/10 ring-1 ring-primary/30"
-                  : "border-border hover:bg-secondary"
+                  : "border-border bg-[hsl(211_100%_96%)] dark:bg-secondary hover:bg-secondary"
               }`}
             >
-              <span className="text-base font-bold text-primary">.{tld.extension}</span>
+              <span className="text-lg font-bold text-primary">.{tld.extension}</span>
               <span className="text-sm text-muted-foreground">${tld.regPrice}/yr</span>
             </div>
           );
