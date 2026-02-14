@@ -134,24 +134,20 @@ const DomainSearch = () => {
         {!loading && results.length > 0 && (
           <>
             {/* Stats */}
-            <div className="mb-6 mt-8 flex gap-8 rounded-xl border border-border bg-card p-5">
-              <div>
-                <p className="text-xs text-muted-foreground">Domains found</p>
-                <p className="text-2xl font-bold text-foreground">{results.length}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Available</p>
-                <p className="text-2xl font-bold text-available">{availableCount}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Taken</p>
-                <p className="text-2xl font-bold text-muted-foreground">{takenCount}</p>
-              </div>
+            <div className="mb-6 mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
+              <span><span className="font-bold text-foreground">{results.length}</span> found</span>
+              <span className="text-border">·</span>
+              <span><span className="font-bold text-available">{availableCount}</span> available</span>
+              <span className="text-border">·</span>
+              <span><span className="font-bold text-muted-foreground">{takenCount}</span> taken</span>
               {stillChecking && (
-                <div className="flex items-center gap-2 ml-auto">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  <span className="text-sm text-muted-foreground">Checking...</span>
-                </div>
+                <>
+                  <span className="text-border">·</span>
+                  <span className="flex items-center gap-1.5">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                    Checking...
+                  </span>
+                </>
               )}
             </div>
 
