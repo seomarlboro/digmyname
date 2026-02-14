@@ -134,20 +134,15 @@ const DomainSearch = () => {
         {!loading && results.length > 0 && (
           <>
             {/* Stats */}
-            <div className="mb-6 mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
-              <span><span className="font-bold text-foreground">{results.length}</span> found</span>
-              <span className="text-border">·</span>
-              <span><span className="font-bold text-available">{availableCount}</span> available</span>
-              <span className="text-border">·</span>
-              <span><span className="font-bold text-muted-foreground">{takenCount}</span> taken</span>
+            <div className="mb-6 mt-8 flex items-center justify-center gap-8 text-base">
+              <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-foreground">{results.length}</span> found</span>
+              <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-available">{availableCount}</span> available</span>
+              <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-muted-foreground/60">{takenCount}</span> taken</span>
               {stillChecking && (
-                <>
-                  <span className="text-border">·</span>
-                  <span className="flex items-center gap-1.5">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                    Checking...
-                  </span>
-                </>
+                <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  Checking…
+                </span>
               )}
             </div>
 
