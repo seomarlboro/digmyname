@@ -20,7 +20,7 @@ const filterConfigs: FilterConfig[] = [
 ];
 
 const featureOptions = ["Premium", "Free SSL", "Instant activation", "Trending"];
-const statusOptions = ["Available", "Taken"];
+const statusOptions = ["All domains", "Available only", "Taken only"];
 
 const PopoverContent = ({ id }: { id: string }) => {
   if (id === "extensions") {
