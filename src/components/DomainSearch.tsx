@@ -107,7 +107,7 @@ const DomainSearch = () => {
       </section>
 
       {/* Results */}
-      <section className="mx-auto max-w-3xl px-4 pb-20">
+      <section className="mx-auto max-w-[968px] px-4 pb-20">
         {loading && (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
