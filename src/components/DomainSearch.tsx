@@ -4,7 +4,11 @@ import { Switch } from "@/components/ui/switch";
 import DomainCard from "@/components/DomainCard";
 import { generateDomainList, checkDomainsAvailability, type DomainResult } from "@/lib/domainData";
 
-const DomainSearch = () => {
+interface DomainSearchProps {
+  selectedTlds: Set<string>;
+}
+
+const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,7 +42,7 @@ const DomainSearch = () => {
 
     const run = async () => {
       // Step 1: Show domains immediately with "checking" state
-      const domains = generateDomainList(debouncedQuery, aiSuggestions);
+      const domains = generateDomainList(debouncedQuery, aiSuggestions, selectedTlds);
       if (cancelled) return;
       setResults(domains);
       setLoading(false);
@@ -66,7 +70,7 @@ const DomainSearch = () => {
 
     run();
     return () => { cancelled = true; };
-  }, [debouncedQuery, aiSuggestions]);
+  }, [debouncedQuery, aiSuggestions, selectedTlds]);
 
   const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
   const availableCount = useMemo(() => checkedResults.filter((r) => r.available).length, [checkedResults]);
