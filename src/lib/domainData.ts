@@ -83,7 +83,7 @@ export interface DomainResult {
 const tldMap = new Map(TLD_LIST.map((t) => [t.extension, t]));
 
 /** Generate domain list with placeholder availability (all unknown/checking) */
-export function generateDomainList(query: string, withVariations = false): DomainResult[] {
+export function generateDomainList(query: string, withVariations = false, allowedTlds?: Set<string>): DomainResult[] {
   if (!query.trim()) return [];
   const q = query.toLowerCase().replace(/[^a-z0-9-]/g, "");
   if (!q) return [];
@@ -93,8 +93,12 @@ export function generateDomainList(query: string, withVariations = false): Domai
     : [q];
   const results: DomainResult[] = [];
 
+  const tlds = allowedTlds && allowedTlds.size > 0
+    ? TLD_LIST.filter((t) => allowedTlds.has(t.extension))
+    : TLD_LIST;
+
   for (const name of names) {
-    for (const tld of TLD_LIST) {
+    for (const tld of tlds) {
       results.push({
         domain: `${name}.${tld.extension}`,
         tld,
