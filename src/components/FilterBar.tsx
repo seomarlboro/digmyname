@@ -127,22 +127,26 @@ const FilterBar = () => {
         </div>
       )}
 
+      {/* Gradient glow behind */}
+      <div className="absolute inset-0 -z-10 rounded-3xl blur-xl opacity-60" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(262 83% 58% / 0.35), hsl(280 90% 55% / 0.3), hsl(30 90% 50% / 0.25), hsl(262 83% 58% / 0.2))" }} />
+      <div className="absolute inset-0 -z-10 rounded-3xl blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(262 83% 58% / 0.25), hsl(280 90% 55% / 0.2))" }} />
+
       {/* Floating bar */}
-      <div className="flex items-center gap-2 rounded-2xl border border-border bg-card/95 px-3 py-2.5 shadow-xl backdrop-blur-lg">
+      <div className="flex items-center gap-2.5 rounded-3xl border border-border/60 bg-card px-4 py-3 backdrop-blur-lg">
         {filterConfigs.map((f) => (
           <button
             key={f.id}
             onClick={() => toggle(f.id)}
-            className={`flex min-w-[110px] items-center justify-between gap-2 rounded-xl px-4 py-2.5 text-left transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/30" : ""}`}
+            className={`flex min-w-[130px] items-center justify-between gap-3 rounded-2xl px-5 py-3 text-left transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/30 scale-[1.02]" : "hover:scale-[1.01]"}`}
           >
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider opacity-80">{f.label}</p>
-              <p className="text-sm font-medium">{f.value}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">{f.label}</p>
+              <p className="text-sm font-semibold">{f.value}</p>
             </div>
             {openFilter === f.id ? (
-              <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-60" />
+              <ChevronDown className="h-4 w-4 shrink-0 opacity-60" />
             ) : (
-              <ChevronUp className="h-3.5 w-3.5 shrink-0 opacity-60" />
+              <ChevronUp className="h-4 w-4 shrink-0 opacity-60" />
             )}
           </button>
         ))}
