@@ -106,9 +106,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   return (
     <div className="w-full">
-      {/* Hero title (empty state) */}
+      {/* Spacer + title to push search bar to vertical center */}
       {!hasQuery && (
-        <div className="hero-gradient flex min-h-[calc(50vh)] flex-col items-center justify-end px-4 pb-8">
+        <div className="hero-gradient flex items-center justify-center px-4" style={{ height: 'calc(50vh - 32px - 40px)' }}>
           <div className="text-center">
             <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
               Find your perfect
@@ -123,7 +123,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       )}
 
       {/* Always-rendered sticky search bar */}
-      <div className={`sticky top-16 z-40 transition-all duration-300 ${hasQuery ? "border-b border-border/50 bg-background/80 py-4 backdrop-blur-xl" : "bg-background py-8"}`}>
+      <div className={`sticky top-16 z-40 transition-all duration-300 ${hasQuery ? "border-b border-border/50 bg-background/80 py-4 backdrop-blur-xl" : "bg-background py-4"}`}>
         <div className="container mx-auto px-4">
           {searchBar}
         </div>
