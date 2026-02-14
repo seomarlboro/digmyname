@@ -130,10 +130,10 @@ const FilterBar = () => {
         {/* All popovers rendered at bar level */}
         {openFilter && openFilter !== "extensions" && (
           <div
-            className="absolute z-50"
+            className="absolute z-50 -translate-x-1/2"
             style={{
               bottom: "calc(100% + 16px)",
-              left: `${buttonRefs.current[openFilter]?.offsetLeft ?? 0}px`,
+              left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
             }}
           >
             <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
