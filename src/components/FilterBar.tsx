@@ -11,11 +11,11 @@ interface FilterConfig {
 }
 
 const filterConfigs: FilterConfig[] = [
-  { id: "extensions", label: "EXTENSIONS", color: "bg-primary/15 border-primary/20" },
-  { id: "price", label: "PRICE", color: "bg-available/15 border-available/20" },
-  { id: "length", label: "LENGTH", color: "bg-purple-500/15 border-purple-500/20" },
-  { id: "features", label: "FEATURES", color: "bg-warning/15 border-warning/20" },
-  { id: "status", label: "STATUS", color: "bg-secondary/80 border-border" },
+  { id: "extensions", label: "EXTENSIONS", color: "bg-primary/10 border-primary/15" },
+  { id: "price", label: "PRICE", color: "bg-available/10 border-available/15" },
+  { id: "length", label: "LENGTH", color: "bg-purple-500/10 border-purple-500/15" },
+  { id: "features", label: "FEATURES", color: "bg-warning/10 border-warning/15" },
+  { id: "status", label: "STATUS", color: "bg-secondary/60 border-border" },
 ];
 
 const featureOptions = ["Premium", "Free SSL", "Instant activation", "Trending"];
