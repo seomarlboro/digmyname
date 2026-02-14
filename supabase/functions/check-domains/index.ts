@@ -12,22 +12,17 @@ interface DomainCheckResult {
   checkedVia: string;
 }
 
-async function checkDns(domain: string): Promise<boolean> {
+// Returns true if DNS records exist (domain is likely taken)
+async function hasDnsRecords(domain: string): Promise<boolean> {
   try {
-    const records = await Deno.resolveDns(domain, "NS");
-    return records.length === 0;
-  } catch (err) {
-    // NXDOMAIN or SERVFAIL typically means domain doesn't exist = available
-    if (err instanceof Deno.errors.NotFound) {
-      return true;
-    }
-    // For NotCapable or other errors, try A record as fallback
+    const records = await Deno.resolveDns(domain, "A");
+    return records.length > 0;
+  } catch {
     try {
-      const aRecords = await Deno.resolveDns(domain, "A");
-      return aRecords.length === 0;
+      const ns = await Deno.resolveDns(domain, "NS");
+      return ns.length > 0;
     } catch {
-      // If DNS resolution fails completely, domain is likely available
-      return true;
+      return false;
     }
   }
 }
@@ -104,16 +99,15 @@ Deno.serve(async (req) => {
     if (uncached.length > 0) {
       const dnsResults = await Promise.all(
         uncached.map(async (domain) => {
-          const available = await checkDns(domain);
-          return { domain, available };
+          const hasRecords = await hasDnsRecords(domain);
+          return { domain, hasRecords };
         })
       );
 
-      // For domains that DNS says are taken, do RDAP to confirm
-      // For available ones, trust DNS (fast path)
-      const rdapChecks = dnsResults.filter((r) => !r.available);
+      // DNS finds records → taken (fast path). No records → RDAP to confirm.
+      const needRdap = dnsResults.filter((r) => !r.hasRecords);
       const rdapResults = await Promise.all(
-        rdapChecks.map(async ({ domain }) => {
+        needRdap.map(async ({ domain }) => {
           const rdap = await checkRdap(domain);
           return { domain, ...rdap };
         })
@@ -122,13 +116,16 @@ Deno.serve(async (req) => {
       const rdapMap = new Map(rdapResults.map((r) => [r.domain, r]));
 
       for (const dns of dnsResults) {
-        const rdap = rdapMap.get(dns.domain);
-        const result: DomainCheckResult = {
-          domain: dns.domain,
-          available: rdap ? rdap.available : dns.available,
-          checkedVia: rdap ? "rdap" : "dns",
-        };
-        freshResults.push(result);
+        if (dns.hasRecords) {
+          freshResults.push({ domain: dns.domain, available: false, checkedVia: "dns" });
+        } else {
+          const rdap = rdapMap.get(dns.domain);
+          freshResults.push({
+            domain: dns.domain,
+            available: rdap ? rdap.available : true,
+            checkedVia: rdap ? "rdap" : "dns",
+          });
+        }
       }
 
       // Cache results (upsert)
