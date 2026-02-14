@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface TLD {
   extension: string;
   regPrice: number;
@@ -24,38 +26,63 @@ export interface DomainResult {
   domain: string;
   tld: TLD;
   available: boolean;
+  checking?: boolean;
 }
 
-function seededRandom(seed: string): number {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    const char = seed.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return Math.abs(hash % 100) / 100;
-}
+const tldMap = new Map(TLD_LIST.map((t) => [t.extension, t]));
 
-export function generateResults(query: string): DomainResult[] {
+/** Generate domain list with placeholder availability (all unknown/checking) */
+export function generateDomainList(query: string): DomainResult[] {
   if (!query.trim()) return [];
-
   const q = query.toLowerCase().replace(/[^a-z0-9-]/g, "");
   if (!q) return [];
 
-  const names = [q, ...VARIATION_PREFIXES.map((p) => p + q)];
+  const names = [q, ...VARIATION_PREFIXES.slice(0, 5).map((p) => p + q)];
   const results: DomainResult[] = [];
 
   for (const name of names) {
     for (const tld of TLD_LIST) {
-      const domain = `${name}.${tld.extension}`;
-      const available = seededRandom(domain) > 0.3;
-      results.push({ domain, tld, available });
+      results.push({
+        domain: `${name}.${tld.extension}`,
+        tld,
+        available: false,
+        checking: true,
+      });
     }
   }
 
-  // Sort: available first, then by reg price
-  return results.sort((a, b) => {
-    if (a.available !== b.available) return a.available ? -1 : 1;
-    return a.tld.regPrice - b.tld.regPrice;
-  });
+  return results;
+}
+
+/** Check real availability via edge function */
+export async function checkDomainsAvailability(
+  domains: string[]
+): Promise<Map<string, boolean>> {
+  const resultMap = new Map<string, boolean>();
+
+  try {
+    const { data, error } = await supabase.functions.invoke("check-domains", {
+      body: { domains },
+    });
+
+    if (error) {
+      console.error("Edge function error:", error);
+      return resultMap;
+    }
+
+    if (data?.results) {
+      for (const r of data.results) {
+        resultMap.set(r.domain, r.available);
+      }
+    }
+  } catch (err) {
+    console.error("Failed to check domains:", err);
+  }
+
+  return resultMap;
+}
+
+// Keep old function for backwards compat but deprecated
+export function generateResults(query: string): DomainResult[] {
+  return generateDomainList(query);
 }
