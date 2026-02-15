@@ -144,9 +144,9 @@ const Pricing = () => {
                         <td className="px-5 py-5">
                           <div>
                             <span className={`text-sm font-medium ${getRegistrarColor(s.best3Year.registrar).text}`}>{s.best3Year.registrar}</span>
-                            <p className="mt-0.5 text-sm">
-                              <span className="font-bold text-foreground">${best3Cost.toFixed(2)}</span>
-                              <span className="text-muted-foreground"> /3yr</span>
+                            <p className="mt-0.5">
+                              <span className="text-base font-extrabold text-foreground">${best3Cost.toFixed(2)}</span>
+                              <span className="text-sm text-muted-foreground"> /3yr</span>
                             </p>
                           </div>
                         </td>
