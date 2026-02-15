@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -39,6 +39,7 @@
     /* Custom tokens */
     --gradient-start: 218 96% 53%;
     --gradient-end: 270 80% 58%;
+    --logo-filter: invert(29%) sepia(98%) saturate(4842%) hue-rotate(219deg) brightness(99%) contrast(97%);
     --available: 152 60% 45%;
     --available-foreground: 0 0% 100%;
     --taken: 0 70% 55%;
@@ -89,6 +90,7 @@
 
     --hero-bg: 230 25% 10%;
     --search-bg: 230 20% 18%;
+    --logo-filter: invert(46%) sepia(98%) saturate(2060%) hue-rotate(212deg) brightness(100%) contrast(97%);
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
