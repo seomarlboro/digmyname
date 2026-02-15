@@ -47,9 +47,12 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
         onOpenChange(false);
       }
     } catch (err: any) {
+      console.error("Auth error:", err.message);
       toast({
-        title: "Error",
-        description: err.message,
+        title: mode === "signup" ? "Signup failed" : "Login failed",
+        description: mode === "signup"
+          ? "Unable to create account. Please try again."
+          : "Invalid email or password. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -62,9 +65,10 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       redirect_uri: window.location.origin,
     });
     if (error) {
+      console.error("OAuth error:", error.message);
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Login failed",
+        description: "Unable to sign in. Please try again.",
         variant: "destructive",
       });
     }

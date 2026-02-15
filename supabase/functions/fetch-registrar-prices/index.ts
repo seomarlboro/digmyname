@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
         const data = await response.json();
         if (!response.ok) {
           errors.push(`${registrar}: HTTP ${response.status}`);
-          console.error(`Error scraping ${registrar}:`, data);
+          console.error(`Error scraping ${registrar}: HTTP ${response.status} - ${data?.error || 'Unknown error'}`);
           continue;
         }
 
