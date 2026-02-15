@@ -54,8 +54,12 @@ async function checkRdap(domain: string): Promise<{ available: boolean; data?: R
 
 function isValidDomain(domain: string): boolean {
   if (typeof domain !== "string" || domain.length === 0 || domain.length > 253) return false;
-  const domainRegex = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
-  return domainRegex.test(domain);
+  // Must have at least one dot, no consecutive dots/hyphens, valid label lengths
+  const domainRegex = /^(?!.*\.\.)(?!.*--)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
+  if (!domainRegex.test(domain)) return false;
+  // Reject domains with labels longer than 63 chars
+  const labels = domain.split(".");
+  return labels.every((l) => l.length >= 1 && l.length <= 63);
 }
 
 Deno.serve(async (req) => {
@@ -170,9 +174,9 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("check-domains error:", err);
+    console.error("check-domains error:", err instanceof Error ? err.message : "Unknown error");
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Unknown error" }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
