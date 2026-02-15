@@ -83,7 +83,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const hasQuery = query.trim().length > 0;
 
   const searchBar = (
-    <div className="mx-auto flex max-w-2xl items-center rounded-2xl border border-border bg-card search-shadow" style={{ padding: '12px', paddingRight: '16px', gap: '8px' }}>
+    <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card pt-3 pb-3 pl-3 pr-8 search-shadow">
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
         <Search className="h-6 w-6 text-primary" />
       </div>
@@ -101,18 +101,18 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           <X className="h-4 w-4" />
         </button>
       )}
-      {/* Mobile: icon only, Desktop: icon + label + switch */}
+      {/* Mobile: clickable icon, Desktop: icon + label + switch */}
       <div
-        onClick={() => isMobile && setAiSuggestions((v) => !v)}
-        className={`flex shrink-0 items-center gap-2 rounded-xl cursor-pointer transition-colors
-          h-12 w-12 justify-center md:w-auto md:h-auto md:px-3 md:py-2 md:cursor-default
-          ${aiSuggestions ? "bg-primary text-primary-foreground md:bg-primary/10 md:text-primary" : "bg-primary/10 text-primary"}`}
+        onClick={() => setAiSuggestions((v) => !v)}
+        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl cursor-pointer transition-colors md:hidden
+          ${aiSuggestions ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}
       >
-        <Sparkles className="h-6 w-6 md:h-4 md:w-4" />
-        <span className="hidden md:inline text-sm font-medium text-primary whitespace-nowrap">AI</span>
-        <div className="hidden md:block">
-          <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} />
-        </div>
+        <Sparkles className="h-6 w-6" />
+      </div>
+      <div className="hidden md:flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2">
+        <Sparkles className="h-4 w-4 text-primary" />
+        <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
+        <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} />
       </div>
     </div>
   );
