@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
 import AuthDialog from "@/components/AuthDialog";
 import type { DomainResult } from "@/lib/domainData";
 
@@ -16,8 +17,15 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
   const { domain, tld, available, checking } = result;
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const cheapestByTld = useCheapestRegistrars();
   const [authOpen, setAuthOpen] = useState(false);
-  const hasHighRenewal = tld.renewPrice > tld.regPrice * 1.8;
+
+  const ext = domain.split(".").pop() ?? "";
+  const cheapest = cheapestByTld.get(ext);
+  const displayPrice = cheapest?.regPrice ?? tld.regPrice;
+  const displayRenew = cheapest?.renewPrice ?? tld.renewPrice;
+  const hasHighRenewal = displayRenew > displayPrice * 1.8;
+  const registrarName = cheapest?.registrar ?? null;
   const favorited = isFavorite(domain);
 
   const handleFavorite = () => {
@@ -30,7 +38,6 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
 
   const parts = domain.split(".");
   const name = parts.slice(0, -1).join(".");
-  const ext = parts[parts.length - 1];
 
   if (compact) {
     return (
@@ -51,7 +58,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           <div className="flex items-center gap-3">
             {available && !checking && (
               <>
-                <span className="text-sm font-bold text-foreground">${tld.regPrice}</span>
+                <span className="text-sm font-bold text-foreground">${displayPrice}</span>
                 <Button size="sm" className="h-7 gap-1 rounded-md btn-gradient text-xs border-0">
                   <ExternalLink className="h-3 w-3" />
                   Buy
@@ -92,16 +99,16 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
             <div className="text-right">
               {hasHighRenewal && (
                 <span className="text-xs text-warning line-through">
-                  ${tld.renewPrice}/year
+                  ${displayRenew}/year
                 </span>
               )}
               <p className="text-2xl font-bold text-foreground">
-                ${tld.regPrice}
+                ${displayPrice}
                 <span className="text-sm font-normal text-muted-foreground">/year</span>
               </p>
               {hasHighRenewal && (
                 <p className="text-xs text-warning font-medium">
-                  Renews at ${tld.renewPrice}/yr
+                  Renews at ${displayRenew}/yr
                 </p>
               )}
             </div>
@@ -128,9 +135,13 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
             )}
           </div>
         </div>
-        <div className="border-t border-border px-6 py-3">
-          <p className="text-xs text-muted-foreground">Registrar: <span className="font-semibold text-foreground">DigMyName</span></p>
-        </div>
+        {registrarName && (
+          <div className="border-t border-border px-6 py-3">
+            <Badge variant="secondary" className="text-xs font-normal">
+              {registrarName}
+            </Badge>
+          </div>
+        )}
       </div>
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </>
