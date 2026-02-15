@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Search, X, Loader2, Sparkles, CheckCircle2, LayoutGrid, List } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import DomainCard from "@/components/DomainCard";
@@ -9,6 +9,7 @@ interface DomainSearchProps {
 }
 
 const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -85,10 +86,12 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         <Search className="h-6 w-6 text-primary" />
       </div>
       <input
+        ref={inputRef}
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Enter domain name..."
+        autoFocus
         className="flex-1 bg-transparent px-2 text-lg font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
       />
       {query && (
