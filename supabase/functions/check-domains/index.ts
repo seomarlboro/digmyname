@@ -52,6 +52,12 @@ async function checkRdap(domain: string): Promise<{ available: boolean; data?: R
   }
 }
 
+function isValidDomain(domain: string): boolean {
+  if (typeof domain !== "string" || domain.length === 0 || domain.length > 253) return false;
+  const domainRegex = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
+  return domainRegex.test(domain);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -67,8 +73,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Limit batch size
-    const batch = domains.slice(0, 50);
+    // Validate and limit batch size
+    const batch = domains.slice(0, 50).filter(isValidDomain);
+
+    if (batch.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "No valid domains provided" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
