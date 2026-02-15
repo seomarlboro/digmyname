@@ -83,7 +83,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const hasQuery = query.trim().length > 0;
 
   const searchBar = (
-    <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card pt-3 pb-3 pl-3 pr-8 search-shadow">
+    <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow overflow-hidden">
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
         <Search className="h-6 w-6 text-primary" />
       </div>
@@ -94,7 +94,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Enter domain name..."
         autoFocus
-        className="flex-1 bg-transparent px-2 text-lg font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
+        className="min-w-0 flex-1 bg-transparent px-2 text-lg font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
       />
       {query && (
         <button onClick={() => setQuery("")} className="p-1 text-muted-foreground hover:text-foreground">
