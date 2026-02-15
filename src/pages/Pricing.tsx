@@ -132,7 +132,6 @@ const Pricing = () => {
                           <SummaryPriceCell
                             registrar={s.cheapestRenew.registrar}
                             price={s.cheapestRenew.renew_price}
-                            isWarning={s.cheapestRenew.renew_price > s.cheapestReg.reg_price * 1.8}
                           />
                         </td>
                         <td className="px-5 py-5">
@@ -201,9 +200,9 @@ const SummaryPriceCell = ({
           {promo}
         </Badge>
       )}
-      <p className="mt-0.5 text-sm">
-        <span className={`font-bold ${isWarning ? "text-warning" : "text-foreground"}`}>${price.toFixed(2)}</span>
-        <span className="text-muted-foreground">/yr</span>
+      <p className="mt-0.5">
+        <span className={`text-base font-extrabold ${isWarning ? "text-warning" : "text-foreground"}`}>${price.toFixed(2)}</span>
+        <span className="text-sm text-muted-foreground">/yr</span>
       </p>
     </div>
   );
