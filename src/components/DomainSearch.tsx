@@ -84,7 +84,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   const searchBar = (
     <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow overflow-hidden">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+      <div className="hidden md:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
         <Search className="h-6 w-6 text-primary" />
       </div>
       <input
