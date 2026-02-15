@@ -22,18 +22,12 @@ const Header = () => {
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">
-            <Link to="/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            <Link to="/" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
               Domains
             </Link>
-            <Link to="/pricing" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            <Link to="/pricing" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
               Pricing
             </Link>
-            <a href="#" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              Transfer
-            </a>
-            <a href="#" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              Support
-            </a>
           </nav>
 
           <div className="flex items-center gap-2">
