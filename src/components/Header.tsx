@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Heart, Moon, Sun, LogOut, User } from "lucide-react";
-import shovelLogo from "@/assets/shovel-logo.svg";
+import ShovelLogo from "@/components/ShovelLogo";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,8 +17,8 @@ const Header = () => {
       <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-lg">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={shovelLogo} alt="DigMyName" className="h-7 w-7 text-primary" style={{ filter: 'var(--logo-filter)' }} />
-            <span className="text-lg font-bold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>DigMyName</span>
+            <ShovelLogo className="h-8 w-8" />
+            <span className="text-xl font-extrabold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '-0.02em' }}>DigMyName</span>
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">
