@@ -104,7 +104,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       {isMobile ? (
         <button
           onClick={() => setAiSuggestions((v) => !v)}
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${aiSuggestions ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl mr-1 transition-colors ${aiSuggestions ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}
         >
           <Sparkles className="h-5 w-5" />
         </button>
