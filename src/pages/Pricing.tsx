@@ -109,11 +109,11 @@ const Pricing = () => {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-primary">Domain</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-available">Cheapest Registration</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-available">Cheapest Renewal</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-available">Cheapest Transfer</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-primary">Best 3-Year Value</th>
+                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Domain</th>
+                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Cheapest Registration</th>
+                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Cheapest Renewal</th>
+                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Cheapest Transfer</th>
+                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Best 3-Year Value</th>
                     <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">WHOIS Privacy</th>
                   </tr>
                 </thead>
