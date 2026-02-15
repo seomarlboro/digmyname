@@ -13,7 +13,6 @@ interface FilterConfig {
 const filterConfigs: FilterConfig[] = [
   { id: "extensions", label: "EXTENSIONS", color: "bg-primary/10 border-primary/15" },
   { id: "price", label: "PRICE", color: "bg-available/10 border-available/15" },
-  { id: "length", label: "LENGTH", color: "bg-purple-500/10 border-purple-500/15" },
   { id: "features", label: "FEATURES", color: "bg-warning/10 border-warning/15" },
   { id: "status", label: "STATUS", color: "bg-secondary/60 border-border" },
 ];
@@ -81,20 +80,6 @@ const PopoverContent = ({ id }: { id: string }) => {
           <span className="text-base font-bold text-foreground">$0</span>
           <span className="text-xs text-muted-foreground">to</span>
           <span className="text-base font-bold text-foreground">$200</span>
-        </div>
-      </div>
-    );
-  }
-  if (id === "length") {
-    return (
-      <div className="w-[250px]">
-        <h3 className="text-sm font-bold text-foreground">Domain Length</h3>
-        <p className="mb-4 text-xs text-muted-foreground">Number of characters</p>
-        <Slider defaultValue={[1, 63]} max={63} min={1} step={1} className="mb-3" />
-        <div className="flex items-center justify-between">
-          <span className="text-base font-bold text-foreground">1 char</span>
-          <span className="text-xs text-muted-foreground">to</span>
-          <span className="text-base font-bold text-foreground">63 chars</span>
         </div>
       </div>
     );
@@ -168,7 +153,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
   const getFilterValue = (id: string) => {
     if (id === "extensions") return selectedTlds.size === 0 ? "All TLDs" : `${selectedTlds.size} selected`;
     if (id === "price") return "$0-$200";
-    if (id === "length") return "1-63 chars";
+    
     if (id === "features") return "Any";
     if (id === "status") return "All";
     return "";
@@ -207,7 +192,6 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
         {filterConfigs.map((f) => {
           const labelColor = f.id === "extensions" ? "text-primary" 
             : f.id === "price" ? "text-available" 
-            : f.id === "length" ? "text-purple-500" 
             : f.id === "features" ? "text-warning" 
             : "text-muted-foreground";
 
@@ -218,7 +202,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
             >
               <button
                 onClick={() => toggle(f.id)}
-                className={`flex min-w-[150px] h-full items-center justify-between gap-4 rounded-2xl border px-5 py-3 text-left whitespace-nowrap transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/20 scale-[1.02] shadow-lg" : "hover:scale-[1.01] hover:shadow-md"}`}
+                className={`flex min-w-[130px] h-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left whitespace-nowrap transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/20 scale-[1.02] shadow-lg" : "hover:scale-[1.01] hover:shadow-md"}`}
               >
                 <div>
                   <p className={`text-[11px] font-extrabold uppercase tracking-widest ${labelColor}`}>{f.label}</p>
