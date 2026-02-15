@@ -243,51 +243,51 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
 
             return (
               <tr key={p.id} className={`border-b border-border transition-colors hover:bg-secondary/30 ${isCheapest ? "bg-available/5" : ""}`}>
-                <td className="px-5 py-3.5">
-                  <span className={`text-sm font-semibold ${isCheapest ? "text-available" : c.text}`}>
+                <td className="px-5 py-4">
+                  <span className={`text-base font-bold ${isCheapest ? "text-available" : c.text}`}>
                     {p.registrar}
                   </span>
-                  {isCheapest && <Award className="ml-1.5 inline h-3.5 w-3.5 text-available" />}
+                  {isCheapest && <Award className="ml-1.5 inline h-4 w-4 text-available" />}
                 </td>
-                <td className="px-5 py-3.5">
-                  <span className={`text-sm font-bold tabular-nums ${isCheapest ? "text-available" : "text-foreground"}`}>
+                <td className="px-5 py-4">
+                  <span className={`text-base font-extrabold tabular-nums ${isCheapest ? "text-available" : "text-foreground"}`}>
                     ${p.reg_price.toFixed(2)}
                   </span>
-                  <span className="text-xs text-muted-foreground">/yr</span>
+                  <span className="text-sm text-muted-foreground">/yr</span>
                 </td>
-                <td className="px-5 py-3.5">
-                  <span className={`text-sm font-bold tabular-nums ${renewHigher ? "text-warning" : "text-foreground"}`}>
+                <td className="px-5 py-4">
+                  <span className={`text-base font-extrabold tabular-nums ${renewHigher ? "text-warning" : "text-foreground"}`}>
                     ${p.renew_price.toFixed(2)}
                   </span>
-                  <span className="text-xs text-muted-foreground">/yr</span>
+                  <span className="text-sm text-muted-foreground">/yr</span>
                 </td>
-                <td className="px-5 py-3.5">
+                <td className="px-5 py-4">
                   {p.transfer_price != null ? (
                     <>
-                      <span className="text-sm font-bold tabular-nums text-foreground">${p.transfer_price.toFixed(2)}</span>
-                      <span className="text-xs text-muted-foreground">/yr</span>
+                      <span className="text-base font-extrabold tabular-nums text-foreground">${p.transfer_price.toFixed(2)}</span>
+                      <span className="text-sm text-muted-foreground">/yr</span>
                     </>
                   ) : (
                     <span className="text-sm text-muted-foreground">—</span>
                   )}
                 </td>
-                <td className="px-5 py-3.5">
-                  <span className="text-sm tabular-nums text-muted-foreground">${p.icann_fee.toFixed(2)}</span>
+                <td className="px-5 py-4">
+                  <span className="text-sm font-medium tabular-nums text-muted-foreground">${p.icann_fee.toFixed(2)}</span>
                 </td>
-                <td className="px-5 py-3.5">
+                <td className="px-5 py-4">
                   {p.promo_code ? (
-                    <Badge variant="secondary" className="text-[10px] font-mono px-1.5 py-0">
+                    <Badge variant="secondary" className="text-xs font-mono px-2 py-0.5">
                       {p.promo_code}
                     </Badge>
                   ) : (
                     <span className="text-sm text-muted-foreground">—</span>
                   )}
                 </td>
-                <td className="px-5 py-3.5">
+                <td className="px-5 py-4">
                   {p.whois_privacy ? (
-                    <Shield className="h-4 w-4 text-available" />
+                    <Shield className="h-5 w-5 text-available" />
                   ) : (
-                    <ShieldOff className="h-4 w-4 text-muted-foreground/50" />
+                    <ShieldOff className="h-5 w-5 text-muted-foreground/50" />
                   )}
                 </td>
               </tr>
