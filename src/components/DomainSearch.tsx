@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Search, X, Loader2, Sparkles, CheckCircle2, LayoutGrid, List } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useIsMobile } from "@/hooks/use-mobile";
 import DomainCard from "@/components/DomainCard";
 import { generateDomainList, checkDomainsAvailability, type DomainResult } from "@/lib/domainData";
 
@@ -16,6 +17,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const [results, setResults] = useState<DomainResult[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState(false);
   const [viewMode, setViewMode] = useState<"cards" | "compact">("cards");
+  const isMobile = useIsMobile();
 
   // Debounce
   useEffect(() => {
@@ -99,11 +101,20 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           <X className="h-4 w-4" />
         </button>
       )}
-      <div className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2">
-        <Sparkles className="h-4 w-4 text-primary" />
-        <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
-        <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} />
-      </div>
+      {isMobile ? (
+        <button
+          onClick={() => setAiSuggestions((v) => !v)}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${aiSuggestions ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}
+        >
+          <Sparkles className="h-5 w-5" />
+        </button>
+      ) : (
+        <div className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
+          <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} />
+        </div>
+      )}
     </div>
   );
 
