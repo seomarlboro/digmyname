@@ -18,7 +18,7 @@ const Header = () => {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
             <ShovelLogo className="h-8 w-8" />
-            <span className="text-xl font-extrabold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '-0.02em' }}>DigMyName</span>
+            <span className="text-xl text-foreground" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, letterSpacing: '-0.03em' }}>DigMyName</span>
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">
