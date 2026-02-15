@@ -87,6 +87,11 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
               {name}.<span className="text-primary">{ext}</span>
             </h3>
             <div className="mt-3 flex flex-wrap gap-1.5">
+              {registrarName && (
+                <Badge variant="secondary" className="text-xs font-normal">
+                  {registrarName}
+                </Badge>
+              )}
               {tld.features.map((f) => (
                 <Badge key={f} variant="secondary" className="text-xs font-normal">
                   {f}
@@ -135,13 +140,6 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
             )}
           </div>
         </div>
-        {registrarName && (
-          <div className="border-t border-border px-6 py-3">
-            <Badge variant="secondary" className="text-xs font-normal">
-              {registrarName}
-            </Badge>
-          </div>
-        )}
       </div>
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </>
