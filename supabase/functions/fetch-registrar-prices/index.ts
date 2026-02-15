@@ -7,7 +7,26 @@ const corsHeaders = {
 };
 
 // TLDs we track
-const TRACKED_TLDS = ["com", "net", "org", "io", "ai", "co", "xyz", "dev", "app", "me"];
+const TRACKED_TLDS = [
+  // Classic
+  "com", "net", "org", "info", "biz",
+  // Tech
+  "io", "ai", "app", "dev", "tech", "digital", "cloud", "code", "software", "systems",
+  // Startup / Business
+  "co", "startup", "agency", "company", "ventures", "capital", "inc",
+  // Creative
+  "design", "studio", "art", "media",
+  // Short / Brandable
+  "xyz", "me", "cc", "tv", "gg", "so",
+  // E-commerce
+  "shop", "store", "market", "buy",
+  // Community / Social
+  "community", "social", "club", "group",
+  // Finance
+  "finance", "money", "fund",
+  // Other popular
+  "life", "world", "site", "online", "space", "pro", "one", "wtf", "lol",
+];
 
 // Registrar pricing page URLs for Firecrawl scraping
 const REGISTRAR_SOURCES: Record<string, { url: string; parseMode: "tldspy" | "porkbun" | "namecheap" | "spaceship" }> = {
