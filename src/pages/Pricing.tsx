@@ -2,8 +2,9 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
-import { Loader2, ExternalLink, Shield, ShieldOff } from "lucide-react";
+import { Loader2, Shield, ShieldOff, TrendingDown, Award, ArrowRightLeft, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getRegistrarColor } from "@/lib/registrarColors";
 
 interface RegistrarPrice {
   id: string;
@@ -92,6 +93,18 @@ const Pricing = () => {
           <p className="mx-auto mt-3 max-w-lg text-base text-muted-foreground">
             Compare registration, renewal & transfer prices across {registrars.length} registrars
           </p>
+          {/* Registrar legend */}
+          <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-3">
+            {registrars.map((r) => {
+              const c = getRegistrarColor(r);
+              return (
+                <span key={r} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${c.bg} ${c.border} ${c.text}`}>
+                  <span className={`h-2 w-2 rounded-full ${c.dot}`} />
+                  {r}
+                </span>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -103,137 +116,18 @@ const Pricing = () => {
           </div>
         ) : (
           <>
-            {/* Summary table */}
-            <div className="mt-8 overflow-hidden rounded-xl border border-border">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-border bg-secondary/50">
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-primary">Domain</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-available">Cheapest Registration</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-available">Cheapest Renewal</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-available">Cheapest Transfer</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-primary">Best 3-Year Value</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">WHOIS Privacy</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tldSummaries.map((s) => (
-                    <tr key={s.tld} className="border-b border-border transition-colors hover:bg-secondary/30">
-                      <td className="px-5 py-5">
-                        <span className="text-xl font-extrabold text-primary">.{s.tld}</span>
-                      </td>
-                      <td className="px-5 py-5">
-                        <PriceCell price={s.cheapestReg} field="reg" />
-                      </td>
-                      <td className="px-5 py-5">
-                        <PriceCell price={s.cheapestRenew} field="renew" />
-                      </td>
-                      <td className="px-5 py-5">
-                        {s.cheapestTransfer ? (
-                          <PriceCell price={s.cheapestTransfer} field="transfer" />
-                        ) : (
-                          <span className="text-sm text-muted-foreground">—</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-5">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">{s.best3Year.registrar}</p>
-                          <p className="text-sm text-muted-foreground">
-                            <span className="font-bold text-foreground">${(s.best3Year.reg_price + s.best3Year.renew_price * 2).toFixed(2)}</span> /3yr
-                          </p>
-                        </div>
-                      </td>
-                      <td className="px-5 py-5">
-                        {s.prices.some((p) => p.whois_privacy) ? (
-                          <Shield className="h-5 w-5 text-available" />
-                        ) : (
-                          <ShieldOff className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            {/* Summary cards grid */}
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {tldSummaries.map((s) => (
+                <SummaryCard key={s.tld} summary={s} />
+              ))}
             </div>
 
             {/* Full comparison by TLD */}
-            <h2 className="mt-12 mb-6 text-2xl font-extrabold text-foreground">Detailed Price Comparison</h2>
+            <h2 className="mt-14 mb-6 text-2xl font-extrabold text-foreground">Detailed Price Comparison</h2>
             <div className="space-y-6">
               {tldSummaries.map((s) => (
-                <div key={s.tld} className="overflow-hidden rounded-xl border border-border">
-                  <div className="flex items-center gap-3 border-b border-border bg-secondary/30 px-5 py-4">
-                    <span className="text-2xl font-extrabold text-primary">.{s.tld}</span>
-                    <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>
-                  </div>
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="border-b border-border bg-secondary/20">
-                        <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Registrar</th>
-                        <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Register</th>
-                        <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Renew</th>
-                        <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Transfer</th>
-                        <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">ICANN Fee</th>
-                        <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Promo</th>
-                        <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">WHOIS</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {s.prices
-                        .sort((a, b) => a.reg_price - b.reg_price)
-                        .map((p, i) => {
-                          const isCheapest = p.registrar === s.cheapestReg.registrar;
-                          return (
-                            <tr key={p.id} className={`border-b border-border transition-colors hover:bg-secondary/30 ${i === 0 ? "bg-available/5" : ""}`}>
-                              <td className="px-5 py-3.5">
-                                <span className={`text-sm font-semibold ${isCheapest ? "text-available" : "text-foreground"}`}>
-                                  {p.registrar}
-                                </span>
-                              </td>
-                              <td className="px-5 py-3.5">
-                                <span className={`text-sm font-bold ${isCheapest ? "text-available" : "text-foreground"}`}>
-                                  ${p.reg_price.toFixed(2)}
-                                </span>
-                                <span className="text-xs text-muted-foreground">/yr</span>
-                              </td>
-                              <td className="px-5 py-3.5">
-                                <span className="text-sm font-bold text-foreground">${p.renew_price.toFixed(2)}</span>
-                                <span className="text-xs text-muted-foreground">/yr</span>
-                              </td>
-                              <td className="px-5 py-3.5">
-                                {p.transfer_price != null ? (
-                                  <>
-                                    <span className="text-sm font-bold text-foreground">${p.transfer_price.toFixed(2)}</span>
-                                    <span className="text-xs text-muted-foreground">/yr</span>
-                                  </>
-                                ) : (
-                                  <span className="text-sm text-muted-foreground">—</span>
-                                )}
-                              </td>
-                              <td className="px-5 py-3.5">
-                                <span className="text-sm text-muted-foreground">${p.icann_fee.toFixed(2)}</span>
-                              </td>
-                              <td className="px-5 py-3.5">
-                                {p.promo_code ? (
-                                  <Badge variant="secondary" className="text-xs font-mono">
-                                    {p.promo_code}
-                                  </Badge>
-                                ) : (
-                                  <span className="text-sm text-muted-foreground">—</span>
-                                )}
-                              </td>
-                              <td className="px-5 py-3.5">
-                                {p.whois_privacy ? (
-                                  <Shield className="h-4 w-4 text-available" />
-                                ) : (
-                                  <ShieldOff className="h-4 w-4 text-muted-foreground" />
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </table>
-                </div>
+                <DetailedTldCard key={s.tld} summary={s} />
               ))}
             </div>
           </>
@@ -243,20 +137,215 @@ const Pricing = () => {
   );
 };
 
-const PriceCell = ({ price, field }: { price: RegistrarPrice; field: "reg" | "renew" | "transfer" }) => {
-  const value = field === "reg" ? price.reg_price : field === "renew" ? price.renew_price : price.transfer_price;
+/* ─── Summary Card ─────────────────────────────────────── */
+
+const SummaryCard = ({ summary: s }: { summary: TldSummary }) => {
+  const best3YearCost = s.best3Year.reg_price + s.best3Year.renew_price * 2;
+  const regColor = getRegistrarColor(s.cheapestReg.registrar);
+  const renewColor = getRegistrarColor(s.cheapestRenew.registrar);
+  const best3Color = getRegistrarColor(s.best3Year.registrar);
+
   return (
-    <div>
-      <p className="text-sm font-medium text-foreground">{price.registrar}</p>
-      {price.promo_code && field === "reg" && (
-        <Badge variant="secondary" className="text-[10px] font-mono mt-0.5 px-1.5 py-0">
-          {price.promo_code}
-        </Badge>
-      )}
-      <p className="mt-0.5 text-sm">
-        <span className="font-bold text-foreground">${(value ?? 0).toFixed(2)}</span>
-        <span className="text-muted-foreground">/yr</span>
-      </p>
+    <div className="group relative overflow-hidden rounded-xl border border-border bg-card/80 backdrop-blur-sm transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-border px-5 py-4">
+        <span className="text-2xl font-extrabold text-primary">.{s.tld}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">{s.prices.length} registrars</span>
+          {s.prices.some((p) => p.whois_privacy) ? (
+            <Shield className="h-4 w-4 text-available" />
+          ) : (
+            <ShieldOff className="h-4 w-4 text-muted-foreground" />
+          )}
+        </div>
+      </div>
+
+      {/* Price rows */}
+      <div className="divide-y divide-border/50 px-5">
+        <PriceRow
+          icon={<TrendingDown className="h-3.5 w-3.5" />}
+          label="Register"
+          registrar={s.cheapestReg.registrar}
+          price={s.cheapestReg.reg_price}
+          promo={s.cheapestReg.promo_code}
+          color={regColor}
+        />
+        <PriceRow
+          icon={<ArrowRightLeft className="h-3.5 w-3.5" />}
+          label="Renew"
+          registrar={s.cheapestRenew.registrar}
+          price={s.cheapestRenew.renew_price}
+          color={renewColor}
+          isRenewHigher={s.cheapestRenew.renew_price > s.cheapestReg.reg_price * 1.8}
+        />
+        {s.cheapestTransfer && (
+          <PriceRow
+            icon={<ArrowRightLeft className="h-3.5 w-3.5" />}
+            label="Transfer"
+            registrar={s.cheapestTransfer.registrar}
+            price={s.cheapestTransfer.transfer_price!}
+            color={getRegistrarColor(s.cheapestTransfer.registrar)}
+          />
+        )}
+      </div>
+
+      {/* Best 3-year footer */}
+      <div className={`flex items-center gap-2 border-t border-border px-5 py-3 ${best3Color.bg}`}>
+        <Trophy className={`h-4 w-4 ${best3Color.text}`} />
+        <div className="flex flex-1 items-center justify-between">
+          <span className={`text-xs font-semibold ${best3Color.text}`}>{s.best3Year.registrar}</span>
+          <span className="text-sm font-bold text-foreground">${best3YearCost.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">/3yr</span></span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PriceRow = ({
+  icon,
+  label,
+  registrar,
+  price,
+  promo,
+  color,
+  isRenewHigher,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  registrar: string;
+  price: number;
+  promo?: string | null;
+  color: ReturnType<typeof getRegistrarColor>;
+  isRenewHigher?: boolean;
+}) => (
+  <div className="flex items-center gap-3 py-3">
+    <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${color.bg} ${color.text}`}>
+      {icon}
+    </span>
+    <div className="flex-1">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <div className="flex items-center gap-1.5">
+        <span className={`h-1.5 w-1.5 rounded-full ${color.dot}`} />
+        <span className={`text-xs font-medium ${color.text}`}>{registrar}</span>
+        {promo && (
+          <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[9px] font-mono">
+            {promo}
+          </Badge>
+        )}
+      </div>
+    </div>
+    <span className={`text-base font-bold tabular-nums ${isRenewHigher ? "text-warning" : "text-foreground"}`}>
+      ${price.toFixed(2)}
+      <span className="text-xs font-normal text-muted-foreground">/yr</span>
+    </span>
+  </div>
+);
+
+/* ─── Detailed TLD Card ────────────────────────────────── */
+
+const DetailedTldCard = ({ summary: s }: { summary: TldSummary }) => {
+  const sorted = [...s.prices].sort((a, b) => a.reg_price - b.reg_price);
+  const cheapestRegPrice = s.cheapestReg.reg_price;
+  const maxRegPrice = Math.max(...s.prices.map((p) => p.reg_price));
+  const range = maxRegPrice - cheapestRegPrice || 1;
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-border">
+      <div className="flex items-center gap-3 border-b border-border bg-secondary/30 px-5 py-4">
+        <span className="text-2xl font-extrabold text-primary">.{s.tld}</span>
+        <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>
+      </div>
+      <div className="divide-y divide-border/50">
+        {sorted.map((p, i) => {
+          const c = getRegistrarColor(p.registrar);
+          const isCheapest = i === 0;
+          const barWidth = range > 0 ? ((p.reg_price - cheapestRegPrice) / range) * 100 : 0;
+          const renewHigher = p.renew_price > p.reg_price * 1.8;
+
+          return (
+            <div
+              key={p.id}
+              className={`group relative grid grid-cols-[minmax(140px,1fr)_repeat(5,minmax(80px,1fr))_40px] items-center gap-2 px-5 py-3.5 transition-colors hover:bg-secondary/30 ${isCheapest ? "bg-available/5" : ""}`}
+            >
+              {/* Registrar */}
+              <div className="flex items-center gap-2">
+                <span className={`h-2.5 w-2.5 rounded-full ${c.dot}`} />
+                <span className={`text-sm font-semibold ${isCheapest ? "text-available" : c.text}`}>
+                  {p.registrar}
+                </span>
+                {isCheapest && (
+                  <Award className="h-3.5 w-3.5 text-available" />
+                )}
+              </div>
+
+              {/* Register */}
+              <div>
+                <div className="flex items-baseline gap-0.5">
+                  <span className={`text-sm font-bold tabular-nums ${isCheapest ? "text-available" : "text-foreground"}`}>
+                    ${p.reg_price.toFixed(2)}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">/yr</span>
+                </div>
+                {/* Price bar */}
+                <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+                  <div
+                    className={`h-full rounded-full transition-all ${isCheapest ? "bg-available" : c.dot}`}
+                    style={{ width: `${Math.max(4, 100 - barWidth)}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Renew */}
+              <div className="flex items-baseline gap-0.5">
+                <span className={`text-sm font-bold tabular-nums ${renewHigher ? "text-warning" : "text-foreground"}`}>
+                  ${p.renew_price.toFixed(2)}
+                </span>
+                <span className="text-[10px] text-muted-foreground">/yr</span>
+              </div>
+
+              {/* Transfer */}
+              <div>
+                {p.transfer_price != null ? (
+                  <div className="flex items-baseline gap-0.5">
+                    <span className="text-sm font-bold tabular-nums text-foreground">${p.transfer_price.toFixed(2)}</span>
+                    <span className="text-[10px] text-muted-foreground">/yr</span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground">—</span>
+                )}
+              </div>
+
+              {/* ICANN */}
+              <div>
+                <span className="text-sm tabular-nums text-muted-foreground">${p.icann_fee.toFixed(2)}</span>
+              </div>
+
+              {/* Promo */}
+              <div>
+                {p.promo_code ? (
+                  <Badge variant="secondary" className="text-[10px] font-mono px-1.5 py-0">
+                    {p.promo_code}
+                  </Badge>
+                ) : (
+                  <span className="text-sm text-muted-foreground">—</span>
+                )}
+              </div>
+
+              {/* WHOIS */}
+              <div>
+                {p.whois_privacy ? (
+                  <Shield className="h-4 w-4 text-available" />
+                ) : (
+                  <ShieldOff className="h-4 w-4 text-muted-foreground/50" />
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Column headers as sticky overlay */}
+      <div className="absolute top-0 left-0 right-0" />
     </div>
   );
 };
