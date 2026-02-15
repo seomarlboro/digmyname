@@ -250,20 +250,10 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
                   {isCheapest && <Award className="ml-1.5 inline h-3.5 w-3.5 text-available" />}
                 </td>
                 <td className="px-5 py-3.5">
-                  <div>
-                    <div className="flex items-baseline gap-0.5">
-                      <span className={`text-sm font-bold tabular-nums ${isCheapest ? "text-available" : "text-foreground"}`}>
-                        ${p.reg_price.toFixed(2)}
-                      </span>
-                      <span className="text-xs text-muted-foreground">/yr</span>
-                    </div>
-                    <div className="mt-1 h-1 w-20 overflow-hidden rounded-full bg-muted/50">
-                      <div
-                        className={`h-full rounded-full ${isCheapest ? "bg-available" : "bg-primary/40"}`}
-                        style={{ width: `${Math.max(6, 100 - barWidth)}%` }}
-                      />
-                    </div>
-                  </div>
+                  <span className={`text-sm font-bold tabular-nums ${isCheapest ? "text-available" : "text-foreground"}`}>
+                    ${p.reg_price.toFixed(2)}
+                  </span>
+                  <span className="text-xs text-muted-foreground">/yr</span>
                 </td>
                 <td className="px-5 py-3.5">
                   <span className={`text-sm font-bold tabular-nums ${renewHigher ? "text-warning" : "text-foreground"}`}>
