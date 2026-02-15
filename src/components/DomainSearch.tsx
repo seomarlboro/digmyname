@@ -83,7 +83,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const hasQuery = query.trim().length > 0;
 
   const searchBar = (
-    <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card py-3 pl-3 pr-5 search-shadow">
+    <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow">
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
         <Search className="h-6 w-6 text-primary" />
       </div>
@@ -101,20 +101,19 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           <X className="h-4 w-4" />
         </button>
       )}
-      {isMobile ? (
-        <button
-          onClick={() => setAiSuggestions((v) => !v)}
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl mr-1 transition-colors ${aiSuggestions ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}
-        >
-          <Sparkles className="h-5 w-5" />
-        </button>
-      ) : (
-        <div className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
+      {/* Mobile: icon only, Desktop: icon + label + switch */}
+      <div
+        onClick={() => isMobile && setAiSuggestions((v) => !v)}
+        className={`flex shrink-0 items-center gap-2 rounded-xl cursor-pointer transition-colors
+          h-12 w-12 justify-center md:w-auto md:h-auto md:px-3 md:py-2 md:cursor-default
+          ${aiSuggestions ? "bg-primary text-primary-foreground md:bg-primary/10 md:text-primary" : "bg-primary/10 text-primary"}`}
+      >
+        <Sparkles className="h-6 w-6 md:h-4 md:w-4" />
+        <span className="hidden md:inline text-sm font-medium text-primary whitespace-nowrap">AI</span>
+        <div className="hidden md:block">
           <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} />
         </div>
-      )}
+      </div>
     </div>
   );
 
