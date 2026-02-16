@@ -10,6 +10,8 @@ interface DomainCheckResult {
   domain: string;
   available: boolean;
   checkedVia: string;
+  price?: number;
+  premium?: boolean;
 }
 
 // Returns true if DNS records exist (domain is likely taken)
@@ -34,7 +36,6 @@ async function checkRdap(domain: string): Promise<{ available: boolean; data?: R
     });
 
     if (resp.status === 404) {
-      // 404 = domain not found in RDAP = available
       return { available: true };
     }
 
@@ -43,21 +44,60 @@ async function checkRdap(domain: string): Promise<{ available: boolean; data?: R
       return { available: false, data };
     }
 
-    // Non-200/404 — inconclusive, consume body
     await resp.text();
     return { available: true };
   } catch {
-    // Timeout or network error — inconclusive, assume available
     return { available: true };
+  }
+}
+
+interface GoDaddyResult {
+  available: boolean;
+  price?: number;
+  premium?: boolean;
+}
+
+async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): Promise<GoDaddyResult | null> {
+  try {
+    const resp = await fetch(
+      `https://api.godaddy.com/v1/domains/available?domain=${encodeURIComponent(domain)}&checkType=FULL`,
+      {
+        headers: {
+          Authorization: `sso-key ${apiKey}:${apiSecret}`,
+          Accept: "application/json",
+        },
+        signal: AbortSignal.timeout(8000),
+      }
+    );
+
+    if (!resp.ok) {
+      const body = await resp.text();
+      console.error(`GoDaddy API error for ${domain}: ${resp.status} ${body}`);
+      return null;
+    }
+
+    const data = await resp.json();
+    // GoDaddy returns: { available, domain, definitive, price, currency }
+    // price is in micro-units (1,000,000 = $1)
+    const priceDollars = data.price != null ? data.price / 1_000_000 : undefined;
+    const tld = domain.split(".").pop() ?? "";
+    // Simple premium detection: if GoDaddy price is significantly above standard TLD prices
+    const isPremium = priceDollars != null && priceDollars > 50 && !["ai", "inc", "gg"].includes(tld);
+
+    return {
+      available: data.available === true,
+      price: priceDollars,
+      premium: isPremium,
+    };
+  } catch {
+    return null;
   }
 }
 
 function isValidDomain(domain: string): boolean {
   if (typeof domain !== "string" || domain.length === 0 || domain.length > 253) return false;
-  // Must have at least one dot, no consecutive dots/hyphens, valid label lengths
   const domainRegex = /^(?!.*\.\.)(?!.*--)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
   if (!domainRegex.test(domain)) return false;
-  // Reject domains with labels longer than 63 chars
   const labels = domain.split(".");
   return labels.every((l) => l.length >= 1 && l.length <= 63);
 }
@@ -77,7 +117,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate and limit batch size
     const batch = domains.slice(0, 50).filter(isValidDomain);
 
     if (batch.length === 0) {
@@ -91,20 +130,28 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    const godaddyKey = Deno.env.get("GODADDY_API_KEY");
+    const godaddySecret = Deno.env.get("GODADDY_API_SECRET");
+    const hasGoDaddy = Boolean(godaddyKey && godaddySecret);
+
     // Check cache first
     const { data: cached } = await supabase
       .from("domain_cache")
-      .select("domain, available, checked_via")
+      .select("domain, available, checked_via, rdap_data")
       .in("domain", batch)
       .gt("expires_at", new Date().toISOString());
 
     const cachedMap = new Map<string, DomainCheckResult>();
     if (cached) {
       for (const c of cached) {
+        // Extract cached price/premium from rdap_data if available
+        const meta = c.rdap_data as Record<string, unknown> | null;
         cachedMap.set(c.domain, {
           domain: c.domain,
           available: c.available,
           checkedVia: c.checked_via,
+          price: meta?.godaddy_price as number | undefined,
+          premium: meta?.premium as boolean | undefined,
         });
       }
     }
@@ -112,8 +159,28 @@ Deno.serve(async (req) => {
     const uncached = batch.filter((d) => !cachedMap.has(d));
     const freshResults: DomainCheckResult[] = [];
 
-    // DNS check all uncached domains in parallel
     if (uncached.length > 0) {
+      // Check GoDaddy for pricing (parallel, max 10 concurrent)
+      const godaddyResults = new Map<string, GoDaddyResult>();
+      if (hasGoDaddy) {
+        const chunks: string[][] = [];
+        for (let i = 0; i < uncached.length; i += 10) {
+          chunks.push(uncached.slice(i, i + 10));
+        }
+        for (const chunk of chunks) {
+          const results = await Promise.all(
+            chunk.map(async (domain) => {
+              const result = await checkGoDaddy(domain, godaddyKey!, godaddySecret!);
+              return { domain, result };
+            })
+          );
+          for (const { domain, result } of results) {
+            if (result) godaddyResults.set(domain, result);
+          }
+        }
+      }
+
+      // DNS + RDAP for domains where GoDaddy didn't give definitive answer
       const dnsResults = await Promise.all(
         uncached.map(async (domain) => {
           const hasRecords = await hasDnsRecords(domain);
@@ -121,36 +188,49 @@ Deno.serve(async (req) => {
         })
       );
 
-      // DNS finds records → taken (fast path). No records → RDAP to confirm.
-      const needRdap = dnsResults.filter((r) => !r.hasRecords);
+      const needRdap = dnsResults.filter((r) => !r.hasRecords && !godaddyResults.has(r.domain));
       const rdapResults = await Promise.all(
         needRdap.map(async ({ domain }) => {
           const rdap = await checkRdap(domain);
           return { domain, ...rdap };
         })
       );
-
       const rdapMap = new Map(rdapResults.map((r) => [r.domain, r]));
 
       for (const dns of dnsResults) {
-        if (dns.hasRecords) {
-          freshResults.push({ domain: dns.domain, available: false, checkedVia: "dns" });
+        const gd = godaddyResults.get(dns.domain);
+
+        let available: boolean;
+        let checkedVia: string;
+
+        if (gd) {
+          available = gd.available;
+          checkedVia = "godaddy";
+        } else if (dns.hasRecords) {
+          available = false;
+          checkedVia = "dns";
         } else {
           const rdap = rdapMap.get(dns.domain);
-          freshResults.push({
-            domain: dns.domain,
-            available: rdap ? rdap.available : true,
-            checkedVia: rdap ? "rdap" : "dns",
-          });
+          available = rdap ? rdap.available : true;
+          checkedVia = rdap ? "rdap" : "dns";
         }
+
+        freshResults.push({
+          domain: dns.domain,
+          available,
+          checkedVia,
+          price: gd?.price,
+          premium: gd?.premium,
+        });
       }
 
-      // Cache results (upsert)
+      // Cache results
       if (freshResults.length > 0) {
         const rows = freshResults.map((r) => ({
           domain: r.domain,
           available: r.available,
           checked_via: r.checkedVia,
+          rdap_data: r.price != null ? { godaddy_price: r.price, premium: r.premium ?? false } : null,
           expires_at: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
         }));
 
@@ -160,13 +240,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Merge cached + fresh
     const allResults: DomainCheckResult[] = [
       ...Array.from(cachedMap.values()),
       ...freshResults,
     ];
 
-    // Return in same order as input
     const resultMap = new Map(allResults.map((r) => [r.domain, r]));
     const ordered = batch.map((d) => resultMap.get(d) ?? { domain: d, available: false, checkedVia: "error" });
 

@@ -23,7 +23,8 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
 
   const ext = domain.split(".").pop() ?? "";
   const cheapest = cheapestByTld.get(ext);
-  const displayPrice = cheapest?.regPrice ?? tld.regPrice;
+  const isPremium = result.premium === true;
+  const displayPrice = isPremium ? result.gdPrice : (cheapest?.regPrice ?? tld.regPrice);
   const displayRenew = cheapest?.renewPrice ?? tld.renewPrice;
   const hasHighRenewal = displayRenew > displayPrice * 1.8;
   const registrarName = cheapest?.registrar ?? null;
@@ -59,7 +60,11 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           <span className="text-xs text-muted-foreground min-w-[80px]">{displayRenew != null ? `renews $${displayRenew}` : ''}</span>
           {available && !checking ? (
             <>
-              <span className="text-lg font-bold text-foreground">${displayPrice}</span>
+              {isPremium ? (
+                <span className="text-sm font-semibold text-warning">Premium</span>
+              ) : (
+                <span className="text-lg font-bold text-foreground">${displayPrice}</span>
+              )}
               <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -117,14 +122,27 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           {/* Right: price + actions */}
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="sm:text-right">
-              <p className="text-2xl font-bold text-foreground">
-                ${displayPrice}
-                <span className="text-sm font-normal text-muted-foreground">/year</span>
-              </p>
-              {hasHighRenewal && (
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  renews ${displayRenew}/yr
-                </p>
+              {isPremium ? (
+                <>
+                  <p className="text-lg font-bold text-warning">Premium</p>
+                  {displayPrice != null && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      ~${displayPrice.toLocaleString()}/yr
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="text-2xl font-bold text-foreground">
+                    ${displayPrice}
+                    <span className="text-sm font-normal text-muted-foreground">/year</span>
+                  </p>
+                  {hasHighRenewal && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      renews ${displayRenew}/yr
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
