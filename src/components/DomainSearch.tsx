@@ -136,7 +136,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       )}
 
       {/* Always-rendered sticky search bar */}
-      <div className={`sticky top-16 z-40 transition-all duration-300 ${hasQuery ? "border-b border-border/50 bg-background/80 py-4 backdrop-blur-xl" : "bg-background py-4"}`}>
+      <div className={`sticky top-16 z-40 border-b transition-all duration-300 ${hasQuery ? "border-border/50 bg-background/80 py-4 backdrop-blur-xl" : "border-transparent bg-background py-4"}`}>
         <div className="container mx-auto px-4">
           {searchBar}
         </div>
