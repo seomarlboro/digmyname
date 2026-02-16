@@ -251,7 +251,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
       <div className="absolute inset-0 -z-10 rounded-3xl blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(225 85% 55% / 0.25), hsl(270 80% 58% / 0.2))" }} />
 
       {/* Floating bar */}
-      <div className="relative flex items-stretch gap-3 rounded-[28px] border border-white/[0.16] bg-white/[0.06] p-3.5 backdrop-blur-2xl shadow-2xl dark:border-white/[0.16]">
+      <div className="relative flex items-stretch gap-3 rounded-[28px] border border-border/30 bg-white p-3.5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
         {/* Popovers */}
         {openFilter && openFilter !== "extensions" && (
           <div
