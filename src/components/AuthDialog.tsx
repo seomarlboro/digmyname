@@ -47,7 +47,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
         onOpenChange(false);
       }
     } catch (err: any) {
-      console.error("Auth error:", err.message);
+      if (import.meta.env.DEV) console.error("Auth error:", err.message);
       toast({
         title: mode === "signup" ? "Signup failed" : "Login failed",
         description: mode === "signup"
@@ -65,7 +65,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       redirect_uri: window.location.origin,
     });
     if (error) {
-      console.error("OAuth error:", error.message);
+      if (import.meta.env.DEV) console.error("OAuth error:", error.message);
       toast({
         title: "Login failed",
         description: "Unable to sign in. Please try again.",
