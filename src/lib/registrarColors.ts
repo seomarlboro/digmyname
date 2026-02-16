@@ -5,18 +5,21 @@ interface RegistrarColor {
   dot: string;
 }
 
-const REGISTRAR_URLS: Record<string, string> = {
-  Cloudflare: "https://www.cloudflare.com/products/registrar/",
-  GoDaddy: "https://www.godaddy.com/",
-  OVHcloud: "https://www.ovhcloud.com/en/domains/",
-  "Google Domains": "https://domains.google/",
-  Porkbun: "https://porkbun.com/",
-  Spaceship: "https://www.spaceship.com/",
-  Namecheap: "https://www.namecheap.com/",
+const REGISTRAR_DOMAIN_URLS: Record<string, (domain: string) => string> = {
+  Cloudflare: (d) => `https://www.cloudflare.com/products/registrar/`,
+  GoDaddy: (d) => `https://www.godaddy.com/domainsearch/find?domainToCheck=${encodeURIComponent(d)}`,
+  OVHcloud: (d) => `https://www.ovhcloud.com/en/domains/results/?domain=${encodeURIComponent(d)}`,
+  "Google Domains": (d) => `https://domains.google/registrar/?searchTerm=${encodeURIComponent(d)}`,
+  Porkbun: (d) => `https://porkbun.com/checkout/search?q=${encodeURIComponent(d)}`,
+  Spaceship: (d) => `https://www.spaceship.com/domain/search/?query=${encodeURIComponent(d)}`,
+  Namecheap: (d) => `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(d)}`,
 };
 
-export const getRegistrarUrl = (registrar: string): string =>
-  REGISTRAR_URLS[registrar] ?? "https://www.google.com/search?q=" + encodeURIComponent(registrar + " domain registrar");
+export const getRegistrarUrl = (registrar: string, domain?: string): string => {
+  const fn = REGISTRAR_DOMAIN_URLS[registrar];
+  if (fn && domain) return fn(domain);
+  return "https://www.google.com/search?q=" + encodeURIComponent((domain ?? "") + " " + registrar + " register");
+};
 
 const REGISTRAR_COLORS: Record<string, RegistrarColor> = {
   Cloudflare: { bg: "bg-[#f6821f]/15", text: "text-[#f6821f]", border: "border-[#f6821f]/30", dot: "bg-[#f6821f]" },
