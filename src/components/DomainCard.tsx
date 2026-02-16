@@ -95,18 +95,13 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
 
         <div className="mt-4 flex items-end justify-between">
           <div>
-            {hasHighRenewal && (
-              <span className="text-xs text-warning line-through">
-                ${displayRenew}/year
-              </span>
-            )}
             <p className="text-2xl font-bold text-foreground">
               ${displayPrice}
               <span className="text-sm font-normal text-muted-foreground">/year</span>
             </p>
             {hasHighRenewal && (
-              <p className="text-xs text-warning font-medium">
-                Renews at ${displayRenew}/yr
+              <p className="text-xs text-muted-foreground mt-0.5">
+                renews ${displayRenew}/yr
               </p>
             )}
           </div>
