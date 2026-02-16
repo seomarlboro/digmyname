@@ -11,7 +11,7 @@ const REGISTRAR_DOMAIN_URLS: Record<string, (domain: string) => string> = {
   OVHcloud: (d) => `https://www.ovhcloud.com/en/domains/results/?domain=${encodeURIComponent(d)}`,
   "Google Domains": (d) => `https://domains.google/registrar/?searchTerm=${encodeURIComponent(d)}`,
   Porkbun: (d) => `https://porkbun.com/checkout/search?q=${encodeURIComponent(d)}`,
-  Spaceship: (d) => `https://www.spaceship.com/domain/search/?query=${encodeURIComponent(d)}`,
+  Spaceship: (d) => `https://www.spaceship.com/domain-search/?query=${encodeURIComponent(d)}`,
   Namecheap: (d) => `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(d)}`,
 };
 
