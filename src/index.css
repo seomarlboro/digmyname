@@ -201,46 +201,12 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
-  }
-
-  .topo-bg::before,
-  .topo-bg::after {
-    content: '';
-    position: absolute;
-    inset: -50%;
-    width: 200%;
-    height: 200%;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Cdefs%3E%3Cstyle%3Ecircle,ellipse%7Bfill:none;stroke:%23888;stroke-width:0.8%7D%3C/style%3E%3C/defs%3E%3Cellipse cx='200' cy='200' rx='180' ry='120'/%3E%3Cellipse cx='200' cy='200' rx='150' ry='100'/%3E%3Cellipse cx='200' cy='200' rx='120' ry='80'/%3E%3Cellipse cx='200' cy='200' rx='90' ry='60'/%3E%3Cellipse cx='200' cy='200' rx='60' ry='40'/%3E%3Cellipse cx='200' cy='200' rx='30' ry='20'/%3E%3Cellipse cx='600' cy='400' rx='160' ry='140'/%3E%3Cellipse cx='600' cy='400' rx='130' ry='110'/%3E%3Cellipse cx='600' cy='400' rx='100' ry='80'/%3E%3Cellipse cx='600' cy='400' rx='70' ry='50'/%3E%3Cellipse cx='600' cy='400' rx='40' ry='25'/%3E%3Cellipse cx='400' cy='650' rx='190' ry='110'/%3E%3Cellipse cx='400' cy='650' rx='155' ry='85'/%3E%3Cellipse cx='400' cy='650' rx='120' ry='60'/%3E%3Cellipse cx='400' cy='650' rx='85' ry='40'/%3E%3Cellipse cx='400' cy='650' rx='50' ry='22'/%3E%3Cellipse cx='700' cy='100' rx='100' ry='80'/%3E%3Cellipse cx='700' cy='100' rx='70' ry='55'/%3E%3Cellipse cx='700' cy='100' rx='40' ry='30'/%3E%3Cellipse cx='100' cy='500' rx='120' ry='90'/%3E%3Cellipse cx='100' cy='500' rx='85' ry='60'/%3E%3Cellipse cx='100' cy='500' rx='50' ry='35'/%3E%3Cellipse cx='500' cy='150' rx='130' ry='70'/%3E%3Cellipse cx='500' cy='150' rx='95' ry='45'/%3E%3Cellipse cx='500' cy='150' rx='55' ry='25'/%3E%3C/svg%3E");
-    background-size: 800px 800px;
-    opacity: 0.04;
-    animation: topo-rotate 120s linear infinite;
-  }
-
-  .topo-bg::after {
-    background-size: 600px 600px;
-    opacity: 0.025;
-    animation: topo-rotate-reverse 90s linear infinite;
-  }
-
-  .dark .topo-bg::before {
     opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000'%3E%3Cdefs%3E%3Cstyle%3Epath,ellipse,circle%7Bfill:none;stroke:%23888;stroke-width:0.6%7D%3C/style%3E%3C/defs%3E%3C!-- Hill cluster 1 --%3E%3Cellipse cx='250' cy='220' rx='200' ry='140'/%3E%3Cellipse cx='250' cy='220' rx='165' ry='115'/%3E%3Cellipse cx='250' cy='220' rx='130' ry='90'/%3E%3Cellipse cx='255' cy='218' rx='95' ry='65'/%3E%3Cellipse cx='258' cy='215' rx='62' ry='42'/%3E%3Cellipse cx='260' cy='212' rx='32' ry='20'/%3E%3C!-- Hill cluster 2 --%3E%3Cellipse cx='700' cy='350' rx='180' ry='150'/%3E%3Cellipse cx='700' cy='350' rx='148' ry='122'/%3E%3Cellipse cx='698' cy='348' rx='115' ry='95'/%3E%3Cellipse cx='695' cy='345' rx='82' ry='68'/%3E%3Cellipse cx='692' cy='342' rx='50' ry='40'/%3E%3Cellipse cx='690' cy='340' rx='22' ry='16'/%3E%3C!-- Hill cluster 3 --%3E%3Cellipse cx='150' cy='650' rx='140' ry='110'/%3E%3Cellipse cx='152' cy='648' rx='110' ry='85'/%3E%3Cellipse cx='154' cy='645' rx='80' ry='60'/%3E%3Cellipse cx='156' cy='642' rx='50' ry='36'/%3E%3Cellipse cx='158' cy='640' rx='24' ry='15'/%3E%3C!-- Hill cluster 4 --%3E%3Cellipse cx='550' cy='750' rx='170' ry='120'/%3E%3Cellipse cx='548' cy='748' rx='138' ry='95'/%3E%3Cellipse cx='546' cy='745' rx='105' ry='70'/%3E%3Cellipse cx='544' cy='742' rx='72' ry='46'/%3E%3Cellipse cx='542' cy='740' rx='38' ry='24'/%3E%3C!-- Hill cluster 5 --%3E%3Cellipse cx='850' cy='120' rx='120' ry='90'/%3E%3Cellipse cx='848' cy='118' rx='88' ry='65'/%3E%3Cellipse cx='846' cy='115' rx='55' ry='40'/%3E%3Cellipse cx='844' cy='112' rx='25' ry='18'/%3E%3C!-- Ridge lines --%3E%3Cpath d='M0 450c80-30 160-60 280-45s200 50 320 30 180-40 280-25 120 20 120 20'/%3E%3Cpath d='M0 480c90-25 170-50 290-35s190 45 310 25 170-35 270-20 130 15 130 15'/%3E%3Cpath d='M0 510c100-20 180-40 300-25s180 40 300 20 160-30 260-15 140 10 140 10'/%3E%3C!-- Valley --%3E%3Cpath d='M400 0c-20 80-40 180-15 300s60 200 35 320-30 180-10 380'/%3E%3Cpath d='M430 0c-18 85-35 185-10 305s55 195 30 315-25 175-5 375'/%3E%3Cpath d='M460 0c-15 90-30 190-5 310s50 190 25 310-20 170 0 370'/%3E%3C!-- Small detail cluster --%3E%3Ccircle cx='900' cy='600' r='60'/%3E%3Ccircle cx='898' cy='598' r='40'/%3E%3Ccircle cx='896' cy='596' r='22'/%3E%3Ccircle cx='895' cy='595' r='8'/%3E%3C!-- Excavation grid marks --%3E%3Cpath d='M0 200h1000' stroke-dasharray='4,12'/%3E%3Cpath d='M0 400h1000' stroke-dasharray='4,12'/%3E%3Cpath d='M0 600h1000' stroke-dasharray='4,12'/%3E%3Cpath d='M0 800h1000' stroke-dasharray='4,12'/%3E%3Cpath d='M200 0v1000' stroke-dasharray='4,12'/%3E%3Cpath d='M400 0v1000' stroke-dasharray='4,12'/%3E%3Cpath d='M600 0v1000' stroke-dasharray='4,12'/%3E%3Cpath d='M800 0v1000' stroke-dasharray='4,12'/%3E%3C/svg%3E");
+    background-size: 1000px 1000px;
   }
 
-  .dark .topo-bg::after {
-    opacity: 0.03;
-  }
-
-  @keyframes topo-rotate {
-    0% { transform: rotate(0deg) translate(0, 0); }
-    25% { transform: rotate(90deg) translate(50px, -30px); }
-    50% { transform: rotate(180deg) translate(0, 0); }
-    75% { transform: rotate(270deg) translate(-50px, 30px); }
-    100% { transform: rotate(360deg) translate(0, 0); }
-  }
-
-  @keyframes topo-rotate-reverse {
-    0% { transform: rotate(0deg) scale(1.1); }
-    50% { transform: rotate(-180deg) scale(0.9); }
-    100% { transform: rotate(-360deg) scale(1.1); }
+  .dark .topo-bg {
+    opacity: 0.06;
   }
 }
