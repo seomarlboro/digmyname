@@ -62,7 +62,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
             <>
               <div className="flex items-center gap-2">
                 {isPremium ? (
-                  <span className="text-lg font-bold text-warning">Premium</span>
+                  <span className="text-lg font-bold text-foreground">Premium</span>
                 ) : (
                   <span className="text-lg font-bold text-foreground">${displayPrice}</span>
                 )}
@@ -126,7 +126,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
             <div className="sm:text-right">
               {isPremium ? (
                 <>
-                  <p className="text-2xl font-bold text-warning">Premium</p>
+                  <p className="text-2xl font-bold text-foreground">Premium</p>
                   {displayRenew != null && (
                     <p className="text-xs text-muted-foreground mt-0.5">
                       renews ${displayRenew}/yr
