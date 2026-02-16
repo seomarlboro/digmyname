@@ -177,7 +177,7 @@
     border-color: transparent;
     background-image:
       linear-gradient(hsl(var(--card)), hsl(var(--card))),
-      conic-gradient(from var(--border-angle), hsl(218 96% 60% / 0.15), hsl(218 96% 60% / 0.6), hsl(270 80% 58% / 0.6), hsl(218 96% 60% / 0.15));
+      conic-gradient(from var(--border-angle), hsl(218 96% 60% / 0.08), hsl(218 96% 60% / 0.6), hsl(270 80% 58% / 0.5), hsl(218 96% 60% / 0.08), hsl(218 96% 60% / 0.08), hsl(218 96% 60% / 0.6), hsl(270 80% 58% / 0.5), hsl(218 96% 60% / 0.08));
     background-origin: border-box;
     background-clip: padding-box, border-box;
     box-shadow: 0 0 20px hsl(218 96% 60% / 0.1);
