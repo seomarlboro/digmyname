@@ -55,7 +55,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           ) : (
             <span className="min-w-[80px]" />
           )}
-          <span className="text-xs text-muted-foreground min-w-[80px]">{hasHighRenewal ? `renews $${displayRenew}` : ''}</span>
+          <span className="text-xs text-muted-foreground min-w-[80px]">{displayRenew != null ? `renews $${displayRenew}` : ''}</span>
           {available && !checking ? (
             <>
               <span className="text-lg font-bold text-foreground">${displayPrice}</span>
