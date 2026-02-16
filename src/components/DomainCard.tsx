@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
 import AuthDialog from "@/components/AuthDialog";
-import { getRegistrarColor } from "@/lib/registrarColors";
+import { getRegistrarColor, getRegistrarUrl } from "@/lib/registrarColors";
 import type { DomainResult } from "@/lib/domainData";
 
 interface DomainCardProps {
@@ -27,6 +27,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
   const displayRenew = cheapest?.renewPrice ?? tld.renewPrice;
   const hasHighRenewal = displayRenew > displayPrice * 1.8;
   const registrarName = cheapest?.registrar ?? null;
+  const buyUrl = registrarName ? getRegistrarUrl(registrarName) : null;
   const favorited = isFavorite(domain);
 
   const handleFavorite = () => {
@@ -59,9 +60,11 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           {available && !checking ? (
             <>
               <span className="text-lg font-bold text-foreground">${displayPrice}</span>
-              <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4">
-                <ExternalLink className="h-3.5 w-3.5" />
-                Buy
+              <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4" asChild>
+                <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Buy
+                </a>
               </Button>
             </>
           ) : !checking ? (
@@ -135,9 +138,11 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
             </Button>
 
             {available ? (
-              <Button className="gap-1.5 rounded-lg btn-gradient border-0">
-                <ExternalLink className="h-4 w-4" />
-                Buy Now
+              <Button className="gap-1.5 rounded-lg btn-gradient border-0" asChild>
+                <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4" />
+                  Buy Now
+                </a>
               </Button>
             ) : (
               <Button variant="outline" className="gap-1.5 rounded-lg">

@@ -5,6 +5,19 @@ interface RegistrarColor {
   dot: string;
 }
 
+const REGISTRAR_URLS: Record<string, string> = {
+  Cloudflare: "https://www.cloudflare.com/products/registrar/",
+  GoDaddy: "https://www.godaddy.com/",
+  OVHcloud: "https://www.ovhcloud.com/en/domains/",
+  "Google Domains": "https://domains.google/",
+  Porkbun: "https://porkbun.com/",
+  Spaceship: "https://www.spaceship.com/",
+  Namecheap: "https://www.namecheap.com/",
+};
+
+export const getRegistrarUrl = (registrar: string): string =>
+  REGISTRAR_URLS[registrar] ?? "https://www.google.com/search?q=" + encodeURIComponent(registrar + " domain registrar");
+
 const REGISTRAR_COLORS: Record<string, RegistrarColor> = {
   Cloudflare: { bg: "bg-[#f6821f]/15", text: "text-[#f6821f]", border: "border-[#f6821f]/30", dot: "bg-[#f6821f]" },
   GoDaddy: { bg: "bg-[#00a63f]/15", text: "text-[#00a63f]", border: "border-[#00a63f]/30", dot: "bg-[#00a63f]" },
