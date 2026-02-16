@@ -173,13 +173,25 @@
   }
 
   .dark .search-border-glow {
-    animation: border-rotate 6s linear infinite;
+    animation: border-rotate 4s linear infinite;
     border-color: transparent;
     background-image:
       linear-gradient(hsl(var(--card)), hsl(var(--card))),
-      conic-gradient(from var(--border-angle), hsl(218 96% 60% / 0.08), hsl(218 96% 60% / 0.6), hsl(270 80% 58% / 0.5), hsl(218 96% 60% / 0.08), hsl(218 96% 60% / 0.08), hsl(218 96% 60% / 0.6), hsl(270 80% 58% / 0.5), hsl(218 96% 60% / 0.08));
+      conic-gradient(
+        from var(--border-angle),
+        hsl(218 96% 60% / 0) 0%,
+        hsl(218 96% 60% / 0) 10%,
+        hsl(218 96% 60% / 0.4) 20%,
+        hsl(218 96% 65% / 0.8) 30%,
+        hsl(240 90% 70% / 1) 38%,
+        hsl(270 80% 60% / 1) 45%,
+        hsl(270 80% 58% / 0.6) 50%,
+        hsl(218 96% 60% / 0.2) 58%,
+        hsl(218 96% 60% / 0) 65%,
+        hsl(218 96% 60% / 0) 100%
+      );
     background-origin: border-box;
     background-clip: padding-box, border-box;
-    box-shadow: 0 0 20px hsl(218 96% 60% / 0.1);
+    box-shadow: 0 0 25px hsl(218 96% 60% / 0.12), 0 0 8px hsl(270 80% 58% / 0.08);
   }
 }
