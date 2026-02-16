@@ -42,17 +42,13 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
   if (compact) {
     return (
       <>
-        <div className="flex items-center justify-between border-b border-border px-4 py-3 transition-colors hover:bg-secondary/50">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3.5 transition-colors hover:bg-secondary/50">
           <div className="flex items-center gap-3">
-            <h3 className="text-base font-semibold text-foreground">
+            <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
             </h3>
-            {checking ? (
+            {checking && (
               <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-            ) : available ? (
-              <Badge className="bg-available/15 text-available text-[11px] px-1.5 py-0">Available</Badge>
-            ) : (
-              <Badge variant="secondary" className="text-[11px] px-1.5 py-0">Taken</Badge>
             )}
           </div>
           <div className="flex items-center gap-3">
