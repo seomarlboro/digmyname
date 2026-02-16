@@ -180,6 +180,26 @@
       linear-gradient(hsl(var(--card)), hsl(var(--card))),
       conic-gradient(
         from var(--border-angle),
+        hsl(218 60% 70% / 0) 0%,
+        hsl(218 60% 70% / 0) 15%,
+        hsl(218 60% 75% / 0.15) 22%,
+        hsl(218 70% 65% / 0.35) 28%,
+        hsl(240 60% 60% / 0.5) 34%,
+        hsl(262 55% 58% / 0.5) 40%,
+        hsl(270 50% 60% / 0.35) 46%,
+        hsl(270 40% 65% / 0.15) 52%,
+        hsl(218 60% 70% / 0) 58%,
+        hsl(218 60% 70% / 0) 100%
+      );
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .dark .search-border-glow {
+    background-image:
+      linear-gradient(hsl(var(--card)), hsl(var(--card))),
+      conic-gradient(
+        from var(--border-angle),
         hsl(218 96% 60% / 0) 0%,
         hsl(218 96% 60% / 0) 25%,
         hsl(218 96% 60% / 0.25) 30%,
@@ -191,11 +211,6 @@
         hsl(218 96% 60% / 0) 50%,
         hsl(218 96% 60% / 0) 100%
       );
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
-  }
-
-  .dark .search-border-glow {
   }
 
 }
