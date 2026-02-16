@@ -123,7 +123,7 @@ export async function checkDomainsAvailability(
     });
 
     if (error) {
-      console.error("Edge function error:", error);
+      if (import.meta.env.DEV) console.error("Edge function error:", error);
       return resultMap;
     }
 
@@ -133,7 +133,7 @@ export async function checkDomainsAvailability(
       }
     }
   } catch (err) {
-    console.error("Failed to check domains:", err);
+    if (import.meta.env.DEV) console.error("Failed to check domains:", err);
   }
 
   return resultMap;
