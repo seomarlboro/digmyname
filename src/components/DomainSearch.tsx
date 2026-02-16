@@ -112,7 +112,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       <div className="hidden md:flex items-center gap-2 rounded-xl bg-primary/10 dark:bg-primary/20 px-3 py-2">
         <Sparkles className="h-4 w-4 text-primary dark:drop-shadow-[0_0_4px_hsl(218,96%,60%)]" />
         <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
-        <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} className="dark:data-[state=unchecked]:bg-primary/30 dark:[&_span]:bg-primary" />
+        <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} className="dark:data-[state=unchecked]:bg-primary/30" />
       </div>
     </div>
   );
