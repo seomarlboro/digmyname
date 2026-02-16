@@ -8,7 +8,7 @@ interface RegistrarColor {
 const REGISTRAR_DOMAIN_URLS: Record<string, (domain: string) => string> = {
   Cloudflare: (d) => `https://www.cloudflare.com/products/registrar/`,
   GoDaddy: (d) => `https://www.godaddy.com/domainsearch/find?domainToCheck=${encodeURIComponent(d)}`,
-  OVHcloud: (d) => `https://www.ovhcloud.com/en/domains/results/?domain=${encodeURIComponent(d)}`,
+  OVHcloud: (d) => `https://order.ca.ovhcloud.com/us/order/webcloud/?#/webCloud/domain/select?selection=~()&domain=${encodeURIComponent(d)}`,
   "Google Domains": (d) => `https://domains.google/registrar/?searchTerm=${encodeURIComponent(d)}`,
   Porkbun: (d) => `https://porkbun.com/checkout/search?q=${encodeURIComponent(d)}`,
   Spaceship: (d) => `https://www.spaceship.com/domain-search/?query=${encodeURIComponent(d)}`,
