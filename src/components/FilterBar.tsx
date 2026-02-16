@@ -16,7 +16,7 @@ const filterConfigs: FilterConfig[] = [
   { id: "extensions", label: "EXTENSIONS", color: "bg-primary/20 border-primary/25" },
   { id: "price", label: "PRICE", color: "bg-available/20 border-available/25" },
   { id: "features", label: "FEATURES", color: "bg-warning/20 border-warning/25" },
-  { id: "status", label: "STATUS", color: "bg-secondary/70 border-border" },
+  { id: "status", label: "STATUS", color: "bg-secondary/70 border-border dark:bg-white/15 dark:border-white/20" },
 ];
 
 const featureOptions = ["Premium", "Free SSL", "Instant activation", "Trending"];
