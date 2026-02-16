@@ -83,7 +83,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const hasQuery = query.trim().length > 0;
 
   const searchBar = (
-    <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow overflow-hidden">
+    <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-card p-3 search-shadow overflow-hidden dark:search-border-glow">
       <div className="hidden md:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
         <Search className="h-6 w-6 text-primary" />
       </div>
@@ -109,10 +109,10 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       >
         <Sparkles className="h-6 w-6" />
       </div>
-      <div className="hidden md:flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2">
-        <Sparkles className="h-4 w-4 text-primary" />
-        <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
-        <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} />
+      <div className="hidden md:flex items-center gap-2 rounded-xl bg-primary/10 dark:bg-primary/20 dark:border dark:border-primary/30 px-3 py-2">
+        <Sparkles className="h-4 w-4 text-primary dark:text-primary dark:drop-shadow-[0_0_4px_hsl(218,96%,60%)]" />
+        <span className="text-sm font-medium text-primary dark:text-primary/90 whitespace-nowrap">AI</span>
+        <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} className="dark:data-[state=unchecked]:bg-primary/30" />
       </div>
     </div>
   );
