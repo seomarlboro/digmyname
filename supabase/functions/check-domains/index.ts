@@ -59,8 +59,9 @@ interface GoDaddyResult {
 
 async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): Promise<GoDaddyResult | null> {
   try {
+    const baseUrl = Deno.env.get("GODADDY_ENV") === "production" ? "api.godaddy.com" : "api.ote-godaddy.com";
     const resp = await fetch(
-      `https://api.godaddy.com/v1/domains/available?domain=${encodeURIComponent(domain)}&checkType=FULL`,
+      `https://${baseUrl}/v1/domains/available?domain=${encodeURIComponent(domain)}&checkType=FULL`,
       {
         headers: {
           Authorization: `sso-key ${apiKey}:${apiSecret}`,
