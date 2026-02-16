@@ -42,6 +42,37 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
   const parts = domain.split(".");
   const name = parts.slice(0, -1).join(".");
 
+  if (checking) {
+    if (compact) {
+      return (
+        <div className="grid border-b border-border px-4 py-4 transition-colors" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-foreground">
+              {name}.<span className="text-primary">{ext}</span>
+            </h3>
+            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+          </div>
+          <span className="min-w-[80px]" />
+          <span className="min-w-[80px]" />
+          <span />
+          <span />
+        </div>
+      );
+    }
+    return (
+      <div className="card-hover rounded-xl border border-border bg-card p-4 sm:p-5">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-bold text-foreground">
+              {name}.<span className="text-primary">{ext}</span>
+            </h3>
+          </div>
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
+
   if (compact) {
     return (
       <>
@@ -50,7 +81,6 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
             <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
             </h3>
-            {checking && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
           </div>
           {registrarName ? (
             <span className={`text-xs font-medium min-w-[80px] ${getRegistrarColor(registrarName).text}`}>{registrarName}</span>
@@ -58,7 +88,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
             <span className="min-w-[80px]" />
           )}
           <span className="text-xs text-muted-foreground min-w-[80px]">{displayRenew != null ? `renews $${displayRenew}` : ''}</span>
-          {available && !checking ? (
+          {available ? (
             <>
               <div className="flex items-center gap-2">
                 {isPremium ? (
@@ -74,18 +104,13 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
                 </a>
               </Button>
             </>
-          ) : !checking ? (
+          ) : (
             <>
               <span />
               <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground">
                 <ExternalLink className="h-3.5 w-3.5" />
                 Whois
               </Button>
-            </>
-          ) : (
-            <>
-              <span />
-              <span />
             </>
           )}
         </div>
