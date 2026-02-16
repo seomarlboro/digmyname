@@ -80,48 +80,46 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
 
   return (
     <>
-      <div className="card-hover rounded-xl border border-border bg-card">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-6">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-foreground">
-              {name}.<span className="text-primary">{ext}</span>
-            </h3>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {registrarName && (
-                <Badge variant="secondary" className="text-xs font-normal">
-                  {registrarName}
-                </Badge>
-              )}
-              {tld.features.map((f) => (
-                <Badge key={f} variant="secondary" className="text-xs font-normal">
-                  {f}
-                </Badge>
-              ))}
-            </div>
+      <div className="card-hover rounded-xl border border-border bg-card p-5 sm:p-6">
+        <h3 className="text-xl font-bold text-foreground">
+          {name}.<span className="text-primary">{ext}</span>
+        </h3>
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {registrarName && (
+            <Badge variant="secondary" className="text-xs font-normal">
+              {registrarName}
+            </Badge>
+          )}
+          {tld.features.map((f) => (
+            <Badge key={f} variant="secondary" className="text-xs font-normal">
+              {f}
+            </Badge>
+          ))}
+        </div>
+
+        <div className="mt-4 flex items-end justify-between">
+          <div>
+            {hasHighRenewal && (
+              <span className="text-xs text-warning line-through">
+                ${displayRenew}/year
+              </span>
+            )}
+            <p className="text-2xl font-bold text-foreground">
+              ${displayPrice}
+              <span className="text-sm font-normal text-muted-foreground">/year</span>
+            </p>
+            {hasHighRenewal && (
+              <p className="text-xs text-warning font-medium">
+                Renews at ${displayRenew}/yr
+              </p>
+            )}
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              {hasHighRenewal && (
-                <span className="text-xs text-warning line-through">
-                  ${displayRenew}/year
-                </span>
-              )}
-              <p className="text-2xl font-bold text-foreground">
-                ${displayPrice}
-                <span className="text-sm font-normal text-muted-foreground">/year</span>
-              </p>
-              {hasHighRenewal && (
-                <p className="text-xs text-warning font-medium">
-                  Renews at ${displayRenew}/yr
-                </p>
-              )}
-            </div>
-
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className={favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}
+              className={`h-9 w-9 ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
               onClick={handleFavorite}
             >
               <Heart className={`h-4 w-4 ${favorited ? "fill-current" : ""}`} />
