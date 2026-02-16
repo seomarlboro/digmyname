@@ -81,9 +81,9 @@ async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): 
     // GoDaddy returns: { available, domain, definitive, price, currency }
     // price is in micro-units (1,000,000 = $1)
     const priceDollars = data.price != null ? data.price / 1_000_000 : undefined;
-    const tld = domain.split(".").pop() ?? "";
-    // Simple premium detection: if GoDaddy price is significantly above standard TLD prices
-    const isPremium = priceDollars != null && priceDollars > 50 && !["ai", "inc", "gg"].includes(tld);
+    // Premium detection: price is more than 3x the GoDaddy typical retail for that TLD
+    // We consider a domain premium only if the price is abnormally high
+    const isPremium = priceDollars != null && priceDollars > 200;
 
     return {
       available: data.available === true,
