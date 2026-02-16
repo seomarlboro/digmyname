@@ -44,12 +44,19 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
       <>
         <div className="flex items-center justify-between border-b border-border px-4 py-4 transition-colors hover:bg-secondary/50">
           <div className="flex items-center gap-3">
-            <h3 className="text-lg font-semibold text-foreground">
-              {name}.<span className="text-primary">{ext}</span>
-            </h3>
-            {registrarName && (
-              <span className="text-xs text-muted-foreground">{registrarName}</span>
-            )}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">
+                {name}.<span className="text-primary">{ext}</span>
+              </h3>
+              <div className="flex items-center gap-2">
+                {registrarName && (
+                  <span className="text-xs text-muted-foreground">{registrarName}</span>
+                )}
+                {hasHighRenewal && (
+                  <span className="text-xs text-muted-foreground">· renews ${displayRenew}</span>
+                )}
+              </div>
+            </div>
             {checking && (
               <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
             )}
@@ -57,12 +64,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           <div className="flex items-center gap-3 sm:gap-4">
             {available && !checking && (
               <>
-                <div className="text-right">
-                  <span className="text-lg font-bold text-foreground">${displayPrice}</span>
-                  {hasHighRenewal && (
-                    <p className="text-[11px] text-muted-foreground leading-tight">renews ${displayRenew}</p>
-                  )}
-                </div>
+                <span className="text-lg font-bold text-foreground">${displayPrice}</span>
                 <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4">
                   <ExternalLink className="h-3.5 w-3.5" />
                   Buy
