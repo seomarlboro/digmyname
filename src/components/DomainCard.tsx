@@ -61,8 +61,11 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           {available && !checking ? (
             <>
               <div className="flex items-center gap-2">
-                {isPremium && <Badge variant="outline" className="text-xs font-semibold text-warning border-warning/30 bg-warning/10">Premium</Badge>}
-                <span className="text-lg font-bold text-foreground">${displayPrice}</span>
+                {isPremium ? (
+                  <Badge variant="outline" className="text-xs font-semibold text-warning border-warning/30 bg-warning/10">Premium</Badge>
+                ) : (
+                  <span className="text-lg font-bold text-foreground">${displayPrice}</span>
+                )}
               </div>
               <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
@@ -110,11 +113,6 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
                   </Badge>
                 );
               })()}
-              {isPremium && (
-                <Badge variant="outline" className="text-xs font-semibold text-warning border-warning/30 bg-warning/10">
-                  Premium
-                </Badge>
-              )}
               {tld.features.map((f) => (
                 <Badge key={f} variant="secondary" className="text-xs font-normal">
                   {f}
@@ -126,14 +124,20 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           {/* Right: price + actions */}
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="sm:text-right">
-              <p className="text-2xl font-bold text-foreground">
-                ${displayPrice}
-                <span className="text-sm font-normal text-muted-foreground">/year</span>
-              </p>
-              {hasHighRenewal && (
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  renews ${displayRenew}/yr
-                </p>
+              {isPremium ? (
+                <Badge variant="outline" className="text-sm font-semibold text-warning border-warning/30 bg-warning/10 px-3 py-1">Premium</Badge>
+              ) : (
+                <>
+                  <p className="text-2xl font-bold text-foreground">
+                    ${displayPrice}
+                    <span className="text-sm font-normal text-muted-foreground">/year</span>
+                  </p>
+                  {hasHighRenewal && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      renews ${displayRenew}/yr
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
