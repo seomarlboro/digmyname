@@ -172,8 +172,8 @@
     100% { --border-angle: 360deg; }
   }
 
-  .dark .search-border-glow {
-    animation: border-rotate 4s linear infinite;
+  .search-border-glow {
+    animation: border-rotate 3s linear infinite;
     border-color: transparent;
     border-radius: 20px;
     background-image:
@@ -181,19 +181,23 @@
       conic-gradient(
         from var(--border-angle),
         hsl(218 96% 60% / 0) 0%,
-        hsl(218 96% 60% / 0) 10%,
-        hsl(218 96% 60% / 0.4) 20%,
-        hsl(218 96% 65% / 0.8) 30%,
-        hsl(240 90% 70% / 1) 38%,
-        hsl(270 80% 60% / 1) 45%,
-        hsl(270 80% 58% / 0.6) 50%,
-        hsl(218 96% 60% / 0.2) 58%,
-        hsl(218 96% 60% / 0) 65%,
+        hsl(218 96% 60% / 0) 25%,
+        hsl(218 96% 60% / 0.25) 30%,
+        hsl(218 96% 65% / 0.6) 34%,
+        hsl(240 90% 70% / 0.8) 37%,
+        hsl(270 80% 60% / 0.8) 40%,
+        hsl(270 80% 58% / 0.4) 43%,
+        hsl(218 96% 60% / 0.1) 47%,
+        hsl(218 96% 60% / 0) 50%,
         hsl(218 96% 60% / 0) 100%
       );
     background-origin: border-box;
     background-clip: padding-box, border-box;
-    box-shadow: 0 0 25px hsl(218 96% 60% / 0.12), 0 0 8px hsl(270 80% 58% / 0.08);
+    box-shadow: 0 0 15px hsl(218 96% 60% / 0.06);
+  }
+
+  .dark .search-border-glow {
+    box-shadow: 0 0 25px hsl(218 96% 60% / 0.15), 0 0 8px hsl(270 80% 58% / 0.1);
   }
 
 }
