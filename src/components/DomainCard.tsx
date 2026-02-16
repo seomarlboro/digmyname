@@ -62,7 +62,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
             <>
               <div className="flex items-center gap-2">
                 {isPremium ? (
-                  <Badge variant="outline" className="text-xs font-semibold text-warning border-warning/30 bg-warning/10">Premium</Badge>
+                  <span className="text-lg font-bold text-warning">Premium</span>
                 ) : (
                   <span className="text-lg font-bold text-foreground">${displayPrice}</span>
                 )}
@@ -125,7 +125,9 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="sm:text-right">
               {isPremium ? (
-                <Badge variant="outline" className="text-sm font-semibold text-warning border-warning/30 bg-warning/10 px-3 py-1">Premium</Badge>
+                <p className="text-2xl font-bold text-warning">
+                  Premium
+                </p>
               ) : (
                 <>
                   <p className="text-2xl font-bold text-foreground">
