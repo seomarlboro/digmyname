@@ -27,7 +27,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
   const displayRenew = cheapest?.renewPrice ?? tld.renewPrice;
   const hasHighRenewal = displayRenew > displayPrice * 1.8;
   const registrarName = cheapest?.registrar ?? null;
-  const buyUrl = registrarName ? getRegistrarUrl(registrarName) : null;
+  const buyUrl = registrarName ? getRegistrarUrl(registrarName, domain) : null;
   const favorited = isFavorite(domain);
 
   const handleFavorite = () => {
