@@ -59,7 +59,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           <span className="text-xs text-muted-foreground min-w-[80px]">{displayRenew != null ? `renews $${displayRenew}` : ''}</span>
           {available && !checking ? (
             <>
-              <span className="text-lg font-bold text-foreground">${displayPrice}</span>
+              <span className="text-lg font-bold text-foreground"><span className="text-xs font-normal text-muted-foreground">от </span>${displayPrice}</span>
               <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -118,7 +118,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="sm:text-right">
               <p className="text-2xl font-bold text-foreground">
-                ${displayPrice}
+                <span className="text-sm font-normal text-muted-foreground">от </span>${displayPrice}
                 <span className="text-sm font-normal text-muted-foreground">/year</span>
               </p>
               {hasHighRenewal && (
