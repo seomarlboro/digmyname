@@ -1,7 +1,26 @@
-// Simplified registrar color — all use primary, cheapest uses available
-export const getRegistrarColor = (_registrar: string) => ({
+interface RegistrarColor {
+  bg: string;
+  text: string;
+  border: string;
+  dot: string;
+}
+
+const REGISTRAR_COLORS: Record<string, RegistrarColor> = {
+  Cloudflare: { bg: "bg-[#f6821f]/15", text: "text-[#f6821f]", border: "border-[#f6821f]/30", dot: "bg-[#f6821f]" },
+  GoDaddy: { bg: "bg-[#00a63f]/15", text: "text-[#00a63f]", border: "border-[#00a63f]/30", dot: "bg-[#00a63f]" },
+  OVHcloud: { bg: "bg-[#000e9c]/15", text: "text-[#6b7aff]", border: "border-[#6b7aff]/30", dot: "bg-[#6b7aff]" },
+  "Google Domains": { bg: "bg-[#4285f4]/15", text: "text-[#4285f4]", border: "border-[#4285f4]/30", dot: "bg-[#4285f4]" },
+  Porkbun: { bg: "bg-[#f17ca2]/15", text: "text-[#f17ca2]", border: "border-[#f17ca2]/30", dot: "bg-[#f17ca2]" },
+  Spaceship: { bg: "bg-[#7c6cf0]/15", text: "text-[#7c6cf0]", border: "border-[#7c6cf0]/30", dot: "bg-[#7c6cf0]" },
+  Namecheap: { bg: "bg-[#de5833]/15", text: "text-[#de5833]", border: "border-[#de5833]/30", dot: "bg-[#de5833]" },
+};
+
+const DEFAULT_COLOR: RegistrarColor = {
   bg: "bg-primary/10",
   text: "text-primary",
   border: "border-primary/20",
   dot: "bg-primary",
-});
+};
+
+export const getRegistrarColor = (registrar: string): RegistrarColor =>
+  REGISTRAR_COLORS[registrar] ?? DEFAULT_COLOR;
