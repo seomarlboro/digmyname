@@ -161,19 +161,25 @@
     transform: translateY(-1px);
   }
 
-  @keyframes border-glow {
-    0%, 100% {
-      border-color: hsl(218 96% 60% / 0.3);
-      box-shadow: 0 4px 30px hsl(218 96% 53% / 0.12), 0 0 15px hsl(218 96% 60% / 0.08);
-    }
-    50% {
-      border-color: hsl(270 80% 58% / 0.4);
-      box-shadow: 0 4px 30px hsl(270 80% 58% / 0.15), 0 0 20px hsl(270 80% 58% / 0.1);
-    }
+  @property --border-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  @keyframes border-rotate {
+    0% { --border-angle: 0deg; }
+    100% { --border-angle: 360deg; }
   }
 
   .dark .search-border-glow {
-    animation: border-glow 4s ease-in-out infinite;
-    border-color: hsl(218 96% 60% / 0.3);
+    animation: border-rotate 6s linear infinite;
+    border-color: transparent;
+    background-image:
+      linear-gradient(hsl(var(--card)), hsl(var(--card))),
+      conic-gradient(from var(--border-angle), hsl(218 96% 60% / 0.15), hsl(218 96% 60% / 0.6), hsl(270 80% 58% / 0.6), hsl(218 96% 60% / 0.15));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    box-shadow: 0 0 20px hsl(218 96% 60% / 0.1);
   }
 }
