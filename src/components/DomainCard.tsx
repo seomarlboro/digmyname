@@ -76,37 +76,42 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
 
   return (
     <>
-      <div className="card-hover rounded-xl border border-border bg-card p-5 sm:p-6">
-        <h3 className="text-xl font-bold text-foreground">
-          {name}.<span className="text-primary">{ext}</span>
-        </h3>
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {registrarName && (
-            <Badge variant="secondary" className="text-xs font-normal">
-              {registrarName}
-            </Badge>
-          )}
-          {tld.features.map((f) => (
-            <Badge key={f} variant="secondary" className="text-xs font-normal">
-              {f}
-            </Badge>
-          ))}
-        </div>
-
-        <div className="mt-4 flex items-end justify-between">
-          <div>
-            <p className="text-2xl font-bold text-foreground">
-              ${displayPrice}
-              <span className="text-sm font-normal text-muted-foreground">/year</span>
-            </p>
-            {hasHighRenewal && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                renews ${displayRenew}/yr
-              </p>
-            )}
+      <div className="card-hover rounded-xl border border-border bg-card p-4 sm:p-5">
+        {/* Mobile: stacked, Desktop: single row */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Left: domain + badges */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-xl font-bold text-foreground">
+                {name}.<span className="text-primary">{ext}</span>
+              </h3>
+              {registrarName && (
+                <Badge variant="secondary" className="text-xs font-normal">
+                  {registrarName}
+                </Badge>
+              )}
+              {tld.features.map((f) => (
+                <Badge key={f} variant="secondary" className="text-xs font-normal">
+                  {f}
+                </Badge>
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Right: price + actions */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="sm:text-right">
+              <p className="text-2xl font-bold text-foreground">
+                ${displayPrice}
+                <span className="text-sm font-normal text-muted-foreground">/year</span>
+              </p>
+              {hasHighRenewal && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  renews ${displayRenew}/yr
+                </p>
+              )}
+            </div>
+
             <Button
               variant="ghost"
               size="icon"
