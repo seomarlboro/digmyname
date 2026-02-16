@@ -175,6 +175,7 @@
   .dark .search-border-glow {
     animation: border-rotate 4s linear infinite;
     border-color: transparent;
+    border-radius: 20px;
     background-image:
       linear-gradient(hsl(var(--card)), hsl(var(--card))),
       conic-gradient(
