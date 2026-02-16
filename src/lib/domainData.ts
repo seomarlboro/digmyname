@@ -78,6 +78,10 @@ export interface DomainResult {
   tld: TLD;
   available: boolean;
   checking?: boolean;
+  /** GoDaddy real price in dollars, if available */
+  gdPrice?: number;
+  /** Whether this is a premium domain */
+  premium?: boolean;
 }
 
 const tldMap = new Map(TLD_LIST.map((t) => [t.extension, t]));
@@ -114,8 +118,8 @@ export function generateDomainList(query: string, withVariations = false, allowe
 /** Check real availability via edge function */
 export async function checkDomainsAvailability(
   domains: string[]
-): Promise<Map<string, boolean>> {
-  const resultMap = new Map<string, boolean>();
+): Promise<Map<string, { available: boolean; price?: number; premium?: boolean }>> {
+  const resultMap = new Map<string, { available: boolean; price?: number; premium?: boolean }>();
 
   try {
     const { data, error } = await supabase.functions.invoke("check-domains", {
@@ -129,7 +133,11 @@ export async function checkDomainsAvailability(
 
     if (data?.results) {
       for (const r of data.results) {
-        resultMap.set(r.domain, r.available);
+        resultMap.set(r.domain, {
+          available: r.available,
+          price: r.price,
+          premium: r.premium,
+        });
       }
     }
   } catch (err) {
