@@ -217,8 +217,8 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
     return (
       <Drawer>
         <DrawerTrigger asChild>
-          <button className="fixed bottom-6 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl active:scale-95 transition-transform">
-            <SlidersHorizontal className="h-5 w-5" />
+          <button className="fixed bottom-6 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full btn-gradient shadow-2xl active:scale-95 transition-transform">
+            <SlidersHorizontal className="h-6 w-6" />
             {activeCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-warning text-[11px] font-bold text-warning-foreground">
                 {activeCount}
