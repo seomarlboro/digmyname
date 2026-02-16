@@ -42,28 +42,36 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
   if (compact) {
     return (
       <>
-        <div className="flex items-center justify-between border-b border-border px-4 py-3.5 transition-colors hover:bg-secondary/50">
+        <div className="flex items-center justify-between border-b border-border px-4 py-4 transition-colors hover:bg-secondary/50">
           <div className="flex items-center gap-3">
             <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
             </h3>
+            {registrarName && (
+              <span className="text-xs text-muted-foreground">{registrarName}</span>
+            )}
             {checking && (
               <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 sm:gap-4">
             {available && !checking && (
               <>
-                <span className="text-sm font-bold text-foreground">${displayPrice}</span>
-                <Button size="sm" className="h-7 gap-1 rounded-md btn-gradient text-xs border-0">
-                  <ExternalLink className="h-3 w-3" />
+                <div className="text-right">
+                  <span className="text-lg font-bold text-foreground">${displayPrice}</span>
+                  {hasHighRenewal && (
+                    <p className="text-[11px] text-muted-foreground leading-tight">renews ${displayRenew}</p>
+                  )}
+                </div>
+                <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4">
+                  <ExternalLink className="h-3.5 w-3.5" />
                   Buy
                 </Button>
               </>
             )}
             {!available && !checking && (
-              <Button variant="ghost" size="sm" className="h-7 gap-1 rounded-md text-xs text-muted-foreground">
-                <ExternalLink className="h-3 w-3" />
+              <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground">
+                <ExternalLink className="h-3.5 w-3.5" />
                 Whois
               </Button>
             )}
