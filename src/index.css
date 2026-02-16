@@ -160,4 +160,20 @@
     box-shadow: 0 8px 30px hsl(218 96% 53% / 0.1);
     transform: translateY(-1px);
   }
+
+  @keyframes border-glow {
+    0%, 100% {
+      border-color: hsl(218 96% 60% / 0.3);
+      box-shadow: 0 4px 30px hsl(218 96% 53% / 0.12), 0 0 15px hsl(218 96% 60% / 0.08);
+    }
+    50% {
+      border-color: hsl(270 80% 58% / 0.4);
+      box-shadow: 0 4px 30px hsl(270 80% 58% / 0.15), 0 0 20px hsl(270 80% 58% / 0.1);
+    }
+  }
+
+  .dark .search-border-glow {
+    animation: border-glow 4s ease-in-out infinite;
+    border-color: hsl(218 96% 60% / 0.3);
+  }
 }
