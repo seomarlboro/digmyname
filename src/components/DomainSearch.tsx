@@ -76,10 +76,11 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     return () => { cancelled = true; };
   }, [debouncedQuery, aiSuggestions, selectedTlds]);
 
+  const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
   const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
   const availableCount = useMemo(() => checkedResults.filter((r) => r.available).length, [checkedResults]);
   const takenCount = useMemo(() => checkedResults.filter((r) => !r.available).length, [checkedResults]);
-  const stillChecking = useMemo(() => results.some((r) => r.checking), [results]);
+  const stillChecking = checkingResults.length > 0;
 
   const hasQuery = query.trim().length > 0;
 
@@ -191,11 +192,27 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
             <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
               {results
                 .filter((r) => !r.checking && r.available)
-                .slice(0, 20)
                 .map((r) => (
                   <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} />
                 ))}
             </div>
+
+            {/* Checking */}
+            {stillChecking && (
+              <>
+                <div className="mb-4 mt-8 flex items-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <h2 className="text-lg font-bold text-foreground">Checking…</h2>
+                </div>
+                <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
+                  {checkingResults
+                    .slice(0, 20)
+                    .map((r) => (
+                      <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} />
+                    ))}
+                </div>
+              </>
+            )}
 
             {/* Taken */}
             {takenCount > 0 && (
