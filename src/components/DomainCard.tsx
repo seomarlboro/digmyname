@@ -42,7 +42,7 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
   if (compact) {
     return (
       <>
-        <div className="grid border-b border-border px-4 py-4 transition-colors hover:bg-secondary/50" style={{ gridTemplateColumns: '1fr auto auto auto auto', alignItems: 'center', gap: '0 1rem' }}>
+        <div className="grid border-b border-border px-4 py-4 transition-colors hover:bg-secondary/50" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr auto', alignItems: 'center', gap: '0 1rem' }}>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
