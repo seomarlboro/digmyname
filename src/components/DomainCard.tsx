@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
 import AuthDialog from "@/components/AuthDialog";
+import { getRegistrarColor } from "@/lib/registrarColors";
 import type { DomainResult } from "@/lib/domainData";
 
 interface DomainCardProps {
@@ -49,7 +50,11 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
             </h3>
             {checking && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
           </div>
-          <span className="text-xs text-muted-foreground min-w-[80px]">{registrarName ?? ''}</span>
+          {registrarName ? (
+            <span className={`text-xs font-medium min-w-[80px] ${getRegistrarColor(registrarName).text}`}>{registrarName}</span>
+          ) : (
+            <span className="min-w-[80px]" />
+          )}
           <span className="text-xs text-muted-foreground min-w-[80px]">{hasHighRenewal ? `renews $${displayRenew}` : ''}</span>
           {available && !checking ? (
             <>
@@ -90,11 +95,14 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
               {name}.<span className="text-primary">{ext}</span>
             </h3>
             <div className="flex items-center gap-1.5 mt-1.5">
-              {registrarName && (
-                <Badge variant="secondary" className="text-xs font-normal">
-                  {registrarName}
-                </Badge>
-              )}
+              {registrarName && (() => {
+                const rc = getRegistrarColor(registrarName);
+                return (
+                  <Badge variant="outline" className={`text-xs font-medium ${rc.text} ${rc.bg} ${rc.border}`}>
+                    {registrarName}
+                  </Badge>
+                );
+              })()}
               {tld.features.map((f) => (
                 <Badge key={f} variant="secondary" className="text-xs font-normal">
                   {f}
