@@ -24,9 +24,9 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
   const ext = domain.split(".").pop() ?? "";
   const cheapest = cheapestByTld.get(ext);
   const isPremium = result.premium === true;
-  const displayPrice = isPremium ? result.gdPrice : (cheapest?.regPrice ?? tld.regPrice);
+  const displayPrice = cheapest?.regPrice ?? tld.regPrice;
   const displayRenew = cheapest?.renewPrice ?? tld.renewPrice;
-  const hasHighRenewal = displayRenew > displayPrice * 1.8;
+  const hasHighRenewal = !isPremium && displayRenew > displayPrice * 1.8;
   const registrarName = cheapest?.registrar ?? null;
   const buyUrl = registrarName ? getRegistrarUrl(registrarName, domain) : null;
   const favorited = isFavorite(domain);
@@ -60,11 +60,10 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           <span className="text-xs text-muted-foreground min-w-[80px]">{displayRenew != null ? `renews $${displayRenew}` : ''}</span>
           {available && !checking ? (
             <>
-              {isPremium ? (
-                <span className="text-sm font-semibold text-warning">Premium</span>
-              ) : (
+              <div className="flex items-center gap-2">
+                {isPremium && <Badge variant="outline" className="text-xs font-semibold text-warning border-warning/30 bg-warning/10">Premium</Badge>}
                 <span className="text-lg font-bold text-foreground">${displayPrice}</span>
-              )}
+              </div>
               <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -111,6 +110,11 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
                   </Badge>
                 );
               })()}
+              {isPremium && (
+                <Badge variant="outline" className="text-xs font-semibold text-warning border-warning/30 bg-warning/10">
+                  Premium
+                </Badge>
+              )}
               {tld.features.map((f) => (
                 <Badge key={f} variant="secondary" className="text-xs font-normal">
                   {f}
@@ -122,27 +126,14 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           {/* Right: price + actions */}
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="sm:text-right">
-              {isPremium ? (
-                <>
-                  <p className="text-lg font-bold text-warning">Premium</p>
-                  {displayPrice != null && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      ~${displayPrice.toLocaleString()}/yr
-                    </p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <p className="text-2xl font-bold text-foreground">
-                    ${displayPrice}
-                    <span className="text-sm font-normal text-muted-foreground">/year</span>
-                  </p>
-                  {hasHighRenewal && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      renews ${displayRenew}/yr
-                    </p>
-                  )}
-                </>
+              <p className="text-2xl font-bold text-foreground">
+                ${displayPrice}
+                <span className="text-sm font-normal text-muted-foreground">/year</span>
+              </p>
+              {hasHighRenewal && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  renews ${displayRenew}/yr
+                </p>
               )}
             </div>
 
