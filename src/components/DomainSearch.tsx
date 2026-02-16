@@ -29,7 +29,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     setLoading(true);
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 500);
+    }, 300);
     return () => clearTimeout(timer);
   }, [query]);
 
