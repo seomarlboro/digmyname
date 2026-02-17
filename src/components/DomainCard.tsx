@@ -148,30 +148,32 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
 
           {/* Right: price + actions */}
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="sm:text-right">
-              {isPremium ? (
-                <>
-                  <p className="text-2xl font-bold text-foreground">Premium</p>
-                  {displayRenew != null && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      renews ${displayRenew}/yr
+            {available && (
+              <div className="sm:text-right">
+                {isPremium ? (
+                  <>
+                    <p className="text-2xl font-bold text-foreground">Premium</p>
+                    {displayRenew != null && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        renews ${displayRenew}/yr
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <p className="text-2xl font-bold text-foreground">
+                      ${displayPrice}
+                      <span className="text-sm font-normal text-muted-foreground">/year</span>
                     </p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <p className="text-2xl font-bold text-foreground">
-                    ${displayPrice}
-                    <span className="text-sm font-normal text-muted-foreground">/year</span>
-                  </p>
-                  {hasHighRenewal && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      renews ${displayRenew}/yr
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
+                    {hasHighRenewal && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        renews ${displayRenew}/yr
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             <Button
               variant="ghost"
