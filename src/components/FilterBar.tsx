@@ -39,7 +39,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
 
   return (
     <div>
-      <h3 className="text-base font-bold text-foreground">Domain Extensions</h3>
+      <h2 className="text-base font-bold text-foreground">Domain Extensions</h2>
       <p className="mb-4 text-sm text-muted-foreground">Select one or more TLDs</p>
       <div className={`grid gap-3 ${mobile ? "grid-cols-3" : "grid-cols-4"}`}>
         {visibleTlds.map((tld) => {
@@ -217,7 +217,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
     return (
       <Drawer>
         <DrawerTrigger asChild>
-          <button className="fixed bottom-6 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full btn-gradient shadow-2xl active:scale-95 transition-transform">
+          <button aria-label="Open filters" className="fixed bottom-6 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full btn-gradient shadow-2xl active:scale-95 transition-transform">
             <SlidersHorizontal className="h-6 w-6" />
             {activeCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-warning text-[11px] font-bold text-warning-foreground">
@@ -230,7 +230,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
           <div className="flex items-center justify-between px-5 pt-4 pb-2">
             <h2 className="text-lg font-bold text-foreground">Filters</h2>
             <DrawerClose asChild>
-              <button className="rounded-full p-1.5 hover:bg-secondary transition-colors">
+              <button aria-label="Close filters" className="rounded-full p-1.5 hover:bg-secondary transition-colors">
                 <X className="h-5 w-5 text-muted-foreground" />
               </button>
             </DrawerClose>
