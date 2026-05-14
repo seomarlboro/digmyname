@@ -96,25 +96,29 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Enter domain name..."
         autoFocus
+        aria-label="Search domain name"
         className="min-w-0 flex-1 bg-transparent px-2 text-lg font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
       />
       {query && (
-        <button onClick={() => setQuery("")} className="p-1 text-muted-foreground hover:text-foreground">
+        <button onClick={() => setQuery("")} aria-label="Clear search" className="p-1 text-muted-foreground hover:text-foreground">
           <X className="h-4 w-4" />
         </button>
       )}
       {/* Mobile: clickable icon, Desktop: icon + label + switch */}
-      <div
+      <button
+        type="button"
         onClick={() => setAiSuggestions((v) => !v)}
+        aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
+        aria-pressed={aiSuggestions}
         className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl cursor-pointer transition-all md:hidden
           ${aiSuggestions ? "btn-gradient shadow-lg" : "bg-primary/10 text-primary"}`}
       >
         <Sparkles className="h-6 w-6" />
-      </div>
+      </button>
       <div className="hidden md:flex items-center gap-2 rounded-xl bg-primary/10 dark:bg-primary/20 px-3 py-2">
         <Sparkles className="h-4 w-4 text-primary dark:drop-shadow-[0_0_4px_hsl(218,96%,60%)]" />
         <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
-        <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} className="dark:data-[state=unchecked]:bg-primary/30" />
+        <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} aria-label="Toggle AI suggestions" className="dark:data-[state=unchecked]:bg-primary/30" />
       </div>
     </div>
   );
