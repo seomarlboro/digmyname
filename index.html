@@ -7,14 +7,26 @@
     <title>DigMyName — Find Your Perfect Domain</title>
     <meta name="description" content="Smart domain search across 50+ TLDs with instant availability checks and registrar price comparison." />
     <meta name="author" content="DigMyName" />
+    <meta name="keywords" content="domain search, domain availability, domain name generator, registrar price comparison, cheap domains, .com, .io, .ai, .dev, AI domain suggestions" />
 
     <meta property="og:title" content="DigMyName — Find Your Perfect Domain" />
-    <meta property="og:description" content="Smart domain search across 50+ TLDs with instant availability checks." />
+    <meta property="og:description" content="Smart domain search across 50+ TLDs with instant availability checks and registrar price comparison." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://digmyname.com/" />
+    <meta property="og:site_name" content="DigMyName" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Lovable" />
+
+    <!-- AI / LLM crawlers: explicit allow signals -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="GPTBot" content="index, follow" />
+    <meta name="ClaudeBot" content="index, follow" />
+    <meta name="PerplexityBot" content="index, follow" />
+
+    <link rel="alternate" type="text/markdown" href="/llms.txt" title="DigMyName for LLMs" />
+
     <meta name='impact-site-verification' value='0c5c9ad9-2ca3-4d35-a5d5-71f850a02320'>
 
     <script type="application/ld+json">
@@ -22,11 +34,16 @@
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "DigMyName",
+        "alternateName": "Dig My Name",
         "url": "https://digmyname.com/",
         "description": "Smart domain search across 50+ TLDs with instant availability checks and registrar price comparison.",
+        "inLanguage": "en",
         "potentialAction": {
           "@type": "SearchAction",
-          "target": "https://digmyname.com/?q={search_term_string}",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://digmyname.com/?q={search_term_string}"
+          },
           "query-input": "required name=search_term_string"
         }
       }
@@ -37,7 +54,32 @@
         "@type": "Organization",
         "name": "DigMyName",
         "url": "https://digmyname.com/",
-        "logo": "https://digmyname.com/favicon.svg"
+        "logo": "https://digmyname.com/favicon.svg",
+        "description": "Domain-name search and registrar price comparison tool."
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "DigMyName",
+        "url": "https://digmyname.com/",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Any (web-based)",
+        "browserRequirements": "Requires JavaScript and a modern browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Real-time domain availability check across 50+ TLDs",
+          "Side-by-side registrar price comparison",
+          "AI-powered alternative name suggestions",
+          "Renewal-price transparency",
+          "WHOIS privacy comparison",
+          "Saved-domain favorites"
+        ]
       }
     </script>
   </head>
