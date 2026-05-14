@@ -85,7 +85,23 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Domain Pricing Comparison — DigMyName</title>
+        <meta name="description" content="Compare domain registration, renewal, and transfer prices side-by-side across major registrars." />
+        <link rel="canonical" href="https://digmyname.com/pricing" />
+        <meta property="og:title" content="Domain Pricing Comparison — DigMyName" />
+        <meta property="og:description" content="Side-by-side domain prices across major registrars." />
+        <meta property="og:url" content="https://digmyname.com/pricing" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Domain Pricing Comparison",
+          "description": "Compare registration, renewal and transfer prices across registrars for popular TLDs.",
+          "url": "https://digmyname.com/pricing"
+        })}</script>
+      </Helmet>
       <Header />
+      <main>
       <section className="hero-gradient pb-8 pt-16 md:pb-12 md:pt-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-gradient text-3xl font-extrabold md:text-5xl">
