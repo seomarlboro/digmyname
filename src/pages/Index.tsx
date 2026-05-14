@@ -17,6 +17,7 @@ const Index = () => {
         <meta property="og:title" content="DigMyName — Find Your Perfect Domain" />
         <meta property="og:description" content="Smart domain search across 50+ TLDs with instant availability checks." />
         <meta property="og:url" content="https://digmyname.com/" />
+        <meta property="og:image" content="https://digmyname.com/og-image.jpg" />
       </Helmet>
       <p style={{ position: 'absolute', left: '-9999px', fontSize: '1px', color: 'transparent' }}>Impact-Site-Verification: 0c5c9ad9-2ca3-4d35-a5d5-71f850a02320</p>
       <Header />
