@@ -191,6 +191,7 @@ const Pricing = () => {
           </>
         )}
       </section>
+      </main>
     </div>
   );
 };
