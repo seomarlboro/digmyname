@@ -180,6 +180,8 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
               size="icon"
               className={`h-9 w-9 ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
               onClick={handleFavorite}
+              aria-label={favorited ? `Remove ${domain} from favorites` : `Save ${domain} to favorites`}
+              aria-pressed={favorited}
             >
               <Heart className={`h-4 w-4 ${favorited ? "fill-current" : ""}`} />
             </Button>

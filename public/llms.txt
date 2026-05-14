@@ -1,0 +1,11 @@
+# DigMyName
+
+> Smart domain search across 50+ TLDs with instant availability checks and registrar price comparison.
+
+DigMyName helps users find available domain names quickly, with real-time availability checks and side-by-side pricing across multiple registrars.
+
+## Pages
+
+- [Home](/): Search domain names across 50+ TLDs with instant availability checks and AI-powered name suggestions.
+- [Pricing](/pricing): Compare domain registration, renewal, and transfer prices across major registrars.
+- [Favorites](/favorites): View saved domains (requires sign-in).

@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Heart, Trash2 } from "lucide-react";
 import Header from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,8 +11,14 @@ const Favorites = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Saved Domains — DigMyName</title>
+        <meta name="description" content="Your saved domain shortlist on DigMyName." />
+        <link rel="canonical" href="https://digmyname.com/favorites" />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <Header />
-      <div className="container mx-auto max-w-[968px] px-4 py-12">
+      <main className="container mx-auto max-w-[968px] px-4 py-12">
         <div className="mb-8 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
             <Heart className="h-5 w-5 text-primary" />
@@ -40,6 +47,7 @@ const Favorites = () => {
                   size="icon"
                   className="text-destructive hover:text-destructive"
                   onClick={() => toggleFavorite(domain)}
+                  aria-label={`Remove ${domain} from favorites`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -47,7 +55,7 @@ const Favorites = () => {
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };

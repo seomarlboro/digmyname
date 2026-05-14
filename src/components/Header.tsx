@@ -45,7 +45,7 @@ const Header = () => {
             {user ? (
               <>
                 <Button variant="ghost" size="icon" className="text-muted-foreground" asChild>
-                  <Link to="/favorites">
+                  <Link to="/favorites" aria-label="Saved domains">
                     <Heart className="h-5 w-5" />
                   </Link>
                 </Button>
@@ -54,6 +54,7 @@ const Header = () => {
                   size="icon"
                   className="text-muted-foreground"
                   onClick={signOut}
+                  aria-label="Sign out"
                 >
                   <LogOut className="h-5 w-5" />
                 </Button>
