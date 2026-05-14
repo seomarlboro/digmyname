@@ -126,7 +126,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   return (
     <div className="w-full">
       {/* Spacer + title to push search bar to vertical center */}
-      {!hasQuery && (
+      {!hasQuery ? (
         <div className="hero-gradient flex items-center justify-center px-4" style={{ height: 'calc(50vh - 32px - 40px)' }}>
           <div className="text-center">
             <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
@@ -139,6 +139,8 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
             </p>
           </div>
         </div>
+      ) : (
+        <h1 className="sr-only">Domain search results for {query}</h1>
       )}
 
       {/* Always-rendered sticky search bar */}
@@ -180,12 +182,16 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                 <div className="flex items-center rounded-lg border border-border bg-card p-0.5">
                   <button
                     onClick={() => setViewMode("cards")}
+                    aria-label="Card view"
+                    aria-pressed={viewMode === "cards"}
                     className={`rounded-md p-1.5 transition-colors ${viewMode === "cards" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     <LayoutGrid className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setViewMode("compact")}
+                    aria-label="Compact list view"
+                    aria-pressed={viewMode === "compact"}
                     className={`rounded-md p-1.5 transition-colors ${viewMode === "compact" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     <List className="h-4 w-4" />
