@@ -92,6 +92,7 @@ const Pricing = () => {
         <meta property="og:title" content="Domain Pricing Comparison — DigMyName" />
         <meta property="og:description" content="Side-by-side domain prices across major registrars." />
         <meta property="og:url" content="https://digmyname.com/pricing" />
+        <meta property="og:image" content="https://digmyname.com/og-image.jpg" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "CollectionPage",
