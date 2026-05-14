@@ -99,6 +99,14 @@ const Pricing = () => {
           "description": "Compare registration, renewal and transfer prices across registrars for popular TLDs.",
           "url": "https://digmyname.com/pricing"
         })}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://digmyname.com/" },
+            { "@type": "ListItem", "position": 2, "name": "Pricing", "item": "https://digmyname.com/pricing" }
+          ]
+        })}</script>
       </Helmet>
       <Header />
       <main>
