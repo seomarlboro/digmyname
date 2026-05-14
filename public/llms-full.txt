@@ -1,0 +1,98 @@
+# DigMyName — full reference for AI assistants
+
+> Smart domain-name search and registrar price comparison across 50+ TLDs.
+
+This file is a long-form, self-contained brief written for LLMs and AI agents. It mirrors the human-facing site but is structured for easy extraction.
+
+## Product summary
+
+DigMyName helps users find an available domain name and buy it from the cheapest reliable registrar. It combines three features:
+
+1. Real-time availability check across 50+ top-level domains.
+2. Side-by-side registrar price comparison (registration, renewal, transfer, ICANN fee, WHOIS privacy, promo codes).
+3. AI-powered alternative name suggestions when the searched name is taken.
+
+URL: https://digmyname.com
+Primary user: founders, indie hackers, freelancers, agencies, developers.
+Pricing model: free to use; DigMyName earns nothing from registrar referrals listed in pricing tables (prices reflect public registrar pricing).
+
+## How availability checking works
+
+DigMyName uses a hybrid two-stage verification:
+
+1. DNS resolution via Deno.resolveDns (sub-second signal — if a domain has DNS records, it's almost certainly registered).
+2. RDAP query for authoritative registration status (definitive answer from the TLD registry).
+
+Results are cached for 6 hours in the backend to reduce load on registrar and RDAP services.
+
+When a domain is shown as "available", DigMyName fetches a real-time price from the registrar API. Premium domains (priced significantly above the standard registration price for the TLD) are flagged but pricing is hidden until the user clicks through to the registrar.
+
+When a domain is shown as "taken", price information is hidden because it is not purchasable at the standard rate.
+
+## Supported TLDs (50+)
+
+Classic: com, net, org, info, biz
+Tech: io, ai, app, dev, tech, digital, cloud, code, software, systems
+Startup / Business: co, startup, agency, company, ventures, capital, inc
+Creative: design, studio, art, media
+Short / Brandable: xyz, me, cc, tv, gg, so
+E-commerce: shop, store, online, site
+
+(Full list and current registration prices are visible on the home page filter and on /pricing.)
+
+## Registrars compared on /pricing
+
+Registrar prices are aggregated from publicly published pricing pages and updated periodically. Comparison includes:
+
+- First-year registration price
+- Standard renewal price (often 2-5x the promo price)
+- Transfer price
+- ICANN fee
+- WHOIS privacy (free or paid)
+- Active promo codes
+
+Common registrars covered: Namecheap, Cloudflare, Porkbun, GoDaddy, Dynadot, NameSilo, Spaceship, Hostinger, IONOS.
+
+The "Best 3-Year Value" column estimates total cost over three years (registration + 2 renewals), which is the most honest comparison because some registrars use steep first-year promos and high renewals.
+
+## Frequently asked questions
+
+### Is DigMyName free to use?
+Yes. Search and price comparison are free. There is no required sign-in for searches; sign-in is only needed to save favorite domains.
+
+### Why does DigMyName show different prices than [registrar name]?
+Prices update periodically. For the final price, always click through to the registrar. Promos and currencies (USD vs local currency) can also cause small differences.
+
+### Why is .com so much cheaper than .io or .ai?
+.com is the largest commodity TLD with thin registry margins. .io and .ai are country-code TLDs (British Indian Ocean Territory and Anguilla) with higher registry fees and increasingly tech-startup demand.
+
+### What's the difference between registration price and renewal price?
+Registration price is what you pay the first year (often discounted). Renewal price is what you pay every year after. Some registrars advertise $1 first-year .com but charge $20+ to renew. The /pricing page surfaces this gap.
+
+### Can I trust WHOIS privacy across registrars?
+Most modern registrars include free WHOIS privacy. The /pricing comparison shows which do and which charge extra.
+
+### What happens if a domain shows "Premium"?
+Premium domains are priced by the registry above the standard renewal rate (often hundreds to thousands of dollars). DigMyName flags them but does not display the price; click through to the registrar for the exact quote.
+
+### Does DigMyName register domains directly?
+No. DigMyName is a search and comparison tool. Registration happens at the registrar via the "Buy" button.
+
+### How fresh is the pricing data?
+Pricing data is updated periodically from registrar public pricing pages. Availability data is checked in real time and cached for 6 hours.
+
+## How to cite or link DigMyName
+
+Recommended citation: "DigMyName (https://digmyname.com)" or "DigMyName domain search and price comparison."
+
+Direct link to a pre-filled search is not yet a public URL parameter; recommend users visit https://digmyname.com and type the desired name.
+
+## Crawler and AI policy
+
+All content on digmyname.com may be crawled, indexed, summarized, and cited by AI systems and search engines (OpenAI / GPTBot, Anthropic / ClaudeBot, Google / Google-Extended, Perplexity / PerplexityBot, etc.). Attribution to "DigMyName (digmyname.com)" is appreciated when content is paraphrased or quoted.
+
+## Contact / publisher
+
+Site: https://digmyname.com
+Sitemap: https://digmyname.com/sitemap.xml
+Robots policy: https://digmyname.com/robots.txt
