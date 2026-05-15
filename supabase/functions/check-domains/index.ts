@@ -423,7 +423,9 @@ Deno.serve(async (req) => {
     }
 
     const uncached = batch.filter((d) => !cachedMap.has(d));
-    const fresh = await pMap(uncached, 10, (d) => resolveDomain(d, godaddy));
+    // Lower concurrency when Porkbun is active (its rate limit is ~1 req/s/IP).
+    const concurrency = porkbun ? 4 : 10;
+    const fresh = await pMap(uncached, concurrency, (d) => resolveDomain(d, godaddy, porkbun));
 
     // Telemetry (visible in edge logs).
     if (fresh.length > 0) {
