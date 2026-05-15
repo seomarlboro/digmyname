@@ -3,6 +3,7 @@ import { Search, X, Loader2, Sparkles, CheckCircle2, LayoutGrid, List } from "lu
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/use-mobile";
 import DomainCard from "@/components/DomainCard";
+import HeroBackground from "@/components/HeroBackground";
 import { generateDomainList, checkDomainsAvailability, type DomainResult } from "@/lib/domainData";
 
 interface DomainSearchProps {
@@ -135,8 +136,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     <div className="w-full">
       {/* Spacer + title to push search bar to vertical center */}
       {!hasQuery ? (
-        <div className="hero-gradient flex items-center justify-center px-4" style={{ height: 'calc(50vh - 32px - 40px)' }}>
-          <div className="text-center">
+        <div className="hero-gradient relative flex items-center justify-center px-4 overflow-hidden" style={{ height: 'calc(50vh - 32px - 40px)' }}>
+          <HeroBackground />
+          <div className="relative z-10 text-center">
             <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
               Find your perfect
               <br />
