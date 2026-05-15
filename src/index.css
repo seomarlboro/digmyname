@@ -216,51 +216,49 @@
 }
 
 /* ============================================================
-   Hero animated background
+   Hero animated background — fixed full-viewport
    ============================================================ */
 @layer components {
   .hero-bg {
-    /* sit behind hero content but inside the hero box */
+    /* sits behind everything but above page bg */
     z-index: 0;
-    mask-image: linear-gradient(180deg, transparent 0%, black 12%, black 78%, transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 12%, black 78%, transparent 100%);
   }
 
   .hero-blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
+    filter: blur(110px);
     will-change: transform;
-    opacity: 0.55;
+    opacity: 0.65;
   }
-  .dark .hero-blob { opacity: 0.45; }
+  .dark .hero-blob { opacity: 0.55; }
 
   .hero-blob-1 {
-    width: 46vw; height: 46vw;
-    left: -8vw; top: -10vw;
-    background: radial-gradient(circle at 30% 30%, hsl(218 96% 53% / 0.7), transparent 70%);
-    animation: hero-drift-a 22s ease-in-out infinite;
+    width: 60vw; height: 60vw;
+    left: -12vw; top: -18vw;
+    background: radial-gradient(circle at 30% 30%, hsl(218 96% 53% / 0.85), transparent 70%);
+    animation: hero-drift-a 24s ease-in-out infinite;
   }
   .hero-blob-2 {
-    width: 40vw; height: 40vw;
-    right: -6vw; top: 20%;
-    background: radial-gradient(circle at 70% 40%, hsl(262 83% 60% / 0.65), transparent 70%);
-    animation: hero-drift-b 28s ease-in-out infinite;
+    width: 55vw; height: 55vw;
+    right: -10vw; top: 10%;
+    background: radial-gradient(circle at 70% 40%, hsl(262 83% 60% / 0.8), transparent 70%);
+    animation: hero-drift-b 30s ease-in-out infinite;
   }
   .hero-blob-3 {
-    width: 36vw; height: 36vw;
-    left: 30%; bottom: -14vw;
-    background: radial-gradient(circle at 50% 50%, hsl(240 90% 65% / 0.55), transparent 70%);
-    animation: hero-drift-c 26s ease-in-out infinite;
+    width: 50vw; height: 50vw;
+    left: 25%; bottom: -22vw;
+    background: radial-gradient(circle at 50% 50%, hsl(240 90% 65% / 0.7), transparent 70%);
+    animation: hero-drift-c 28s ease-in-out infinite;
   }
 
   .hero-grid {
     position: absolute; inset: 0;
-    background-image: radial-gradient(hsl(var(--foreground) / 0.08) 1px, transparent 1px);
-    background-size: 28px 28px;
-    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    opacity: 0.35;
+    background-image: radial-gradient(hsl(var(--foreground) / 0.1) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+    opacity: 0.4;
   }
 
   .hero-pill {
@@ -268,7 +266,6 @@
     font-family: 'Inter', sans-serif;
     font-weight: 800;
     letter-spacing: -0.02em;
-    color: hsl(var(--primary));
     background: linear-gradient(135deg, hsl(218 96% 53%), hsl(262 83% 60%));
     -webkit-background-clip: text;
     background-clip: text;
@@ -279,33 +276,34 @@
     animation-timing-function: ease-in-out;
     animation-direction: alternate;
     will-change: transform;
-    text-shadow: 0 0 20px hsl(218 96% 53% / 0.3);
+    filter: drop-shadow(0 0 16px hsl(218 96% 53% / 0.35));
   }
 
   .hero-vignette {
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse at center, transparent 40%, hsl(var(--background)) 100%);
+    background: radial-gradient(ellipse at center, transparent 30%, hsl(var(--background) / 0.85) 100%);
     pointer-events: none;
   }
 }
 
 @keyframes hero-drift-a {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50%      { transform: translate(8vw, 6vw) scale(1.1); }
+  50%      { transform: translate(10vw, 8vw) scale(1.12); }
 }
 @keyframes hero-drift-b {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50%      { transform: translate(-6vw, 4vw) scale(0.9); }
+  50%      { transform: translate(-8vw, 6vw) scale(0.92); }
 }
 @keyframes hero-drift-c {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50%      { transform: translate(4vw, -5vw) scale(1.05); }
+  50%      { transform: translate(6vw, -7vw) scale(1.08); }
 }
 @keyframes hero-float {
-  0%   { transform: translate(0, 0) rotate(-2deg); }
-  100% { transform: translate(12px, -18px) rotate(2deg); }
+  0%   { transform: translate(0, 0) rotate(-3deg); }
+  100% { transform: translate(20px, -28px) rotate(3deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-blob, .hero-pill { animation: none !important; }
 }
+
