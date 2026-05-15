@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import DomainSearch from "@/components/DomainSearch";
 import FilterBar from "@/components/FilterBar";
-import FAQ from "@/components/FAQ";
+
 
 const Index = () => {
   const [selectedTlds, setSelectedTlds] = useState<Set<string>>(new Set());
@@ -23,7 +23,6 @@ const Index = () => {
       <Header />
       <main>
         <DomainSearch selectedTlds={selectedTlds} />
-        <FAQ />
         <FilterBar selectedTlds={selectedTlds} onSelectedTldsChange={setSelectedTlds} />
       </main>
     </div>
