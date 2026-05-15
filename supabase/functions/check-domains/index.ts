@@ -231,6 +231,7 @@ function isValidDomain(domain: string): boolean {
 function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
   if (uncertain) return 0; // never cache uncertain results
   switch (checkedVia) {
+    case "porkbun": return 24 * 60 * 60;             // 24h — authoritative pricing
     case "godaddy_definitive": return 24 * 60 * 60; // 24h
     case "rdap": return 6 * 60 * 60;                 // 6h
     case "dns": return 30 * 60;                      // 30m
@@ -243,15 +244,30 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
 // ---------------------------------------------------------------------------
 async function resolveDomain(
   domain: string,
-  godaddy: { key: string; secret: string } | null
+  godaddy: { key: string; secret: string } | null,
+  porkbun: { key: string; secret: string } | null
 ): Promise<DomainCheckResult> {
-  const [gd, dns, rdap] = await Promise.all([
+  const [pb, gd, dns, rdap] = await Promise.all([
+    porkbun ? checkPorkbun(domain, porkbun.key, porkbun.secret) : Promise.resolve(null),
     godaddy ? checkGoDaddy(domain, godaddy.key, godaddy.secret) : Promise.resolve(null),
     checkDnsDoH(domain),
     checkRdap(domain),
   ]);
 
   const likelyPremium = isLikelyPremium(domain);
+
+  // 0. Porkbun is the most reliable source: it returns availability AND a real
+  //    premium flag with actual aftermarket price. Trust it unconditionally.
+  if (pb) {
+    return {
+      domain,
+      available: pb.available,
+      checkedVia: "porkbun",
+      price: pb.price ?? gd?.price,
+      premium: pb.premium || (pb.price != null && pb.price >= 50),
+      likelyPremium: pb.premium || (pb.available && likelyPremium) ? true : undefined,
+    };
+  }
 
   // 1. Trust GoDaddy when definitive.
   if (gd && gd.definitive) {
