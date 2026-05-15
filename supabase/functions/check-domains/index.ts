@@ -326,6 +326,17 @@ const RATE_LIMIT_MAX = 30;            // requests
 const RATE_LIMIT_WINDOW_MS = 60_000;  // per minute
 const rateBuckets = new Map<string, number[]>();
 
+// Porkbun checkDomain endpoint allows 1 request per 10 seconds globally per API key.
+// Track last successful call timestamp at module scope (per isolate).
+const PORKBUN_MIN_INTERVAL_MS = 11_000;
+let porkbunLastCallMs = 0;
+function porkbunBudgetReady(): boolean {
+  return Date.now() - porkbunLastCallMs >= PORKBUN_MIN_INTERVAL_MS;
+}
+function consumePorkbunBudget(): void {
+  porkbunLastCallMs = Date.now();
+}
+
 function clientIp(req: Request): string {
   const fwd = req.headers.get("x-forwarded-for");
   if (fwd) return fwd.split(",")[0].trim();
