@@ -64,7 +64,15 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           prev.map((r) => {
             const info = availMap.get(r.domain);
             if (info) {
-              return { ...r, available: info.available, checking: false, gdPrice: info.price, premium: info.premium };
+              return {
+                ...r,
+                available: info.available,
+                checking: false,
+                gdPrice: info.price,
+                premium: info.premium,
+                likelyPremium: info.likelyPremium,
+                uncertain: info.uncertain,
+              };
             }
             return r;
           })
