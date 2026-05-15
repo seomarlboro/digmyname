@@ -303,6 +303,7 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
   if (uncertain) return 0; // never cache uncertain results
   switch (checkedVia) {
     case "porkbun": return 24 * 60 * 60;             // 24h — authoritative pricing
+    case "domainr": return 24 * 60 * 60;             // 24h — authoritative status
     case "godaddy_definitive": return 24 * 60 * 60; // 24h
     case "rdap": return 6 * 60 * 60;                 // 6h
     case "dns": return 30 * 60;                      // 30m
