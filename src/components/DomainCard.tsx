@@ -24,9 +24,10 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
   const ext = domain.split(".").pop() ?? "";
   const cheapest = cheapestByTld.get(ext);
   const isPremium = result.premium === true;
+  const isLikelyPremium = !isPremium && result.likelyPremium === true;
   const displayPrice = cheapest?.regPrice ?? tld.regPrice;
   const displayRenew = cheapest?.renewPrice ?? tld.renewPrice;
-  const hasHighRenewal = !isPremium && displayRenew > displayPrice * 1.8;
+  const hasHighRenewal = !isPremium && !isLikelyPremium && displayRenew > displayPrice * 1.8;
   const registrarName = cheapest?.registrar ?? null;
   const buyUrl = registrarName ? getRegistrarUrl(registrarName, domain) : null;
   const favorited = isFavorite(domain);
@@ -93,6 +94,8 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
               <div className="flex items-center gap-2">
                 {isPremium ? (
                   <span className="text-lg font-bold text-foreground">Premium</span>
+                ) : isLikelyPremium ? (
+                  <span className="text-sm font-semibold text-amber-500">Likely premium</span>
                 ) : (
                   <span className="text-lg font-bold text-foreground">${displayPrice}</span>
                 )}
@@ -158,6 +161,13 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
                         renews ${displayRenew}/yr
                       </p>
                     )}
+                  </>
+                ) : isLikelyPremium ? (
+                  <>
+                    <p className="text-xl font-bold text-amber-500">Likely premium</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Verify on registrar
+                    </p>
                   </>
                 ) : (
                   <>
