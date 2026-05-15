@@ -210,6 +210,72 @@ async function checkPorkbun(domain: string, apiKey: string, secretKey: string): 
   }
 }
 
+// ---------------------------------------------------------------------------
+// Domainr (via RapidAPI) — batch authoritative status for up to 32 domains.
+// Statuses we care about (space-separated string per domain):
+//   undelegated / inactive    → available for standard registration
+//   active / parked           → taken
+//   marketed / priced / premium → aftermarket / registry-premium tier
+//   suffix                    → not registerable (it's a TLD itself)
+// Docs: https://domainr.com/docs/api/v2/status
+// ---------------------------------------------------------------------------
+interface DomainrStatusEntry {
+  domain: string;
+  zone?: string;
+  status: string;
+  summary?: string;
+}
+
+async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<Map<string, DomainrStatusEntry> | null> {
+  if (domains.length === 0) return new Map();
+  try {
+    const out = new Map<string, DomainrStatusEntry>();
+    // Domainr accepts up to 32 domains per call.
+    for (let i = 0; i < domains.length; i += 32) {
+      const slice = domains.slice(i, i + 32);
+      const url = `https://domainr.p.rapidapi.com/v2/status?domain=${encodeURIComponent(slice.join(","))}`;
+      const resp = await fetch(url, {
+        headers: {
+          "X-RapidAPI-Key": rapidKey,
+          "X-RapidAPI-Host": "domainr.p.rapidapi.com",
+        },
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => "");
+        console.warn(`domainr HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+        return out.size > 0 ? out : null;
+      }
+      const data = await resp.json();
+      if (Array.isArray(data?.status)) {
+        for (const entry of data.status as DomainrStatusEntry[]) {
+          if (entry?.domain) out.set(entry.domain.toLowerCase(), entry);
+        }
+      }
+    }
+    return out;
+  } catch (e) {
+    console.warn(`domainr error: ${e instanceof Error ? e.message : String(e)}`);
+    return null;
+  }
+}
+
+type DomainrVerdict =
+  | { kind: "available" }
+  | { kind: "taken" }
+  | { kind: "premium" } // marketed / priced / premium — registered or aftermarket, not standard
+  | { kind: "unknown" };
+
+function interpretDomainr(entry: DomainrStatusEntry | undefined): DomainrVerdict {
+  if (!entry?.status) return { kind: "unknown" };
+  const tokens = entry.status.toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.includes("suffix")) return { kind: "taken" };
+  if (tokens.some((t) => ["marketed", "priced", "premium", "transferable"].includes(t))) return { kind: "premium" };
+  if (tokens.some((t) => ["active", "parked", "disallowed", "reserved", "tld", "deleting"].includes(t))) return { kind: "taken" };
+  if (tokens.some((t) => ["undelegated", "inactive", "unregistered"].includes(t))) return { kind: "available" };
+  return { kind: "unknown" };
+}
+
 // Concurrency limiter (no extra deps).
 async function pMap<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const out: R[] = new Array(items.length);
@@ -237,6 +303,7 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
   if (uncertain) return 0; // never cache uncertain results
   switch (checkedVia) {
     case "porkbun": return 24 * 60 * 60;             // 24h — authoritative pricing
+    case "domainr": return 24 * 60 * 60;             // 24h — authoritative status
     case "godaddy_definitive": return 24 * 60 * 60; // 24h
     case "rdap": return 6 * 60 * 60;                 // 6h
     case "dns": return 30 * 60;                      // 30m
@@ -404,6 +471,8 @@ Deno.serve(async (req) => {
     const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
     const porkbun = porkbunKey && porkbunSecret ? { key: porkbunKey, secret: porkbunSecret } : null;
 
+    const rapidKey = Deno.env.get("RAPIDAPI_DOMAINR_KEY");
+
     // Cache lookup.
     const { data: cached } = await supabase
       .from("domain_cache")
@@ -427,7 +496,38 @@ Deno.serve(async (req) => {
     }
 
     const uncached = batch.filter((d) => !cachedMap.has(d));
-    const fresh = await pMap(uncached, 10, (d) => resolveDomain(d, godaddy, null));
+
+    // ---- Domainr batch pass (top-tier authoritative status) -------------
+    // One batched call covers up to 32 domains — much faster than per-domain checks.
+    // We trust Domainr for available / taken / premium classification, then only
+    // fall back to GoDaddy/RDAP/DNS for domains it didn't classify confidently.
+    const domainrResults = rapidKey ? await checkDomainrBatch(uncached, rapidKey) : null;
+    const fresh: DomainCheckResult[] = [];
+    const needsFallback: string[] = [];
+
+    for (const d of uncached) {
+      const verdict = interpretDomainr(domainrResults?.get(d.toLowerCase()));
+      const likelyPremium = isLikelyPremium(d);
+      if (verdict.kind === "available") {
+        fresh.push({ domain: d, available: true, checkedVia: "domainr", likelyPremium: likelyPremium || undefined });
+      } else if (verdict.kind === "taken") {
+        fresh.push({ domain: d, available: false, checkedVia: "domainr", likelyPremium });
+      } else if (verdict.kind === "premium") {
+        // Aftermarket / registry premium — registered but listed for sale at non-standard pricing.
+        fresh.push({
+          domain: d,
+          available: false,
+          checkedVia: "domainr",
+          premium: true,
+          likelyPremium: true,
+        });
+      } else {
+        needsFallback.push(d);
+      }
+    }
+
+    const fallback = await pMap(needsFallback, 10, (d) => resolveDomain(d, godaddy, null));
+    fresh.push(...fallback);
 
     // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
     // Porkbun is the only source that reliably tells us whether an "available"
