@@ -416,9 +416,37 @@ Deno.serve(async (req) => {
     }
 
     const uncached = batch.filter((d) => !cachedMap.has(d));
-    // Lower concurrency when Porkbun is active (its rate limit is ~1 req/s/IP).
-    const concurrency = porkbun ? 4 : 10;
-    const fresh = await pMap(uncached, concurrency, (d) => resolveDomain(d, godaddy, porkbun));
+    const fresh = await pMap(uncached, 10, (d) => resolveDomain(d, godaddy, null));
+
+    // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
+    // Porkbun is the only source that reliably tells us whether an "available"
+    // short/premium-tier name is actually registerable at standard price.
+    // We can call it at most once per ~10s globally → verify the most suspicious
+    // result per request (available + likelyPremium) when budget allows.
+    if (porkbun && porkbunBudgetReady()) {
+      const candidates = fresh
+        .filter((r) => r.available && r.likelyPremium && !r.premium)
+        // Prefer shortest SLD (most likely premium) and TLDs we know to be premium.
+        .sort((a, b) => a.domain.split(".")[0].length - b.domain.split(".")[0].length);
+      const target = candidates[0];
+      if (target) {
+        consumePorkbunBudget();
+        const pb = await checkPorkbun(target.domain, porkbun.key, porkbun.secret);
+        if (pb) {
+          const idx = fresh.findIndex((r) => r.domain === target.domain);
+          if (idx >= 0) {
+            fresh[idx] = {
+              domain: target.domain,
+              available: pb.available,
+              checkedVia: "porkbun",
+              price: pb.price ?? target.price,
+              premium: pb.premium || (pb.price != null && pb.price >= 50),
+              likelyPremium: pb.premium ? true : undefined,
+            };
+          }
+        }
+      }
+    }
 
     // Telemetry (visible in edge logs).
     if (fresh.length > 0) {
