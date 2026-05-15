@@ -471,6 +471,8 @@ Deno.serve(async (req) => {
     const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
     const porkbun = porkbunKey && porkbunSecret ? { key: porkbunKey, secret: porkbunSecret } : null;
 
+    const rapidKey = Deno.env.get("RAPIDAPI_DOMAINR_KEY");
+
     // Cache lookup.
     const { data: cached } = await supabase
       .from("domain_cache")
