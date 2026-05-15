@@ -396,6 +396,10 @@ Deno.serve(async (req) => {
     const godaddySecret = Deno.env.get("GODADDY_API_SECRET");
     const godaddy = godaddyKey && godaddySecret ? { key: godaddyKey, secret: godaddySecret } : null;
 
+    const porkbunKey = Deno.env.get("PORKBUN_API_KEY");
+    const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
+    const porkbun = porkbunKey && porkbunSecret ? { key: porkbunKey, secret: porkbunSecret } : null;
+
     // Cache lookup.
     const { data: cached } = await supabase
       .from("domain_cache")
