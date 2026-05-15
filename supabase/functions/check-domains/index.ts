@@ -505,6 +505,15 @@ Deno.serve(async (req) => {
     // We trust Domainr for available / taken / premium classification, then only
     // fall back to GoDaddy/RDAP/DNS for domains it didn't classify confidently.
     const domainrResults = rapidKey ? await checkDomainrBatch(uncached, rapidKey) : null;
+    if (rapidKey) {
+      const sample = uncached.slice(0, 5).map((d) => {
+        const e = domainrResults?.get(d.toLowerCase());
+        return `${d}=${e?.status ?? "MISSING"}`;
+      });
+      console.log(`domainr keyPresent=true returned=${domainrResults?.size ?? "null"} sample=[${sample.join(", ")}]`);
+    } else {
+      console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — falling back to GoDaddy/RDAP/DNS only");
+    }
     const fresh: DomainCheckResult[] = [];
     const needsFallback: string[] = [];
 
