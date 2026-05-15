@@ -162,6 +162,13 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
                       </p>
                     )}
                   </>
+                ) : isLikelyPremium ? (
+                  <>
+                    <p className="text-xl font-bold text-amber-500">Likely premium</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Verify on registrar
+                    </p>
+                  </>
                 ) : (
                   <>
                     <p className="text-2xl font-bold text-foreground">
