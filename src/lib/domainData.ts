@@ -141,6 +141,8 @@ export async function checkDomainsAvailability(
           available: r.available,
           price: r.price,
           premium: r.premium,
+          likelyPremium: r.likelyPremium,
+          uncertain: r.uncertain,
         });
       }
     }
