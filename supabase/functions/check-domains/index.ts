@@ -129,7 +129,10 @@ interface GoDaddyResult {
 
 async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): Promise<GoDaddyResult | null> {
   try {
-    const baseUrl = Deno.env.get("GODADDY_ENV") === "production" ? "api.godaddy.com" : "api.ote-godaddy.com";
+    // Default to production; user can explicitly opt into the OTE sandbox by setting GODADDY_ENV=ote.
+    // OTE returns fabricated availability/pricing (e.g. registered .com names appearing free at $10.69),
+    // which silently corrupts results — never trust it unless explicitly requested.
+    const baseUrl = Deno.env.get("GODADDY_ENV") === "ote" ? "api.ote-godaddy.com" : "api.godaddy.com";
     const resp = await fetch(
       `https://${baseUrl}/v1/domains/available?domain=${encodeURIComponent(domain)}&checkType=FULL`,
       {
@@ -502,6 +505,15 @@ Deno.serve(async (req) => {
     // We trust Domainr for available / taken / premium classification, then only
     // fall back to GoDaddy/RDAP/DNS for domains it didn't classify confidently.
     const domainrResults = rapidKey ? await checkDomainrBatch(uncached, rapidKey) : null;
+    if (rapidKey) {
+      const sample = uncached.slice(0, 5).map((d) => {
+        const e = domainrResults?.get(d.toLowerCase());
+        return `${d}=${e?.status ?? "MISSING"}`;
+      });
+      console.log(`domainr keyPresent=true returned=${domainrResults?.size ?? "null"} sample=[${sample.join(", ")}]`);
+    } else {
+      console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — falling back to GoDaddy/RDAP/DNS only");
+    }
     const fresh: DomainCheckResult[] = [];
     const needsFallback: string[] = [];
 
