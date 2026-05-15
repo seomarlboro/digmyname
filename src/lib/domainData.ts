@@ -80,8 +80,12 @@ export interface DomainResult {
   checking?: boolean;
   /** GoDaddy real price in dollars, if available */
   gdPrice?: number;
-  /** Whether this is a premium domain */
+  /** Confirmed premium / aftermarket via GoDaddy pricing */
   premium?: boolean;
+  /** Heuristic: likely registered or aftermarket even if APIs say otherwise */
+  likelyPremium?: boolean;
+  /** APIs disagreed or failed — treat with caution */
+  uncertain?: boolean;
 }
 
 const tldMap = new Map(TLD_LIST.map((t) => [t.extension, t]));
