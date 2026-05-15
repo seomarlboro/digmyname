@@ -184,11 +184,15 @@ async function checkPorkbun(domain: string, apiKey: string, secretKey: string): 
       }
     );
     if (!resp.ok) {
-      await resp.text().catch(() => {});
+      const txt = await resp.text().catch(() => "");
+      console.warn(`porkbun HTTP ${resp.status} for ${domain}: ${txt.slice(0, 200)}`);
       return null;
     }
     const data = await resp.json();
-    if (data?.status !== "SUCCESS" || !data.response) return null;
+    if (data?.status !== "SUCCESS" || !data.response) {
+      console.warn(`porkbun non-success for ${domain}: ${JSON.stringify(data).slice(0, 200)}`);
+      return null;
+    }
     const r = data.response;
     const price = r.price != null ? Number(r.price) : undefined;
     const regular = r.regularPrice != null ? Number(r.regularPrice) : undefined;
@@ -200,7 +204,8 @@ async function checkPorkbun(domain: string, apiKey: string, secretKey: string): 
       regularPrice: Number.isFinite(regular) ? regular : undefined,
       renewPrice: Number.isFinite(renewal) ? renewal : undefined,
     };
-  } catch {
+  } catch (e) {
+    console.warn(`porkbun error for ${domain}: ${e instanceof Error ? e.message : String(e)}`);
     return null;
   }
 }
