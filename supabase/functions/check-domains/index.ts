@@ -496,7 +496,38 @@ Deno.serve(async (req) => {
     }
 
     const uncached = batch.filter((d) => !cachedMap.has(d));
-    const fresh = await pMap(uncached, 10, (d) => resolveDomain(d, godaddy, null));
+
+    // ---- Domainr batch pass (top-tier authoritative status) -------------
+    // One batched call covers up to 32 domains — much faster than per-domain checks.
+    // We trust Domainr for available / taken / premium classification, then only
+    // fall back to GoDaddy/RDAP/DNS for domains it didn't classify confidently.
+    const domainrResults = rapidKey ? await checkDomainrBatch(uncached, rapidKey) : null;
+    const fresh: DomainCheckResult[] = [];
+    const needsFallback: string[] = [];
+
+    for (const d of uncached) {
+      const verdict = interpretDomainr(domainrResults?.get(d.toLowerCase()));
+      const likelyPremium = isLikelyPremium(d);
+      if (verdict.kind === "available") {
+        fresh.push({ domain: d, available: true, checkedVia: "domainr", likelyPremium: likelyPremium || undefined });
+      } else if (verdict.kind === "taken") {
+        fresh.push({ domain: d, available: false, checkedVia: "domainr", likelyPremium });
+      } else if (verdict.kind === "premium") {
+        // Aftermarket / registry premium — registered but listed for sale at non-standard pricing.
+        fresh.push({
+          domain: d,
+          available: false,
+          checkedVia: "domainr",
+          premium: true,
+          likelyPremium: true,
+        });
+      } else {
+        needsFallback.push(d);
+      }
+    }
+
+    const fallback = await pMap(needsFallback, 10, (d) => resolveDomain(d, godaddy, null));
+    fresh.push(...fallback);
 
     // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
     // Porkbun is the only source that reliably tells us whether an "available"
