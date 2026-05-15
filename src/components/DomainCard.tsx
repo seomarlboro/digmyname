@@ -24,9 +24,10 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
   const ext = domain.split(".").pop() ?? "";
   const cheapest = cheapestByTld.get(ext);
   const isPremium = result.premium === true;
+  const isLikelyPremium = !isPremium && result.likelyPremium === true;
   const displayPrice = cheapest?.regPrice ?? tld.regPrice;
   const displayRenew = cheapest?.renewPrice ?? tld.renewPrice;
-  const hasHighRenewal = !isPremium && displayRenew > displayPrice * 1.8;
+  const hasHighRenewal = !isPremium && !isLikelyPremium && displayRenew > displayPrice * 1.8;
   const registrarName = cheapest?.registrar ?? null;
   const buyUrl = registrarName ? getRegistrarUrl(registrarName, domain) : null;
   const favorited = isFavorite(domain);
