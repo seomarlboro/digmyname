@@ -159,6 +159,57 @@ async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): 
   }
 }
 
+// ---------------------------------------------------------------------------
+// Porkbun — authoritative for premium / aftermarket pricing.
+// Endpoint: POST /api/json/v3/domain/checkDomain/{domain}
+// Returns: { status, response: { avail: "yes"|"no", price, regularPrice, premium: "yes"|"no", additional?: { renewal } } }
+// ---------------------------------------------------------------------------
+interface PorkbunResult {
+  available: boolean;
+  premium: boolean;
+  price?: number;
+  regularPrice?: number;
+  renewPrice?: number;
+}
+
+async function checkPorkbun(domain: string, apiKey: string, secretKey: string): Promise<PorkbunResult | null> {
+  try {
+    const resp = await fetch(
+      `https://api.porkbun.com/api/json/v3/domain/checkDomain/${encodeURIComponent(domain)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apikey: apiKey, secretapikey: secretKey }),
+        signal: AbortSignal.timeout(6000),
+      }
+    );
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => "");
+      console.warn(`porkbun HTTP ${resp.status} for ${domain}: ${txt.slice(0, 200)}`);
+      return null;
+    }
+    const data = await resp.json();
+    if (data?.status !== "SUCCESS" || !data.response) {
+      console.warn(`porkbun non-success for ${domain}: ${JSON.stringify(data).slice(0, 200)}`);
+      return null;
+    }
+    const r = data.response;
+    const price = r.price != null ? Number(r.price) : undefined;
+    const regular = r.regularPrice != null ? Number(r.regularPrice) : undefined;
+    const renewal = r.additional?.renewal != null ? Number(r.additional.renewal) : undefined;
+    return {
+      available: r.avail === "yes",
+      premium: r.premium === "yes",
+      price: Number.isFinite(price) ? price : undefined,
+      regularPrice: Number.isFinite(regular) ? regular : undefined,
+      renewPrice: Number.isFinite(renewal) ? renewal : undefined,
+    };
+  } catch (e) {
+    console.warn(`porkbun error for ${domain}: ${e instanceof Error ? e.message : String(e)}`);
+    return null;
+  }
+}
+
 // Concurrency limiter (no extra deps).
 async function pMap<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const out: R[] = new Array(items.length);
@@ -185,6 +236,7 @@ function isValidDomain(domain: string): boolean {
 function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
   if (uncertain) return 0; // never cache uncertain results
   switch (checkedVia) {
+    case "porkbun": return 24 * 60 * 60;             // 24h — authoritative pricing
     case "godaddy_definitive": return 24 * 60 * 60; // 24h
     case "rdap": return 6 * 60 * 60;                 // 6h
     case "dns": return 30 * 60;                      // 30m
@@ -194,10 +246,13 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
 
 // ---------------------------------------------------------------------------
 // Resolve a single domain by combining all signals.
+// NOTE: Porkbun is NOT called here — its rate limit is 1 req / 10 sec which is
+// unworkable for batch checks. We use it as a verification step in `verifySuspiciousWithPorkbun`.
 // ---------------------------------------------------------------------------
 async function resolveDomain(
   domain: string,
-  godaddy: { key: string; secret: string } | null
+  godaddy: { key: string; secret: string } | null,
+  _porkbun: unknown // kept for signature compat; unused intentionally
 ): Promise<DomainCheckResult> {
   const [gd, dns, rdap] = await Promise.all([
     godaddy ? checkGoDaddy(domain, godaddy.key, godaddy.secret) : Promise.resolve(null),
@@ -271,6 +326,17 @@ const RATE_LIMIT_MAX = 30;            // requests
 const RATE_LIMIT_WINDOW_MS = 60_000;  // per minute
 const rateBuckets = new Map<string, number[]>();
 
+// Porkbun checkDomain endpoint allows 1 request per 10 seconds globally per API key.
+// Track last successful call timestamp at module scope (per isolate).
+const PORKBUN_MIN_INTERVAL_MS = 11_000;
+let porkbunLastCallMs = 0;
+function porkbunBudgetReady(): boolean {
+  return Date.now() - porkbunLastCallMs >= PORKBUN_MIN_INTERVAL_MS;
+}
+function consumePorkbunBudget(): void {
+  porkbunLastCallMs = Date.now();
+}
+
 function clientIp(req: Request): string {
   const fwd = req.headers.get("x-forwarded-for");
   if (fwd) return fwd.split(",")[0].trim();
@@ -334,6 +400,10 @@ Deno.serve(async (req) => {
     const godaddySecret = Deno.env.get("GODADDY_API_SECRET");
     const godaddy = godaddyKey && godaddySecret ? { key: godaddyKey, secret: godaddySecret } : null;
 
+    const porkbunKey = Deno.env.get("PORKBUN_API_KEY");
+    const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
+    const porkbun = porkbunKey && porkbunSecret ? { key: porkbunKey, secret: porkbunSecret } : null;
+
     // Cache lookup.
     const { data: cached } = await supabase
       .from("domain_cache")
@@ -357,7 +427,37 @@ Deno.serve(async (req) => {
     }
 
     const uncached = batch.filter((d) => !cachedMap.has(d));
-    const fresh = await pMap(uncached, 10, (d) => resolveDomain(d, godaddy));
+    const fresh = await pMap(uncached, 10, (d) => resolveDomain(d, godaddy, null));
+
+    // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
+    // Porkbun is the only source that reliably tells us whether an "available"
+    // short/premium-tier name is actually registerable at standard price.
+    // We can call it at most once per ~10s globally → verify the most suspicious
+    // result per request (available + likelyPremium) when budget allows.
+    if (porkbun && porkbunBudgetReady()) {
+      const candidates = fresh
+        .filter((r) => r.available && r.likelyPremium && !r.premium)
+        // Prefer shortest SLD (most likely premium) and TLDs we know to be premium.
+        .sort((a, b) => a.domain.split(".")[0].length - b.domain.split(".")[0].length);
+      const target = candidates[0];
+      if (target) {
+        consumePorkbunBudget();
+        const pb = await checkPorkbun(target.domain, porkbun.key, porkbun.secret);
+        if (pb) {
+          const idx = fresh.findIndex((r) => r.domain === target.domain);
+          if (idx >= 0) {
+            fresh[idx] = {
+              domain: target.domain,
+              available: pb.available,
+              checkedVia: "porkbun",
+              price: pb.price ?? target.price,
+              premium: pb.premium || (pb.price != null && pb.price >= 50),
+              likelyPremium: pb.premium ? true : undefined,
+            };
+          }
+        }
+      }
+    }
 
     // Telemetry (visible in edge logs).
     if (fresh.length > 0) {
