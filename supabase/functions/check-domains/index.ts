@@ -246,33 +246,21 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
 
 // ---------------------------------------------------------------------------
 // Resolve a single domain by combining all signals.
+// NOTE: Porkbun is NOT called here — its rate limit is 1 req / 10 sec which is
+// unworkable for batch checks. We use it as a verification step in `verifySuspiciousWithPorkbun`.
 // ---------------------------------------------------------------------------
 async function resolveDomain(
   domain: string,
   godaddy: { key: string; secret: string } | null,
-  porkbun: { key: string; secret: string } | null
+  _porkbun: unknown // kept for signature compat; unused intentionally
 ): Promise<DomainCheckResult> {
-  const [pb, gd, dns, rdap] = await Promise.all([
-    porkbun ? checkPorkbun(domain, porkbun.key, porkbun.secret) : Promise.resolve(null),
+  const [gd, dns, rdap] = await Promise.all([
     godaddy ? checkGoDaddy(domain, godaddy.key, godaddy.secret) : Promise.resolve(null),
     checkDnsDoH(domain),
     checkRdap(domain),
   ]);
 
   const likelyPremium = isLikelyPremium(domain);
-
-  // 0. Porkbun is the most reliable source: it returns availability AND a real
-  //    premium flag with actual aftermarket price. Trust it unconditionally.
-  if (pb) {
-    return {
-      domain,
-      available: pb.available,
-      checkedVia: "porkbun",
-      price: pb.price ?? gd?.price,
-      premium: pb.premium || (pb.price != null && pb.price >= 50),
-      likelyPremium: pb.premium || (pb.available && likelyPremium) ? true : undefined,
-    };
-  }
 
   // 1. Trust GoDaddy when definitive.
   if (gd && gd.definitive) {
