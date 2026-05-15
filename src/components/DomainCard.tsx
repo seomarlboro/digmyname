@@ -94,6 +94,8 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
               <div className="flex items-center gap-2">
                 {isPremium ? (
                   <span className="text-lg font-bold text-foreground">Premium</span>
+                ) : isLikelyPremium ? (
+                  <span className="text-sm font-semibold text-amber-500">Likely premium</span>
                 ) : (
                   <span className="text-lg font-bold text-foreground">${displayPrice}</span>
                 )}
