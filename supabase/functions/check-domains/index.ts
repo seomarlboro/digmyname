@@ -129,7 +129,10 @@ interface GoDaddyResult {
 
 async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): Promise<GoDaddyResult | null> {
   try {
-    const baseUrl = Deno.env.get("GODADDY_ENV") === "production" ? "api.godaddy.com" : "api.ote-godaddy.com";
+    // Default to production; user can explicitly opt into the OTE sandbox by setting GODADDY_ENV=ote.
+    // OTE returns fabricated availability/pricing (e.g. registered .com names appearing free at $10.69),
+    // which silently corrupts results — never trust it unless explicitly requested.
+    const baseUrl = Deno.env.get("GODADDY_ENV") === "ote" ? "api.ote-godaddy.com" : "api.godaddy.com";
     const resp = await fetch(
       `https://${baseUrl}/v1/domains/available?domain=${encodeURIComponent(domain)}&checkType=FULL`,
       {
