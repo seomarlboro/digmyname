@@ -1,10 +1,29 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// Admin-only function: triggers paid Firecrawl scraping. Tightly locked.
+// CORS deliberately disabled — browsers should NEVER call this.
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Origin": "null",
+  "Access-Control-Allow-Headers": "authorization, content-type, x-cron-secret",
 };
+
+/**
+ * Authorize callers: must present EITHER
+ *   • Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>, OR
+ *   • x-cron-secret: <CRON_SECRET>
+ */
+function isAuthorized(req: Request): boolean {
+  const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const cronSecret = Deno.env.get("CRON_SECRET");
+
+  const auth = req.headers.get("authorization") ?? "";
+  if (serviceRole && auth === `Bearer ${serviceRole}`) return true;
+
+  const provided = req.headers.get("x-cron-secret");
+  if (cronSecret && provided && provided === cronSecret) return true;
+
+  return false;
+}
 
 // TLDs we track
 const TRACKED_TLDS = [
@@ -94,6 +113,13 @@ function parseTldSpyMarkdown(markdown: string, registrar: string): ParsedPrice[]
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  if (!isAuthorized(req)) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 
   try {

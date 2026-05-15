@@ -243,8 +243,51 @@ async function resolveDomain(
   return { domain, available: false, checkedVia: "unknown", uncertain: true };
 }
 
+// ---------------------------------------------------------------------------
+// Lightweight per-IP rate limiter (in-memory, sliding window).
+// Each isolate gets its own counter — good enough to stop trivial abuse
+// without external infra. Combine with Cloudflare/edge limits for stronger guarantees.
+// ---------------------------------------------------------------------------
+const RATE_LIMIT_MAX = 30;            // requests
+const RATE_LIMIT_WINDOW_MS = 60_000;  // per minute
+const rateBuckets = new Map<string, number[]>();
+
+function clientIp(req: Request): string {
+  const fwd = req.headers.get("x-forwarded-for");
+  if (fwd) return fwd.split(",")[0].trim();
+  return req.headers.get("cf-connecting-ip") ?? req.headers.get("x-real-ip") ?? "unknown";
+}
+
+function rateLimited(req: Request): boolean {
+  const ip = clientIp(req);
+  const now = Date.now();
+  const window = rateBuckets.get(ip) ?? [];
+  const recent = window.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_MAX) {
+    rateBuckets.set(ip, recent);
+    return true;
+  }
+  recent.push(now);
+  rateBuckets.set(ip, recent);
+  // Best-effort cleanup to prevent unbounded growth.
+  if (rateBuckets.size > 5000) {
+    for (const [k, v] of rateBuckets) {
+      if (v.every((t) => now - t > RATE_LIMIT_WINDOW_MS)) rateBuckets.delete(k);
+    }
+  }
+  return false;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  if (rateLimited(req)) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+    });
+  }
+
 
   try {
     const { domains } = (await req.json()) as { domains: string[] };
