@@ -29,17 +29,36 @@ interface DomainCheckResult {
   likelyPremium?: boolean;
 }
 
-// TLDs where short SLDs are almost always premium / aftermarket.
-const PREMIUM_TLDS = new Set(["com", "io", "ai", "co", "app", "dev", "net", "org"]);
+// TLDs where registries actively price short names as premium / aftermarket.
+// Almost every commercial gTLD/ccTLD has a premium tier for 1-4 char SLDs.
+const PREMIUM_TLDS = new Set([
+  "com", "net", "org", "info", "biz", "co", "io", "ai", "app", "dev",
+  "me", "tv", "cc", "us", "in", "ws", "to", "fm", "gg", "so",
+  "xyz", "tech", "studio", "cloud", "pro", "shop", "store", "online",
+  "site", "live", "world", "life", "art", "blog", "club", "design",
+  "agency", "company", "digital", "media", "news",
+]);
+
+// Single-syllable / very common English words that are aftermarket on .com.
+const COMMON_WORDS_RE = /^(?:[bcdfghjklmnpqrstvwxz][aeiou][bcdfghjklmnpqrstvwxz]?|[aeiou][bcdfghjklmnpqrstvwxz]{1,2})$/i;
 
 function isLikelyPremium(domain: string): boolean {
   const [sld, ...rest] = domain.split(".");
   const tld = rest.join(".");
   if (!sld || !tld) return false;
-  // Short SLDs (≤4 chars) on premium TLDs are almost certainly registered/aftermarket.
-  if (sld.length <= 4 && PREMIUM_TLDS.has(tld)) return true;
-  // Common single dictionary words on .com are also aftermarket.
-  if (tld === "com" && sld.length <= 5 && /^[a-z]+$/.test(sld)) return true;
+
+  // 1-3 char SLD on ANY TLD: registry premium tier almost always applies.
+  if (sld.length <= 3) return true;
+
+  // 4-char SLD on any commercial premium TLD = aftermarket / premium tier.
+  if (sld.length === 4 && PREMIUM_TLDS.has(tld)) return true;
+
+  // 5-char pure-letter SLD on the most contested TLDs.
+  if (sld.length <= 5 && /^[a-z]+$/i.test(sld) && (tld === "com" || tld === "io" || tld === "ai" || tld === "co")) return true;
+
+  // Tiny dictionary-shaped names on .com.
+  if (tld === "com" && sld.length <= 4 && COMMON_WORDS_RE.test(sld)) return true;
+
   return false;
 }
 
