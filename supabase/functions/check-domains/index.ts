@@ -159,6 +159,52 @@ async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): 
   }
 }
 
+// ---------------------------------------------------------------------------
+// Porkbun — authoritative for premium / aftermarket pricing.
+// Endpoint: POST /api/json/v3/domain/checkDomain/{domain}
+// Returns: { status, response: { avail: "yes"|"no", price, regularPrice, premium: "yes"|"no", additional?: { renewal } } }
+// ---------------------------------------------------------------------------
+interface PorkbunResult {
+  available: boolean;
+  premium: boolean;
+  price?: number;
+  regularPrice?: number;
+  renewPrice?: number;
+}
+
+async function checkPorkbun(domain: string, apiKey: string, secretKey: string): Promise<PorkbunResult | null> {
+  try {
+    const resp = await fetch(
+      `https://api.porkbun.com/api/json/v3/domain/checkDomain/${encodeURIComponent(domain)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apikey: apiKey, secretapikey: secretKey }),
+        signal: AbortSignal.timeout(6000),
+      }
+    );
+    if (!resp.ok) {
+      await resp.text().catch(() => {});
+      return null;
+    }
+    const data = await resp.json();
+    if (data?.status !== "SUCCESS" || !data.response) return null;
+    const r = data.response;
+    const price = r.price != null ? Number(r.price) : undefined;
+    const regular = r.regularPrice != null ? Number(r.regularPrice) : undefined;
+    const renewal = r.additional?.renewal != null ? Number(r.additional.renewal) : undefined;
+    return {
+      available: r.avail === "yes",
+      premium: r.premium === "yes",
+      price: Number.isFinite(price) ? price : undefined,
+      regularPrice: Number.isFinite(regular) ? regular : undefined,
+      renewPrice: Number.isFinite(renewal) ? renewal : undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
 // Concurrency limiter (no extra deps).
 async function pMap<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const out: R[] = new Array(items.length);
