@@ -281,6 +281,14 @@ function rateLimited(req: Request): boolean {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  if (rateLimited(req)) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+    });
+  }
+
+
   try {
     const { domains } = (await req.json()) as { domains: string[] };
     if (!Array.isArray(domains) || domains.length === 0) {
