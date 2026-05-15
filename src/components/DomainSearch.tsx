@@ -134,11 +134,12 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   return (
     <div className="w-full">
+      {!hasQuery && <HeroBackground />}
+
       {/* Spacer + title to push search bar to vertical center */}
       {!hasQuery ? (
-        <div className="hero-gradient relative flex items-center justify-center px-4 overflow-hidden" style={{ height: 'calc(50vh - 32px - 40px)' }}>
-          <HeroBackground />
-          <div className="relative z-10 text-center">
+        <div className="relative z-10 flex items-center justify-center px-4" style={{ height: 'calc(50vh - 32px - 40px)' }}>
+          <div className="text-center">
             <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
               Find your perfect
               <br />
