@@ -213,10 +213,19 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
                 </a>
               </Button>
             ) : (
-              <Button variant="outline" className="gap-1.5 rounded-lg">
-                <ExternalLink className="h-4 w-4" />
-                Whois
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" className="gap-1.5 rounded-lg" asChild>
+                  <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4" />
+                    Whois
+                  </a>
+                </Button>
+                <Button variant="outline" size="icon" className="rounded-lg" asChild aria-label={`Open ${domain}`}>
+                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
+                    <ArrowUpRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
             )}
           </div>
         </div>
