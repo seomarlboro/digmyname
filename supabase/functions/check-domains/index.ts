@@ -386,9 +386,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const godaddyKey = Deno.env.get("GODADDY_API_KEY");
-    const godaddySecret = Deno.env.get("GODADDY_API_SECRET");
-    const godaddy = godaddyKey && godaddySecret ? { key: godaddyKey, secret: godaddySecret } : null;
+    // GoDaddy removed from verification chain.
 
     const porkbunKey = Deno.env.get("PORKBUN_API_KEY");
     const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
