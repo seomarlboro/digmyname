@@ -19,6 +19,10 @@ const HeroBackground = () => {
       {/* Rotating conic beam */}
       <div className="hero-beam" />
 
+      {/* Spotlight cone falling onto the search bar */}
+      <div className="hero-spotlight" />
+      <div className="hero-spotlight-pool" />
+
       {/* Aurora blobs */}
       <div className="hero-blob hero-blob-1" />
       <div className="hero-blob hero-blob-2" />
