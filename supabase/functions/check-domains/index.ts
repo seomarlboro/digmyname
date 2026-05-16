@@ -323,75 +323,37 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
 }
 
 // ---------------------------------------------------------------------------
-// Resolve a single domain by combining all signals.
-// NOTE: Porkbun is NOT called here — its rate limit is 1 req / 10 sec which is
-// unworkable for batch checks. We use it as a verification step in `verifySuspiciousWithPorkbun`.
+// Resolve a single domain using RDAP + DNS only. GoDaddy is intentionally
+// removed from the verification chain — production API access requires
+// 50+ domains on the account or Reseller status, which we don't have.
 // ---------------------------------------------------------------------------
-async function resolveDomain(
-  domain: string,
-  godaddy: { key: string; secret: string } | null,
-  _porkbun: unknown // kept for signature compat; unused intentionally
-): Promise<DomainCheckResult> {
-  const [gd, dns, rdap] = await Promise.all([
-    godaddy ? checkGoDaddy(domain, godaddy.key, godaddy.secret) : Promise.resolve(null),
-    checkDnsDoH(domain),
-    checkRdap(domain),
-  ]);
-
+async function resolveDomain(domain: string): Promise<DomainCheckResult> {
+  const [dns, rdap] = await Promise.all([checkDnsDoH(domain), checkRdap(domain)]);
   const likelyPremium = isLikelyPremium(domain);
 
-  // 1. Trust GoDaddy when definitive.
-  if (gd && gd.definitive) {
-    return {
-      domain,
-      available: gd.available,
-      checkedVia: "godaddy_definitive",
-      price: gd.price,
-      premium: gd.premium,
-      likelyPremium: gd.premium || (gd.available && likelyPremium) ? true : undefined,
-    };
-  }
-
-  // 2. RDAP is authoritative for registration status.
+  // RDAP is authoritative for registration status.
   if (rdap === "taken") {
-    return { domain, available: false, checkedVia: "rdap", price: gd?.price, premium: gd?.premium, likelyPremium };
+    return { domain, available: false, checkedVia: "rdap", likelyPremium };
   }
   if (rdap === "available" && dns === "no_records") {
-    // Both say "no" → confidently available. Premium heuristic still flags pricey aftermarket risk.
     return {
       domain,
       available: true,
       checkedVia: "rdap",
-      price: gd?.price,
-      premium: gd?.premium,
-      likelyPremium: likelyPremium || gd?.premium ? true : undefined,
+      likelyPremium: likelyPremium || undefined,
     };
   }
 
-  // 3. DNS-only signal: records exist → taken.
+  // DNS-only signal: records exist → taken.
   if (dns === "has_records") {
-    return { domain, available: false, checkedVia: "dns", price: gd?.price, premium: gd?.premium, likelyPremium };
+    return { domain, available: false, checkedVia: "dns", likelyPremium };
   }
 
-  // 4. GoDaddy non-definitive but said "available" → still uncertain (often aftermarket).
-  if (gd && gd.available) {
-    return {
-      domain,
-      available: false,
-      checkedVia: "godaddy_uncertain",
-      price: gd.price,
-      premium: gd.premium,
-      likelyPremium: true,
-      uncertain: true,
-    };
-  }
-
-  // 5. Heuristic fallback — short SLD on premium TLD with no clear answer.
+  // Heuristic fallback — short SLD on premium TLD with no clear answer.
   if (likelyPremium) {
     return { domain, available: false, checkedVia: "heuristic", likelyPremium: true, uncertain: true };
   }
 
-  // 6. All sources failed.
   return { domain, available: false, checkedVia: "unknown", uncertain: true };
 }
 
