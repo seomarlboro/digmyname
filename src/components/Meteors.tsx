@@ -20,8 +20,8 @@ const Meteors = ({ number = 20, className, angle = 215 }: MeteorsProps) => {
       "--angle": `${angle}deg`,
       top: `${Math.floor(Math.random() * 100)}%`,
       left: `${Math.floor(Math.random() * 100)}%`,
-      animationDelay: `${Math.random() * 5}s`,
-      animationDuration: `${Math.random() * 5 + 4}s`,
+      animationDelay: `${Math.random() * 12}s`,
+      animationDuration: `${Math.random() * 4 + 8}s`,
     })) as React.CSSProperties[];
     setStyles(next);
   }, [number, angle]);
