@@ -408,6 +408,10 @@
   0%   { transform: translate(0, 0) rotate(-4deg); }
   100% { transform: translate(18px, -24px) rotate(4deg); }
 }
+@keyframes hero-spotlight-pulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .hero-blob, .hero-tld, .hero-beam { animation: none !important; }
