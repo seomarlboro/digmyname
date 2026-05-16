@@ -1,6 +1,8 @@
 import Spotlight from "@/components/Spotlight";
+
+/**
  * Full-viewport animated hero background.
- * Aurora mesh + rotating conic beam + drifting TLD constellation + dot grid + vignette.
+ * Spotlights + aurora mesh + drifting TLD constellation + dot grid + vignette.
  */
 const TLDS = [
   { label: ".com", x: "8%",  y: "22%", size: 64, delay: "0s",   dur: "14s" },
