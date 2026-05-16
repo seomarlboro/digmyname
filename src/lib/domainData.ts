@@ -93,7 +93,27 @@ const tldMap = new Map(TLD_LIST.map((t) => [t.extension, t]));
 /** Generate domain list with placeholder availability (all unknown/checking) */
 export function generateDomainList(query: string, withVariations = false, allowedTlds?: Set<string>): DomainResult[] {
   if (!query.trim()) return [];
-  const q = query.toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const raw = query.toLowerCase().trim();
+
+  // Detect if user typed a full domain like "jitr.com" — extract SLD + TLD.
+  let baseName = raw.replace(/[^a-z0-9.-]/g, "");
+  let typedTld: TLD | null = null;
+  if (baseName.includes(".")) {
+    const parts = baseName.split(".").filter(Boolean);
+    if (parts.length >= 2) {
+      const maybeTld = parts.slice(1).join(".");
+      const match = tldMap.get(maybeTld);
+      if (match) {
+        baseName = parts[0];
+        typedTld = match;
+      } else {
+        baseName = parts[0];
+      }
+    } else {
+      baseName = parts[0] ?? "";
+    }
+  }
+  const q = baseName.replace(/[^a-z0-9-]/g, "");
   if (!q) return [];
 
   const names = withVariations
@@ -101,9 +121,14 @@ export function generateDomainList(query: string, withVariations = false, allowe
     : [q];
   const results: DomainResult[] = [];
 
-  const tlds = allowedTlds && allowedTlds.size > 0
+  const baseTlds = allowedTlds && allowedTlds.size > 0
     ? TLD_LIST.filter((t) => allowedTlds.has(t.extension))
     : TLD_LIST;
+
+  // If user typed a specific TLD, make sure it's included and listed first.
+  const tlds = typedTld
+    ? [typedTld, ...baseTlds.filter((t) => t.extension !== typedTld!.extension)]
+    : baseTlds;
 
   for (const name of names) {
     for (const tld of tlds) {
