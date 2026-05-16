@@ -117,58 +117,8 @@ async function checkRdap(domain: string): Promise<RdapState> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// GoDaddy — pricing + premium detection. Respects the `definitive` flag.
-// ---------------------------------------------------------------------------
-interface GoDaddyResult {
-  available: boolean;
-  definitive: boolean;
-  price?: number;
-  premium?: boolean;
-}
+// GoDaddy removed: production API requires 50+ domains on account or Reseller status.
 
-async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): Promise<GoDaddyResult | null> {
-  const envSetting = Deno.env.get("GODADDY_ENV");
-  // If explicitly set, honor it. Otherwise try prod first, fall back to OTE on auth failure.
-  const candidates: string[] = envSetting === "ote"
-    ? ["api.ote-godaddy.com"]
-    : envSetting === "production"
-      ? ["api.godaddy.com"]
-      : ["api.godaddy.com", "api.ote-godaddy.com"];
-
-  for (const baseUrl of candidates) {
-    try {
-      const resp = await fetch(
-        `https://${baseUrl}/v1/domains/available?domain=${encodeURIComponent(domain)}&checkType=FULL`,
-        {
-          headers: {
-            Authorization: `sso-key ${apiKey}:${apiSecret}`,
-            Accept: "application/json",
-          },
-          signal: AbortSignal.timeout(6000),
-        }
-      );
-      if (!resp.ok) {
-        const txt = await resp.text().catch(() => "");
-        console.warn(`godaddy HTTP ${resp.status} for ${domain} (${baseUrl}): ${txt.slice(0, 200)}`);
-        continue; // try next candidate
-      }
-      const data = await resp.json();
-      const priceDollars = data.price != null ? Number(data.price) / 1_000_000 : undefined;
-      const isPremium = priceDollars != null && priceDollars >= 50;
-      return {
-        available: data.available === true,
-        definitive: data.definitive === true,
-        price: priceDollars,
-        premium: isPremium,
-      };
-    } catch (e) {
-      console.warn(`godaddy fetch error for ${domain} (${baseUrl}): ${e instanceof Error ? e.message : String(e)}`);
-      continue;
-    }
-  }
-  return null;
-}
 
 // ---------------------------------------------------------------------------
 // Porkbun — authoritative for premium / aftermarket pricing.
@@ -323,75 +273,37 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
 }
 
 // ---------------------------------------------------------------------------
-// Resolve a single domain by combining all signals.
-// NOTE: Porkbun is NOT called here — its rate limit is 1 req / 10 sec which is
-// unworkable for batch checks. We use it as a verification step in `verifySuspiciousWithPorkbun`.
+// Resolve a single domain using RDAP + DNS only. GoDaddy is intentionally
+// removed from the verification chain — production API access requires
+// 50+ domains on the account or Reseller status, which we don't have.
 // ---------------------------------------------------------------------------
-async function resolveDomain(
-  domain: string,
-  godaddy: { key: string; secret: string } | null,
-  _porkbun: unknown // kept for signature compat; unused intentionally
-): Promise<DomainCheckResult> {
-  const [gd, dns, rdap] = await Promise.all([
-    godaddy ? checkGoDaddy(domain, godaddy.key, godaddy.secret) : Promise.resolve(null),
-    checkDnsDoH(domain),
-    checkRdap(domain),
-  ]);
-
+async function resolveDomain(domain: string): Promise<DomainCheckResult> {
+  const [dns, rdap] = await Promise.all([checkDnsDoH(domain), checkRdap(domain)]);
   const likelyPremium = isLikelyPremium(domain);
 
-  // 1. Trust GoDaddy when definitive.
-  if (gd && gd.definitive) {
-    return {
-      domain,
-      available: gd.available,
-      checkedVia: "godaddy_definitive",
-      price: gd.price,
-      premium: gd.premium,
-      likelyPremium: gd.premium || (gd.available && likelyPremium) ? true : undefined,
-    };
-  }
-
-  // 2. RDAP is authoritative for registration status.
+  // RDAP is authoritative for registration status.
   if (rdap === "taken") {
-    return { domain, available: false, checkedVia: "rdap", price: gd?.price, premium: gd?.premium, likelyPremium };
+    return { domain, available: false, checkedVia: "rdap", likelyPremium };
   }
   if (rdap === "available" && dns === "no_records") {
-    // Both say "no" → confidently available. Premium heuristic still flags pricey aftermarket risk.
     return {
       domain,
       available: true,
       checkedVia: "rdap",
-      price: gd?.price,
-      premium: gd?.premium,
-      likelyPremium: likelyPremium || gd?.premium ? true : undefined,
+      likelyPremium: likelyPremium || undefined,
     };
   }
 
-  // 3. DNS-only signal: records exist → taken.
+  // DNS-only signal: records exist → taken.
   if (dns === "has_records") {
-    return { domain, available: false, checkedVia: "dns", price: gd?.price, premium: gd?.premium, likelyPremium };
+    return { domain, available: false, checkedVia: "dns", likelyPremium };
   }
 
-  // 4. GoDaddy non-definitive but said "available" → still uncertain (often aftermarket).
-  if (gd && gd.available) {
-    return {
-      domain,
-      available: false,
-      checkedVia: "godaddy_uncertain",
-      price: gd.price,
-      premium: gd.premium,
-      likelyPremium: true,
-      uncertain: true,
-    };
-  }
-
-  // 5. Heuristic fallback — short SLD on premium TLD with no clear answer.
+  // Heuristic fallback — short SLD on premium TLD with no clear answer.
   if (likelyPremium) {
     return { domain, available: false, checkedVia: "heuristic", likelyPremium: true, uncertain: true };
   }
 
-  // 6. All sources failed.
   return { domain, available: false, checkedVia: "unknown", uncertain: true };
 }
 
@@ -474,9 +386,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const godaddyKey = Deno.env.get("GODADDY_API_KEY");
-    const godaddySecret = Deno.env.get("GODADDY_API_SECRET");
-    const godaddy = godaddyKey && godaddySecret ? { key: godaddyKey, secret: godaddySecret } : null;
+    // GoDaddy removed from verification chain.
 
     const porkbunKey = Deno.env.get("PORKBUN_API_KEY");
     const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
@@ -520,7 +430,7 @@ Deno.serve(async (req) => {
       });
       console.log(`domainr keyPresent=true returned=${domainrResults?.size ?? "null"} sample=[${sample.join(", ")}]`);
     } else {
-      console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — falling back to GoDaddy/RDAP/DNS only");
+      console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — falling back to RDAP/DNS only");
     }
     const fresh: DomainCheckResult[] = [];
     const needsFallback: string[] = [];
@@ -546,7 +456,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const fallback = await pMap(needsFallback, 10, (d) => resolveDomain(d, godaddy, null));
+    const fallback = await pMap(needsFallback, 10, (d) => resolveDomain(d));
     fresh.push(...fallback);
 
     // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
