@@ -456,7 +456,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const fallback = await pMap(needsFallback, 10, (d) => resolveDomain(d, godaddy, null));
+    const fallback = await pMap(needsFallback, 10, (d) => resolveDomain(d));
     fresh.push(...fallback);
 
     // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
