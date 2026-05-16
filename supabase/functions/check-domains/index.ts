@@ -153,19 +153,21 @@ async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): 
         console.warn(`godaddy HTTP ${resp.status} for ${domain} (${baseUrl}): ${txt.slice(0, 200)}`);
         continue; // try next candidate
       }
-    const data = await resp.json();
-    const priceDollars = data.price != null ? Number(data.price) / 1_000_000 : undefined;
-    // Lowered threshold: GoDaddy aftermarket starts well under $200.
-    const isPremium = priceDollars != null && priceDollars >= 50;
-    return {
-      available: data.available === true,
-      definitive: data.definitive === true,
-      price: priceDollars,
-      premium: isPremium,
-    };
-  } catch {
-    return null;
+      const data = await resp.json();
+      const priceDollars = data.price != null ? Number(data.price) / 1_000_000 : undefined;
+      const isPremium = priceDollars != null && priceDollars >= 50;
+      return {
+        available: data.available === true,
+        definitive: data.definitive === true,
+        price: priceDollars,
+        premium: isPremium,
+      };
+    } catch (e) {
+      console.warn(`godaddy fetch error for ${domain} (${baseUrl}): ${e instanceof Error ? e.message : String(e)}`);
+      continue;
+    }
   }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
