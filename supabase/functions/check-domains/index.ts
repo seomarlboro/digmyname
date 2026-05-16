@@ -117,58 +117,8 @@ async function checkRdap(domain: string): Promise<RdapState> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// GoDaddy — pricing + premium detection. Respects the `definitive` flag.
-// ---------------------------------------------------------------------------
-interface GoDaddyResult {
-  available: boolean;
-  definitive: boolean;
-  price?: number;
-  premium?: boolean;
-}
+// GoDaddy removed: production API requires 50+ domains on account or Reseller status.
 
-async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): Promise<GoDaddyResult | null> {
-  const envSetting = Deno.env.get("GODADDY_ENV");
-  // If explicitly set, honor it. Otherwise try prod first, fall back to OTE on auth failure.
-  const candidates: string[] = envSetting === "ote"
-    ? ["api.ote-godaddy.com"]
-    : envSetting === "production"
-      ? ["api.godaddy.com"]
-      : ["api.godaddy.com", "api.ote-godaddy.com"];
-
-  for (const baseUrl of candidates) {
-    try {
-      const resp = await fetch(
-        `https://${baseUrl}/v1/domains/available?domain=${encodeURIComponent(domain)}&checkType=FULL`,
-        {
-          headers: {
-            Authorization: `sso-key ${apiKey}:${apiSecret}`,
-            Accept: "application/json",
-          },
-          signal: AbortSignal.timeout(6000),
-        }
-      );
-      if (!resp.ok) {
-        const txt = await resp.text().catch(() => "");
-        console.warn(`godaddy HTTP ${resp.status} for ${domain} (${baseUrl}): ${txt.slice(0, 200)}`);
-        continue; // try next candidate
-      }
-      const data = await resp.json();
-      const priceDollars = data.price != null ? Number(data.price) / 1_000_000 : undefined;
-      const isPremium = priceDollars != null && priceDollars >= 50;
-      return {
-        available: data.available === true,
-        definitive: data.definitive === true,
-        price: priceDollars,
-        premium: isPremium,
-      };
-    } catch (e) {
-      console.warn(`godaddy fetch error for ${domain} (${baseUrl}): ${e instanceof Error ? e.message : String(e)}`);
-      continue;
-    }
-  }
-  return null;
-}
 
 // ---------------------------------------------------------------------------
 // Porkbun — authoritative for premium / aftermarket pricing.
