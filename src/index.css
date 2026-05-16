@@ -257,6 +257,50 @@
   }
   .dark .hero-beam { opacity: 0.55; }
 
+  /* Cone of light descending from above onto the search bar */
+  .hero-spotlight {
+    position: absolute;
+    left: 50%;
+    top: -10vh;
+    width: 60vw;
+    height: 85vh;
+    transform: translateX(-50%);
+    background: linear-gradient(
+      to bottom,
+      hsl(218 96% 70% / 0.28) 0%,
+      hsl(230 90% 65% / 0.18) 40%,
+      hsl(262 83% 60% / 0.08) 75%,
+      transparent 100%
+    );
+    clip-path: polygon(45% 0%, 55% 0%, 78% 100%, 22% 100%);
+    filter: blur(28px);
+    mix-blend-mode: screen;
+    opacity: 0.9;
+    animation: hero-spotlight-pulse 8s ease-in-out infinite;
+  }
+  .dark .hero-spotlight { opacity: 1; }
+
+  /* Bright pool of light where the beam "lands" on the search bar */
+  .hero-spotlight-pool {
+    position: absolute;
+    left: 50%;
+    top: 50vh;
+    width: 70vw;
+    max-width: 900px;
+    height: 220px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      ellipse at center,
+      hsl(218 96% 60% / 0.35) 0%,
+      hsl(240 90% 65% / 0.18) 35%,
+      transparent 70%
+    );
+    filter: blur(40px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    animation: hero-spotlight-pulse 8s ease-in-out infinite;
+  }
+
   .hero-blob {
     position: absolute;
     border-radius: 50%;
