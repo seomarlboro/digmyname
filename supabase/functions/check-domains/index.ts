@@ -128,26 +128,31 @@ interface GoDaddyResult {
 }
 
 async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): Promise<GoDaddyResult | null> {
-  try {
-    // Default to production; user can explicitly opt into the OTE sandbox by setting GODADDY_ENV=ote.
-    // OTE returns fabricated availability/pricing (e.g. registered .com names appearing free at $10.69),
-    // which silently corrupts results — never trust it unless explicitly requested.
-    const baseUrl = Deno.env.get("GODADDY_ENV") === "ote" ? "api.ote-godaddy.com" : "api.godaddy.com";
-    const resp = await fetch(
-      `https://${baseUrl}/v1/domains/available?domain=${encodeURIComponent(domain)}&checkType=FULL`,
-      {
-        headers: {
-          Authorization: `sso-key ${apiKey}:${apiSecret}`,
-          Accept: "application/json",
-        },
-        signal: AbortSignal.timeout(6000),
+  const envSetting = Deno.env.get("GODADDY_ENV");
+  // If explicitly set, honor it. Otherwise try prod first, fall back to OTE on auth failure.
+  const candidates: string[] = envSetting === "ote"
+    ? ["api.ote-godaddy.com"]
+    : envSetting === "production"
+      ? ["api.godaddy.com"]
+      : ["api.godaddy.com", "api.ote-godaddy.com"];
+
+  for (const baseUrl of candidates) {
+    try {
+      const resp = await fetch(
+        `https://${baseUrl}/v1/domains/available?domain=${encodeURIComponent(domain)}&checkType=FULL`,
+        {
+          headers: {
+            Authorization: `sso-key ${apiKey}:${apiSecret}`,
+            Accept: "application/json",
+          },
+          signal: AbortSignal.timeout(6000),
+        }
+      );
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => "");
+        console.warn(`godaddy HTTP ${resp.status} for ${domain} (${baseUrl}): ${txt.slice(0, 200)}`);
+        continue; // try next candidate
       }
-    );
-    if (!resp.ok) {
-      const txt = await resp.text().catch(() => "");
-      console.warn(`godaddy HTTP ${resp.status} for ${domain} (${baseUrl}): ${txt.slice(0, 200)}`);
-      return null;
-    }
     const data = await resp.json();
     const priceDollars = data.price != null ? Number(data.price) / 1_000_000 : undefined;
     // Lowered threshold: GoDaddy aftermarket starts well under $200.
