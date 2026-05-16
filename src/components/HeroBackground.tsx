@@ -1,4 +1,4 @@
-/**
+import Spotlight from "@/components/Spotlight";
  * Full-viewport animated hero background.
  * Aurora mesh + rotating conic beam + drifting TLD constellation + dot grid + vignette.
  */
