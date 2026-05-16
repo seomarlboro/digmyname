@@ -430,7 +430,7 @@ Deno.serve(async (req) => {
       });
       console.log(`domainr keyPresent=true returned=${domainrResults?.size ?? "null"} sample=[${sample.join(", ")}]`);
     } else {
-      console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — falling back to GoDaddy/RDAP/DNS only");
+      console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — falling back to RDAP/DNS only");
     }
     const fresh: DomainCheckResult[] = [];
     const needsFallback: string[] = [];
