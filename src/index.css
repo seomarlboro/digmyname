@@ -320,9 +320,6 @@
   .dark .hero-noise { opacity: 0.06; }
 }
 
-@keyframes hero-rotate {
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
 @keyframes hero-drift-a {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50%      { transform: translate(10vw, 8vw) scale(1.12); }
