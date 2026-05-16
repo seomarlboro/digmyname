@@ -235,71 +235,6 @@
       radial-gradient(ellipse 70% 50% at 50% 100%, hsl(262 83% 60% / 0.06), transparent 60%);
   }
 
-  /* Slowly rotating conic beam — gives a sense of cosmic light */
-  .hero-beam {
-    position: absolute;
-    left: 50%; top: 50%;
-    width: 140vmax; height: 140vmax;
-    transform: translate(-50%, -50%);
-    background: conic-gradient(
-      from 0deg,
-      transparent 0deg,
-      hsl(218 96% 53% / 0.10) 30deg,
-      transparent 90deg,
-      hsl(262 83% 60% / 0.08) 180deg,
-      transparent 240deg,
-      hsl(218 96% 53% / 0.10) 320deg,
-      transparent 360deg
-    );
-    filter: blur(40px);
-    animation: hero-rotate 60s linear infinite;
-    opacity: 0.7;
-  }
-  .dark .hero-beam { opacity: 0.55; }
-
-  /* Cone of light descending from above onto the search bar */
-  .hero-spotlight {
-    position: absolute;
-    left: 50%;
-    top: -10vh;
-    width: 60vw;
-    height: 85vh;
-    transform: translateX(-50%);
-    background: linear-gradient(
-      to bottom,
-      hsl(218 96% 70% / 0.28) 0%,
-      hsl(230 90% 65% / 0.18) 40%,
-      hsl(262 83% 60% / 0.08) 75%,
-      transparent 100%
-    );
-    clip-path: polygon(45% 0%, 55% 0%, 78% 100%, 22% 100%);
-    filter: blur(28px);
-    mix-blend-mode: screen;
-    opacity: 0.9;
-    animation: hero-spotlight-pulse 8s ease-in-out infinite;
-  }
-  .dark .hero-spotlight { opacity: 1; }
-
-  /* Bright pool of light where the beam "lands" on the search bar */
-  .hero-spotlight-pool {
-    position: absolute;
-    left: 50%;
-    top: 50vh;
-    width: 70vw;
-    max-width: 900px;
-    height: 220px;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(
-      ellipse at center,
-      hsl(218 96% 60% / 0.35) 0%,
-      hsl(240 90% 65% / 0.18) 35%,
-      transparent 70%
-    );
-    filter: blur(40px);
-    mix-blend-mode: screen;
-    pointer-events: none;
-    animation: hero-spotlight-pulse 8s ease-in-out infinite;
-  }
 
   .hero-blob {
     position: absolute;
@@ -385,9 +320,6 @@
   .dark .hero-noise { opacity: 0.06; }
 }
 
-@keyframes hero-rotate {
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
 @keyframes hero-drift-a {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50%      { transform: translate(10vw, 8vw) scale(1.12); }
@@ -408,12 +340,8 @@
   0%   { transform: translate(0, 0) rotate(-4deg); }
   100% { transform: translate(18px, -24px) rotate(4deg); }
 }
-@keyframes hero-spotlight-pulse {
-  0%, 100% { opacity: 0.85; }
-  50%      { opacity: 1; }
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-blob, .hero-tld, .hero-beam { animation: none !important; }
+  .hero-blob, .hero-tld { animation: none !important; }
 }
 

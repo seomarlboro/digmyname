@@ -1,6 +1,8 @@
+import Spotlight from "@/components/Spotlight";
+
 /**
  * Full-viewport animated hero background.
- * Aurora mesh + rotating conic beam + drifting TLD constellation + dot grid + vignette.
+ * Spotlights + aurora mesh + drifting TLD constellation + dot grid + vignette.
  */
 const TLDS = [
   { label: ".com", x: "8%",  y: "22%", size: 64, delay: "0s",   dur: "14s" },
@@ -16,12 +18,9 @@ const TLDS = [
 const HeroBackground = () => {
   return (
     <div className="hero-bg pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-      {/* Rotating conic beam */}
-      <div className="hero-beam" />
-
-      {/* Spotlight cone falling onto the search bar */}
-      <div className="hero-spotlight" />
-      <div className="hero-spotlight-pool" />
+      {/* SVG spotlights — Aceternity-style soft beams */}
+      <Spotlight className="-top-40 left-0 md:-top-20 md:left-60" fill="hsl(218 96% 65%)" />
+      <Spotlight className="top-10 right-0 md:top-32 md:right-40 [transform:scaleX(-1)]" fill="hsl(262 83% 65%)" />
 
       {/* Aurora blobs */}
       <div className="hero-blob hero-blob-1" />
