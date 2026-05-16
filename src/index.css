@@ -274,8 +274,21 @@
   .hero-constellation {
     position: absolute; inset: 0;
   }
-  .hero-tld {
+  /* Outer wrap handles mouse-parallax translation */
+  .hero-tld-wrap {
     position: absolute;
+    display: inline-block;
+    will-change: transform;
+    transform: translate3d(
+      calc(var(--mx, 0) * var(--depth, 20) * -1px),
+      calc(var(--my, 0) * var(--depth, 20) * -1px),
+      0
+    );
+    transition: transform 0.05s linear;
+  }
+  /* Inner span handles the slow floating drift */
+  .hero-tld {
+    display: inline-block;
     font-family: 'Inter', sans-serif;
     font-weight: 900;
     letter-spacing: -0.04em;
