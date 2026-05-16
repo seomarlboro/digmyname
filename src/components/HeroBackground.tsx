@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import Spotlight from "@/components/Spotlight";
+import Meteors from "@/components/Meteors";
 
 /**
  * Full-viewport animated hero background.
