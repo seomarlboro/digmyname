@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ExternalLink, Heart, Loader2 } from "lucide-react";
+import { ExternalLink, Heart, Loader2, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
@@ -110,10 +110,19 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
           ) : (
             <>
               <span />
-              <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground">
-                <ExternalLink className="h-3.5 w-3.5" />
-                Whois
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground" asChild>
+                  <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Whois
+                  </a>
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-primary" asChild aria-label={`Open ${domain}`}>
+                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
+                    <ArrowUpRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
             </>
           )}
         </div>
@@ -204,10 +213,19 @@ const DomainCard = ({ result, compact = false }: DomainCardProps) => {
                 </a>
               </Button>
             ) : (
-              <Button variant="outline" className="gap-1.5 rounded-lg">
-                <ExternalLink className="h-4 w-4" />
-                Whois
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" className="gap-1.5 rounded-lg" asChild>
+                  <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4" />
+                    Whois
+                  </a>
+                </Button>
+                <Button variant="outline" size="icon" className="rounded-lg" asChild aria-label={`Open ${domain}`}>
+                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
+                    <ArrowUpRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
             )}
           </div>
         </div>
