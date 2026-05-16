@@ -144,7 +144,8 @@ async function checkGoDaddy(domain: string, apiKey: string, apiSecret: string): 
       }
     );
     if (!resp.ok) {
-      await resp.text().catch(() => {});
+      const txt = await resp.text().catch(() => "");
+      console.warn(`godaddy HTTP ${resp.status} for ${domain} (${baseUrl}): ${txt.slice(0, 200)}`);
       return null;
     }
     const data = await resp.json();
