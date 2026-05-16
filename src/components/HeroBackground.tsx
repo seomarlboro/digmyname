@@ -68,7 +68,7 @@ const HeroBackground = () => {
 
       {/* Meteors — lightweight diagonal streaks */}
       <div className="absolute inset-0 overflow-hidden opacity-60">
-        <Meteors number={18} />
+        <Meteors number={7} />
       </div>
 
       {/* Aurora blobs */}
