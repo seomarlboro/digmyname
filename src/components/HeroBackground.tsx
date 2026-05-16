@@ -66,6 +66,11 @@ const HeroBackground = () => {
       <Spotlight className="-top-40 left-0 md:-top-20 md:left-60" fill="hsl(218 96% 65%)" />
       <Spotlight className="top-10 right-0 md:top-32 md:right-40 [transform:scaleX(-1)]" fill="hsl(262 83% 65%)" />
 
+      {/* Meteors — lightweight diagonal streaks */}
+      <div className="absolute inset-0 overflow-hidden opacity-60">
+        <Meteors number={18} />
+      </div>
+
       {/* Aurora blobs */}
       <div className="hero-blob hero-blob-1" />
       <div className="hero-blob hero-blob-2" />
