@@ -87,5 +87,8 @@ Allow: /
 # --- Fallback ---
 User-agent: *
 Allow: /
+# Prevent crawling of the SearchAction query parameter (canonical is /)
+Disallow: /?q=
+Disallow: /*?q=
 
 Sitemap: https://digmyname.com/sitemap.xml
