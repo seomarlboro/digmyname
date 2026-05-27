@@ -89,7 +89,66 @@ async function checkDnsDoH(domain: string): Promise<DnsState> {
       if (Array.isArray(data.Answer) && data.Answer.length > 0) return "has_records";
       // Status 3 = NXDOMAIN
       if (data.Status === 3) return "no_records";
+}
+
+// ---------------------------------------------------------------------------
+// Aftermarket / parked-domain detection (NS-based).
+//
+// When a domain is registered (taken) we additionally check whether its
+// nameservers belong to a known marketplace / parking provider. If yes, the
+// domain is almost certainly listed for resale and we surface a direct
+// listing link instead of just saying "Taken".
+// ---------------------------------------------------------------------------
+interface AftermarketHit {
+  marketplace: string;
+  buildUrl: (domain: string) => string;
+}
+
+const AFTERMARKET_NS_PATTERNS: Array<[RegExp, AftermarketHit]> = [
+  [/(^|\.)sedoparking\.com$/i,    { marketplace: "Sedo",         buildUrl: (d) => `https://sedo.com/search/?keyword=${encodeURIComponent(d)}&language=us` }],
+  [/(^|\.)dan\.com$/i,            { marketplace: "Dan.com",      buildUrl: (d) => `https://dan.com/buy-domain/${d}` }],
+  [/(^|\.)(afternic|dnsowl)\.com$/i, { marketplace: "Afternic",  buildUrl: (d) => `https://www.afternic.com/domain/${d}` }],
+  [/(^|\.)hugedomains\.com$/i,    { marketplace: "HugeDomains",  buildUrl: (d) => `https://www.hugedomains.com/domain_profile.aspx?d=${d.split(".").slice(0, -1).join(".")}&e=${d.split(".").pop()}` }],
+  [/(^|\.)domainmarket\.com$/i,   { marketplace: "DomainMarket", buildUrl: (d) => `https://www.domainmarket.com/buynow/${d}` }],
+  [/(^|\.)uniregistrymarket\.link$/i, { marketplace: "Uniregistry", buildUrl: (d) => `https://uniregistry.com/market/domain/${d}` }],
+  [/(^|\.)(bodis|parkingcrew|above|saw|namebright|fabulous|voodoo|undeveloped|parklogic)\.(com|net|link)$/i, { marketplace: "Aftermarket", buildUrl: (d) => `https://www.afternic.com/domain/${d}` }],
+];
+
+export function classifyAftermarket(nsHosts: string[]): AftermarketHit | null {
+  for (const raw of nsHosts) {
+    const host = raw.replace(/\.$/, "").toLowerCase();
+    for (const [re, hit] of AFTERMARKET_NS_PATTERNS) {
+      if (re.test(host)) return hit;
     }
+  }
+  return null;
+}
+
+async function fetchNsRecords(domain: string): Promise<string[]> {
+  try {
+    const r = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=NS`, {
+      headers: { Accept: "application/dns-json" },
+      signal: AbortSignal.timeout(2000),
+    });
+    if (!r.ok) return [];
+    const data = await r.json();
+    if (!Array.isArray(data?.Answer)) return [];
+    return data.Answer
+      .map((a: { data?: string }) => String(a?.data ?? "").replace(/\.$/, "").toLowerCase())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+export async function detectAftermarket(
+  domain: string
+): Promise<{ marketplace: string; listingUrl: string } | null> {
+  const ns = await fetchNsRecords(domain);
+  const hit = classifyAftermarket(ns);
+  if (!hit) return null;
+  return { marketplace: hit.marketplace, listingUrl: hit.buildUrl(domain) };
+}
     return any ? "no_records" : "error";
   } catch {
     return "error";
