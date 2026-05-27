@@ -87,9 +87,31 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
   const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
-  const availableCount = useMemo(() => checkedResults.filter((r) => r.available).length, [checkedResults]);
-  const takenCount = useMemo(() => checkedResults.filter((r) => !r.available).length, [checkedResults]);
+  const availableCount = useMemo(() => checkedResults.filter((r) => r.available && !r.uncertain).length, [checkedResults]);
+  const uncertainCount = useMemo(() => checkedResults.filter((r) => r.uncertain).length, [checkedResults]);
+  const takenCount = useMemo(() => checkedResults.filter((r) => !r.available && !r.uncertain).length, [checkedResults]);
   const stillChecking = checkingResults.length > 0;
+
+  const retryDomain = useCallback(async (domain: string) => {
+    setResults((prev) => prev.map((r) => (r.domain === domain ? { ...r, checking: true } : r)));
+    const availMap = await checkDomainsAvailability([domain]);
+    setResults((prev) =>
+      prev.map((r) => {
+        if (r.domain !== domain) return r;
+        const info = availMap.get(domain);
+        if (!info) return { ...r, checking: false, uncertain: true };
+        return {
+          ...r,
+          checking: false,
+          available: info.available,
+          gdPrice: info.price,
+          premium: info.premium,
+          likelyPremium: info.likelyPremium,
+          uncertain: info.uncertain,
+        };
+      })
+    );
+  }, []);
 
   const hasQuery = query.trim().length > 0;
 
