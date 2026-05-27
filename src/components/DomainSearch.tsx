@@ -51,15 +51,15 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       setResults(domains);
       setLoading(false);
 
-      // Step 2: Check real availability in batches
+      // Step 2: Check real availability.
+      // Strategy: send the most popular TLDs (first 20) as a small priority batch,
+      // then fan out the rest in parallel batches of 20. Each batch updates the UI
+      // as soon as it returns, so the popular TLDs feel near-instant.
       const domainNames = domains.map((d) => d.domain);
-      const batchSize = 20;
+      const PRIORITY_SIZE = 20;
+      const BATCH_SIZE = 20;
 
-      for (let i = 0; i < domainNames.length; i += batchSize) {
-        if (cancelled) return;
-        const batch = domainNames.slice(i, i + batchSize);
-        const availMap = await checkDomainsAvailability(batch);
-
+      const applyBatch = (availMap: Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean }>) => {
         if (cancelled) return;
         setResults((prev) =>
           prev.map((r) => {
@@ -78,7 +78,26 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
             return r;
           })
         );
+      };
+
+      const runBatch = async (slice: string[]) => {
+        const availMap = await checkDomainsAvailability(slice);
+        applyBatch(availMap);
+      };
+
+      // Priority batch (popular TLDs) fires first and is awaited so we surface
+      // results to the user ASAP; remaining batches run in parallel.
+      const priority = domainNames.slice(0, PRIORITY_SIZE);
+      const rest = domainNames.slice(PRIORITY_SIZE);
+      const restBatches: string[][] = [];
+      for (let i = 0; i < rest.length; i += BATCH_SIZE) {
+        restBatches.push(rest.slice(i, i + BATCH_SIZE));
       }
+
+      await Promise.all([
+        priority.length > 0 ? runBatch(priority) : Promise.resolve(),
+        ...restBatches.map(runBatch),
+      ]);
     };
 
     run();
