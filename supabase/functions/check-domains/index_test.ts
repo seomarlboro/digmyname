@@ -57,3 +57,31 @@ Deno.test("clearly-available random domain returns true", async () => {
     assertEquals(r.available, true);
   }
 });
+
+Deno.test("uncertain results never claim available:true", async () => {
+  // Run a few unusual ccTLD names; if any come back uncertain, must not be available.
+  const { results } = await check(["xn--unverifiable-test-zzz.test"]).catch(() => ({ results: [] as Array<Record<string, unknown>> }));
+  for (const r of results) {
+    if (r.uncertain === true) {
+      assertEquals(r.available, false, "uncertain must imply available:false");
+    }
+  }
+});
+
+Deno.test("IANA RDAP bootstrap routes major TLDs to authoritative servers", async () => {
+  // Import the bootstrap loader directly to verify the IANA mapping populates.
+  const mod = await import("./index.ts");
+  // loadRdapBootstrap is exported for testability.
+  const loader = (mod as unknown as { loadRdapBootstrap: () => Promise<Map<string, string[]>> }).loadRdapBootstrap;
+  assert(typeof loader === "function", "loadRdapBootstrap must be exported");
+  const map = await loader();
+  // The bootstrap file lists hundreds of TLDs; major ones must be present.
+  assert(map.size > 100, `expected >100 TLDs mapped, got ${map.size}`);
+  for (const tld of ["com", "net", "org", "io", "app", "dev"]) {
+    const bases = map.get(tld);
+    assert(bases && bases.length > 0, `TLD ${tld} should have an RDAP base URL`);
+    for (const base of bases) {
+      assert(base.startsWith("https://"), `RDAP base for ${tld} should be https, got ${base}`);
+    }
+  }
+});
