@@ -14,7 +14,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-lg">
+      <header className="sticky top-0 z-50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
             <ShovelLogo className="h-8 w-8" />
