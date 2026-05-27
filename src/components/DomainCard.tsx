@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ExternalLink, Heart, Loader2, ArrowUpRight } from "lucide-react";
+import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,10 +12,12 @@ import type { DomainResult } from "@/lib/domainData";
 interface DomainCardProps {
   result: DomainResult;
   compact?: boolean;
+  onRetry?: (domain: string) => void;
 }
 
-const DomainCard = ({ result, compact = false }: DomainCardProps) => {
+const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const { domain, tld, available, checking } = result;
+  const isUncertain = result.uncertain === true;
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const cheapestByTld = useCheapestRegistrars();
