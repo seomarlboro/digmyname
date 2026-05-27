@@ -541,6 +541,9 @@ Deno.serve(async (req) => {
           price: meta.godaddy_price as number | undefined,
           premium: meta.premium as boolean | undefined,
           likelyPremium: meta.likely_premium as boolean | undefined,
+          forSale: meta.for_sale as boolean | undefined,
+          forSaleVia: meta.for_sale_via as string | undefined,
+          listingUrl: meta.listing_url as string | undefined,
         });
       }
     }
