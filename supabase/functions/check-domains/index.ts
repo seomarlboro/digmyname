@@ -94,14 +94,62 @@ async function checkDnsDoH(domain: string): Promise<DnsState> {
 
 // ---------------------------------------------------------------------------
 // RDAP — authoritative for "registered yes/no" but no pricing.
+//
+// P0.1: Resolve TLD → official RDAP server via IANA bootstrap file
+// (https://data.iana.org/rdap/dns.json). This is the authoritative mapping
+// every registry publishes, and is far more reliable than the public
+// rdap.org aggregator (which 5xx / times out for many ccTLDs and newer
+// gTLDs like .io, .ai, .co, .gg).
+//
+// Strategy:
+//   1. Try the IANA-mapped RDAP server for the TLD (with one alternate).
+//   2. Fall back to rdap.org if no mapping or all mapped servers fail.
 // ---------------------------------------------------------------------------
 type RdapState = "available" | "taken" | "unknown";
 
-async function checkRdap(domain: string): Promise<RdapState> {
+// Module-level cache for the IANA RDAP bootstrap file (TTL: 24h).
+interface RdapBootstrap {
+  services: Array<[string[], string[]]>; // [tlds, rdapBaseUrls]
+}
+let rdapBootstrapCache: { map: Map<string, string[]>; expiresAt: number } | null = null;
+
+export async function loadRdapBootstrap(): Promise<Map<string, string[]>> {
+  const now = Date.now();
+  if (rdapBootstrapCache && rdapBootstrapCache.expiresAt > now) {
+    return rdapBootstrapCache.map;
+  }
   try {
-    const resp = await fetch(`https://rdap.org/domain/${domain}`, {
+    const resp = await fetch("https://data.iana.org/rdap/dns.json", {
       signal: AbortSignal.timeout(4000),
     });
+    if (!resp.ok) {
+      await resp.text().catch(() => {});
+      throw new Error(`IANA bootstrap HTTP ${resp.status}`);
+    }
+    const data = (await resp.json()) as RdapBootstrap;
+    const map = new Map<string, string[]>();
+    for (const entry of data.services ?? []) {
+      const [tlds, bases] = entry;
+      const cleanBases = bases.map((b) => b.replace(/\/+$/, ""));
+      for (const tld of tlds) {
+        map.set(tld.toLowerCase(), cleanBases);
+      }
+    }
+    rdapBootstrapCache = { map, expiresAt: now + 24 * 60 * 60 * 1000 };
+    console.log(`rdap bootstrap loaded: ${map.size} TLDs mapped`);
+    return map;
+  } catch (e) {
+    console.warn(`rdap bootstrap load failed: ${e instanceof Error ? e.message : String(e)}`);
+    // Cache an empty map for 5 min to avoid hammering on failures.
+    const empty = new Map<string, string[]>();
+    rdapBootstrapCache = { map: empty, expiresAt: now + 5 * 60 * 1000 };
+    return empty;
+  }
+}
+
+async function rdapQueryOnce(url: string, timeoutMs: number): Promise<RdapState> {
+  try {
+    const resp = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
     if (resp.status === 404) {
       await resp.text().catch(() => {});
       return "available";
@@ -115,6 +163,21 @@ async function checkRdap(domain: string): Promise<RdapState> {
   } catch {
     return "unknown";
   }
+}
+
+async function checkRdap(domain: string): Promise<RdapState> {
+  const tld = domain.split(".").pop()?.toLowerCase() ?? "";
+  const bootstrap = await loadRdapBootstrap();
+  const bases = bootstrap.get(tld) ?? [];
+
+  // Try official IANA-mapped RDAP servers first (max 2 to bound latency).
+  for (const base of bases.slice(0, 2)) {
+    const state = await rdapQueryOnce(`${base}/domain/${domain}`, 4000);
+    if (state !== "unknown") return state;
+  }
+
+  // Fallback to public aggregator.
+  return await rdapQueryOnce(`https://rdap.org/domain/${domain}`, 4000);
 }
 
 // GoDaddy removed: production API requires 50+ domains on account or Reseller status.
