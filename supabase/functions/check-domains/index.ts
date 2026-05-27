@@ -89,7 +89,14 @@ async function checkDnsDoH(domain: string): Promise<DnsState> {
       if (Array.isArray(data.Answer) && data.Answer.length > 0) return "has_records";
       // Status 3 = NXDOMAIN
       if (data.Status === 3) return "no_records";
+    }
+    return any ? "no_records" : "error";
+  } catch {
+    return "error";
+  }
 }
+
+
 
 // ---------------------------------------------------------------------------
 // Aftermarket / parked-domain detection (NS-based).
