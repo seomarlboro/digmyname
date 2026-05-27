@@ -59,11 +59,12 @@ Deno.test("clearly-available random domain returns true", async () => {
 });
 
 Deno.test("uncertain results never claim available:true", async () => {
-  // Run a few unusual ccTLD names; if any come back uncertain, must not be available.
-  const { results } = await check(["xn--unverifiable-test-zzz.test"]).catch(() => ({ results: [] as Array<Record<string, unknown>> }));
-  for (const r of results) {
-    if (r.uncertain === true) {
-      assertEquals(r.available, false, "uncertain must imply available:false");
+  // Mix of real domains — none should ever be both uncertain and available.
+  const probes = ["google.com", `lvbl-${crypto.randomUUID().slice(0, 8)}.com`];
+  const { results } = await check(probes);
+  for (const r of (results ?? [])) {
+    if (r?.uncertain === true) {
+      assertEquals(r.available, false, `uncertain must imply available:false, got ${JSON.stringify(r)}`);
     }
   }
 });
@@ -71,13 +72,15 @@ Deno.test("uncertain results never claim available:true", async () => {
 Deno.test("IANA RDAP bootstrap routes major TLDs to authoritative servers", async () => {
   // Import the bootstrap loader directly to verify the IANA mapping populates.
   const mod = await import("./index.ts");
-  // loadRdapBootstrap is exported for testability.
   const loader = (mod as unknown as { loadRdapBootstrap: () => Promise<Map<string, string[]>> }).loadRdapBootstrap;
   assert(typeof loader === "function", "loadRdapBootstrap must be exported");
   const map = await loader();
-  // The bootstrap file lists hundreds of TLDs; major ones must be present.
+  // The bootstrap file lists hundreds of TLDs; major gTLDs must be present.
   assert(map.size > 100, `expected >100 TLDs mapped, got ${map.size}`);
-  for (const tld of ["com", "net", "org", "io", "app", "dev"]) {
+  // .com/.net/.org are always in IANA's dns.json; .app/.dev are Google gTLDs.
+  // .io is intentionally NOT tested — Afilias-operated and historically missing
+  // from dns.json; our code falls back to rdap.org for those.
+  for (const tld of ["com", "net", "org", "app", "dev"]) {
     const bases = map.get(tld);
     assert(bases && bases.length > 0, `TLD ${tld} should have an RDAP base URL`);
     for (const base of bases) {
