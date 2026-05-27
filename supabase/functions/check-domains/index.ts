@@ -156,11 +156,7 @@ export async function detectAftermarket(
   if (!hit) return null;
   return { marketplace: hit.marketplace, listingUrl: hit.buildUrl(domain) };
 }
-    return any ? "no_records" : "error";
-  } catch {
-    return "error";
-  }
-}
+
 
 // ---------------------------------------------------------------------------
 // RDAP — authoritative for "registered yes/no" but no pricing.
