@@ -591,6 +591,33 @@ Deno.serve(async (req) => {
     const fallback = await pMap(needsFallback, 10, (d) => resolveDomain(d));
     fresh.push(...fallback);
 
+    // ---- Aftermarket NS detection ---------------------------------------
+    // For every "taken" result, peek at the NS records — if they point to a
+    // known marketplace (Sedo, Dan, Afternic, HugeDomains, …) flag it as
+    // forSale so the UI can surface a buy-listing link instead of a dead end.
+    const aftermarketTargets = fresh.filter(
+      (r) => !r.available && !r.uncertain && !r.forSale
+    );
+    if (aftermarketTargets.length > 0) {
+      const hits = await pMap(aftermarketTargets, 10, async (r) => ({
+        domain: r.domain,
+        hit: await detectAftermarket(r.domain),
+      }));
+      for (const { domain, hit } of hits) {
+        if (!hit) continue;
+        const idx = fresh.findIndex((r) => r.domain === domain);
+        if (idx >= 0) {
+          fresh[idx] = {
+            ...fresh[idx],
+            forSale: true,
+            forSaleVia: hit.marketplace,
+            listingUrl: hit.listingUrl,
+          };
+        }
+      }
+    }
+
+
     // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
     // Porkbun is the only source that reliably tells us whether an "available"
     // short/premium-tier name is actually registerable at standard price.
