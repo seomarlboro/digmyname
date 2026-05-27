@@ -76,6 +76,60 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
     );
   }
 
+  // Uncertain — APIs failed or disagreed. Show retry instead of misleading "Taken".
+  if (isUncertain) {
+    if (compact) {
+      return (
+        <div className="grid border-b border-border px-4 py-4 transition-colors hover:bg-secondary/50" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-foreground">
+              {name}.<span className="text-primary">{ext}</span>
+            </h3>
+            <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
+          </div>
+          <span className="text-xs text-muted-foreground min-w-[80px]">Couldn't verify</span>
+          <span className="min-w-[80px]" />
+          <span />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground"
+            onClick={() => onRetry?.(domain)}
+            disabled={!onRetry}
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Retry
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <div className="card-hover rounded-xl border border-amber-500/30 bg-card p-4 sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+              {name}.<span className="text-primary">{ext}</span>
+              <AlertCircle className="h-4 w-4 text-amber-500" />
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Couldn't verify availability — registry didn't respond. Try again.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="gap-1.5 rounded-lg border-amber-500/40 text-amber-600 hover:text-amber-600 dark:text-amber-400"
+            onClick={() => onRetry?.(domain)}
+            disabled={!onRetry}
+          >
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+
   if (compact) {
     return (
       <>
