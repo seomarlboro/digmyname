@@ -669,6 +669,9 @@ Deno.serve(async (req) => {
           godaddy_price: r.price ?? null,
           premium: r.premium ?? false,
           likely_premium: r.likelyPremium ?? false,
+          for_sale: r.forSale ?? false,
+          for_sale_via: r.forSaleVia ?? null,
+          listing_url: r.listingUrl ?? null,
         },
         expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
       }));
