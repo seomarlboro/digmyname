@@ -86,6 +86,10 @@ export interface DomainResult {
   likelyPremium?: boolean;
   /** APIs disagreed or failed — treat with caution */
   uncertain?: boolean;
+  /** Registered but parked on a marketplace (Sedo, Dan, Afternic, …). */
+  forSale?: boolean;
+  forSaleVia?: string;
+  listingUrl?: string;
 }
 
 const tldMap = new Map(TLD_LIST.map((t) => [t.extension, t]));
