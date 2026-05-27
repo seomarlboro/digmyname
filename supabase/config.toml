@@ -1,1 +1,8 @@
 project_id = "ifamsapmecefkyspmojb"
+
+[functions.check-domains]
+verify_jwt = false
+
+[functions.fetch-registrar-prices]
+verify_jwt = false
+
