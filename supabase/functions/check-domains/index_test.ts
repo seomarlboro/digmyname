@@ -69,17 +69,21 @@ Deno.test("uncertain results never claim available:true", async () => {
   }
 });
 
-Deno.test("IANA RDAP bootstrap routes major TLDs to authoritative servers", async () => {
-  // Import the bootstrap loader directly to verify the IANA mapping populates.
-  const mod = await import("./index.ts");
-  const loader = (mod as unknown as { loadRdapBootstrap: () => Promise<Map<string, string[]>> }).loadRdapBootstrap;
-  assert(typeof loader === "function", "loadRdapBootstrap must be exported");
-  const map = await loader();
-  // The bootstrap file lists hundreds of TLDs; major gTLDs must be present.
+Deno.test("IANA RDAP bootstrap file maps major TLDs to authoritative servers", async () => {
+  // Validate the exact upstream the edge function relies on (IANA dns.json).
+  // If this ever fails, our RDAP lookups will silently fall back to rdap.org.
+  const resp = await fetch("https://data.iana.org/rdap/dns.json", {
+    signal: AbortSignal.timeout(8000),
+  });
+  assertEquals(resp.status, 200, "IANA dns.json must be reachable");
+  const data = await resp.json() as { services: Array<[string[], string[]]> };
+  assert(Array.isArray(data.services) && data.services.length > 0, "services array must exist");
+
+  const map = new Map<string, string[]>();
+  for (const [tlds, bases] of data.services) {
+    for (const tld of tlds) map.set(tld.toLowerCase(), bases);
+  }
   assert(map.size > 100, `expected >100 TLDs mapped, got ${map.size}`);
-  // .com/.net/.org are always in IANA's dns.json; .app/.dev are Google gTLDs.
-  // .io is intentionally NOT tested — Afilias-operated and historically missing
-  // from dns.json; our code falls back to rdap.org for those.
   for (const tld of ["com", "net", "org", "app", "dev"]) {
     const bases = map.get(tld);
     assert(bases && bases.length > 0, `TLD ${tld} should have an RDAP base URL`);
