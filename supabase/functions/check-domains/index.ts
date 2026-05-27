@@ -27,6 +27,10 @@ interface DomainCheckResult {
   premium?: boolean;
   uncertain?: boolean;
   likelyPremium?: boolean;
+  /** Registered but parked on an aftermarket marketplace (Sedo, Dan, Afternic, …). */
+  forSale?: boolean;
+  forSaleVia?: string;
+  listingUrl?: string;
 }
 
 // TLDs where registries actively price short names as premium / aftermarket.
