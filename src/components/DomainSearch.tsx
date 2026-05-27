@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useRef } from "react";
-import { Search, X, Loader2, Sparkles, CheckCircle2, LayoutGrid, List } from "lucide-react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { Search, X, Loader2, Sparkles, CheckCircle2, LayoutGrid, List, AlertCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/use-mobile";
 import DomainCard from "@/components/DomainCard";
@@ -87,9 +87,31 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
   const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
-  const availableCount = useMemo(() => checkedResults.filter((r) => r.available).length, [checkedResults]);
-  const takenCount = useMemo(() => checkedResults.filter((r) => !r.available).length, [checkedResults]);
+  const availableCount = useMemo(() => checkedResults.filter((r) => r.available && !r.uncertain).length, [checkedResults]);
+  const uncertainCount = useMemo(() => checkedResults.filter((r) => r.uncertain).length, [checkedResults]);
+  const takenCount = useMemo(() => checkedResults.filter((r) => !r.available && !r.uncertain).length, [checkedResults]);
   const stillChecking = checkingResults.length > 0;
+
+  const retryDomain = useCallback(async (domain: string) => {
+    setResults((prev) => prev.map((r) => (r.domain === domain ? { ...r, checking: true } : r)));
+    const availMap = await checkDomainsAvailability([domain]);
+    setResults((prev) =>
+      prev.map((r) => {
+        if (r.domain !== domain) return r;
+        const info = availMap.get(domain);
+        if (!info) return { ...r, checking: false, uncertain: true };
+        return {
+          ...r,
+          checking: false,
+          available: info.available,
+          gdPrice: info.price,
+          premium: info.premium,
+          likelyPremium: info.likelyPremium,
+          uncertain: info.uncertain,
+        };
+      })
+    );
+  }, []);
 
   const hasQuery = query.trim().length > 0;
 
@@ -177,6 +199,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
               <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-foreground">{results.length}</span> found</span>
               <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-available">{availableCount}</span> available</span>
               <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-muted-foreground/60">{takenCount}</span> taken</span>
+              {uncertainCount > 0 && (
+                <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-amber-500">{uncertainCount}</span> unverified</span>
+              )}
               {stillChecking && (
                 <span className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -212,9 +237,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
             )}
             <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
               {results
-                .filter((r) => !r.checking && r.available)
+                .filter((r) => !r.checking && r.available && !r.uncertain)
                 .map((r) => (
-                  <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} />
+                  <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
                 ))}
             </div>
 
@@ -229,7 +254,25 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                   {checkingResults
                     .slice(0, 20)
                     .map((r) => (
-                      <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} />
+                      <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
+                    ))}
+                </div>
+              </>
+            )}
+
+            {/* Uncertain — couldn't verify */}
+            {uncertainCount > 0 && (
+              <>
+                <div className="mb-4 mt-8 flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-amber-500" />
+                  <h2 className="text-lg font-bold text-foreground">Couldn't verify</h2>
+                </div>
+                <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
+                  {results
+                    .filter((r) => !r.checking && r.uncertain)
+                    .slice(0, 10)
+                    .map((r) => (
+                      <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
                     ))}
                 </div>
               </>
@@ -244,10 +287,10 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                 </div>
                 <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
                   {results
-                    .filter((r) => !r.checking && !r.available)
+                    .filter((r) => !r.checking && !r.available && !r.uncertain)
                     .slice(0, 10)
                     .map((r) => (
-                      <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} />
+                      <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
                     ))}
                 </div>
               </>
