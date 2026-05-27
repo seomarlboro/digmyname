@@ -151,8 +151,8 @@ export function generateDomainList(query: string, withVariations = false, allowe
 /** Check real availability via edge function */
 export async function checkDomainsAvailability(
   domains: string[]
-): Promise<Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean }>> {
-  const resultMap = new Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean }>();
+): Promise<Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>> {
+  const resultMap = new Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>();
 
   try {
     const { data, error } = await supabase.functions.invoke("check-domains", {
@@ -172,6 +172,9 @@ export async function checkDomainsAvailability(
           premium: r.premium,
           likelyPremium: r.likelyPremium,
           uncertain: r.uncertain,
+          forSale: r.forSale,
+          forSaleVia: r.forSaleVia,
+          listingUrl: r.listingUrl,
         });
       }
     }
