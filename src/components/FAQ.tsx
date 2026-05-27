@@ -5,7 +5,7 @@ const faqs = [
   },
   {
     q: "How does the availability check work?",
-    a: "DigMyName uses a hybrid two-stage system: a fast DNS resolution for instant signal and an authoritative RDAP query for the final status. Results are cached for 6 hours.",
+    a: "DigMyName cross-checks four independent sources — Domainr, the IANA RDAP bootstrap, DNS (Cloudflare DoH), and Porkbun for premium pricing. When sources disagree we label the result Unverified instead of guessing. Full breakdown on the How it works page.",
   },
   {
     q: "Why is .com cheaper than .io or .ai?",

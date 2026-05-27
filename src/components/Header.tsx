@@ -28,6 +28,9 @@ const Header = () => {
             <Link to="/pricing" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
               Pricing
             </Link>
+            <Link to="/how-it-works" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
+              How it works
+            </Link>
           </nav>
 
           <div className="flex items-center gap-2">
