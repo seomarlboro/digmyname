@@ -378,6 +378,54 @@ const HowItWorks = () => {
           </dl>
         </section>
 
+        {/* Public API for agents */}
+        <section className="py-12">
+          <h2 className="mb-3 text-2xl font-bold text-foreground">
+            For AI agents & developers
+          </h2>
+          <p className="mb-6 max-w-2xl text-muted-foreground">
+            We expose a free, no-auth JSON API so ChatGPT, Claude, Perplexity
+            and your own scripts can answer "is this domain available?"
+            without scraping. 10 requests / 60 s / IP.
+          </p>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="mb-3 text-sm font-bold text-foreground">
+              Quick example
+            </div>
+            <pre className="overflow-x-auto rounded-md bg-muted/40 p-3 text-xs leading-relaxed text-foreground">
+{`curl "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/check?domain=acme.io"`}
+            </pre>
+            <ul className="mt-4 space-y-1 text-sm text-muted-foreground">
+              <li>
+                <code className="text-foreground">GET /check?domain=</code> — single domain
+              </li>
+              <li>
+                <code className="text-foreground">GET /search?q=&amp;tlds=</code> — multi-TLD lookup
+              </li>
+              <li>
+                <code className="text-foreground">GET /registrars?tld=</code> — cheapest registrars
+              </li>
+              <li>
+                <code className="text-foreground">GET /openapi.json</code> — full schema
+              </li>
+            </ul>
+            <div className="mt-4 text-xs text-muted-foreground">
+              Plugin manifest:{" "}
+              <a
+                href="/.well-known/ai-plugin.json"
+                className="underline hover:text-foreground"
+              >
+                /.well-known/ai-plugin.json
+              </a>{" "}
+              · LLM docs:{" "}
+              <a href="/llms.txt" className="underline hover:text-foreground">
+                /llms.txt
+              </a>
+            </div>
+          </div>
+        </section>
+
+
         {/* CTA */}
         <section className="py-16 text-center">
           <h2 className="mb-4 text-3xl font-extrabold text-foreground">
