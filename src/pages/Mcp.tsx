@@ -112,6 +112,7 @@ const Mcp = () => {
               <Button asChild size="lg" variant="outline" className="gap-2">
                 <Link to="/" onClick={() => trackMcpEvent("click", "try_web")}>Try the web version</Link>
               </Button>
+            </div>
           </section>
 
           {/* Three formats */}
@@ -119,8 +120,6 @@ const Mcp = () => {
             <h2 className="text-2xl font-bold mb-6 text-center">Three drop-in formats</h2>
             <div className="grid md:grid-cols-3 gap-4">
               {formats.map((f) => (
-                <a
-                  key={f.title}
                 <a
                   key={f.title}
                   href={f.href}
