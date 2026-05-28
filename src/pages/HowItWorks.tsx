@@ -168,7 +168,8 @@ const HowItWorks = () => {
 
       <Header />
 
-      <main className="mx-auto max-w-4xl px-4">
+      <main className="mx-auto max-w-[968px] px-4">
+
         {/* Hero */}
         <section className="pt-16 pb-12 text-center">
           <Badge variant="secondary" className="mb-5 gap-1.5">
