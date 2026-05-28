@@ -130,6 +130,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           premium: info.premium,
           likelyPremium: info.likelyPremium,
           uncertain: info.uncertain,
+          forSale: info.forSale,
+          forSaleVia: info.forSaleVia,
+          listingUrl: info.listingUrl,
         };
       })
     );
