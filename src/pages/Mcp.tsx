@@ -60,12 +60,16 @@ const configSnippet = `{
 const Mcp = () => {
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    trackMcpEvent("page_view", "mcp");
+  }, []);
+
   const copyConfig = async () => {
     await navigator.clipboard.writeText(configSnippet);
     setCopied(true);
+    trackMcpEvent("copy_config", "claude_desktop");
     setTimeout(() => setCopied(false), 2000);
   };
-
   return (
     <>
       <Helmet>
@@ -99,12 +103,15 @@ const Mcp = () => {
                 <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
                   <Github className="w-5 h-5" />
                   View on GitHub
+              <Button asChild size="lg" className="gap-2">
+                <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackMcpEvent("click", "github_hero")}>
+                  <Github className="w-5 h-5" />
+                  View on GitHub
                 </a>
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2">
-                <Link to="/">Try the web version</Link>
+                <Link to="/" onClick={() => trackMcpEvent("click", "try_web")}>Try the web version</Link>
               </Button>
-            </div>
           </section>
 
           {/* Three formats */}
@@ -114,9 +121,12 @@ const Mcp = () => {
               {formats.map((f) => (
                 <a
                   key={f.title}
+                <a
+                  key={f.title}
                   href={f.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackMcpEvent("click", `format_${f.title.toLowerCase().replace(/\s+/g, "_")}`)}
                   className="group p-6 rounded-xl border border-border bg-card/50 backdrop-blur hover:border-primary/50 transition-all"
                 >
                   <div className="flex items-center justify-between mb-3">
