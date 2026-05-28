@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle } from "lucide-react";
+import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
@@ -165,14 +165,30 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
             </>
           ) : (
             <>
-              <span />
+              {result.forSale ? (
+                <span className="text-sm font-semibold text-amber-500 flex items-center gap-1">
+                  <Tag className="h-3.5 w-3.5" />
+                  For sale
+                </span>
+              ) : (
+                <span />
+              )}
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground" asChild>
-                  <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    Whois
-                  </a>
-                </Button>
+                {result.forSale && result.listingUrl ? (
+                  <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4" asChild>
+                    <a href={result.listingUrl} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      {result.forSaleVia ?? "View"}
+                    </a>
+                  </Button>
+                ) : (
+                  <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground" asChild>
+                    <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Whois
+                    </a>
+                  </Button>
+                )}
                 <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-primary" asChild aria-label={`Open ${domain}`}>
                   <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
                     <ArrowUpRight className="h-4 w-4" />
@@ -216,7 +232,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
 
           {/* Right: price + actions */}
           <div className="flex items-center gap-3 sm:gap-4">
-            {available && (
+            {available ? (
               <div className="sm:text-right">
                 {isPremium ? (
                   <>
@@ -248,7 +264,17 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   </>
                 )}
               </div>
-            )}
+            ) : result.forSale ? (
+              <div className="sm:text-right">
+                <p className="text-xl font-bold text-amber-500 flex items-center gap-1.5 sm:justify-end">
+                  <Tag className="h-4 w-4" />
+                  For sale
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Listed on {result.forSaleVia ?? "marketplace"}
+                </p>
+              </div>
+            ) : null}
 
             <Button
               variant="ghost"
@@ -268,6 +294,20 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   Buy Now
                 </a>
               </Button>
+            ) : result.forSale && result.listingUrl ? (
+              <div className="flex items-center gap-2">
+                <Button className="gap-1.5 rounded-lg btn-gradient border-0" asChild>
+                  <a href={result.listingUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4" />
+                    View listing
+                  </a>
+                </Button>
+                <Button variant="outline" size="icon" className="rounded-lg" asChild aria-label={`Open ${domain}`}>
+                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
+                    <ArrowUpRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="outline" className="gap-1.5 rounded-lg" asChild>

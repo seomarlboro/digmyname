@@ -27,6 +27,10 @@ interface DomainCheckResult {
   premium?: boolean;
   uncertain?: boolean;
   likelyPremium?: boolean;
+  /** Registered but parked on an aftermarket marketplace (Sedo, Dan, Afternic, …). */
+  forSale?: boolean;
+  forSaleVia?: string;
+  listingUrl?: string;
 }
 
 // TLDs where registries actively price short names as premium / aftermarket.
@@ -91,6 +95,69 @@ async function checkDnsDoH(domain: string): Promise<DnsState> {
     return "error";
   }
 }
+
+
+
+// ---------------------------------------------------------------------------
+// Aftermarket / parked-domain detection (NS-based).
+//
+// When a domain is registered (taken) we additionally check whether its
+// nameservers belong to a known marketplace / parking provider. If yes, the
+// domain is almost certainly listed for resale and we surface a direct
+// listing link instead of just saying "Taken".
+// ---------------------------------------------------------------------------
+interface AftermarketHit {
+  marketplace: string;
+  buildUrl: (domain: string) => string;
+}
+
+const AFTERMARKET_NS_PATTERNS: Array<[RegExp, AftermarketHit]> = [
+  [/(^|\.)sedoparking\.com$/i,    { marketplace: "Sedo",         buildUrl: (d) => `https://sedo.com/search/?keyword=${encodeURIComponent(d)}&language=us` }],
+  [/(^|\.)dan\.com$/i,            { marketplace: "Dan.com",      buildUrl: (d) => `https://dan.com/buy-domain/${d}` }],
+  [/(^|\.)(afternic|dnsowl)\.com$/i, { marketplace: "Afternic",  buildUrl: (d) => `https://www.afternic.com/domain/${d}` }],
+  [/(^|\.)hugedomains\.com$/i,    { marketplace: "HugeDomains",  buildUrl: (d) => `https://www.hugedomains.com/domain_profile.aspx?d=${d.split(".").slice(0, -1).join(".")}&e=${d.split(".").pop()}` }],
+  [/(^|\.)domainmarket\.com$/i,   { marketplace: "DomainMarket", buildUrl: (d) => `https://www.domainmarket.com/buynow/${d}` }],
+  [/(^|\.)uniregistrymarket\.link$/i, { marketplace: "Uniregistry", buildUrl: (d) => `https://uniregistry.com/market/domain/${d}` }],
+  [/(^|\.)(atom|squadhelp)\.com$/i, { marketplace: "Atom.com",   buildUrl: (d) => `https://www.atom.com/name/${d.split(".")[0]}` }],
+  [/(^|\.)(bodis|parkingcrew|above|saw|namebright|fabulous|voodoo|undeveloped|parklogic)\.(com|net|link)$/i, { marketplace: "Aftermarket", buildUrl: (d) => `https://www.afternic.com/domain/${d}` }],
+];
+
+export function classifyAftermarket(nsHosts: string[]): AftermarketHit | null {
+  for (const raw of nsHosts) {
+    const host = raw.replace(/\.$/, "").toLowerCase();
+    for (const [re, hit] of AFTERMARKET_NS_PATTERNS) {
+      if (re.test(host)) return hit;
+    }
+  }
+  return null;
+}
+
+async function fetchNsRecords(domain: string): Promise<string[]> {
+  try {
+    const r = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=NS`, {
+      headers: { Accept: "application/dns-json" },
+      signal: AbortSignal.timeout(2000),
+    });
+    if (!r.ok) return [];
+    const data = await r.json();
+    if (!Array.isArray(data?.Answer)) return [];
+    return data.Answer
+      .map((a: { data?: string }) => String(a?.data ?? "").replace(/\.$/, "").toLowerCase())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+export async function detectAftermarket(
+  domain: string
+): Promise<{ marketplace: string; listingUrl: string } | null> {
+  const ns = await fetchNsRecords(domain);
+  const hit = classifyAftermarket(ns);
+  if (!hit) return null;
+  return { marketplace: hit.marketplace, listingUrl: hit.buildUrl(domain) };
+}
+
 
 // ---------------------------------------------------------------------------
 // RDAP — authoritative for "registered yes/no" but no pricing.
@@ -475,6 +542,9 @@ Deno.serve(async (req) => {
           price: meta.godaddy_price as number | undefined,
           premium: meta.premium as boolean | undefined,
           likelyPremium: meta.likely_premium as boolean | undefined,
+          forSale: meta.for_sale as boolean | undefined,
+          forSaleVia: meta.for_sale_via as string | undefined,
+          listingUrl: meta.listing_url as string | undefined,
         });
       }
     }
@@ -521,6 +591,33 @@ Deno.serve(async (req) => {
 
     const fallback = await pMap(needsFallback, 10, (d) => resolveDomain(d));
     fresh.push(...fallback);
+
+    // ---- Aftermarket NS detection ---------------------------------------
+    // For every "taken" result, peek at the NS records — if they point to a
+    // known marketplace (Sedo, Dan, Afternic, HugeDomains, …) flag it as
+    // forSale so the UI can surface a buy-listing link instead of a dead end.
+    const aftermarketTargets = fresh.filter(
+      (r) => !r.available && !r.uncertain && !r.forSale
+    );
+    if (aftermarketTargets.length > 0) {
+      const hits = await pMap(aftermarketTargets, 10, async (r) => ({
+        domain: r.domain,
+        hit: await detectAftermarket(r.domain),
+      }));
+      for (const { domain, hit } of hits) {
+        if (!hit) continue;
+        const idx = fresh.findIndex((r) => r.domain === domain);
+        if (idx >= 0) {
+          fresh[idx] = {
+            ...fresh[idx],
+            forSale: true,
+            forSaleVia: hit.marketplace,
+            listingUrl: hit.listingUrl,
+          };
+        }
+      }
+    }
+
 
     // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
     // Porkbun is the only source that reliably tells us whether an "available"
@@ -573,6 +670,9 @@ Deno.serve(async (req) => {
           godaddy_price: r.price ?? null,
           premium: r.premium ?? false,
           likely_premium: r.likelyPremium ?? false,
+          for_sale: r.forSale ?? false,
+          for_sale_via: r.forSaleVia ?? null,
+          listing_url: r.listingUrl ?? null,
         },
         expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
       }));

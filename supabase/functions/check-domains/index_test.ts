@@ -2,6 +2,7 @@
 // Loads .env so VITE_SUPABASE_URL / KEY are available.
 import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { classifyAftermarket } from "./index.ts";
 
 const SUPABASE_URL = Deno.env.get("VITE_SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY")!;
@@ -91,4 +92,49 @@ Deno.test("IANA RDAP bootstrap file maps major TLDs to authoritative servers", a
       assert(base.startsWith("https://"), `RDAP base for ${tld} should be https, got ${base}`);
     }
   }
+});
+
+// ---- Aftermarket NS classifier (pure unit tests, no network) ----------------
+
+Deno.test("classifyAftermarket: Sedo parking NS → Sedo", () => {
+  const hit = classifyAftermarket(["ns1.sedoparking.com.", "ns2.sedoparking.com."]);
+  assert(hit, "expected aftermarket hit");
+  assertEquals(hit!.marketplace, "Sedo");
+  assert(hit!.buildUrl("example.com").startsWith("https://sedo.com/"));
+});
+
+Deno.test("classifyAftermarket: Dan.com NS → Dan.com", () => {
+  const hit = classifyAftermarket(["ns1.dan.com", "ns2.dan.com"]);
+  assert(hit);
+  assertEquals(hit!.marketplace, "Dan.com");
+  assertEquals(hit!.buildUrl("example.io"), "https://dan.com/buy-domain/example.io");
+});
+
+Deno.test("classifyAftermarket: Afternic / dnsowl NS → Afternic", () => {
+  const a = classifyAftermarket(["ns1.afternic.com"]);
+  const b = classifyAftermarket(["ns01.dnsowl.com"]);
+  assertEquals(a?.marketplace, "Afternic");
+  assertEquals(b?.marketplace, "Afternic");
+});
+
+Deno.test("classifyAftermarket: HugeDomains NS → HugeDomains", () => {
+  const hit = classifyAftermarket(["ns1.hugedomains.com"]);
+  assertEquals(hit?.marketplace, "HugeDomains");
+  assert(hit!.buildUrl("foo.com").includes("d=foo"));
+});
+
+Deno.test("classifyAftermarket: regular nameservers → null", () => {
+  assertEquals(classifyAftermarket(["ns1.google.com", "ns2.google.com"]), null);
+  assertEquals(classifyAftermarket(["dns1.p01.nsone.net"]), null);
+  assertEquals(classifyAftermarket([]), null);
+});
+
+Deno.test("classifyAftermarket: case-insensitive + trailing dot tolerated", () => {
+  const hit = classifyAftermarket(["NS1.SedoParking.com."]);
+  assertEquals(hit?.marketplace, "Sedo");
+});
+
+Deno.test("classifyAftermarket: anti-spoof — sedoparking-as-subdomain on other root is ignored", () => {
+  // attacker.com using "sedoparking.com.attacker.example" must NOT match.
+  assertEquals(classifyAftermarket(["ns1.sedoparking.com.attacker.example"]), null);
 });
