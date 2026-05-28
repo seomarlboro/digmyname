@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Pricing from "./pages/Pricing";
 import Favorites from "./pages/Favorites";
 import HowItWorks from "./pages/HowItWorks";
+import Mcp from "./pages/Mcp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,9 @@ const App = () => (
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/about" element={<HowItWorks />} />
+              <Route path="/mcp" element={<Mcp />} />
+              <Route path="/skill" element={<Mcp />} />
+              <Route path="/gpt" element={<Mcp />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
