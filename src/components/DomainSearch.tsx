@@ -59,7 +59,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       const PRIORITY_SIZE = 20;
       const BATCH_SIZE = 20;
 
-      const applyBatch = (availMap: Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean }>) => {
+      const applyBatch = (availMap: Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>) => {
         if (cancelled) return;
         setResults((prev) =>
           prev.map((r) => {
@@ -73,6 +73,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                 premium: info.premium,
                 likelyPremium: info.likelyPremium,
                 uncertain: info.uncertain,
+                forSale: info.forSale,
+                forSaleVia: info.forSaleVia,
+                listingUrl: info.listingUrl,
               };
             }
             return r;
