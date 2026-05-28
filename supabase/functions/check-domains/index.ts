@@ -602,10 +602,12 @@ Deno.serve(async (req) => {
       (r) => !r.available && !r.uncertain && !r.forSale
     );
     if (aftermarketTargets.length > 0) {
-      const hits = await pMap(aftermarketTargets, 10, async (r) => ({
-        domain: r.domain,
-        hit: await detectAftermarket(r.domain),
-      }));
+      const hits = await pMap(aftermarketTargets, 10, async (r) => {
+        const ns = await fetchNsRecords(r.domain);
+        const hit = classifyAftermarket(ns);
+        console.log(`aftermarket-probe domain=${r.domain} ns=[${ns.join(",")}] hit=${hit?.marketplace ?? "none"}`);
+        return { domain: r.domain, hit: hit ? { marketplace: hit.marketplace, listingUrl: hit.buildUrl(r.domain) } : null };
+      });
       for (const { domain, hit } of hits) {
         if (!hit) continue;
         const idx = fresh.findIndex((r) => r.domain === domain);
