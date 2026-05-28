@@ -1,10 +1,11 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Github, Puzzle, Sparkles, Bot, Check, Copy, ExternalLink, Terminal } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { trackMcpEvent } from "@/lib/trackMcpEvent";
 
 const GITHUB_URL = "https://github.com/seomarlboro/domain-check-skills";
 
