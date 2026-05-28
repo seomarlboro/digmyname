@@ -1,0 +1,1 @@
+DELETE FROM public.domain_cache WHERE domain IN ('stakeout.io','stakeout.net','stakeout.org','stakeout.com');
