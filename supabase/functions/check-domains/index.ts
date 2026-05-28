@@ -119,6 +119,8 @@ const AFTERMARKET_NS_PATTERNS: Array<[RegExp, AftermarketHit]> = [
   [/(^|\.)domainmarket\.com$/i,   { marketplace: "DomainMarket", buildUrl: (d) => `https://www.domainmarket.com/buynow/${d}` }],
   [/(^|\.)uniregistrymarket\.link$/i, { marketplace: "Uniregistry", buildUrl: (d) => `https://uniregistry.com/market/domain/${d}` }],
   [/(^|\.)(atom|squadhelp)\.com$/i, { marketplace: "Atom.com",   buildUrl: (d) => `https://www.atom.com/name/${d.split(".")[0]}` }],
+  // Spaceship marketplace parks listed domains on launch{1,2}.spaceship.net
+  [/(^|\.)spaceship\.net$/i,      { marketplace: "Spaceship",    buildUrl: (d) => `https://www.spaceship.com/domain-search/?query=${encodeURIComponent(d)}` }],
   [/(^|\.)(bodis|parkingcrew|above|saw|namebright|fabulous|voodoo|undeveloped|parklogic)\.(com|net|link)$/i, { marketplace: "Aftermarket", buildUrl: (d) => `https://www.afternic.com/domain/${d}` }],
 ];
 
