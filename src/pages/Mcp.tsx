@@ -80,6 +80,24 @@ const Mcp = () => {
           content="Check domain availability from any LLM. Free MCP server, Claude Skill and Custom GPT — 7 registrars, 52 TLDs, no hallucinations."
         />
         <link rel="canonical" href="https://digmyname.com/mcp" />
+        <meta property="og:title" content="Domain Check Skills — MCP / Claude Skill / Custom GPT" />
+        <meta property="og:description" content="Plug live domain availability into any LLM. Free, open-source, MIT." />
+        <meta property="og:url" content="https://digmyname.com/mcp" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "domain-check-skills-mcp",
+          applicationCategory: "DeveloperApplication",
+          operatingSystem: "Cross-platform",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          softwareVersion: "0.1.0",
+          downloadUrl: "https://www.npmjs.com/package/domain-check-skills-mcp",
+          codeRepository: GITHUB_URL,
+          license: "https://opensource.org/licenses/MIT",
+          description: "MCP server, Claude Skill and Custom GPT for live domain availability across 52 TLDs and 7 registrars.",
+        })}</script>
       </Helmet>
 
       <div className="min-h-screen bg-background">
@@ -99,6 +117,21 @@ const Mcp = () => {
               Plug live domain availability into the LLMs you already use. MCP server, Claude Skill,
               and Custom GPT — all powered by the DigMyName engine.
             </p>
+
+            {/* Live badges */}
+            <div className="flex flex-wrap gap-2 justify-center mb-6">
+              <a href="https://www.npmjs.com/package/domain-check-skills-mcp" target="_blank" rel="noopener noreferrer" aria-label="npm version">
+                <img src="https://img.shields.io/npm/v/domain-check-skills-mcp?color=145DFB&label=npm&style=flat-square" alt="npm version" />
+              </a>
+              <a href="https://www.npmjs.com/package/domain-check-skills-mcp" target="_blank" rel="noopener noreferrer" aria-label="npm downloads">
+                <img src="https://img.shields.io/npm/dm/domain-check-skills-mcp?color=145DFB&label=downloads&style=flat-square" alt="npm downloads" />
+              </a>
+              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" aria-label="GitHub stars">
+                <img src="https://img.shields.io/github/stars/seomarlboro/domain-check-skills?color=145DFB&style=flat-square" alt="GitHub stars" />
+              </a>
+              <img src="https://img.shields.io/badge/license-MIT-145DFB?style=flat-square" alt="MIT license" />
+            </div>
+
             <div className="flex flex-wrap gap-3 justify-center">
               <Button asChild size="lg" className="gap-2">
                 <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackMcpEvent("click", "github_hero")}>
@@ -111,6 +144,7 @@ const Mcp = () => {
               </Button>
             </div>
           </section>
+
 
           {/* Three formats */}
           <section className="mb-16">
