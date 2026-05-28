@@ -232,7 +232,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
 
           {/* Right: price + actions */}
           <div className="flex items-center gap-3 sm:gap-4">
-            {available && (
+            {available ? (
               <div className="sm:text-right">
                 {isPremium ? (
                   <>
@@ -264,7 +264,17 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   </>
                 )}
               </div>
-            )}
+            ) : result.forSale ? (
+              <div className="sm:text-right">
+                <p className="text-xl font-bold text-amber-500 flex items-center gap-1.5 sm:justify-end">
+                  <Tag className="h-4 w-4" />
+                  For sale
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Listed on {result.forSaleVia ?? "marketplace"}
+                </p>
+              </div>
+            ) : null}
 
             <Button
               variant="ghost"
@@ -284,6 +294,20 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   Buy Now
                 </a>
               </Button>
+            ) : result.forSale && result.listingUrl ? (
+              <div className="flex items-center gap-2">
+                <Button className="gap-1.5 rounded-lg btn-gradient border-0" asChild>
+                  <a href={result.listingUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4" />
+                    View listing
+                  </a>
+                </Button>
+                <Button variant="outline" size="icon" className="rounded-lg" asChild aria-label={`Open ${domain}`}>
+                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
+                    <ArrowUpRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="outline" className="gap-1.5 rounded-lg" asChild>
