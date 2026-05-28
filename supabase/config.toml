@@ -6,3 +6,6 @@ verify_jwt = false
 [functions.fetch-registrar-prices]
 verify_jwt = false
 
+[functions.public-api]
+verify_jwt = false
+
