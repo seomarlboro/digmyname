@@ -65,6 +65,33 @@ export type Database = {
         }
         Relationships: []
       }
+      mcp_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          referrer: string | null
+          target: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          referrer?: string | null
+          target?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          referrer?: string | null
+          target?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

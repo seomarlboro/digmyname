@@ -1,10 +1,11 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Github, Puzzle, Sparkles, Bot, Check, Copy, ExternalLink, Terminal } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { trackMcpEvent } from "@/lib/trackMcpEvent";
 
 const GITHUB_URL = "https://github.com/seomarlboro/domain-check-skills";
 
@@ -59,12 +60,16 @@ const configSnippet = `{
 const Mcp = () => {
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    trackMcpEvent("page_view", "mcp");
+  }, []);
+
   const copyConfig = async () => {
     await navigator.clipboard.writeText(configSnippet);
     setCopied(true);
+    trackMcpEvent("copy_config", "claude_desktop");
     setTimeout(() => setCopied(false), 2000);
   };
-
   return (
     <>
       <Helmet>
@@ -95,13 +100,13 @@ const Mcp = () => {
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Button asChild size="lg" className="gap-2">
-                <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+                <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackMcpEvent("click", "github_hero")}>
                   <Github className="w-5 h-5" />
                   View on GitHub
                 </a>
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2">
-                <Link to="/">Try the web version</Link>
+                <Link to="/" onClick={() => trackMcpEvent("click", "try_web")}>Try the web version</Link>
               </Button>
             </div>
           </section>
@@ -116,6 +121,7 @@ const Mcp = () => {
                   href={f.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackMcpEvent("click", `format_${f.title.toLowerCase().replace(/\s+/g, "_")}`)}
                   className="group p-6 rounded-xl border border-border bg-card/50 backdrop-blur hover:border-primary/50 transition-all"
                 >
                   <div className="flex items-center justify-between mb-3">
