@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle } from "lucide-react";
+import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
