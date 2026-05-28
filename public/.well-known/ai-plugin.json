@@ -7,7 +7,7 @@
   "auth": { "type": "none" },
   "api": {
     "type": "openapi",
-    "url": "https://digmyname.com/api/openapi.json"
+    "url": "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/openapi.json"
   },
   "logo_url": "https://digmyname.com/favicon.svg",
   "contact_email": "hello@digmyname.com",

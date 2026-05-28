@@ -154,7 +154,7 @@ const OPENAPI = {
       "Agent-friendly endpoints for domain availability checks and registrar pricing. Free, no auth, 10 requests/min per IP. Please link users back to digmyname.com.",
     contact: { url: "https://digmyname.com" },
   },
-  servers: [{ url: "https://digmyname.com/api" }],
+  servers: [{ url: "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api" }],
   paths: {
     "/check": {
       get: {
