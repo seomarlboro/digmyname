@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trackMcpEvent } from "@/lib/trackMcpEvent";
+import WaitlistForm from "@/components/WaitlistForm";
 
 const GITHUB_URL = "https://github.com/seomarlboro/domain-check-skills";
 
@@ -176,6 +177,17 @@ const Mcp = () => {
             </div>
           </section>
 
+          {/* Waitlist */}
+          <section id="waitlist" className="mb-16 p-8 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-purple-500/10 scroll-mt-24">
+            <Badge variant="secondary" className="mb-3">Coming soon</Badge>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">Paid tier waitlist</h2>
+            <p className="text-muted-foreground mb-6 max-w-2xl">
+              The free tier is generous (60 req/min, 5,000/day). Need more? Join the waitlist for API keys,
+              100k requests/day, webhook notifications and SLA.
+            </p>
+            <WaitlistForm />
+          </section>
+
           {/* Footer CTA */}
           <section className="text-center p-8 rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-purple-500/10">
             <h2 className="text-2xl font-bold mb-3">MIT licensed. PRs welcome.</h2>
@@ -183,7 +195,7 @@ const Mcp = () => {
               Built in Ukraine 🇺🇦. Star the repo if you find it useful.
             </p>
             <Button asChild size="lg" className="gap-2">
-              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackMcpEvent("click", "github_footer")}>
                 <Github className="w-5 h-5" />
                 Star on GitHub
               </a>
