@@ -21,10 +21,11 @@ const renderPage = () => {
 describe("Mcp page", () => {
   it("renders hero heading", () => {
     renderPage();
-    expect(screen.getByRole("heading", { level: 1, name: /Domain Check Skills/i })).toBeInTheDocument();
+  it("renders hero heading", () => {
+    renderPage();
+    expect(screen.getByRole("heading", { level: 1, name: /Domain availability/i })).toBeInTheDocument();
   });
 
-  it("links to GitHub repo", () => {
     renderPage();
     const links = screen.getAllByRole("link", { name: /View on GitHub|Star on GitHub/i });
     expect(links.length).toBeGreaterThan(0);
