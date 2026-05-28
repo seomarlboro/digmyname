@@ -85,8 +85,11 @@ const configSnippet = `{
   }
 }`;
 
+const oneLineCommand = `claude mcp add domain-check -- npx -y domain-check-skills-mcp`;
+
 const Mcp = () => {
   const [copied, setCopied] = useState(false);
+  const [copiedCli, setCopiedCli] = useState(false);
 
   useEffect(() => {
     trackMcpEvent("page_view", "mcp");
@@ -97,6 +100,13 @@ const Mcp = () => {
     setCopied(true);
     trackMcpEvent("copy_config", "claude_desktop");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyCli = async () => {
+    await navigator.clipboard.writeText(oneLineCommand);
+    setCopiedCli(true);
+    trackMcpEvent("copy_config", "claude_cli");
+    setTimeout(() => setCopiedCli(false), 2000);
   };
 
   return (
@@ -362,12 +372,40 @@ const Mcp = () => {
               Up & running in 30 seconds
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl">
-              Drop this into your{" "}
+              Using Claude Code? One command and you're done. Otherwise, drop the JSON below into your{" "}
               <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">
                 claude_desktop_config.json
               </code>{" "}
               and restart the client.
             </p>
+
+            {/* One-line CLI install */}
+            <div className="mb-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent overflow-hidden shadow-2xl shadow-primary/10">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-card/40">
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs text-muted-foreground font-mono">
+                    Claude Code · one command
+                  </span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={copyCli}
+                  className="gap-1.5 h-7 text-xs"
+                >
+                  {copiedCli ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedCli ? "Copied" : "Copy"}
+                </Button>
+              </div>
+              <pre className="p-5 text-sm overflow-x-auto font-mono leading-relaxed">
+                <code className="text-foreground/90">
+                  <span className="text-primary select-none">$ </span>
+                  {oneLineCommand}
+                </code>
+              </pre>
+            </div>
+
 
             <div className="rounded-2xl border border-border bg-[#0a0a14] overflow-hidden shadow-2xl shadow-primary/5">
               {/* Editor chrome */}
