@@ -165,14 +165,30 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
             </>
           ) : (
             <>
-              <span />
+              {result.forSale ? (
+                <span className="text-sm font-semibold text-amber-500 flex items-center gap-1">
+                  <Tag className="h-3.5 w-3.5" />
+                  For sale
+                </span>
+              ) : (
+                <span />
+              )}
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground" asChild>
-                  <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    Whois
-                  </a>
-                </Button>
+                {result.forSale && result.listingUrl ? (
+                  <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4" asChild>
+                    <a href={result.listingUrl} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      {result.forSaleVia ?? "View"}
+                    </a>
+                  </Button>
+                ) : (
+                  <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground" asChild>
+                    <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Whois
+                    </a>
+                  </Button>
+                )}
                 <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-primary" asChild aria-label={`Open ${domain}`}>
                   <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
                     <ArrowUpRight className="h-4 w-4" />
