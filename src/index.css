@@ -315,7 +315,7 @@
   /* Inner span handles the slow floating drift */
   .hero-tld {
     display: inline-block;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Geist', sans-serif;
     font-weight: 900;
     letter-spacing: -0.04em;
     background: linear-gradient(135deg, hsl(218 96% 60%), hsl(262 83% 65%));
