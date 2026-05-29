@@ -240,17 +240,20 @@ const Mcp = () => {
               {stats.map((s) => (
                 <div
                   key={s.label}
-                  className="p-5 rounded-xl border border-border bg-card/40 backdrop-blur text-center"
+                  className="group p-6 rounded-2xl border border-border bg-card/40 backdrop-blur hover:border-primary/40 hover:bg-card/60 transition-colors flex flex-col items-center text-center"
                 >
-                  <s.icon className="w-5 h-5 mx-auto mb-2 text-primary" />
-                  <div className="text-2xl md:text-3xl font-black bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
+                  <div className="w-11 h-11 mb-3 rounded-xl bg-gradient-to-br from-primary/20 to-purple-500/20 border border-primary/20 flex items-center justify-center">
+                    <s.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="text-3xl md:text-4xl font-black leading-none bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
                     {s.value}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
+                  <div className="text-[11px] text-muted-foreground mt-2 uppercase tracking-[0.12em] font-medium">
                     {s.label}
                   </div>
                 </div>
               ))}
+
             </div>
           </section>
 
