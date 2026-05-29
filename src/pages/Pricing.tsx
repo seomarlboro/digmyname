@@ -113,7 +113,7 @@ const Pricing = () => {
       <main>
       <section className="hero-gradient pb-8 pt-16 md:pb-12 md:pt-20">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-gradient text-4xl md:text-5xl font-bold tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
             Domain Pricing Comparison
           </h1>
           <p className="mx-auto mt-3 max-w-lg text-base md:text-lg text-muted-foreground">
