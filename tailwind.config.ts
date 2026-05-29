@@ -85,9 +85,13 @@ export default {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 2px)",
+        lg: "var(--radius)",
+        xl: "1.25rem",      // was 0.75rem — Apple-like squircle feel
+        "2xl": "1.75rem",   // was 1rem
+        "3xl": "2.25rem",   // was 1.5rem
+        "4xl": "3rem",
       },
       keyframes: {
         "accordion-down": {
