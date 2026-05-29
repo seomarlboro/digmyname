@@ -80,9 +80,7 @@ const WaitlistForm = () => {
         </Button>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <p className="text-xs text-muted-foreground">
-        No spam. One email when the paid tier (API keys, 100k/day, webhooks, SLA) ships.
-      </p>
+
     </form>
   );
 };
