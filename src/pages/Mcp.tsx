@@ -173,13 +173,10 @@ const Mcp = () => {
               <ArrowUpRight className="w-3 h-3" />
             </a>
 
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight leading-[1.05]">
-              <span className="block bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">
-                Domain availability,
-              </span>
-              <span className="block bg-gradient-to-r from-primary via-primary to-purple-500 bg-clip-text text-transparent">
-                inside every LLM.
-              </span>
+            <h1 className="mb-5 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+              Domain availability,
+              <br className="hidden sm:block" />{" "}
+              <span className="text-gradient">inside every LLM.</span>
             </h1>
 
             <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
