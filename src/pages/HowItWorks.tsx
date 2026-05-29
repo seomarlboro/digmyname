@@ -175,11 +175,12 @@ const HowItWorks = () => {
           <Badge variant="secondary" className="mb-5 gap-1.5">
             <Sparkles className="h-3.5 w-3.5" /> Why DigMyName
           </Badge>
-          <h1 className="mb-5 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="mb-5 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
             Built for <span className="text-gradient">honesty</span>,
             <br className="hidden sm:block" /> not just speed.
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto max-w-2xl text-base md:text-lg text-muted-foreground">
+
             Most domain checkers rely on a single data source and quietly guess
             when it fails. DigMyName cross-checks four independent sources and
             tells you when it isn't sure — so you never buy a domain that turns
@@ -189,7 +190,7 @@ const HowItWorks = () => {
 
         {/* Sources */}
         <section className="py-12">
-          <h2 className="mb-2 text-2xl font-bold text-foreground">
+          <h2 className="mb-2 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
             Four sources, one truth
           </h2>
           <p className="mb-8 text-muted-foreground">
@@ -207,10 +208,10 @@ const HowItWorks = () => {
                     <s.icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                       Step {i + 1} · {s.role}
                     </div>
-                    <div className="text-base font-bold text-foreground">
+                    <div className="text-lg font-semibold tracking-tight text-foreground">
                       {s.name}
                     </div>
                   </div>
@@ -230,7 +231,7 @@ const HowItWorks = () => {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/15 text-warning">
                 <AlertCircle className="h-5 w-5" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 The "Unverified" state
               </h2>
             </div>
@@ -252,7 +253,7 @@ const HowItWorks = () => {
 
         {/* Comparison */}
         <section className="py-12">
-          <h2 className="mb-2 text-2xl font-bold text-foreground">
+          <h2 className="mb-2 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
             How we compare
           </h2>
           <p className="mb-8 text-muted-foreground">
@@ -321,13 +322,14 @@ const HowItWorks = () => {
 
         {/* What we don't claim */}
         <section className="py-12">
-          <h2 className="mb-6 text-2xl font-bold text-foreground">
+          <h2 className="mb-6 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
             What we're <span className="text-muted-foreground">not</span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-border bg-card p-5">
               <Globe className="mb-3 h-5 w-5 text-muted-foreground" />
-              <div className="mb-1 font-bold text-foreground">
+              <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
+
                 Not 800+ TLDs
               </div>
               <p className="text-sm text-muted-foreground">
@@ -337,7 +339,8 @@ const HowItWorks = () => {
             </div>
             <div className="rounded-xl border border-border bg-card p-5">
               <Scale className="mb-3 h-5 w-5 text-muted-foreground" />
-              <div className="mb-1 font-bold text-foreground">
+              <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
+
                 Not a registrar
               </div>
               <p className="text-sm text-muted-foreground">
@@ -347,7 +350,7 @@ const HowItWorks = () => {
             </div>
             <div className="rounded-xl border border-border bg-card p-5">
               <Heart className="mb-3 h-5 w-5 text-muted-foreground" />
-              <div className="mb-1 font-bold text-foreground">
+              <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
                 Not an affiliate farm
               </div>
               <p className="text-sm text-muted-foreground">
@@ -361,7 +364,7 @@ const HowItWorks = () => {
 
         {/* FAQ */}
         <section className="py-12">
-          <h2 className="mb-8 text-2xl font-bold text-foreground">
+          <h2 className="mb-8 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
             Frequently asked
           </h2>
           <dl className="space-y-4">
@@ -370,7 +373,7 @@ const HowItWorks = () => {
                 key={f.q}
                 className="rounded-xl border border-border bg-card p-5"
               >
-                <dt className="text-base font-bold text-foreground">{f.q}</dt>
+                <dt className="text-base font-semibold text-foreground">{f.q}</dt>
                 <dd className="mt-2 text-sm text-muted-foreground leading-relaxed">
                   {f.a}
                 </dd>
@@ -381,7 +384,7 @@ const HowItWorks = () => {
 
         {/* Public API for agents */}
         <section className="py-12">
-          <h2 className="mb-3 text-2xl font-bold text-foreground">
+          <h2 className="mb-3 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
             For AI agents & developers
           </h2>
           <p className="mb-6 max-w-2xl text-muted-foreground">
@@ -390,7 +393,7 @@ const HowItWorks = () => {
             without scraping. 10 requests / 60 s / IP.
           </p>
           <div className="rounded-xl border border-border bg-card p-5">
-            <div className="mb-3 text-sm font-bold text-foreground">
+            <div className="mb-3 text-sm font-semibold text-foreground">
               Quick example
             </div>
             <pre className="overflow-x-auto rounded-md bg-muted/40 p-3 text-xs leading-relaxed text-foreground">
@@ -429,7 +432,7 @@ const HowItWorks = () => {
 
         {/* CTA */}
         <section className="py-16 text-center">
-          <h2 className="mb-4 text-3xl font-extrabold text-foreground">
+          <h2 className="mb-4 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
             Try an honest search.
           </h2>
           <p className="mx-auto mb-8 max-w-xl text-muted-foreground">

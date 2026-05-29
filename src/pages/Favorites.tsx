@@ -23,7 +23,7 @@ const Favorites = () => {
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
             <Heart className="h-5 w-5 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Saved Domains</h1>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Saved Domains</h1>
         </div>
 
         {!user && (
