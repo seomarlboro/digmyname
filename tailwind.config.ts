@@ -83,15 +83,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-      },
       borderRadius: {
         sm: "calc(var(--radius) - 4px)",
         md: "calc(var(--radius) - 2px)",
         lg: "var(--radius)",
-        xl: "1.25rem",      // was 0.75rem — Apple-like squircle feel
-        "2xl": "1.75rem",   // was 1rem
-        "3xl": "2.25rem",   // was 1.5rem
-        "4xl": "3rem",
+        xl: "0.875rem",     // small chips/icon badges — keep tight
+        "2xl": "1.5rem",    // cards
+        "3xl": "2rem",      // hero blocks
+        "4xl": "2.75rem",
+      },
       },
       keyframes: {
         "accordion-down": {
