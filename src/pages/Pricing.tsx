@@ -192,7 +192,7 @@ const Pricing = () => {
             </div>
 
             {/* Full comparison by TLD */}
-            <h2 className="mt-12 mb-6 text-2xl font-extrabold text-foreground">Detailed Price Comparison</h2>
+            <h2 className="mt-12 mb-6 text-2xl md:text-3xl font-bold tracking-tight text-foreground">Detailed Price Comparison</h2>
             <div className="space-y-6">
               {tldSummaries.map((s) => (
                 <DetailedTldTable key={s.tld} summary={s} />

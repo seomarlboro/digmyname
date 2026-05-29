@@ -187,7 +187,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       {!hasQuery ? (
         <div className="relative z-10 flex items-center justify-center px-4" style={{ height: 'calc(50vh - 32px - 40px)' }}>
           <div className="text-center">
-            <h1 className="text-gradient text-4xl font-extrabold leading-tight md:text-6xl">
+            <h1 className="text-gradient text-4xl md:text-5xl font-bold tracking-tight">
               Find your perfect
               <br />
               domain in seconds
