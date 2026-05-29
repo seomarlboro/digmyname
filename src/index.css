@@ -34,7 +34,8 @@
     --input: 240 10% 90%;
     --ring: 218 96% 53%;
 
-    --radius: 0.75rem;
+    --radius: 1.125rem;
+
 
     /* Custom tokens */
     --gradient-start: 218 96% 53%;
