@@ -173,7 +173,7 @@ const Mcp = () => {
               <ArrowUpRight className="w-3 h-3" />
             </a>
 
-            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-[1.05]">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight leading-[1.05]">
               <span className="block bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">
                 Domain availability,
               </span>
@@ -182,7 +182,7 @@ const Mcp = () => {
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
               One install. Live answers from Domainr, RDAP, DNS and Porkbun — straight into Claude,
               Cursor, ChatGPT and any MCP-compatible client.
             </p>
@@ -245,10 +245,10 @@ const Mcp = () => {
                   <div className="w-11 h-11 mb-3 rounded-xl bg-gradient-to-br from-primary/20 to-purple-500/20 border border-primary/20 flex items-center justify-center">
                     <s.icon className="w-5 h-5 text-primary" />
                   </div>
-                  <div className="text-3xl md:text-4xl font-black leading-none bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
+                  <div className="text-2xl md:text-3xl font-bold tracking-tight leading-none bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
                     {s.value}
                   </div>
-                  <div className="text-[11px] text-muted-foreground mt-2 uppercase tracking-[0.12em] font-medium">
+                  <div className="text-xs text-muted-foreground mt-2 uppercase tracking-widest font-semibold">
                     {s.label}
                   </div>
                 </div>
@@ -264,7 +264,7 @@ const Mcp = () => {
                 <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">
                   Pick your stack
                 </p>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
                   Three drop-in formats
                 </h2>
               </div>
@@ -287,7 +287,7 @@ const Mcp = () => {
                     </div>
                     <span className="text-xs font-mono text-muted-foreground/60">{f.n}</span>
                   </div>
-                  <h3 className="font-bold text-xl mb-2">{f.title}</h3>
+                  <h3 className="text-lg font-semibold tracking-tight mb-2">{f.title}</h3>
                   <p className="text-sm text-muted-foreground mb-5 leading-relaxed flex-1">{f.for}</p>
 
                   <div className="flex items-center justify-between">
@@ -308,7 +308,7 @@ const Mcp = () => {
             <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">
               Quick start
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-6">
               Up & running in 30 seconds
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl">
@@ -385,7 +385,7 @@ const Mcp = () => {
             <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">
               API surface
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-8">Tools exposed</h2>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-8">Tools exposed</h2>
             <div className="space-y-3">
               {tools.map((t, i) => (
                 <div
@@ -397,7 +397,7 @@ const Mcp = () => {
                     <span className="text-xs font-mono text-muted-foreground/50">
                       0{i + 1}
                     </span>
-                    <code className="text-primary font-mono font-bold text-base md:text-lg">
+                    <code className="text-primary font-mono font-semibold text-base">
                       {t.name}
                     </code>
                     <code className="text-muted-foreground/70 font-mono text-sm">{t.sig}</code>
@@ -423,7 +423,8 @@ const Mcp = () => {
                 <Badge variant="secondary" className="mb-3">
                   Coming soon
                 </Badge>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">
+
                   Paid tier waitlist
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
@@ -443,7 +444,7 @@ const Mcp = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-primary/10 border border-primary/20 text-xs">
               MIT licensed · Built in Ukraine 🇺🇦
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">
               PRs welcome. Stars appreciated.
             </h2>
             <p className="text-muted-foreground mb-7 max-w-md mx-auto">
