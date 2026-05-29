@@ -355,32 +355,37 @@ const Mcp = () => {
                   <span className="text-xs text-muted-foreground font-mono">
                     claude_desktop_config.json
                   </span>
+            {/* One-line CLI install */}
+            <div className="mb-4 rounded-2xl border border-border bg-[#0a0a14] overflow-hidden shadow-2xl shadow-primary/5">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-card/40">
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+                  </div>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    Claude Code · one command
+                  </span>
                 </div>
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={copyConfig}
+                  onClick={copyCli}
                   className="gap-1.5 h-7 text-xs"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? "Copied" : "Copy"}
+                  {copiedCli ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedCli ? "Copied" : "Copy"}
                 </Button>
               </div>
               <pre className="p-6 text-sm overflow-x-auto font-mono leading-relaxed">
-                <code className="text-foreground/90">{configSnippet}</code>
+                <code className="text-foreground/90">
+                  <span className="text-primary select-none">$ </span>
+                  {oneLineCommand}
+                </code>
               </pre>
             </div>
-            <p className="text-sm text-muted-foreground mt-4 flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-primary" />
-              Then ask:{" "}
-              <em className="text-foreground/80">
-                "Check if myidea.com and myidea.io are available."
-              </em>
-            </p>
-          </section>
 
-          {/* Tools */}
-          <section className="mb-20">
             <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">
               API surface
             </p>
