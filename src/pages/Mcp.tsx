@@ -276,7 +276,7 @@ const Mcp = () => {
                   onClick={() =>
                     trackMcpEvent("click", `format_${f.title.toLowerCase().replace(/\s+/g, "_")}`)
                   }
-                  className="group relative p-6 rounded-2xl border border-border bg-card/40 backdrop-blur-xl hover:border-primary/50 hover:bg-card/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10"
+                  className="group relative p-6 rounded-2xl border border-border bg-card/40 backdrop-blur-xl hover:border-primary/50 hover:bg-card/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 flex flex-col"
                 >
                   <div className="flex items-start justify-between mb-6">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-purple-500/20 border border-primary/20 flex items-center justify-center">
@@ -285,7 +285,8 @@ const Mcp = () => {
                     <span className="text-xs font-mono text-muted-foreground/60">{f.n}</span>
                   </div>
                   <h3 className="font-bold text-xl mb-2">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-5 leading-relaxed">{f.for}</p>
+                  <p className="text-sm text-muted-foreground mb-5 leading-relaxed flex-1">{f.for}</p>
+
                   <div className="flex items-center justify-between">
                     <Badge variant="outline" className="text-xs">
                       {f.badge}
