@@ -418,19 +418,24 @@ const Mcp = () => {
               aria-hidden
               className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-primary/20 blur-[120px] -z-0"
             />
-            <div className="relative">
-              <Badge variant="secondary" className="mb-3">
-                Coming soon
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
-                Paid tier waitlist
-              </h2>
-              <p className="text-muted-foreground mb-7 max-w-2xl leading-relaxed">
-                Free tier is generous (60 req/min · 5,000/day). Need more? Get API keys, 100k
-                req/day, webhooks and an SLA.
-              </p>
-              <WaitlistForm />
+            <div className="relative grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+              <div>
+                <Badge variant="secondary" className="mb-3">
+                  Coming soon
+                </Badge>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+                  Paid tier waitlist
+                </h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  Free tier is generous (60 req/min · 5,000/day). Need more? Get API keys, 100k
+                  req/day, webhooks and an SLA.
+                </p>
+              </div>
+              <div>
+                <WaitlistForm />
+              </div>
             </div>
+
           </section>
 
           {/* Footer CTA */}
