@@ -18,7 +18,7 @@ const Favorites = () => {
         <meta name="robots" content="noindex" />
       </Helmet>
       <Header />
-      <main className="container mx-auto max-w-[968px] px-4 py-12">
+      <main className="container mx-auto max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px] px-4 py-12">
         <div className="mb-8 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
             <Heart className="h-5 w-5 text-primary" />
