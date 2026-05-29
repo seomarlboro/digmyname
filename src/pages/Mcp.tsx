@@ -350,11 +350,8 @@ const Mcp = () => {
                   <div className="flex gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
                     <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-                  </div>
-                  <span className="text-xs text-muted-foreground font-mono">
-                    claude_desktop_config.json
-                  </span>
+                  <Terminal className="w-3.5 h-3.5 text-primary" />
+
                 </div>
                 <Button
                   size="sm"
