@@ -12,7 +12,19 @@ export default {
         "2xl": "1400px",
       },
     },
+    screens: {
+      xs: "390px",      // modern phones (iPhone 15/16)
+      sm: "640px",      // large phones / small tablets
+      md: "768px",      // tablets portrait
+      lg: "1024px",     // tablets landscape / small laptops
+      xl: "1280px",     // laptops
+      "2xl": "1536px",  // desktops
+      "3xl": "1920px",  // full HD
+      "4xl": "2560px",  // QHD / ultrawide
+      "5xl": "3840px",  // 4K
+    },
     extend: {
+
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
