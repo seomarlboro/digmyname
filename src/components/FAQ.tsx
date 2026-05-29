@@ -42,11 +42,11 @@ const FAQ = () => {
           }),
         }}
       />
-      <h2 className="mb-8 text-3xl font-extrabold text-foreground">Frequently asked questions</h2>
+      <h2 className="mb-8 text-2xl md:text-3xl font-bold tracking-tight text-foreground">Frequently asked questions</h2>
       <dl className="space-y-6">
         {faqs.map((f) => (
           <div key={f.q} className="rounded-xl border border-border bg-card p-5">
-            <dt className="text-base font-bold text-foreground">{f.q}</dt>
+            <dt className="text-base font-semibold text-foreground">{f.q}</dt>
             <dd className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.a}</dd>
           </div>
         ))}
