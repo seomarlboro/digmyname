@@ -155,7 +155,7 @@ const Mcp = () => {
 
         <Header />
 
-        <main className="container mx-auto px-4 py-16 max-w-[968px]">
+        <main className="container mx-auto px-4 py-16 max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px]">
           {/* Hero */}
           <section className="text-center mb-20">
             <a

@@ -168,7 +168,7 @@ const HowItWorks = () => {
 
       <Header />
 
-      <main className="mx-auto max-w-[968px] px-4">
+      <main className="mx-auto max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px] px-4">
 
         {/* Hero */}
         <section className="pt-16 pb-12 text-center">

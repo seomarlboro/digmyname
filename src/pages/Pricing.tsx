@@ -122,7 +122,7 @@ const Pricing = () => {
         </div>
       </section>
 
-      <section className="container mx-auto max-w-[968px] px-4 pb-20">
+      <section className="container mx-auto max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px] px-4 pb-20">
 
         {isLoading ? (
           <div className="flex flex-col items-center py-20">
