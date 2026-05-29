@@ -316,10 +316,14 @@ const Mcp = () => {
             </p>
 
             {/* One-line CLI install */}
-            <div className="mb-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent overflow-hidden shadow-2xl shadow-primary/10">
+            <div className="mb-4 rounded-2xl border border-border bg-[#0a0a14] overflow-hidden shadow-2xl shadow-primary/5">
               <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-card/40">
-                <div className="flex items-center gap-2">
-                  <Terminal className="w-3.5 h-3.5 text-primary" />
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+                  </div>
                   <span className="text-xs text-muted-foreground font-mono">
                     Claude Code · one command
                   </span>
@@ -334,7 +338,7 @@ const Mcp = () => {
                   {copiedCli ? "Copied" : "Copy"}
                 </Button>
               </div>
-              <pre className="p-5 text-sm overflow-x-auto font-mono leading-relaxed">
+              <pre className="p-6 text-sm overflow-x-auto font-mono leading-relaxed">
                 <code className="text-foreground/90">
                   <span className="text-primary select-none">$ </span>
                   {oneLineCommand}
@@ -342,9 +346,8 @@ const Mcp = () => {
               </pre>
             </div>
 
-
+            {/* JSON config */}
             <div className="rounded-2xl border border-border bg-[#0a0a14] overflow-hidden shadow-2xl shadow-primary/5">
-              {/* Editor chrome */}
               <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-card/40">
                 <div className="flex items-center gap-3">
                   <div className="flex gap-1.5">
@@ -406,6 +409,7 @@ const Mcp = () => {
               ))}
             </div>
           </section>
+
 
           {/* Waitlist */}
           <section
