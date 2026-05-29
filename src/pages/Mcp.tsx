@@ -347,12 +347,12 @@ const Mcp = () => {
             <div className="rounded-2xl border border-border bg-[#0a0a14] overflow-hidden shadow-2xl shadow-primary/5">
               <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-card/40">
                 <div className="flex items-center gap-3">
-                  <div className="flex gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
                   <Terminal className="w-3.5 h-3.5 text-primary" />
-
+                  <span className="text-xs text-muted-foreground font-mono">
+                    claude_desktop_config.json
+                  </span>
                 </div>
+
                 <Button
                   size="sm"
                   variant="ghost"
