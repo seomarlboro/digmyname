@@ -7,7 +7,7 @@ import Meteors from "@/components/Meteors";
  * Spotlights + aurora mesh + drifting TLD constellation (mouse parallax) + dot grid + vignette.
  */
 const TLDS = [
-  { label: ".com", x: "8%",  y: "22%", size: 64, depth: 40, delay: "0s",   dur: "14s" },
+  { label: ".com", x: "8%",  y: "8%", size: 64, depth: 40, delay: "0s",   dur: "14s" },
   { label: ".ai",  x: "82%", y: "18%", size: 56, depth: 32, delay: "1.5s", dur: "16s" },
   { label: ".io",  x: "16%", y: "70%", size: 48, depth: 24, delay: "3s",   dur: "18s" },
   { label: ".dev", x: "74%", y: "62%", size: 52, depth: 28, delay: "0.8s", dur: "15s" },
