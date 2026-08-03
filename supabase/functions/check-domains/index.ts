@@ -383,8 +383,14 @@ interface DomainrStatusEntry {
   summary?: string;
 }
 
+// Circuit breaker: if RapidAPI answers 401/403 (key invalid / not subscribed)
+// stop calling it for the lifetime of this isolate instead of burning a
+// round-trip on every request.
+let domainrDisabledReason: string | null = null;
+
 async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<Map<string, DomainrStatusEntry> | null> {
   if (domains.length === 0) return new Map();
+  if (domainrDisabledReason) return null;
   try {
     const out = new Map<string, DomainrStatusEntry>();
     // Domainr accepts up to 32 domains per call.
@@ -400,7 +406,12 @@ async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<M
       });
       if (!resp.ok) {
         const txt = await resp.text().catch(() => "");
-        console.warn(`domainr HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+        if (resp.status === 401 || resp.status === 403) {
+          domainrDisabledReason = `HTTP ${resp.status}: ${txt.slice(0, 120)}`;
+          console.error(`domainr DISABLED for this isolate — ${domainrDisabledReason}. Check the RapidAPI subscription for domainr.p.rapidapi.com.`);
+        } else {
+          console.warn(`domainr HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+        }
         return out.size > 0 ? out : null;
       }
       const data = await resp.json();
