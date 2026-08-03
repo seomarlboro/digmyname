@@ -278,35 +278,35 @@ export function warmRdapBootstrap(): Promise<Map<string, string[]>> {
 // Hardcoded RDAP endpoints for the top TLDs (≈95% of every real search).
 // These never change in practice, so for popular zones we skip the IANA
 // bootstrap wait entirely and hit the registry on the very first millisecond.
+// Verified against https://data.iana.org/rdap/dns.json — every entry below was
+// live-tested (HTTP 200/404, no redirects). Zones missing from the IANA
+// bootstrap (.io, .co, .me, .us) intentionally keep the aggregator path.
 export const FAST_RDAP: Record<string, string> = {
   com: "https://rdap.verisign.com/com/v1",
   net: "https://rdap.verisign.com/net/v1",
   org: "https://rdap.publicinterestregistry.org/rdap",
   info: "https://rdap.identitydigital.services/rdap",
   biz: "https://rdap.nic.biz",
-  co: "https://rdap.nic.co",
-  io: "https://rdap.identitydigital.services/rdap",
   ai: "https://rdap.identitydigital.services/rdap",
-  app: "https://www.registry.google/rdap",
-  dev: "https://www.registry.google/rdap",
-  page: "https://www.registry.google/rdap",
+  app: "https://pubapi.registry.google/rdap",
+  dev: "https://pubapi.registry.google/rdap",
+  page: "https://pubapi.registry.google/rdap",
   xyz: "https://rdap.centralnic.com/xyz",
-  online: "https://rdap.centralnic.com/online",
-  site: "https://rdap.centralnic.com/site",
-  store: "https://rdap.centralnic.com/store",
-  tech: "https://rdap.centralnic.com/tech",
-  space: "https://rdap.centralnic.com/space",
+  online: "https://rdap.radix.host/rdap",
+  site: "https://rdap.radix.host/rdap",
+  store: "https://rdap.radix.host/rdap",
+  tech: "https://rdap.radix.host/rdap",
+  space: "https://rdap.radix.host/rdap",
   shop: "https://rdap.gmoregistry.net/rdap",
-  cloud: "https://rdap.nic.cloud",
+  cloud: "https://rdap.registry.cloud/rdap",
   studio: "https://rdap.identitydigital.services/rdap",
   agency: "https://rdap.identitydigital.services/rdap",
   live: "https://rdap.identitydigital.services/rdap",
   life: "https://rdap.identitydigital.services/rdap",
-  me: "https://rdap.nic.me",
   tv: "https://rdap.nic.tv",
-  cc: "https://rdap.nic.cc",
-  us: "https://rdap.nic.us",
+  cc: "https://tld-rdap.verisign.com/cc/v1",
 };
+
 
 async function checkRdap(domain: string): Promise<RdapState> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
