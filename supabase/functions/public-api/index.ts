@@ -355,12 +355,16 @@ Deno.serve(async (req) => {
     }
 
     if (path === "/age") {
-      const raw = url.searchParams.get("domain") || "";
-      const domain = validateDomain(raw);
-      if (!domain) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400, rlHeaders);
-      const ages = await invokeAge([domain]);
-      const info = ages[domain] || { created: null, expires: null };
-      return json({ domain, created: info.created, expires: info.expires }, 200, rlHeaders);
+      const raw = url.searchParams.get("domains") || url.searchParams.get("domain") || "";
+      const domains = raw
+        .split(",")
+        .map((d) => validateDomain(d))
+        .filter((d): d is string => !!d)
+        .slice(0, 50);
+      if (!domains.length) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400, rlHeaders);
+      const ages = await invokeAge(domains);
+      const results = domains.map((d) => ({ domain: d, created: ages[d]?.created ?? null, expires: ages[d]?.expires ?? null }));
+      return json({ count: results.length, results }, 200, rlHeaders);
     }
 
     return json({ error: "not_found", path }, 404, rlHeaders);
