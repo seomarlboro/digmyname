@@ -717,9 +717,10 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
 
   const [dns, rdap] = await Promise.all([dnsP, rdapP]);
 
-  // RDAP 404 is authoritative for "not registered". A DNS lookup error must not
-  // downgrade that to uncertain — only actual DNS records can contradict it.
-  if (rdap === "available" && dns !== "has_records") {
+  // RDAP 404 is authoritative for "not registered" only when DNS also answers
+  // NXDOMAIN. A DNS lookup error or ambiguous answer must not be treated as
+  // confirmation that the name is free.
+  if (rdap === "available" && dns === "no_records") {
     return {
       domain,
       available: true,
@@ -739,7 +740,10 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
     };
   }
 
-
+  // RDAP says available but DNS could not confirm NXDOMAIN → uncertain.
+  if (rdap === "available" && (dns === "error" || dns === "unknown")) {
+    return { domain, available: false, checkedVia: "rdap", uncertain: true, reason: "dns_error" };
+  }
 
   // Heuristic fallback — short SLD on premium TLD with no clear answer.
   if (likelyPremium) {
