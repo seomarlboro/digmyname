@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Heart, Moon, Sun, LogOut, User } from "lucide-react";
 import ShovelLogo from "@/components/ShovelLogo";
-import { Link } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";

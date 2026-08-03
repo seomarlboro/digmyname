@@ -40,7 +40,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("search-sticky-change", { detail: scrolled }));
-    return () => window.dispatchEvent(new CustomEvent("search-sticky-change", { detail: false }));
+    return () => {
+      window.dispatchEvent(new CustomEvent("search-sticky-change", { detail: false }));
+    };
   }, [scrolled]);
 
   // Debounce
