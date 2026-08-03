@@ -19,6 +19,11 @@ const corsHeaders = {
 //   On uncertain → return available:false + uncertain:true (never falsely "available").
 // ============================================================================
 
+// Bump this whenever availability/premium logic changes so old cached rows are
+// treated as misses instead of returning stale interpretations.
+const CACHE_VERSION = 1;
+
+
 interface DomainCheckResult {
   domain: string;
   available: boolean;
@@ -46,7 +51,7 @@ const PREMIUM_TLDS = new Set([
 // Single-syllable / very common English words that are aftermarket on .com.
 const COMMON_WORDS_RE = /^(?:[bcdfghjklmnpqrstvwxz][aeiou][bcdfghjklmnpqrstvwxz]?|[aeiou][bcdfghjklmnpqrstvwxz]{1,2})$/i;
 
-function isLikelyPremium(domain: string): boolean {
+export function isLikelyPremium(domain: string): boolean {
   const [sld, ...rest] = domain.split(".");
   const tld = rest.join(".");
   if (!sld || !tld) return false;
@@ -57,10 +62,11 @@ function isLikelyPremium(domain: string): boolean {
   // 4-char SLD on any commercial premium TLD = aftermarket / premium tier.
   if (sld.length === 4 && PREMIUM_TLDS.has(tld)) return true;
 
-  // 5-char pure-letter SLD on the most contested TLDs.
-  if (sld.length <= 5 && /^[a-z]+$/i.test(sld) && (tld === "com" || tld === "io" || tld === "ai" || tld === "co")) return true;
+  // 5-char pure-letter SLD on contested TLDs (premium/aftermarket candidates).
+  if (sld.length <= 5 && /^[a-z]+$/i.test(sld) && (PREMIUM_TLDS.has(tld) || tld === "com" || tld === "io" || tld === "ai" || tld === "co")) return true;
 
-  // Tiny dictionary-shaped names on .com.
+  // Tiny dictionary-shaped names on premium TLDs and .com.
+  if (sld.length <= 5 && PREMIUM_TLDS.has(tld) && COMMON_WORDS_RE.test(sld)) return true;
   if (tld === "com" && sld.length <= 4 && COMMON_WORDS_RE.test(sld)) return true;
 
   return false;
@@ -97,13 +103,19 @@ async function dohProbe(endpoint: string, domain: string, timeoutMs: number): Pr
       )
     );
     let any = false;
+    let hasRecords = false;
+    let nxdomain = false;
     for (const data of responses) {
       if (!data) continue;
       any = true;
-      if (Array.isArray(data.Answer) && data.Answer.length > 0) return "has_records";
+      if (Array.isArray(data.Answer) && data.Answer.length > 0) hasRecords = true;
       // Status 3 = NXDOMAIN
-      if (data.Status === 3) return "no_records";
+      if (data.Status === 3) nxdomain = true;
     }
+    // Records take precedence: a domain can have NS records but no A record.
+    if (hasRecords) return "has_records";
+    // Only call it "no records" if at least one resolver explicitly answered NXDOMAIN.
+    if (nxdomain) return "no_records";
     return any ? "no_records" : "error";
   } catch {
     return "error";
@@ -711,9 +723,10 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
 
   const [dns, rdap] = await Promise.all([dnsP, rdapP]);
 
-  // RDAP 404 is authoritative for "not registered". A DNS lookup error must not
-  // downgrade that to uncertain — only actual DNS records can contradict it.
-  if (rdap === "available" && dns !== "has_records") {
+  // RDAP 404 is authoritative for "not registered" only when DNS also answers
+  // NXDOMAIN. A DNS lookup error or ambiguous answer must not be treated as
+  // confirmation that the name is free.
+  if (rdap === "available" && dns === "no_records") {
     return {
       domain,
       available: true,
@@ -733,7 +746,10 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
     };
   }
 
-
+  // RDAP says available but DNS could not confirm NXDOMAIN → uncertain.
+  if (rdap === "available" && dns === "error") {
+    return { domain, available: false, checkedVia: "rdap", uncertain: true };
+  }
 
   // Heuristic fallback — short SLD on premium TLD with no clear answer.
   if (likelyPremium) {
@@ -851,6 +867,9 @@ Deno.serve(async (req) => {
 
       for (const c of cached ?? []) {
         const meta = (c.rdap_data ?? {}) as Record<string, unknown>;
+        // Ignore rows written by older logic versions — they may encode stale
+        // availability/premium interpretations.
+        if ((meta.cache_version as number | undefined) !== CACHE_VERSION) continue;
         const result: DomainCheckResult = {
           domain: c.domain,
           available: c.available,
@@ -865,6 +884,7 @@ Deno.serve(async (req) => {
         cachedMap.set(c.domain, result);
         hotCache.set(c.domain, { result, expiresAt: nowMs + HOT_CACHE_TTL_MS });
       }
+
     }
 
     const uncached = batch.filter((d) => !cachedMap.has(d));
@@ -980,11 +1000,15 @@ Deno.serve(async (req) => {
 
     for (let i = 0; i < fresh.length; i++) {
       const r = fresh[i];
-      if (!r.available || r.price != null) continue;
+      // Don't attach a standard retail price to likely-premium names until a
+      // registrar has verified the real price. Showing $0.98 for a name that
+      // actually costs $600+ is misleading.
+      if (!r.available || r.price != null || r.likelyPremium) continue;
       const tld = r.domain.split(".").slice(1).join(".");
       const p = dbPrice.get(tld) ?? pricing.get(tld)?.registration;
       if (p != null) fresh[i] = { ...r, price: p };
     }
+
 
     // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
     // Porkbun's authenticated checkDomain is the only source that returns the
@@ -1008,16 +1032,24 @@ Deno.serve(async (req) => {
               pb.premium ||
               (pb.price != null && standard != null && pb.price > standard * 2) ||
               (pb.price != null && standard == null && pb.price >= 50);
+            // If Porkbun says the name is taken, drop any stale standard price.
+            // If it says available but not premium, fall back to standard retail
+            // pricing (the earlier loop skipped likely-premium names).
+            const price = pb.available
+              ? (isPremium ? pb.price : (pb.price ?? standard ?? fresh[idx].price))
+              : undefined;
             fresh[idx] = {
               ...fresh[idx],
               available: pb.available,
               checkedVia: "porkbun",
-              price: pb.price ?? fresh[idx].price,
-              premium: isPremium || undefined,
+              price,
+              premium: pb.available ? (isPremium || undefined) : undefined,
               likelyPremium: isPremium || undefined,
               uncertain: undefined,
             };
+
           }
+
         }
       }
     }
@@ -1054,6 +1086,7 @@ Deno.serve(async (req) => {
           available: r.available,
           checked_via: r.checkedVia,
           rdap_data: {
+            cache_version: CACHE_VERSION,
             godaddy_price: r.price ?? null,
             premium: r.premium ?? false,
             likely_premium: r.likelyPremium ?? false,
@@ -1063,6 +1096,7 @@ Deno.serve(async (req) => {
           },
           expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
         };
+
       });
       // Persist in the background — the user's response doesn't wait for the write.
       const write = supabase.from("domain_cache").upsert(rows, { onConflict: "domain" });

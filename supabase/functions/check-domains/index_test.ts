@@ -2,7 +2,7 @@
 // Loads .env so VITE_SUPABASE_URL / KEY are available.
 import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { classifyAftermarket, FAST_RDAP, FAST_RDAP_EXCEPTIONS, interpretDomainr, isValidDomain, loadRdapBootstrap, loadTldPricing } from "./index.ts";
+import { classifyAftermarket, FAST_RDAP, FAST_RDAP_EXCEPTIONS, interpretDomainr, isLikelyPremium, isValidDomain, loadRdapBootstrap, loadTldPricing } from "./index.ts";
 
 const SUPABASE_URL = Deno.env.get("VITE_SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY")!;
@@ -28,6 +28,14 @@ Deno.test("known-taken short .com is never reported as available", async () => {
   assertEquals(status, 200);
   const r = results[0];
   assertEquals(r.available, false, `google.com should be taken, got ${JSON.stringify(r)}`);
+});
+
+Deno.test("known-taken brand domain on premium new gTLD is never reported as available", async () => {
+  // apple.studio is registered → must be available:false.
+  const { status, results } = await check(["apple.studio"]);
+  assertEquals(status, 200);
+  const r = results[0];
+  assertEquals(r.available, false, `apple.studio should be taken, got ${JSON.stringify(r)}`);
 });
 
 Deno.test("invalid domain is rejected", async () => {
@@ -177,6 +185,20 @@ Deno.test("interpretDomainr: empty / unknown / soft-only status → unknown", ()
   assertEquals(interpretDomainr(undefined).kind, "unknown");
   assertEquals(interpretDomainr({ domain: "x.com", status: "" }).kind, "unknown");
   assertEquals(interpretDomainr({ domain: "x.com", status: "unknown" }).kind, "unknown");
+});
+
+// ---- Premium / aftermarket heuristics --------------------------------------
+
+Deno.test("isLikelyPremium: 5-letter pure-letter SLD on premium TLD", () => {
+  assert(isLikelyPremium("indie.studio"), "indie.studio should be flagged likelyPremium");
+  assert(isLikelyPremium("indie.store"), "indie.store should be flagged likelyPremium");
+  assert(isLikelyPremium("hello.world"), "hello.world should be flagged likelyPremium");
+  assert(!isLikelyPremium("indie.zzz-unknown-tld"), "unknown TLD should not be flagged");
+});
+
+Deno.test("isLikelyPremium: common short words on premium TLDs", () => {
+  assert(isLikelyPremium("sky.cloud"), "sky.cloud should be flagged likelyPremium");
+  assert(isLikelyPremium("art.design"), "art.design should be flagged likelyPremium");
 });
 
 // ---- Domain validation ------------------------------------------------------
