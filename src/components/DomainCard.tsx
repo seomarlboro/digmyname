@@ -36,6 +36,12 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const buyUrl = registrarName ? getRegistrarUrl(registrarName, domain) : null;
   const favorited = isFavorite(domain);
 
+  // Registration year for taken domains — fetched lazily in the background,
+  // so it never delays the availability check.
+  const age = useDomainAge(domain, !checking && result.uncertain !== true && !available);
+  const sinceLabel = formatRegisteredSince(age);
+
+
   const handleFavorite = () => {
     if (!user) {
       setAuthOpen(true);
