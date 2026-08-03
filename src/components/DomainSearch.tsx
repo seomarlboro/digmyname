@@ -164,8 +164,23 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   const hasQuery = query.trim().length > 0;
 
+  const aiButton = (
+    <button
+      type="button"
+      onClick={() => setAiSuggestions((v) => !v)}
+      aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
+      aria-pressed={aiSuggestions}
+      className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full border transition-all
+        ${aiSuggestions
+          ? "border-primary/40 bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+          : "border-white/10 bg-white/10 text-primary backdrop-blur-md hover:bg-white/15"}`}
+    >
+      <Sparkles className="h-6 w-6" />
+    </button>
+  );
+
   const searchBar = (
-    <div className="mx-auto flex max-w-2xl items-center gap-3 rounded-[100px] border border-white/10 bg-white/10 p-4 [backdrop-filter:blur(64px)]">
+    <div className="flex flex-1 items-center gap-3 rounded-[100px] border border-white/10 bg-white/10 p-4 [backdrop-filter:blur(64px)]">
       <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
         <Search className="h-7 w-7 text-primary" />
       </div>
@@ -184,34 +199,6 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           <X className="h-4 w-4" />
         </button>
       )}
-      {/* Mobile: clickable icon, Desktop: segmented AI toggle */}
-      <button
-        type="button"
-        onClick={() => setAiSuggestions((v) => !v)}
-        aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
-        aria-pressed={aiSuggestions}
-        className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all md:hidden
-          ${aiSuggestions ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" : "text-primary bg-primary/10"}`}
-      >
-        <Sparkles className="h-6 w-6" />
-      </button>
-      <button
-        type="button"
-        onClick={() => setAiSuggestions((v) => !v)}
-        aria-pressed={aiSuggestions}
-        aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
-        className="hidden md:flex items-center gap-3 rounded-full border border-primary/20 bg-primary/10 px-2 py-2 pr-4 backdrop-blur-sm transition-colors hover:bg-primary/15"
-      >
-        <span className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${aiSuggestions ? "bg-primary text-primary-foreground" : "bg-background/60 text-primary"}`}>
-          <Sparkles className="h-5 w-5" />
-        </span>
-        <span className="text-base font-semibold text-foreground whitespace-nowrap">AI</span>
-        <span className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${aiSuggestions ? "bg-primary" : "bg-background/60"}`}>
-          <span className={`inline-flex h-full w-1/2 items-center justify-center text-[10px] font-bold uppercase tracking-wider ${aiSuggestions ? "text-primary-foreground" : "text-muted-foreground"}`}>ON</span>
-          <span className={`inline-flex h-full w-1/2 items-center justify-center text-[10px] font-bold uppercase tracking-wider ${aiSuggestions ? "text-primary-foreground/60" : "text-foreground"}`}>OFF</span>
-          <span className={`absolute top-0.5 h-7 w-7 rounded-full bg-background shadow-sm transition-all ${aiSuggestions ? "left-[calc(50%-2px)]" : "left-0.5"}`} />
-        </span>
-      </button>
     </div>
   );
 
@@ -243,8 +230,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         {scrolled && (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 -top-16 bg-background/80 backdrop-blur-xl" aria-hidden="true" />
         )}
-        <div className="container relative mx-auto px-4">
+        <div className="container relative mx-auto flex max-w-3xl items-center gap-3 px-4">
           {searchBar}
+          {aiButton}
         </div>
       </div>
 
