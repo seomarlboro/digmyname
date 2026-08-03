@@ -132,18 +132,24 @@ async function invokeCheck(domains: string[]) {
 
 function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; affiliateUrl: string | null } | null) {
   const available = !!r.available;
+  const likelyPremium = !!r.likelyPremium;
+  // Don't expose a standard retail price for likely-premium names: the real
+  // registry price can be 10-1000x higher and must be verified first.
+  const priceOk = available && !likelyPremium && typeof r.price === "number";
+  const registrarOk = priceOk && cheapest;
   return {
     domain: r.domain,
     available,
     uncertain: !!r.uncertain,
     premium: !!r.premium,
-    likely_premium: !!r.likelyPremium,
-    // Price only makes sense when the domain is actually available.
-    price_usd: available && typeof r.price === "number" ? r.price : null,
+    likely_premium: likelyPremium,
+    // Price only makes sense when the domain is actually available and not
+    // a heuristic premium candidate.
+    price_usd: priceOk ? r.price : null,
     for_sale: !!r.forSale,
     for_sale_via: r.forSaleVia || null,
     listing_url: r.listingUrl || null,
-    cheapest_registrar: cheapest
+    cheapest_registrar: registrarOk
       ? {
           name: cheapest.registrar,
           reg_price_usd: cheapest.regPrice,
@@ -152,12 +158,13 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
         }
       : null,
     // Best link to hand to the user: buy it, or see the full comparison on DigMyName.
-    buy_url: cheapest
+    buy_url: registrarOk
       ? cheapest.affiliateUrl || registerUrl(cheapest.registrar, r.domain)
       : `https://digmyname.com/?q=${encodeURIComponent(r.domain.split(".")[0])}&${UTM}`,
     search_url: `https://digmyname.com/?q=${encodeURIComponent(r.domain.split(".")[0])}&${UTM}`,
   };
 }
+
 
 
 
