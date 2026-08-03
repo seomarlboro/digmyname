@@ -186,7 +186,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const hasQuery = query.trim().length > 0;
 
   const searchBar = (
-    <div className="flex flex-1 items-center gap-1 rounded-[100px] border border-white/10 bg-white/10 py-[14px] pl-5 pr-6 [backdrop-filter:blur(64px)]">
+    <div className="flex flex-1 items-center gap-0.5 rounded-[100px] border border-white/10 bg-white/10 py-[14px] pl-5 pr-6 [backdrop-filter:blur(64px)]">
       <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
         <Search className="h-7 w-7 text-primary" />
       </div>
@@ -198,7 +198,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         placeholder="Enter domain name..."
         autoFocus
         aria-label="Search domain name"
-        className="min-w-0 flex-1 bg-transparent pl-2 pr-10 text-2xl font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
+        className="min-w-0 flex-1 bg-transparent pl-1 pr-10 text-2xl font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
       />
       {query && (
         <button onClick={() => setQuery("")} aria-label="Clear search" className="p-1 text-muted-foreground hover:text-foreground">
