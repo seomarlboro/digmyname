@@ -187,15 +187,16 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       {!hasQuery ? (
         <div className="relative z-10 flex items-center justify-center px-4" style={{ height: 'calc(50vh - 32px - 40px)' }}>
           <div className="text-center">
-            <h1 className="text-gradient text-4xl md:text-5xl font-bold tracking-tight">
-              Find your perfect
+            <h1 className="text-gradient text-5xl font-extrabold leading-[0.95] tracking-[-0.045em] sm:text-6xl md:text-7xl lg:text-[5.5rem]">
+              Find your domain
               <br />
-              domain in seconds
+              name in seconds
             </h1>
-            <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground md:text-lg">
-              Smart search across thousands of domains with instant availability checks
+            <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
+              Search 50+ TLDs, check availability instantly, and compare registrar prices before you buy.
             </p>
           </div>
+
         </div>
       ) : (
         <h1 className="sr-only">Domain search results for {query}</h1>
