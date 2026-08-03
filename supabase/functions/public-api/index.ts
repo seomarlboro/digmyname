@@ -33,8 +33,30 @@ const DOMAIN_RE = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,24}(?:\.[a-z]{
 
 // ---------- rate limiting (in-memory, per edge instance) ----------
 const WINDOW_MS = 60_000;
-const LIMIT = 10;
+const LIMIT = 60;
 const buckets = new Map<string, number[]>();
+
+// ---------- registrar deeplinks (domain prefilled) ----------
+const REGISTRAR_LINKS: Record<string, (d: string) => string> = {
+  GoDaddy: (d) => `https://www.godaddy.com/domainsearch/find?domainToCheck=${encodeURIComponent(d)}`,
+  Porkbun: (d) => `https://porkbun.com/checkout/search?q=${encodeURIComponent(d)}`,
+  Namecheap: (d) => `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(d)}`,
+  Spaceship: (d) => `https://www.spaceship.com/domain-search/?query=${encodeURIComponent(d)}`,
+  Cloudflare: () => `https://www.cloudflare.com/products/registrar/`,
+  OVHcloud: (d) =>
+    `https://order.ca.ovhcloud.com/us/order/webcloud/?#/webCloud/domain/select?selection=~()&domain=${encodeURIComponent(d)}`,
+  "Google Domains": (d) => `https://domains.google/registrar/?searchTerm=${encodeURIComponent(d)}`,
+};
+
+function registerUrl(registrar: string, domain?: string | null): string {
+  const fn = REGISTRAR_LINKS[registrar];
+  if (fn && domain) return fn(domain);
+  if (fn) return fn("");
+  return `https://www.google.com/search?q=${encodeURIComponent(`${domain ?? ""} ${registrar} register`)}`;
+}
+
+const UTM = "utm_source=mcp&utm_medium=api&utm_campaign=domain-check-skills";
+
 
 function clientIp(req: Request): string {
   const xff = req.headers.get("x-forwarded-for");
