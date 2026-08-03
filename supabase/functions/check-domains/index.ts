@@ -19,6 +19,11 @@ const corsHeaders = {
 //   On uncertain → return available:false + uncertain:true (never falsely "available").
 // ============================================================================
 
+// Bump this whenever availability/premium logic changes so old cached rows are
+// treated as misses instead of returning stale interpretations.
+const CACHE_VERSION = 1;
+
+
 interface DomainCheckResult {
   domain: string;
   available: boolean;
