@@ -131,13 +131,15 @@ async function invokeCheck(domains: string[]) {
 }
 
 function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; affiliateUrl: string | null } | null) {
+  const available = !!r.available;
   return {
     domain: r.domain,
-    available: !!r.available,
+    available,
     uncertain: !!r.uncertain,
     premium: !!r.premium,
     likely_premium: !!r.likelyPremium,
-    price_usd: typeof r.price === "number" ? r.price : null,
+    // Price only makes sense when the domain is actually available.
+    price_usd: available && typeof r.price === "number" ? r.price : null,
     for_sale: !!r.forSale,
     for_sale_via: r.forSaleVia || null,
     listing_url: r.listingUrl || null,
@@ -156,6 +158,7 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
     search_url: `https://digmyname.com/?q=${encodeURIComponent(r.domain.split(".")[0])}&${UTM}`,
   };
 }
+
 
 
 async function cheapestForTlds(tlds: string[]): Promise<Map<string, { registrar: string; regPrice: number; affiliateUrl: string | null }>> {
