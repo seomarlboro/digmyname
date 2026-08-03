@@ -118,8 +118,14 @@
   }
 
   h1, h2, h3, h4 {
-    letter-spacing: -0.02em;
+    font-family: 'Geist', system-ui, sans-serif;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+    text-wrap: balance;
   }
+
+  h1 { letter-spacing: -0.045em; }
+
 
   code, pre, .font-mono {
     font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
