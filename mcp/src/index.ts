@@ -17,7 +17,7 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api";
 
-const USER_AGENT = "domain-check-skills-mcp/0.2.0 (+https://digmyname.com/mcp)";
+const USER_AGENT = "domain-check-skills-mcp/1.0.0 (+https://digmyname.com/mcp)";
 
 type Registrar = {
   name: string;
@@ -88,7 +88,7 @@ function formatResult(r: DomainResult): string {
 
 const server = new McpServer({
   name: "domain-check-skills",
-  version: "0.2.0",
+  version: "1.0.0",
 });
 
 server.tool(
@@ -172,7 +172,7 @@ server.tool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("domain-check-skills-mcp v0.2.0 ready (stdio)");
+  console.error("domain-check-skills-mcp v1.0.0 ready (stdio)");
 }
 
 main().catch((err) => {
