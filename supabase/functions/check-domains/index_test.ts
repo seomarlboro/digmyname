@@ -2,7 +2,7 @@
 // Loads .env so VITE_SUPABASE_URL / KEY are available.
 import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { classifyAftermarket, FAST_RDAP, interpretDomainr, isValidDomain, loadRdapBootstrap, loadTldPricing } from "./index.ts";
+import { classifyAftermarket, FAST_RDAP, FAST_RDAP_EXCEPTIONS, interpretDomainr, isValidDomain, loadRdapBootstrap, loadTldPricing } from "./index.ts";
 
 const SUPABASE_URL = Deno.env.get("VITE_SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY")!;
@@ -202,6 +202,10 @@ Deno.test("FAST_RDAP endpoints match the IANA bootstrap", async () => {
   const bootstrap = await loadRdapBootstrap();
   for (const [tld, base] of Object.entries(FAST_RDAP)) {
     const official = (bootstrap.get(tld) ?? []).map((b) => b.replace(/\/+$/, ""));
+    if (FAST_RDAP_EXCEPTIONS.has(tld)) {
+      assertEquals(official.length, 0, `${tld} is now in the bootstrap — drop the exception`);
+      continue;
+    }
     assert(official.length > 0, `${tld} missing from IANA bootstrap — remove it from FAST_RDAP`);
     assert(official.includes(base), `${tld}: ${base} not in ${JSON.stringify(official)}`);
   }
