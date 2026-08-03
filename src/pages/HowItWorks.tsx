@@ -390,7 +390,7 @@ const HowItWorks = () => {
           <p className="mb-6 max-w-2xl text-muted-foreground">
             We expose a free, no-auth JSON API so ChatGPT, Claude, Perplexity
             and your own scripts can answer "is this domain available?"
-            without scraping. 10 requests / 60 s / IP.
+            without scraping. 60 requests / 60 s / IP.
           </p>
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="mb-3 text-sm font-semibold text-foreground">

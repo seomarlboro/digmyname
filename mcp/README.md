@@ -61,6 +61,10 @@ Rate limit: 60 requests / minute / IP.
 
 Node.js 18+
 
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.0.0**.
+
 ## License
 
 MIT

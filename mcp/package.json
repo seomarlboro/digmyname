@@ -11,6 +11,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "engines": {
@@ -33,10 +34,10 @@
   "homepage": "https://digmyname.com/mcp",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/digmyname/domain-check-skills-mcp.git"
+    "url": "git+https://github.com/Seomarlboro/domain-check-skills.git"
   },
   "bugs": {
-    "url": "https://github.com/digmyname/domain-check-skills-mcp/issues"
+    "url": "https://github.com/Seomarlboro/domain-check-skills/issues"
   },
   "scripts": {
     "build": "tsc",
