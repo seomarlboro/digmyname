@@ -234,20 +234,41 @@ async function rdapQueryOnce(url: string, timeoutMs: number): Promise<RdapState>
   }
 }
 
+// Prewarm the bootstrap as soon as the isolate boots so the first user request
+// doesn't pay the IANA download latency.
+// Lazily started on the first request (not at module load, which would leak an
+// in-flight fetch into the test runner) and reused by every later call.
+let rdapBootstrapPrewarm: Promise<Map<string, string[]>> | null = null;
+export function warmRdapBootstrap(): Promise<Map<string, string[]>> {
+  if (!rdapBootstrapPrewarm) {
+    rdapBootstrapPrewarm = loadRdapBootstrap().catch(() => new Map<string, string[]>());
+  }
+  return rdapBootstrapPrewarm;
+}
+
 async function checkRdap(domain: string): Promise<RdapState> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
-  const bootstrap = await loadRdapBootstrap();
+  // Never block on the bootstrap for more than 700ms — if it isn't warm yet we
+  // go straight to the public aggregator instead of stalling the whole batch.
+  const bootstrap = await Promise.race([
+    warmRdapBootstrap(),
+    new Promise<Map<string, string[]>>((res) => {
+      const id = setTimeout(() => res(new Map()), 700);
+      Deno.unrefTimer?.(id);
+    }),
+  ]);
   const bases = bootstrap.get(tld) ?? [];
 
   // Try official IANA-mapped RDAP servers first (max 2 to bound latency).
   for (const base of bases.slice(0, 2)) {
-    const state = await rdapQueryOnce(`${base}/domain/${domain}`, 4000);
+    const state = await rdapQueryOnce(`${base}/domain/${domain}`, 3000);
     if (state !== "unknown") return state;
   }
 
   // Fallback to public aggregator.
-  return await rdapQueryOnce(`https://rdap.org/domain/${domain}`, 4000);
+  return await rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000);
 }
+
 
 // GoDaddy removed: production API requires 50+ domains on account or Reseller status.
 
@@ -517,18 +538,49 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
 }
 
 // ---------------------------------------------------------------------------
+// L1 hot cache — per-isolate, in memory. A repeated search (user retypes, tweaks
+// a filter, or another visitor hits the same warm isolate) skips both the DB
+// round-trip and every network probe.
+// ---------------------------------------------------------------------------
+const HOT_CACHE_TTL_MS = 10 * 60 * 1000;
+const HOT_CACHE_MAX = 5000;
+const hotCache = new Map<string, { result: DomainCheckResult; expiresAt: number }>();
+function pruneHotCache(): void {
+  if (hotCache.size < HOT_CACHE_MAX) return;
+  const now = Date.now();
+  for (const [k, v] of hotCache) if (v.expiresAt <= now) hotCache.delete(k);
+  // Still oversized → drop oldest insertions.
+  while (hotCache.size > HOT_CACHE_MAX) hotCache.delete(hotCache.keys().next().value as string);
+}
+
+// ---------------------------------------------------------------------------
+
 // Resolve a single domain using RDAP + DNS only. GoDaddy is intentionally
 // removed from the verification chain — production API access requires
 // 50+ domains on the account or Reseller status, which we don't have.
+//
+// Speed: both probes start in parallel and whichever proves "taken" first wins
+// immediately — we don't wait for the slower one just to confirm a negative.
 // ---------------------------------------------------------------------------
-async function resolveDomain(domain: string): Promise<DomainCheckResult> {
-  const [dns, rdap] = await Promise.all([checkDnsDoH(domain), checkRdap(domain)]);
-  const likelyPremium = isLikelyPremium(domain);
+const PENDING_FOREVER = <T,>(): Promise<T> => new Promise<T>(() => {});
 
-  // RDAP is authoritative for registration status.
-  if (rdap === "taken") {
-    return { domain, available: false, checkedVia: "rdap", likelyPremium };
+async function resolveDomain(domain: string): Promise<DomainCheckResult> {
+  const likelyPremium = isLikelyPremium(domain);
+  const dnsP = checkDnsDoH(domain);
+  const rdapP = checkRdap(domain);
+
+  // Fast path: the first decisive "taken" signal ends the check.
+  const winner = await Promise.race([
+    rdapP.then((r) => (r === "taken" ? "rdap" : PENDING_FOREVER<string>())),
+    dnsP.then((d) => (d === "has_records" ? "dns" : PENDING_FOREVER<string>())),
+    Promise.all([dnsP, rdapP]).then(() => "settled"),
+  ]);
+  if (winner === "rdap" || winner === "dns") {
+    return { domain, available: false, checkedVia: winner, likelyPremium };
   }
+
+  const [dns, rdap] = await Promise.all([dnsP, rdapP]);
+
   // RDAP 404 is authoritative for "not registered". A DNS lookup error must not
   // downgrade that to uncertain — only actual DNS records can contradict it.
   if (rdap === "available" && dns !== "has_records") {
@@ -540,12 +592,6 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
     };
   }
 
-
-  // DNS-only signal: records exist → taken.
-  if (dns === "has_records") {
-    return { domain, available: false, checkedVia: "dns", likelyPremium };
-  }
-
   // Heuristic fallback — short SLD on premium TLD with no clear answer.
   if (likelyPremium) {
     return { domain, available: false, checkedVia: "heuristic", likelyPremium: true, uncertain: true };
@@ -553,6 +599,7 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
 
   return { domain, available: false, checkedVia: "unknown", uncertain: true };
 }
+
 
 // ---------------------------------------------------------------------------
 // Lightweight per-IP rate limiter (in-memory, sliding window).
@@ -641,18 +688,27 @@ Deno.serve(async (req) => {
 
     const rapidKey = Deno.env.get("RAPIDAPI_DOMAINR_KEY");
 
-    // Cache lookup.
-    const { data: cached } = await supabase
-      .from("domain_cache")
-      .select("domain, available, checked_via, rdap_data")
-      .in("domain", batch)
-      .gt("expires_at", new Date().toISOString());
-
+    // ---- L1: in-isolate hot cache (zero network, zero DB) ----------------
     const cachedMap = new Map<string, DomainCheckResult>();
-    if (cached) {
-      for (const c of cached) {
+    const nowMs = Date.now();
+    const missAfterL1: string[] = [];
+    for (const d of batch) {
+      const hot = hotCache.get(d);
+      if (hot && hot.expiresAt > nowMs) cachedMap.set(d, { ...hot.result });
+      else missAfterL1.push(d);
+    }
+
+    // ---- L2: shared DB cache --------------------------------------------
+    if (missAfterL1.length > 0) {
+      const { data: cached } = await supabase
+        .from("domain_cache")
+        .select("domain, available, checked_via, rdap_data")
+        .in("domain", missAfterL1)
+        .gt("expires_at", new Date().toISOString());
+
+      for (const c of cached ?? []) {
         const meta = (c.rdap_data ?? {}) as Record<string, unknown>;
-        cachedMap.set(c.domain, {
+        const result: DomainCheckResult = {
           domain: c.domain,
           available: c.available,
           checkedVia: c.checked_via,
@@ -662,7 +718,9 @@ Deno.serve(async (req) => {
           forSale: meta.for_sale as boolean | undefined,
           forSaleVia: meta.for_sale_via as string | undefined,
           listingUrl: meta.listing_url as string | undefined,
-        });
+        };
+        cachedMap.set(c.domain, result);
+        hotCache.set(c.domain, { result, expiresAt: nowMs + HOT_CACHE_TTL_MS });
       }
     }
 
@@ -672,7 +730,9 @@ Deno.serve(async (req) => {
     // RDAP is registry data: free, unlimited and definitive for "registered vs not".
     // Running it first means Domainr (paid, rate-limited) is only consulted where
     // it actually adds information, which keeps us well under the 429 ceiling.
-    const baseResults = await pMap(uncached, 10, (d) => resolveDomain(d));
+    // Concurrency 25: a 20-domain batch fires in a single wave instead of two.
+    const baseResults = await pMap(uncached, 25, (d) => resolveDomain(d));
+
 
     // ---- Pass 2: Domainr, only where it adds value -----------------------
     //   • RDAP/DNS could not decide (uncertain) → need a verdict
@@ -733,7 +793,7 @@ Deno.serve(async (req) => {
       (r) => !r.available && !r.uncertain && !r.forSale
     );
     if (aftermarketTargets.length > 0) {
-      const hits = await pMap(aftermarketTargets, 10, async (r) => ({
+      const hits = await pMap(aftermarketTargets, 20, async (r) => ({
         domain: r.domain,
         hit: await detectAftermarket(r.domain),
       }));
@@ -839,22 +899,35 @@ Deno.serve(async (req) => {
       .filter(({ ttl }) => ttl > 0);
 
     if (cacheable.length > 0) {
-      const rows = cacheable.map(({ r, ttl }) => ({
-        domain: r.domain,
-        available: r.available,
-        checked_via: r.checkedVia,
-        rdap_data: {
-          godaddy_price: r.price ?? null,
-          premium: r.premium ?? false,
-          likely_premium: r.likelyPremium ?? false,
-          for_sale: r.forSale ?? false,
-          for_sale_via: r.forSaleVia ?? null,
-          listing_url: r.listingUrl ?? null,
-        },
-        expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
-      }));
-      await supabase.from("domain_cache").upsert(rows, { onConflict: "domain" });
+      const rows = cacheable.map(({ r, ttl }) => {
+        // L1: keep it in this isolate too, so a repeat search is instant.
+        pruneHotCache();
+        hotCache.set(r.domain, {
+          result: r,
+          expiresAt: Date.now() + Math.min(ttl * 1000, HOT_CACHE_TTL_MS),
+        });
+        return {
+          domain: r.domain,
+          available: r.available,
+          checked_via: r.checkedVia,
+          rdap_data: {
+            godaddy_price: r.price ?? null,
+            premium: r.premium ?? false,
+            likely_premium: r.likelyPremium ?? false,
+            for_sale: r.forSale ?? false,
+            for_sale_via: r.forSaleVia ?? null,
+            listing_url: r.listingUrl ?? null,
+          },
+          expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
+        };
+      });
+      // Persist in the background — the user's response doesn't wait for the write.
+      const write = supabase.from("domain_cache").upsert(rows, { onConflict: "domain" });
+      const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+      if (rt?.waitUntil) rt.waitUntil(Promise.resolve(write).catch(() => {}));
+      else await write;
     }
+
 
     const all = new Map<string, DomainCheckResult>();
     for (const c of cachedMap.values()) all.set(c.domain, c);
