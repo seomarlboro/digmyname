@@ -236,7 +236,15 @@ async function rdapQueryOnce(url: string, timeoutMs: number): Promise<RdapState>
 
 // Prewarm the bootstrap as soon as the isolate boots so the first user request
 // doesn't pay the IANA download latency.
-const rdapBootstrapPrewarm = loadRdapBootstrap().catch(() => new Map<string, string[]>());
+// Lazily started on the first request (not at module load, which would leak an
+// in-flight fetch into the test runner) and reused by every later call.
+let rdapBootstrapPrewarm: Promise<Map<string, string[]>> | null = null;
+export function warmRdapBootstrap(): Promise<Map<string, string[]>> {
+  if (!rdapBootstrapPrewarm) {
+    rdapBootstrapPrewarm = loadRdapBootstrap().catch(() => new Map<string, string[]>());
+  }
+  return rdapBootstrapPrewarm;
+}
 
 async function checkRdap(domain: string): Promise<RdapState> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
