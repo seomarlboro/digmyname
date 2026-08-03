@@ -97,13 +97,19 @@ async function dohProbe(endpoint: string, domain: string, timeoutMs: number): Pr
       )
     );
     let any = false;
+    let hasRecords = false;
+    let nxdomain = false;
     for (const data of responses) {
       if (!data) continue;
       any = true;
-      if (Array.isArray(data.Answer) && data.Answer.length > 0) return "has_records";
+      if (Array.isArray(data.Answer) && data.Answer.length > 0) hasRecords = true;
       // Status 3 = NXDOMAIN
-      if (data.Status === 3) return "no_records";
+      if (data.Status === 3) nxdomain = true;
     }
+    // Records take precedence: a domain can have NS records but no A record.
+    if (hasRecords) return "has_records";
+    // Only call it "no records" if at least one resolver explicitly answered NXDOMAIN.
+    if (nxdomain) return "no_records";
     return any ? "no_records" : "error";
   } catch {
     return "error";
