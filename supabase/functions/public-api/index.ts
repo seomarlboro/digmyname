@@ -7,7 +7,7 @@
 //
 // Notes:
 //  - No auth (CORS *), designed for AI agents / scripts.
-//  - In-memory rate limit: 10 requests / minute / IP. Best-effort (per edge instance),
+//  - In-memory rate limit: 60 requests / minute / IP. Best-effort (per edge instance),
 //    intentionally conservative to avoid impacting normal users.
 //  - Delegates availability checks to the existing `check-domains` function so logic stays in one place.
 //  - Returns minimal, stable JSON. No internal cache/source-chain details exposed.
