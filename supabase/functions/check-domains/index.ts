@@ -1019,16 +1019,20 @@ Deno.serve(async (req) => {
               pb.premium ||
               (pb.price != null && standard != null && pb.price > standard * 2) ||
               (pb.price != null && standard == null && pb.price >= 50);
+            // If Porkbun says the name is taken, drop any stale standard price that
+            // was attached while we still thought it was available.
+            const price = pb.available ? (pb.price ?? fresh[idx].price) : undefined;
             fresh[idx] = {
               ...fresh[idx],
               available: pb.available,
               checkedVia: "porkbun",
-              price: pb.price ?? fresh[idx].price,
-              premium: isPremium || undefined,
+              price,
+              premium: pb.available ? (isPremium || undefined) : undefined,
               likelyPremium: isPremium || undefined,
               uncertain: undefined,
             };
           }
+
         }
       }
     }
