@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, Moon, Sun, LogOut, User } from "lucide-react";
 import ShovelLogo from "@/components/ShovelLogo";
 import { Link } from "react-router-dom";
@@ -11,10 +11,24 @@ const Header = () => {
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
+      <header
+        className={`sticky top-0 z-50 w-full transition-colors duration-300 ${
+          scrolled
+            ? "border-b border-border/40 bg-background/80 backdrop-blur-xl"
+            : "border-b border-transparent bg-transparent"
+        }`}
+      >
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5">
             <ShovelLogo className="h-8 w-8" />
