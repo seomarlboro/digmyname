@@ -142,11 +142,21 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
     for_sale_via: r.forSaleVia || null,
     listing_url: r.listingUrl || null,
     cheapest_registrar: cheapest
-      ? { name: cheapest.registrar, reg_price_usd: cheapest.regPrice, affiliate_url: cheapest.affiliateUrl }
+      ? {
+          name: cheapest.registrar,
+          reg_price_usd: cheapest.regPrice,
+          affiliate_url: cheapest.affiliateUrl,
+          register_url: cheapest.affiliateUrl || registerUrl(cheapest.registrar, r.domain),
+        }
       : null,
-    search_url: `https://digmyname.com/?q=${encodeURIComponent(r.domain.split(".")[0])}`,
+    // Best link to hand to the user: buy it, or see the full comparison on DigMyName.
+    buy_url: cheapest
+      ? cheapest.affiliateUrl || registerUrl(cheapest.registrar, r.domain)
+      : `https://digmyname.com/?q=${encodeURIComponent(r.domain.split(".")[0])}&${UTM}`,
+    search_url: `https://digmyname.com/?q=${encodeURIComponent(r.domain.split(".")[0])}&${UTM}`,
   };
 }
+
 
 async function cheapestForTlds(tlds: string[]): Promise<Map<string, { registrar: string; regPrice: number; affiliateUrl: string | null }>> {
   const result = new Map<string, { registrar: string; regPrice: number; affiliateUrl: string | null }>();
