@@ -2,6 +2,24 @@
 
 All notable changes to DigMyName.
 
+## 2026-08-03 — MCP server v1.0.0 + Public API v1.1.0
+
+### Added
+- **`domain-check-skills-mcp@1.0.0`** published to npm — official MCP server with three tools (`check_domain`, `search_domains`, `compare_registrars`), MIT licensed, Node.js 18+.
+- `/mcp` landing page with one-line Claude Code install, config snippets, JSON-LD `SoftwareApplication` schema, npm badges and OG/Twitter meta.
+- Public API returns `buy_url` and `register_url` per result, with `utm_source=mcp` attribution.
+- `three_year_total_usd` added to registrar results.
+- 404 page with CSS/SVG cosmic animation.
+
+### Changed
+- Public API rate limit raised from 10 to 60 requests / minute / IP.
+- `llms.txt` and `llms-full.txt` document the MCP server, new API fields and the new rate limit.
+- Sitemap includes `/mcp`, `/pricing`, `/how-it-works`.
+- Design system: Geist Sans/Mono, unified heading scale across pages, `--radius: 1rem` Apple-style corners, responsive container 968px → 1320px, breakpoints `xs` (390px) → `5xl` (3840px).
+
+### Fixed
+- OpenAPI docs URL in the public API response.
+
 ## 2026-05-15 — Domain verification accuracy overhaul
 
 ### Fixed
