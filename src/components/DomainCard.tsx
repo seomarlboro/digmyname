@@ -222,7 +222,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               {name}.<span className="text-primary">{ext}</span>
             </h3>
             <div className="flex items-center gap-1.5 mt-1.5">
-              {registrarName && (() => {
+              {available && registrarName && (() => {
                 const rc = getRegistrarColor(registrarName);
                 return (
                   <Badge variant="outline" className={`text-xs font-medium ${rc.text} ${rc.bg} ${rc.border}`}>
@@ -236,12 +236,11 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   {sinceLabel}
                 </Badge>
               )}
-              {tld.features.map((f) => (
+              {available && tld.features.map((f) => (
                 <Badge key={f} variant="secondary" className="text-xs font-normal">
                   {f}
                 </Badge>
               ))}
-
             </div>
           </div>
 
