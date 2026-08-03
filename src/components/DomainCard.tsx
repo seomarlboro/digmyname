@@ -179,8 +179,8 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   For sale
                 </span>
               ) : sinceLabel ? (
-                <span className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                  <CalendarClock className="h-3.5 w-3.5" />
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <CalendarClock className="h-3 w-3" />
                   {sinceLabel}
                 </span>
               ) : (
