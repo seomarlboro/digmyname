@@ -44,8 +44,9 @@ const DomainResultSchema = z.object({
 });
 
 type DomainResult = z.infer<typeof DomainResultSchema>;
+type AgeBatch = { count: number; results: Array<{ domain: string; created: string | null; expires: string | null }> };
 
-async function apiary<T>(path: string): Promise<T> {
+async function api<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { accept: "application/json", "user-agent": USER_AGENT },
   });
@@ -114,9 +115,10 @@ server.tool(
     const clean = domain.trim().toLowerCase();
     const [check, age] = await Promise.all([
       api<{ result: DomainResult }>(`/check?domain=${encodeURIComponent(clean)}`),
-      api<{ created: string | null }>(`/age?domain=${encodeURIComponent(clean)}`).catch(() => ({ created: null })),
+      api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => ({ count: 1, results: [{ domain: clean, created: null, expires: null }] })),
     ]);
-    const result = { ...check.result, since_year: yearFromIso(age.created) };
+    const created = age.results.find((a) => a.domain === clean)?.created ?? null;
+    const result = { ...check.result, since_year: yearFromIso(created) };
     return { content: [{ type: "text" as const, text: formatResult(result) }] };
   }
 );
@@ -139,16 +141,17 @@ server.tool(
     const results = data.results ?? [];
 
     const takenDomains = results.filter((r) => !r.available && !r.uncertain).map((r) => r.domain);
-    let ages: Record<string, { created: string | null }> = {};
+    let ageByDomain: Record<string, string | null> = {};
     if (takenDomains.length) {
-      ages = await api<Record<string, { created: string | null }>>(
-        `/age?domain=${encodeURIComponent(takenDomains.join(","))}`
-      ).catch(() => ({}));
+      const ageBatch = await api<AgeBatch>(
+        `/age?domains=${encodeURIComponent(takenDomains.join(","))}`
+      ).catch(() => ({ count: 0, results: [] }));
+      ageByDomain = Object.fromEntries(ageBatch.results.map((a) => [a.domain, a.created]));
     }
 
     const enriched = results.map((r) => ({
       ...r,
-      since_year: !r.available && !r.uncertain ? yearFromIso(ages[r.domain]?.created ?? null) : null,
+      since_year: !r.available && !r.uncertain ? yearFromIso(ageByDomain[r.domain] ?? null) : null,
     }));
 
     const available = enriched.filter((r) => r.available && !r.uncertain);
@@ -210,13 +213,16 @@ server.tool(
   "Return the registration (creation) year and expiration date for a taken domain using RDAP.",
   { domain: z.string().describe("Fully-qualified domain, e.g. acme.com") },
   async ({ domain }: { domain: string }) => {
-    const data = await api<{ domain: string; created: string | null; expires: string | null }>(
-      `/age?domain=${encodeURIComponent(domain.trim().toLowerCase())}`
-    );
-    const y = yearFromIso(data.created);
-    const text = data.created
-      ? `${data.domain} — registered ${data.created}${y ? ` (since ${y})` : ""}${data.expires ? `, expires ${data.expires}` : ""}`
-      : `Could not determine registration date for ${data.domain}.`;
+    const clean = domain.trim().toLowerCase();
+    const data = await api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`);
+    const info = data.results.find((a) => a.domain === clean);
+    if (!info) {
+      return { content: [{ type: "text" as const, text: `Could not determine registration date for ${clean}.` }] };
+    }
+    const y = yearFromIso(info.created);
+    const text = info.created
+      ? `${info.domain} — registered ${info.created}${y ? ` (since ${y})` : ""}${info.expires ? `, expires ${info.expires}` : ""}`
+      : `Could not determine registration date for ${info.domain}.`;
     return { content: [{ type: "text" as const, text }] };
   }
 );
