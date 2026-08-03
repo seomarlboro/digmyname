@@ -18,7 +18,16 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const [results, setResults] = useState<DomainResult[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState(false);
   const [viewMode, setViewMode] = useState<"cards" | "compact">("cards");
+  const [scrolled, setScrolled] = useState(false);
   const isMobile = useIsMobile();
+
+  // Track scroll to blur the search bar background only after scrolling
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Debounce
   useEffect(() => {
