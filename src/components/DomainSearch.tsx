@@ -215,9 +215,8 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
             aiSuggestions ? "translate-x-[32px]" : "translate-x-0"
           }`}
         >
-          <Sparkles
+          <StarsIcon
             className={`h-4 w-4 transition-colors ${aiSuggestions ? "text-primary" : "text-muted-foreground"}`}
-            strokeWidth={2.5}
           />
         </span>
       </button>
