@@ -275,28 +275,79 @@ export function warmRdapBootstrap(): Promise<Map<string, string[]>> {
   return rdapBootstrapPrewarm;
 }
 
+// Hardcoded RDAP endpoints for the top TLDs (≈95% of every real search).
+// These never change in practice, so for popular zones we skip the IANA
+// bootstrap wait entirely and hit the registry on the very first millisecond.
+export const FAST_RDAP: Record<string, string> = {
+  com: "https://rdap.verisign.com/com/v1",
+  net: "https://rdap.verisign.com/net/v1",
+  org: "https://rdap.publicinterestregistry.org/rdap",
+  info: "https://rdap.identitydigital.services/rdap",
+  biz: "https://rdap.nic.biz",
+  co: "https://rdap.nic.co",
+  io: "https://rdap.identitydigital.services/rdap",
+  ai: "https://rdap.identitydigital.services/rdap",
+  app: "https://www.registry.google/rdap",
+  dev: "https://www.registry.google/rdap",
+  page: "https://www.registry.google/rdap",
+  xyz: "https://rdap.centralnic.com/xyz",
+  online: "https://rdap.centralnic.com/online",
+  site: "https://rdap.centralnic.com/site",
+  store: "https://rdap.centralnic.com/store",
+  tech: "https://rdap.centralnic.com/tech",
+  space: "https://rdap.centralnic.com/space",
+  shop: "https://rdap.gmoregistry.net/rdap",
+  cloud: "https://rdap.nic.cloud",
+  studio: "https://rdap.identitydigital.services/rdap",
+  agency: "https://rdap.identitydigital.services/rdap",
+  live: "https://rdap.identitydigital.services/rdap",
+  life: "https://rdap.identitydigital.services/rdap",
+  me: "https://rdap.nic.me",
+  tv: "https://rdap.nic.tv",
+  cc: "https://rdap.nic.cc",
+  us: "https://rdap.nic.us",
+};
+
 async function checkRdap(domain: string): Promise<RdapState> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
-  // Never block on the bootstrap for more than 700ms — if it isn't warm yet we
-  // go straight to the public aggregator instead of stalling the whole batch.
-  const bootstrap = await Promise.race([
-    warmRdapBootstrap(),
-    new Promise<Map<string, string[]>>((res) => {
-      const id = setTimeout(() => res(new Map()), 700);
-      Deno.unrefTimer?.(id);
-    }),
-  ]);
-  const bases = bootstrap.get(tld) ?? [];
 
-  // Try official IANA-mapped RDAP servers first (max 2 to bound latency).
-  for (const base of bases.slice(0, 2)) {
-    const state = await rdapQueryOnce(`${base}/domain/${domain}`, 3000);
-    if (state !== "unknown") return state;
+  // Fast lane: popular TLD → known registry endpoint, zero lookup latency.
+  const fast = FAST_RDAP[tld];
+  let bases: string[];
+  if (fast) {
+    bases = [fast];
+    // Keep the bootstrap warming in the background for the long-tail zones.
+    warmRdapBootstrap();
+  } else {
+    // Never block on the bootstrap for more than 700ms — if it isn't warm yet we
+    // go straight to the public aggregator instead of stalling the whole batch.
+    const bootstrap = await Promise.race([
+      warmRdapBootstrap(),
+      new Promise<Map<string, string[]>>((res) => {
+        const id = setTimeout(() => res(new Map()), 700);
+        Deno.unrefTimer?.(id);
+      }),
+    ]);
+    bases = (bootstrap.get(tld) ?? []).slice(0, 2);
   }
 
-  // Fallback to public aggregator.
-  return await rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000);
+  // Query the registry endpoint(s) and hedge with the public aggregator after
+  // 700ms instead of waiting out a full 3s timeout before falling back.
+  const decisive = (p: Promise<RdapState>) =>
+    p.then((s) => (s === "unknown" ? PENDING_FOREVER<RdapState>() : s));
+
+  const probes = bases.map((base) => rdapQueryOnce(`${base}/domain/${domain}`, 3000));
+  const aggregator = sleep(probes.length ? 700 : 0).then(() =>
+    rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000)
+  );
+  const all = [...probes, aggregator];
+
+  return await Promise.race([
+    ...all.map(decisive),
+    Promise.all(all).then((states) => states.find((s) => s !== "unknown") ?? "unknown"),
+  ]);
 }
+
 
 
 // GoDaddy removed: production API requires 50+ domains on account or Reseller status.
