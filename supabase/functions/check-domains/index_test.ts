@@ -30,6 +30,14 @@ Deno.test("known-taken short .com is never reported as available", async () => {
   assertEquals(r.available, false, `google.com should be taken, got ${JSON.stringify(r)}`);
 });
 
+Deno.test("known-taken brand domain on premium new gTLD is never reported as available", async () => {
+  // apple.studio is registered → must be available:false.
+  const { status, results } = await check(["apple.studio"]);
+  assertEquals(status, 200);
+  const r = results[0];
+  assertEquals(r.available, false, `apple.studio should be taken, got ${JSON.stringify(r)}`);
+});
+
 Deno.test("invalid domain is rejected", async () => {
   const { status } = await check(["not a domain!!"]);
   assertEquals(status, 400);
