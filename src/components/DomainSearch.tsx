@@ -186,7 +186,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const hasQuery = query.trim().length > 0;
 
   const searchBar = (
-    <div className="flex flex-1 items-center gap-1 rounded-[100px] border border-white/10 bg-white/10 py-[14px] px-5 [backdrop-filter:blur(64px)]">
+    <div className="flex flex-1 items-center gap-1 rounded-[100px] border border-white/10 bg-white/10 py-[14px] pl-5 pr-6 [backdrop-filter:blur(64px)]">
       <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
         <Search className="h-7 w-7 text-primary" />
       </div>
