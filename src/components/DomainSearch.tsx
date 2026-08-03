@@ -198,7 +198,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         placeholder="Enter domain name..."
         autoFocus
         aria-label="Search domain name"
-        className="min-w-0 flex-1 bg-transparent pl-4 pr-8 text-2xl font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
+        className="min-w-0 flex-1 bg-transparent pl-4 pr-10 text-2xl font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
       />
       {query && (
         <button onClick={() => setQuery("")} aria-label="Clear search" className="p-1 text-muted-foreground hover:text-foreground">
