@@ -1,20 +1,29 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, X, Loader2, CheckCircle2, LayoutGrid, List, AlertCircle } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const StarsIcon = ({ className }: { className?: string }) => (
+const StarsIcon = ({ className, active }: { className?: string; active?: boolean }) => (
   <svg
     viewBox="0 0 512 512"
     className={className}
-    fill="currentColor"
+    fill={active ? "url(#starsGradient)" : "currentColor"}
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
+    {active && (
+      <defs>
+        <linearGradient id="starsGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="hsl(160, 70%, 55%)" />
+          <stop offset="50%" stopColor="hsl(205, 90%, 58%)" />
+          <stop offset="100%" stopColor="hsl(255, 85%, 65%)" />
+        </linearGradient>
+      </defs>
+    )}
     <path d="M298.138,136.665c-62.065-13.011-110.576-61.522-123.585-123.588C172.955,5.458,166.235,0,158.448,0 s-14.507,5.458-16.104,13.078c-13.01,62.065-61.521,110.575-123.586,123.584c-7.62,1.597-13.079,8.318-13.079,16.104 s5.458,14.507,13.079,16.104c62.064,13.011,110.573,61.521,123.583,123.586c1.597,7.62,8.317,13.079,16.104,13.079 c7.786,0,14.507-5.458,16.104-13.079c13.011-62.065,61.523-110.575,123.588-123.583c7.62-1.597,13.079-8.317,13.079-16.104 C311.215,144.983,305.757,138.262,298.138,136.665z" />
     <path d="M270.938,408.484c-29.242-6.129-52.098-28.985-58.229-58.229c-1.597-7.62-8.317-13.079-16.104-13.079 c-7.786,0-14.507,5.457-16.104,13.078c-6.131,29.243-28.988,52.099-58.23,58.229c-7.62,1.597-13.079,8.318-13.079,16.104 c0,7.786,5.458,14.507,13.079,16.104c29.241,6.13,52.098,28.987,58.228,58.23c1.597,7.62,8.317,13.079,16.104,13.079 c7.786,0,14.507-5.457,16.104-13.079c6.131-29.243,28.988-52.099,58.231-58.229c7.62-1.597,13.079-8.318,13.079-16.104 C284.017,416.802,278.559,410.082,270.938,408.484z" />
     <path d="M493.243,256.135c-39.526-8.286-70.419-39.18-78.704-78.705c-1.597-7.62-8.317-13.079-16.104-13.079 c-7.786,0-14.507,5.457-16.104,13.078c-8.286,39.526-39.179,70.419-78.705,78.704c-7.62,1.597-13.079,8.318-13.079,16.104 c0,7.786,5.458,14.506,13.079,16.104c39.525,8.286,70.418,39.179,78.703,78.705c1.597,7.62,8.317,13.079,16.104,13.079 c7.786,0,14.507-5.457,16.104-13.079c8.287-39.526,39.18-70.419,78.705-78.703c7.62-1.598,13.079-8.318,13.079-16.104 S500.863,257.732,493.243,256.135z" />
   </svg>
 );
-import { useIsMobile } from "@/hooks/use-mobile";
 import DomainCard from "@/components/DomainCard";
 import HeroBackground from "@/components/HeroBackground";
 import { generateDomainList, checkDomainsAvailability, type DomainResult } from "@/lib/domainData";
@@ -204,19 +213,20 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
         aria-pressed={aiSuggestions}
         title={aiSuggestions ? "AI suggestions on" : "AI suggestions off"}
-        className={`relative flex h-9 w-[68px] shrink-0 items-center rounded-full p-1 transition-all duration-300 ${
+        className={`relative flex h-[30px] w-[54px] shrink-0 items-center rounded-full p-[3px] transition-all duration-300 ${
           aiSuggestions
             ? "bg-[linear-gradient(90deg,hsl(160_70%_80%),hsl(205_90%_78%),hsl(255_85%_78%))] shadow-[0_2px_12px_hsl(var(--primary)/0.35)]"
             : "bg-white/10 hover:bg-white/[0.16]"
         }`}
       >
         <span
-          className={`flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 ${
-            aiSuggestions ? "translate-x-[32px]" : "translate-x-0"
+          className={`flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            aiSuggestions ? "translate-x-6" : "translate-x-0"
           }`}
         >
           <StarsIcon
-            className={`h-4 w-4 transition-colors ${aiSuggestions ? "text-primary" : "text-muted-foreground"}`}
+            className="h-[14px] w-[14px]"
+            active={aiSuggestions}
           />
         </span>
       </button>
