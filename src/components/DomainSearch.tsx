@@ -150,7 +150,11 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const hasQuery = query.trim().length > 0;
 
   const searchBar = (
-    <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-[20px] border border-border/40 bg-transparent p-3" style={{ borderRadius: '20px' }}>
+    <div className={`mx-auto flex max-w-2xl items-center gap-2 rounded-[20px] border p-3 transition-colors duration-300 ${
+      scrolled
+        ? "border-border/50 bg-background/80 backdrop-blur-xl"
+        : "border-border/40 bg-transparent"
+    }`}>
       <div className="hidden md:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
         <Search className="h-6 w-6 text-primary" />
       </div>
@@ -212,7 +216,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       )}
 
       {/* Always-rendered sticky search bar */}
-      <div className={`sticky top-16 z-40 border-b transition-all duration-300 ${scrolled || hasQuery ? "border-border/50 bg-background/80 py-4 backdrop-blur-xl" : "border-transparent bg-transparent py-4"}`}>
+      <div className={`sticky top-16 z-40 py-4 transition-colors duration-300 ${
+        scrolled ? "bg-background/80 backdrop-blur-xl" : "bg-transparent"
+      }`}>
         <div className="container mx-auto px-4">
           {searchBar}
         </div>
