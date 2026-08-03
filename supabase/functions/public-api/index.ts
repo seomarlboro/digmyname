@@ -33,8 +33,30 @@ const DOMAIN_RE = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,24}(?:\.[a-z]{
 
 // ---------- rate limiting (in-memory, per edge instance) ----------
 const WINDOW_MS = 60_000;
-const LIMIT = 10;
+const LIMIT = 60;
 const buckets = new Map<string, number[]>();
+
+// ---------- registrar deeplinks (domain prefilled) ----------
+const REGISTRAR_LINKS: Record<string, (d: string) => string> = {
+  GoDaddy: (d) => `https://www.godaddy.com/domainsearch/find?domainToCheck=${encodeURIComponent(d)}`,
+  Porkbun: (d) => `https://porkbun.com/checkout/search?q=${encodeURIComponent(d)}`,
+  Namecheap: (d) => `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(d)}`,
+  Spaceship: (d) => `https://www.spaceship.com/domain-search/?query=${encodeURIComponent(d)}`,
+  Cloudflare: () => `https://www.cloudflare.com/products/registrar/`,
+  OVHcloud: (d) =>
+    `https://order.ca.ovhcloud.com/us/order/webcloud/?#/webCloud/domain/select?selection=~()&domain=${encodeURIComponent(d)}`,
+  "Google Domains": (d) => `https://domains.google/registrar/?searchTerm=${encodeURIComponent(d)}`,
+};
+
+function registerUrl(registrar: string, domain?: string | null): string {
+  const fn = REGISTRAR_LINKS[registrar];
+  if (fn && domain) return fn(domain);
+  if (fn) return fn("");
+  return `https://www.google.com/search?q=${encodeURIComponent(`${domain ?? ""} ${registrar} register`)}`;
+}
+
+const UTM = "utm_source=mcp&utm_medium=api&utm_campaign=domain-check-skills";
+
 
 function clientIp(req: Request): string {
   const xff = req.headers.get("x-forwarded-for");
@@ -120,11 +142,21 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
     for_sale_via: r.forSaleVia || null,
     listing_url: r.listingUrl || null,
     cheapest_registrar: cheapest
-      ? { name: cheapest.registrar, reg_price_usd: cheapest.regPrice, affiliate_url: cheapest.affiliateUrl }
+      ? {
+          name: cheapest.registrar,
+          reg_price_usd: cheapest.regPrice,
+          affiliate_url: cheapest.affiliateUrl,
+          register_url: cheapest.affiliateUrl || registerUrl(cheapest.registrar, r.domain),
+        }
       : null,
-    search_url: `https://digmyname.com/?q=${encodeURIComponent(r.domain.split(".")[0])}`,
+    // Best link to hand to the user: buy it, or see the full comparison on DigMyName.
+    buy_url: cheapest
+      ? cheapest.affiliateUrl || registerUrl(cheapest.registrar, r.domain)
+      : `https://digmyname.com/?q=${encodeURIComponent(r.domain.split(".")[0])}&${UTM}`,
+    search_url: `https://digmyname.com/?q=${encodeURIComponent(r.domain.split(".")[0])}&${UTM}`,
   };
 }
+
 
 async function cheapestForTlds(tlds: string[]): Promise<Map<string, { registrar: string; regPrice: number; affiliateUrl: string | null }>> {
   const result = new Map<string, { registrar: string; regPrice: number; affiliateUrl: string | null }>();
@@ -149,9 +181,10 @@ const OPENAPI = {
   openapi: "3.1.0",
   info: {
     title: "DigMyName Public API",
-    version: "1.0.0",
+    version: "1.1.0",
     description:
-      "Agent-friendly endpoints for domain availability checks and registrar pricing. Free, no auth, 10 requests/min per IP. Please link users back to digmyname.com.",
+      "Agent-friendly endpoints for domain availability checks and registrar pricing. Free, no auth, 60 requests/min per IP. Every result carries a buy_url and a search_url — please surface them so users can act. Please link users back to digmyname.com.",
+
     contact: { url: "https://digmyname.com" },
   },
   servers: [{ url: "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api" }],
@@ -214,7 +247,7 @@ Deno.serve(async (req) => {
       return json(
         {
           name: "DigMyName Public API",
-          docs: "https://digmyname.com/api/openapi.json",
+          docs: "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/openapi.json",
           endpoints: ["/check?domain=", "/search?q=&tlds=", "/registrars?tld=", "/openapi.json"],
           rate_limit: `${LIMIT} requests / 60s / IP`,
           website: "https://digmyname.com",
@@ -276,10 +309,18 @@ Deno.serve(async (req) => {
             reg_price_usd: Number(r.reg_price),
             renew_price_usd: Number(r.renew_price),
             transfer_price_usd: r.transfer_price != null ? Number(r.transfer_price) : null,
+            three_year_total_usd:
+              Math.round((Number(r.reg_price) + 2 * Number(r.renew_price)) * 100) / 100,
+
             promo_code: r.promo_code || null,
             affiliate_url: r.affiliate_url || null,
+            register_url:
+              r.affiliate_url ||
+              registerUrl(r.registrar, validateDomain(url.searchParams.get("domain") || "") || null),
             whois_privacy_included: !!r.whois_privacy,
           })),
+          compare_url: `https://digmyname.com/pricing?${UTM}`,
+
         },
         200,
         rlHeaders,
