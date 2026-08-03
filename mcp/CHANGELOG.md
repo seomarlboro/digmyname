@@ -5,6 +5,18 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-08-04
+
+### Added
+- `get_domain_age` — returns registration year and expiration date for taken domains via RDAP.
+- `check_domain` and `search_domains` now include `registered since [year]` for taken domains.
+- Results explicitly separate `UNKNOWN` (no conclusive signal) from `TAKEN`/`AVAILABLE`.
+- `likely_premium` results now carry a warning that the real registry price may differ from cached retail pricing.
+
+### Changed
+- Bumped server and API client version to 1.1.0.
+- `search_domains` description now correctly references the `query` parameter.
+
 ## [1.0.0] — 2026-08-03
 
 First stable release.
@@ -22,5 +34,6 @@ First stable release.
 
 - Initial preview release.
 
+[1.1.0]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.1.0
 [1.0.0]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.0.0
 [0.1.0]: https://www.npmjs.com/package/domain-check-skills-mcp/v/0.1.0

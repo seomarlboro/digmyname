@@ -1,6 +1,6 @@
 {
   "name": "domain-check-skills-mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MCP server for real-time domain availability checks and registrar price comparison, powered by DigMyName.",
   "license": "MIT",
   "type": "module",

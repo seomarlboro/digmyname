@@ -55,17 +55,22 @@ const tools = [
   {
     name: "check_domain",
     sig: "(domain: string)",
-    desc: "Live availability for one domain. Domainr + RDAP + DNS + Porkbun cross-checked. Never returns Taken when uncertain.",
+    desc: "Live availability, premium flags, cheapest registrar and buy link for one domain. Shows registration year when taken.",
   },
   {
     name: "search_domains",
-    sig: "(base: string, tlds?: string[])",
-    desc: "Suggest a base name across 12 popular TLDs in parallel. Returns availability + cheapest registrar per result.",
+    sig: "(query: string, tlds?: string[])",
+    desc: "Check one name across 12 popular TLDs in parallel. Returns availability + price + registration year for taken results.",
   },
   {
-    name: "get_registrars",
+    name: "compare_registrars",
     sig: "(tld: string)",
     desc: "Side-by-side pricing across 7 registrars including registration, renewal and 3-year value.",
+  },
+  {
+    name: "get_domain_age",
+    sig: "(domain: string)",
+    desc: "Registration year and expiration date for a taken domain via RDAP.",
   },
 ];
 
@@ -130,11 +135,11 @@ const Mcp = () => {
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Cross-platform",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-          softwareVersion: "1.0.0",
+          softwareVersion: "1.1.0",
           downloadUrl: NPM_URL,
           codeRepository: GITHUB_URL,
           license: "https://opensource.org/licenses/MIT",
-          description: "MCP server, Claude Skill and Custom GPT for live domain availability across 52 TLDs and 7 registrars.",
+          description: "MCP server, Claude Skill and Custom GPT for live domain availability, registrar pricing and domain age across 52 TLDs and 7 registrars.",
         })}</script>
       </Helmet>
 
@@ -167,11 +172,11 @@ const Mcp = () => {
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-              </span>
-              Live on npm · v1.0.0
-              <ArrowUpRight className="w-3 h-3" />
-            </a>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+            </span>
+            Live on npm · v1.1.0
+            <ArrowUpRight className="w-3 h-3" />
+          </a>
 
             <h1 className="mb-5 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               Domain availability,

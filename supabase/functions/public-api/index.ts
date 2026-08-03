@@ -3,6 +3,7 @@
 //   GET /public-api/check?domain=<fqdn>
 //   GET /public-api/search?q=<word>&tlds=com,io,ai     (defaults to a curated 12-TLD set)
 //   GET /public-api/registrars?tld=com                 (cheapest registrars from cache)
+//   GET /public-api/age?domain=<fqdn>                    (registration year for taken domains)
 //   GET /public-api/openapi.json
 //
 // Notes:
@@ -130,6 +131,15 @@ async function invokeCheck(domains: string[]) {
   return data?.results ?? [];
 }
 
+async function invokeAge(domains: string[]) {
+  const supa = createClient(SUPABASE_URL, SERVICE_KEY);
+  const { data, error } = await supa.functions.invoke("domain-age", {
+    body: { domains },
+  });
+  if (error) throw error;
+  return (data?.results ?? {}) as Record<string, { created: string | null; expires: string | null }>;
+}
+
 function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; affiliateUrl: string | null } | null) {
   const available = !!r.available;
   const likelyPremium = !!r.likelyPremium;
@@ -223,6 +233,13 @@ const OPENAPI = {
         summary: "Cheapest registrar for a TLD",
         parameters: [{ name: "tld", in: "query", required: true, schema: { type: "string", example: "com" } }],
         responses: { "200": { description: "Sorted registrar pricing" } },
+      },
+    },
+    "/age": {
+      get: {
+        summary: "Registration year for a taken domain",
+        parameters: [{ name: "domain", in: "query", required: true, schema: { type: "string", example: "myname.com" } }],
+        responses: { "200": { description: "Domain creation/expiration dates" } },
       },
     },
   },
@@ -335,6 +352,19 @@ Deno.serve(async (req) => {
         200,
         rlHeaders,
       );
+    }
+
+    if (path === "/age") {
+      const raw = url.searchParams.get("domains") || url.searchParams.get("domain") || "";
+      const domains = raw
+        .split(",")
+        .map((d) => validateDomain(d))
+        .filter((d): d is string => !!d)
+        .slice(0, 50);
+      if (!domains.length) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400, rlHeaders);
+      const ages = await invokeAge(domains);
+      const results = domains.map((d) => ({ domain: d, created: ages[d]?.created ?? null, expires: ages[d]?.expires ?? null }));
+      return json({ count: results.length, results }, 200, rlHeaders);
     }
 
     return json({ error: "not_found", path }, 404, rlHeaders);

@@ -4,9 +4,10 @@
  * MCP server exposing DigMyName's public domain API to AI agents.
  *
  * Tools:
- *  - check_domain      : availability + price for one exact domain
+ *  - check_domain      : availability + price + age for one exact domain
  *  - search_domains    : check one name across many TLDs
  *  - compare_registrars: cheapest registrars for a TLD
+ *  - get_domain_age    : registration year for a taken domain
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -17,29 +18,33 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api";
 
-const USER_AGENT = "domain-check-skills-mcp/1.0.0 (+https://digmyname.com/mcp)";
+const USER_AGENT = "domain-check-skills-mcp/1.1.0 (+https://digmyname.com/mcp)";
 
-type Registrar = {
-  name: string;
-  reg_price_usd: number | null;
-  affiliate_url: string | null;
-  register_url: string | null;
-};
+const RegistrarSchema = z.object({
+  name: z.string(),
+  reg_price_usd: z.number().nullable(),
+  affiliate_url: z.string().nullable(),
+  register_url: z.string().nullable(),
+});
 
-type DomainResult = {
-  domain: string;
-  available: boolean;
-  uncertain?: boolean;
-  premium?: boolean;
-  likely_premium?: boolean;
-  price_usd?: number | null;
-  for_sale?: boolean;
-  for_sale_via?: string | null;
-  listing_url?: string | null;
-  cheapest_registrar?: Registrar | null;
-  buy_url?: string | null;
-  search_url?: string | null;
-};
+const DomainResultSchema = z.object({
+  domain: z.string(),
+  available: z.boolean(),
+  uncertain: z.boolean().optional(),
+  premium: z.boolean().optional(),
+  likely_premium: z.boolean().optional(),
+  price_usd: z.number().nullable().optional(),
+  for_sale: z.boolean().optional(),
+  for_sale_via: z.string().nullable().optional(),
+  listing_url: z.string().nullable().optional(),
+  cheapest_registrar: RegistrarSchema.nullable().optional(),
+  buy_url: z.string().nullable().optional(),
+  search_url: z.string().nullable().optional(),
+  since_year: z.number().nullable().optional(),
+});
+
+type DomainResult = z.infer<typeof DomainResultSchema>;
+type AgeBatch = { count: number; results: Array<{ domain: string; created: string | null; expires: string | null }> };
 
 async function api<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -58,11 +63,17 @@ function money(n: number | null | undefined): string {
   return typeof n === "number" ? `$${n.toFixed(2)}` : "n/a";
 }
 
+function yearFromIso(iso: string | null | undefined): number | null {
+  if (!iso) return null;
+  const y = Number(iso.slice(0, 4));
+  return Number.isFinite(y) && y > 1990 ? y : null;
+}
+
 function statusLabel(r: DomainResult): string {
   if (r.uncertain) return "UNKNOWN";
   if (!r.available) return r.for_sale ? "TAKEN (listed for sale)" : "TAKEN";
   if (r.premium) return "AVAILABLE (premium)";
-  if (r.likely_premium) return "AVAILABLE (likely premium)";
+  if (r.likely_premium) return "AVAILABLE (likely premium — real price may differ)";
   return "AVAILABLE";
 }
 
@@ -78,8 +89,13 @@ function formatResult(r: DomainResult): string {
       parts.push(`  price: ${money(r.price_usd)}`);
     }
     if (r.buy_url) parts.push(`  buy: ${r.buy_url}`);
-  } else if (r.for_sale && r.listing_url) {
-    parts.push(`  for sale via ${r.for_sale_via ?? "marketplace"}: ${r.listing_url}`);
+  } else {
+    if (r.for_sale && r.listing_url) {
+      parts.push(`  for sale via ${r.for_sale_via ?? "marketplace"}: ${r.listing_url}`);
+    }
+    if (typeof r.since_year === "number") {
+      parts.push(`  registered since: ${r.since_year}`);
+    }
   }
 
   if (r.search_url) parts.push(`  compare: ${r.search_url}`);
@@ -88,24 +104,28 @@ function formatResult(r: DomainResult): string {
 
 const server = new McpServer({
   name: "domain-check-skills",
-  version: "1.0.0",
+  version: "1.1.0",
 });
 
 server.tool(
   "check_domain",
-  "Check whether a specific domain (e.g. acme.io) is available, and get the cheapest registrar plus a direct purchase link.",
+  "Check whether a specific domain (e.g. acme.io) is available. Returns cheapest registrar, buy link, and registration year when taken.",
   { domain: z.string().describe("Fully-qualified domain, e.g. acme.io") },
   async ({ domain }: { domain: string }) => {
-    const data = await api<{ result: DomainResult }>(
-      `/check?domain=${encodeURIComponent(domain.trim().toLowerCase())}`
-    );
-    return { content: [{ type: "text" as const, text: formatResult(data.result) }] };
+    const clean = domain.trim().toLowerCase();
+    const [check, age] = await Promise.all([
+      api<{ result: DomainResult }>(`/check?domain=${encodeURIComponent(clean)}`),
+      api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => ({ count: 1, results: [{ domain: clean, created: null, expires: null }] })),
+    ]);
+    const created = age.results.find((a) => a.domain === clean)?.created ?? null;
+    const result = { ...check.result, since_year: yearFromIso(created) };
+    return { content: [{ type: "text" as const, text: formatResult(result) }] };
   }
 );
 
 server.tool(
   "search_domains",
-  "Check one name across many TLDs at once. Returns availability, cheapest price and a buy link for each.",
+  "Check one name across many TLDs at once. Returns availability, cheapest price, buy link and registration year (for taken domains) for each.",
   {
     query: z.string().describe("Name without TLD, e.g. acme"),
     tlds: z
@@ -116,18 +136,37 @@ server.tool(
   async ({ query, tlds }: { query: string; tlds?: string }) => {
     const qs = new URLSearchParams({ q: query.trim().toLowerCase() });
     if (tlds) qs.set("tlds", tlds.replace(/\s/g, "").toLowerCase());
-    const data = await api<{ results: DomainResult[] }>(`/search?${qs.toString()}`);
 
+    const data = await api<{ results: DomainResult[] }>(`/search?${qs.toString()}`);
     const results = data.results ?? [];
-    const available = results.filter((r) => r.available && !r.uncertain);
-    const taken = results.filter((r) => !r.available && !r.uncertain);
+
+    const takenDomains = results.filter((r) => !r.available && !r.uncertain).map((r) => r.domain);
+    let ageByDomain: Record<string, string | null> = {};
+    if (takenDomains.length) {
+      const ageBatch = await api<AgeBatch>(
+        `/age?domains=${encodeURIComponent(takenDomains.join(","))}`
+      ).catch(() => ({ count: 0, results: [] }));
+      ageByDomain = Object.fromEntries(ageBatch.results.map((a) => [a.domain, a.created]));
+    }
+
+    const enriched = results.map((r) => ({
+      ...r,
+      since_year: !r.available && !r.uncertain ? yearFromIso(ageByDomain[r.domain] ?? null) : null,
+    }));
+
+    const available = enriched.filter((r) => r.available && !r.uncertain);
+    const taken = enriched.filter((r) => !r.available && !r.uncertain);
+    const unknown = enriched.filter((r) => r.uncertain);
 
     const lines: string[] = [];
     if (available.length) {
       lines.push(`AVAILABLE (${available.length}):`, ...available.map(formatResult));
     }
     if (taken.length) {
-      lines.push("", `TAKEN (${taken.length}): ${taken.map((r) => r.domain).join(", ")}`);
+      lines.push("", `TAKEN (${taken.length}):`, ...taken.map(formatResult));
+    }
+    if (unknown.length) {
+      lines.push("", `UNKNOWN (${unknown.length}): ${unknown.map((r) => r.domain).join(", ")}`);
     }
     if (!lines.length) lines.push("No conclusive results.");
     lines.push("", `Full comparison: https://digmyname.com/?q=${encodeURIComponent(query)}`);
@@ -169,10 +208,29 @@ server.tool(
   }
 );
 
+server.tool(
+  "get_domain_age",
+  "Return the registration (creation) year and expiration date for a taken domain using RDAP.",
+  { domain: z.string().describe("Fully-qualified domain, e.g. acme.com") },
+  async ({ domain }: { domain: string }) => {
+    const clean = domain.trim().toLowerCase();
+    const data = await api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`);
+    const info = data.results.find((a) => a.domain === clean);
+    if (!info) {
+      return { content: [{ type: "text" as const, text: `Could not determine registration date for ${clean}.` }] };
+    }
+    const y = yearFromIso(info.created);
+    const text = info.created
+      ? `${info.domain} — registered ${info.created}${y ? ` (since ${y})` : ""}${info.expires ? `, expires ${info.expires}` : ""}`
+      : `Could not determine registration date for ${info.domain}.`;
+    return { content: [{ type: "text" as const, text }] };
+  }
+);
+
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("domain-check-skills-mcp v1.0.0 ready (stdio)");
+  console.error("domain-check-skills-mcp v1.1.0 ready (stdio)");
 }
 
 main().catch((err) => {
