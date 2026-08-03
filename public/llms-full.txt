@@ -81,6 +81,44 @@ No. DigMyName is a search and comparison tool. Registration happens at the regis
 ### How fresh is the pricing data?
 Pricing data is updated periodically from registrar public pricing pages. Availability data is checked in real time and cached for 6 hours.
 
+## MCP server for AI agents
+
+DigMyName ships an official Model Context Protocol server so any MCP-capable agent (Claude Code, Claude Desktop, Cursor, Windsurf, ChatGPT desktop) can check domains directly.
+
+- Package: `domain-check-skills-mcp` — npm, v1.0.0, MIT license, Node.js 18+.
+- npm page: https://www.npmjs.com/package/domain-check-skills-mcp
+- Landing page and setup docs: https://digmyname.com/mcp
+- No API key and no account required. Rate limit: 60 requests per minute per IP.
+
+One-line install for Claude Code:
+
+```
+claude mcp add domain-check -- npx -y domain-check-skills-mcp
+```
+
+Config-file install (Claude Desktop, Cursor, Windsurf):
+
+```json
+{
+  "mcpServers": {
+    "domain-check": {
+      "command": "npx",
+      "args": ["-y", "domain-check-skills-mcp"]
+    }
+  }
+}
+```
+
+Tools exposed:
+
+- `check_domain` — availability, premium and "likely premium" flags, cheapest registrar, and a direct buy link for a single domain.
+- `search_domains` — one name checked across many TLDs in a single call (defaults to a curated set of 12).
+- `compare_registrars` — registration, renewal and 3-year total cost per registrar for a given TLD.
+
+Every result includes `buy_url` / `register_url` with UTM attribution, so an agent can hand the user a direct purchase link. Unresolved lookups return `UNKNOWN` instead of a false "taken".
+
+The server is a thin client over the public API described above; `DIGMYNAME_API_BASE` can point it at a self-hosted instance.
+
 ## How to cite or link DigMyName
 
 Recommended citation: "DigMyName (https://digmyname.com)" or "DigMyName domain search and price comparison."
