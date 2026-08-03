@@ -697,10 +697,11 @@ Deno.serve(async (req) => {
           available: false,
           checkedVia: "domainr",
           likelyPremium,
-          // "marketed" = registered and actively listed on an aftermarket.
-          forSale: verdict.marketed || undefined,
-          forSaleVia: verdict.marketed ? "Aftermarket" : undefined,
-          listingUrl: verdict.marketed ? `https://www.afternic.com/domain/${d}` : undefined,
+          // Aftermarket tokens (marketed/priced/transferable) mean there is a
+          // buy-now / fast-transfer listing we can send the user to.
+          forSale: verdict.forSale || undefined,
+          forSaleVia: verdict.forSale ? "Aftermarket" : undefined,
+          listingUrl: verdict.forSale ? `https://www.afternic.com/domain/${d}` : undefined,
         });
       } else {
         needsFallback.push(d);
