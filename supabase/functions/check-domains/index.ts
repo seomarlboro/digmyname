@@ -385,12 +385,14 @@ interface DomainrStatusEntry {
 
 // Circuit breaker: if RapidAPI answers 401/403 (key invalid / not subscribed)
 // stop calling it for the lifetime of this isolate instead of burning a
-// round-trip on every request.
+// round-trip on every request. A 429 (quota) triggers a temporary cooldown.
 let domainrDisabledReason: string | null = null;
+let domainrCooldownUntil = 0;
 
 async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<Map<string, DomainrStatusEntry> | null> {
   if (domains.length === 0) return new Map();
   if (domainrDisabledReason) return null;
+  if (Date.now() < domainrCooldownUntil) return null;
   try {
     const out = new Map<string, DomainrStatusEntry>();
     // Domainr accepts up to 32 domains per call.
@@ -409,11 +411,15 @@ async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<M
         if (resp.status === 401 || resp.status === 403) {
           domainrDisabledReason = `HTTP ${resp.status}: ${txt.slice(0, 120)}`;
           console.error(`domainr DISABLED for this isolate — ${domainrDisabledReason}. Check the RapidAPI subscription for domainr.p.rapidapi.com.`);
+        } else if (resp.status === 429) {
+          domainrCooldownUntil = Date.now() + 60_000;
+          console.warn("domainr 429 — cooling down for 60s, RDAP/DNS results stand");
         } else {
           console.warn(`domainr HTTP ${resp.status}: ${txt.slice(0, 200)}`);
         }
         return out.size > 0 ? out : null;
       }
+
       const data = await resp.json();
       if (Array.isArray(data?.status)) {
         for (const entry of data.status as DomainrStatusEntry[]) {
@@ -662,30 +668,39 @@ Deno.serve(async (req) => {
 
     const uncached = batch.filter((d) => !cachedMap.has(d));
 
-    // ---- Domainr batch pass (top-tier authoritative status) -------------
-    // One batched call covers up to 32 domains — much faster than per-domain checks.
-    // We trust Domainr for available / taken / premium classification, then only
-    // fall back to GoDaddy/RDAP/DNS for domains it didn't classify confidently.
-    const domainrResults = rapidKey ? await checkDomainrBatch(uncached, rapidKey) : null;
-    if (rapidKey) {
-      const sample = uncached.slice(0, 5).map((d) => {
-        const e = domainrResults?.get(d.toLowerCase());
-        return `${d}=${e?.status ?? "MISSING"}`;
-      });
-      console.log(`domainr keyPresent=true returned=${domainrResults?.size ?? "null"} sample=[${sample.join(", ")}]`);
-    } else {
-      console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — falling back to RDAP/DNS only");
-    }
-    const fresh: DomainCheckResult[] = [];
-    const needsFallback: string[] = [];
+    // ---- Pass 1: free authoritative sources (RDAP + DNS) -----------------
+    // RDAP is registry data: free, unlimited and definitive for "registered vs not".
+    // Running it first means Domainr (paid, rate-limited) is only consulted where
+    // it actually adds information, which keeps us well under the 429 ceiling.
+    const baseResults = await pMap(uncached, 10, (d) => resolveDomain(d));
 
-    for (const d of uncached) {
-      const verdict = interpretDomainr(domainrResults?.get(d.toLowerCase()));
-      const likelyPremium = isLikelyPremium(d);
+    // ---- Pass 2: Domainr, only where it adds value -----------------------
+    //   • RDAP/DNS could not decide (uncertain) → need a verdict
+    //   • domain looks available AND looks premium → need the premium/aftermarket flag
+    const needsDomainr = baseResults
+      .filter((r) => r.uncertain || (r.available && (r.likelyPremium || isLikelyPremium(r.domain))))
+      .map((r) => r.domain);
+
+    const domainrResults = rapidKey && needsDomainr.length > 0
+      ? await checkDomainrBatch(needsDomainr, rapidKey)
+      : null;
+    if (rapidKey) {
+      console.log(
+        `domainr consulted for ${needsDomainr.length}/${uncached.length} domains, returned=${domainrResults?.size ?? "null"}`
+      );
+    } else {
+      console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — RDAP/DNS only");
+    }
+
+    const fresh: DomainCheckResult[] = [];
+    for (const base of baseResults) {
+      const verdict = interpretDomainr(domainrResults?.get(base.domain.toLowerCase()));
+      const likelyPremium = base.likelyPremium ?? isLikelyPremium(base.domain);
+
       if (verdict.kind === "available") {
         // Registry-premium names ARE registerable — available:true + premium flag.
         fresh.push({
-          domain: d,
+          domain: base.domain,
           available: true,
           checkedVia: "domainr",
           premium: verdict.premium || undefined,
@@ -693,7 +708,7 @@ Deno.serve(async (req) => {
         });
       } else if (verdict.kind === "taken") {
         fresh.push({
-          domain: d,
+          domain: base.domain,
           available: false,
           checkedVia: "domainr",
           likelyPremium,
@@ -701,16 +716,14 @@ Deno.serve(async (req) => {
           // buy-now / fast-transfer listing we can send the user to.
           forSale: verdict.forSale || undefined,
           forSaleVia: verdict.forSale ? "Aftermarket" : undefined,
-          listingUrl: verdict.forSale ? `https://www.afternic.com/domain/${d}` : undefined,
+          listingUrl: verdict.forSale ? `https://www.afternic.com/domain/${base.domain}` : undefined,
         });
       } else {
-        needsFallback.push(d);
+        // No Domainr signal — keep the RDAP/DNS verdict as-is.
+        fresh.push(base);
       }
     }
 
-
-    const fallback = await pMap(needsFallback, 10, (d) => resolveDomain(d));
-    fresh.push(...fallback);
 
     // ---- Aftermarket NS detection ---------------------------------------
     // For every "taken" result, peek at the NS records — if they point to a
