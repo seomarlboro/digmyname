@@ -1000,11 +1000,15 @@ Deno.serve(async (req) => {
 
     for (let i = 0; i < fresh.length; i++) {
       const r = fresh[i];
-      if (!r.available || r.price != null) continue;
+      // Don't attach a standard retail price to likely-premium names until a
+      // registrar has verified the real price. Showing $0.98 for a name that
+      // actually costs $600+ is misleading.
+      if (!r.available || r.price != null || r.likelyPremium) continue;
       const tld = r.domain.split(".").slice(1).join(".");
       const p = dbPrice.get(tld) ?? pricing.get(tld)?.registration;
       if (p != null) fresh[i] = { ...r, price: p };
     }
+
 
     // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
     // Porkbun's authenticated checkDomain is the only source that returns the
