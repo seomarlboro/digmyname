@@ -152,7 +152,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
           ) : (
             <span className="min-w-[80px]" />
           )}
-          <span className="text-xs text-muted-foreground min-w-[80px]">{available ? (displayRenew != null ? `renews $${displayRenew}` : '') : (sinceLabel ?? '')}</span>
+          <span className="text-xs text-muted-foreground min-w-[80px]">{available ? (displayRenew != null ? `renews $${displayRenew}` : '') : ''}</span>
           {available ? (
             <>
               <div className="flex items-center gap-2">
@@ -177,6 +177,11 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                 <span className="text-sm font-semibold text-amber-500 flex items-center gap-1">
                   <Tag className="h-3.5 w-3.5" />
                   For sale
+                </span>
+              ) : sinceLabel ? (
+                <span className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  {sinceLabel}
                 </span>
               ) : (
                 <span />
@@ -230,12 +235,6 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   </Badge>
                 );
               })()}
-              {!available && sinceLabel && (
-                <Badge variant="secondary" className="text-xs font-normal gap-1">
-                  <CalendarClock className="h-3 w-3" />
-                  {sinceLabel}
-                </Badge>
-              )}
               {available && tld.features.map((f) => (
                 <Badge key={f} variant="secondary" className="text-xs font-normal">
                   {f}
@@ -286,6 +285,13 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Listed on {result.forSaleVia ?? "marketplace"}
+                </p>
+              </div>
+            ) : sinceLabel ? (
+              <div className="sm:text-right">
+                <p className="text-lg font-bold text-foreground flex items-center gap-1.5 sm:justify-end">
+                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                  {sinceLabel}
                 </p>
               </div>
             ) : null}
