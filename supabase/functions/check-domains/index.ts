@@ -305,8 +305,21 @@ export const FAST_RDAP: Record<string, string> = {
   life: "https://rdap.identitydigital.services/rdap",
   tv: "https://rdap.nic.tv",
   cc: "https://tld-rdap.verisign.com/cc/v1",
+  // Not published in the IANA bootstrap, but verified live (registered → 200,
+  // unregistered → 404). Kept in a documented exception list, see the test.
+  io: "https://rdap.identitydigital.services/rdap",
+  us: "https://rdap.nic.us",
 };
 
+/** FAST_RDAP entries deliberately absent from the IANA bootstrap file. */
+export const FAST_RDAP_EXCEPTIONS = new Set(["io", "us"]);
+
+/**
+ * TLDs where the public rdap.org aggregator answers 404 even for *registered*
+ * names (.co, .me have no working public RDAP). A 404 from the aggregator on
+ * these zones must never be read as "available".
+ */
+const AGGREGATOR_UNRELIABLE_TLDS = new Set(["co", "me"]);
 
 async function checkRdap(domain: string): Promise<RdapState> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
@@ -337,9 +350,14 @@ async function checkRdap(domain: string): Promise<RdapState> {
     p.then((s) => (s === "unknown" ? PENDING_FOREVER<RdapState>() : s));
 
   const probes = bases.map((base) => rdapQueryOnce(`${base}/domain/${domain}`, 3000));
-  const aggregator = sleep(probes.length ? 700 : 0).then(() =>
-    rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000)
-  );
+
+  // On zones with no trustworthy RDAP server, the aggregator may only *confirm*
+  // a registration — its 404s are downgraded to "unknown".
+  const trustAggregator404 = bases.length > 0 || !AGGREGATOR_UNRELIABLE_TLDS.has(tld);
+  const aggregator = sleep(probes.length ? 700 : 0)
+    .then(() => rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000))
+    .then((s) => (s === "available" && !trustAggregator404 ? "unknown" as RdapState : s));
+
   const all = [...probes, aggregator];
 
   return await Promise.race([
@@ -347,6 +365,7 @@ async function checkRdap(domain: string): Promise<RdapState> {
     Promise.all(all).then((states) => states.find((s) => s !== "unknown") ?? "unknown"),
   ]);
 }
+
 
 
 
