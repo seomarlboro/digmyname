@@ -1078,6 +1078,7 @@ Deno.serve(async (req) => {
           available: r.available,
           checked_via: r.checkedVia,
           rdap_data: {
+            cache_version: CACHE_VERSION,
             godaddy_price: r.price ?? null,
             premium: r.premium ?? false,
             likely_premium: r.likelyPremium ?? false,
@@ -1087,6 +1088,7 @@ Deno.serve(async (req) => {
           },
           expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
         };
+
       });
       // Persist in the background — the user's response doesn't wait for the write.
       const write = supabase.from("domain_cache").upsert(rows, { onConflict: "domain" });
