@@ -213,19 +213,19 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
         aria-pressed={aiSuggestions}
         title={aiSuggestions ? "AI suggestions on" : "AI suggestions off"}
-        className={`relative flex h-[30px] w-[54px] shrink-0 items-center rounded-full p-[3px] transition-all duration-300 ${
+        className={`relative flex h-[38px] w-[68px] shrink-0 items-center rounded-full p-1 transition-all duration-300 ${
           aiSuggestions
-            ? "bg-[linear-gradient(90deg,hsl(160_70%_80%),hsl(205_90%_78%),hsl(255_85%_78%))] shadow-[0_2px_12px_hsl(var(--primary)/0.35)]"
+            ? "bg-[linear-gradient(90deg,hsl(160_70%_80%),hsl(205_90%_78%),hsl(255_85%_78%))] shadow-[0_2px_16px_hsl(var(--primary)/0.4)]"
             : "bg-white/10 hover:bg-white/[0.16]"
         }`}
       >
         <span
-          className={`flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-            aiSuggestions ? "translate-x-6" : "translate-x-0"
+          className={`flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            aiSuggestions ? "translate-x-[30px]" : "translate-x-0"
           }`}
         >
           <StarsIcon
-            className="h-[14px] w-[14px]"
+            className="h-[18px] w-[18px]"
             active={aiSuggestions}
           />
         </span>
