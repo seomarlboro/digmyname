@@ -742,8 +742,8 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
   }
 
   // RDAP says available but DNS could not confirm NXDOMAIN → uncertain.
-  if (rdap === "available" && (dns === "error" || dns === "unknown")) {
-    return { domain, available: false, checkedVia: "rdap", uncertain: true, reason: "dns_error" };
+  if (rdap === "available" && dns === "error") {
+    return { domain, available: false, checkedVia: "rdap", uncertain: true };
   }
 
   // Heuristic fallback — short SLD on premium TLD with no clear answer.
