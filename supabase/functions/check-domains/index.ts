@@ -527,6 +527,23 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
 }
 
 // ---------------------------------------------------------------------------
+// L1 hot cache — per-isolate, in memory. A repeated search (user retypes, tweaks
+// a filter, or another visitor hits the same warm isolate) skips both the DB
+// round-trip and every network probe.
+// ---------------------------------------------------------------------------
+const HOT_CACHE_TTL_MS = 10 * 60 * 1000;
+const HOT_CACHE_MAX = 5000;
+const hotCache = new Map<string, { result: DomainCheckResult; expiresAt: number }>();
+setInterval(() => {
+  if (hotCache.size < HOT_CACHE_MAX) return;
+  const now = Date.now();
+  for (const [k, v] of hotCache) if (v.expiresAt <= now) hotCache.delete(k);
+  // Still oversized → drop oldest insertions.
+  while (hotCache.size > HOT_CACHE_MAX) hotCache.delete(hotCache.keys().next().value as string);
+}, 60_000);
+
+// ---------------------------------------------------------------------------
+
 // Resolve a single domain using RDAP + DNS only. GoDaddy is intentionally
 // removed from the verification chain — production API access requires
 // 50+ domains on the account or Reseller status, which we don't have.
