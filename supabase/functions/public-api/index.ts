@@ -310,7 +310,8 @@ Deno.serve(async (req) => {
             renew_price_usd: Number(r.renew_price),
             transfer_price_usd: r.transfer_price != null ? Number(r.transfer_price) : null,
             three_year_total_usd:
-              Number(r.reg_price) + 2 * Number(r.renew_price) || null,
+              Math.round((Number(r.reg_price) + 2 * Number(r.renew_price)) * 100) / 100,
+
             promo_code: r.promo_code || null,
             affiliate_url: r.affiliate_url || null,
             register_url:
