@@ -234,20 +234,30 @@ async function rdapQueryOnce(url: string, timeoutMs: number): Promise<RdapState>
   }
 }
 
+// Prewarm the bootstrap as soon as the isolate boots so the first user request
+// doesn't pay the IANA download latency.
+const rdapBootstrapPrewarm = loadRdapBootstrap().catch(() => new Map<string, string[]>());
+
 async function checkRdap(domain: string): Promise<RdapState> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
-  const bootstrap = await loadRdapBootstrap();
+  // Never block on the bootstrap for more than 700ms — if it isn't warm yet we
+  // go straight to the public aggregator instead of stalling the whole batch.
+  const bootstrap = await Promise.race([
+    rdapBootstrapPrewarm,
+    new Promise<Map<string, string[]>>((res) => setTimeout(() => res(new Map()), 700)),
+  ]);
   const bases = bootstrap.get(tld) ?? [];
 
   // Try official IANA-mapped RDAP servers first (max 2 to bound latency).
   for (const base of bases.slice(0, 2)) {
-    const state = await rdapQueryOnce(`${base}/domain/${domain}`, 4000);
+    const state = await rdapQueryOnce(`${base}/domain/${domain}`, 3000);
     if (state !== "unknown") return state;
   }
 
   // Fallback to public aggregator.
-  return await rdapQueryOnce(`https://rdap.org/domain/${domain}`, 4000);
+  return await rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000);
 }
+
 
 // GoDaddy removed: production API requires 50+ domains on account or Reseller status.
 
