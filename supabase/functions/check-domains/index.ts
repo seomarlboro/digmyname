@@ -545,13 +545,13 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
 const HOT_CACHE_TTL_MS = 10 * 60 * 1000;
 const HOT_CACHE_MAX = 5000;
 const hotCache = new Map<string, { result: DomainCheckResult; expiresAt: number }>();
-setInterval(() => {
+function pruneHotCache(): void {
   if (hotCache.size < HOT_CACHE_MAX) return;
   const now = Date.now();
   for (const [k, v] of hotCache) if (v.expiresAt <= now) hotCache.delete(k);
   // Still oversized → drop oldest insertions.
   while (hotCache.size > HOT_CACHE_MAX) hotCache.delete(hotCache.keys().next().value as string);
-}, 60_000);
+}
 
 // ---------------------------------------------------------------------------
 
