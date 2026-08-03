@@ -190,14 +190,24 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
         aria-pressed={aiSuggestions}
         title={aiSuggestions ? "AI suggestions on" : "AI suggestions off"}
-        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors ${
+        className={`relative flex h-9 w-[68px] shrink-0 items-center rounded-full p-1 transition-all duration-300 ${
           aiSuggestions
-            ? "bg-primary text-primary-foreground"
-            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            ? "bg-[linear-gradient(90deg,hsl(160_70%_80%),hsl(205_90%_78%),hsl(255_85%_78%))] shadow-[0_2px_12px_hsl(var(--primary)/0.35)]"
+            : "bg-white/10 hover:bg-white/[0.16]"
         }`}
       >
-        <Sparkles className="h-5 w-5" />
+        <span
+          className={`flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 ${
+            aiSuggestions ? "translate-x-[32px]" : "translate-x-0"
+          }`}
+        >
+          <Sparkles
+            className={`h-4 w-4 transition-colors ${aiSuggestions ? "text-primary" : "text-muted-foreground"}`}
+            strokeWidth={2.5}
+          />
+        </span>
       </button>
+
     </div>
   );
 
