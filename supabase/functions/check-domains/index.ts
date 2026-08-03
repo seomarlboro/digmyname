@@ -57,10 +57,11 @@ function isLikelyPremium(domain: string): boolean {
   // 4-char SLD on any commercial premium TLD = aftermarket / premium tier.
   if (sld.length === 4 && PREMIUM_TLDS.has(tld)) return true;
 
-  // 5-char pure-letter SLD on the most contested TLDs.
-  if (sld.length <= 5 && /^[a-z]+$/i.test(sld) && (tld === "com" || tld === "io" || tld === "ai" || tld === "co")) return true;
+  // 5-char pure-letter SLD on contested TLDs (premium/aftermarket candidates).
+  if (sld.length <= 5 && /^[a-z]+$/i.test(sld) && (PREMIUM_TLDS.has(tld) || tld === "com" || tld === "io" || tld === "ai" || tld === "co")) return true;
 
-  // Tiny dictionary-shaped names on .com.
+  // Tiny dictionary-shaped names on premium TLDs and .com.
+  if (sld.length <= 5 && PREMIUM_TLDS.has(tld) && COMMON_WORDS_RE.test(sld)) return true;
   if (tld === "com" && sld.length <= 4 && COMMON_WORDS_RE.test(sld)) return true;
 
   return false;
