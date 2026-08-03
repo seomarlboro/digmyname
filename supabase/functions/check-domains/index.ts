@@ -660,18 +660,27 @@ Deno.serve(async (req) => {
 
     const rapidKey = Deno.env.get("RAPIDAPI_DOMAINR_KEY");
 
-    // Cache lookup.
-    const { data: cached } = await supabase
-      .from("domain_cache")
-      .select("domain, available, checked_via, rdap_data")
-      .in("domain", batch)
-      .gt("expires_at", new Date().toISOString());
-
+    // ---- L1: in-isolate hot cache (zero network, zero DB) ----------------
     const cachedMap = new Map<string, DomainCheckResult>();
-    if (cached) {
-      for (const c of cached) {
+    const nowMs = Date.now();
+    const missAfterL1: string[] = [];
+    for (const d of batch) {
+      const hot = hotCache.get(d);
+      if (hot && hot.expiresAt > nowMs) cachedMap.set(d, { ...hot.result });
+      else missAfterL1.push(d);
+    }
+
+    // ---- L2: shared DB cache --------------------------------------------
+    if (missAfterL1.length > 0) {
+      const { data: cached } = await supabase
+        .from("domain_cache")
+        .select("domain, available, checked_via, rdap_data")
+        .in("domain", missAfterL1)
+        .gt("expires_at", new Date().toISOString());
+
+      for (const c of cached ?? []) {
         const meta = (c.rdap_data ?? {}) as Record<string, unknown>;
-        cachedMap.set(c.domain, {
+        const result: DomainCheckResult = {
           domain: c.domain,
           available: c.available,
           checkedVia: c.checked_via,
@@ -681,7 +690,9 @@ Deno.serve(async (req) => {
           forSale: meta.for_sale as boolean | undefined,
           forSaleVia: meta.for_sale_via as string | undefined,
           listingUrl: meta.listing_url as string | undefined,
-        });
+        };
+        cachedMap.set(c.domain, result);
+        hotCache.set(c.domain, { result, expiresAt: nowMs + HOT_CACHE_TTL_MS });
       }
     }
 
@@ -691,7 +702,9 @@ Deno.serve(async (req) => {
     // RDAP is registry data: free, unlimited and definitive for "registered vs not".
     // Running it first means Domainr (paid, rate-limited) is only consulted where
     // it actually adds information, which keeps us well under the 429 ceiling.
-    const baseResults = await pMap(uncached, 10, (d) => resolveDomain(d));
+    // Concurrency 25: a 20-domain batch fires in a single wave instead of two.
+    const baseResults = await pMap(uncached, 25, (d) => resolveDomain(d));
+
 
     // ---- Pass 2: Domainr, only where it adds value -----------------------
     //   • RDAP/DNS could not decide (uncertain) → need a verdict
