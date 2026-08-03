@@ -214,7 +214,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         className={`relative flex h-[38px] w-[58px] shrink-0 items-center rounded-full p-1 transition-all duration-300 ${
           aiSuggestions
             ? "bg-[linear-gradient(90deg,hsl(160_70%_80%),hsl(205_90%_78%),hsl(255_85%_78%))] shadow-[0_2px_16px_hsl(var(--primary)/0.4)]"
-            : "bg-white/10 hover:bg-white/[0.16]"
+            : "bg-black/10 hover:bg-black/[0.16] dark:bg-white/10 dark:hover:bg-white/[0.16]"
         }`}
       >
         <span
