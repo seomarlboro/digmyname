@@ -230,8 +230,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         {scrolled && (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 -top-16 bg-background/80 backdrop-blur-xl" aria-hidden="true" />
         )}
-        <div className="container relative mx-auto px-4">
+        <div className="container relative mx-auto flex max-w-3xl items-center gap-3 px-4">
           {searchBar}
+          {aiButton}
         </div>
       </div>
 
