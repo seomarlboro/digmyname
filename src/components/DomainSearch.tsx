@@ -170,12 +170,42 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       onClick={() => setAiSuggestions((v) => !v)}
       aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
       aria-pressed={aiSuggestions}
-      className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full border transition-all
-        ${aiSuggestions
-          ? "border-primary/40 bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-          : "border-white/10 bg-white/10 text-primary backdrop-blur-md hover:bg-white/15"}`}
+      className="group relative h-14 w-28 shrink-0 rounded-full border border-white/10 bg-white/5 p-1 shadow-inner backdrop-blur-md transition-colors hover:bg-white/10"
     >
-      <Sparkles className="h-6 w-6" />
+      {/* Gradient fill that fades in when active */}
+      <span
+        aria-hidden="true"
+        className={`absolute inset-0 rounded-full transition-opacity duration-300 ${aiSuggestions ? "opacity-100" : "opacity-0"}`}
+        style={{
+          background: "linear-gradient(135deg, #a5f3fc 0%, #67e8f9 25%, #818cf8 70%, #c4b5fd 100%)",
+        }}
+      />
+      {/* Track sparkles (subtle, visible when off) */}
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-opacity duration-300 group-hover:text-white/50">
+        <Sparkles className="h-4 w-4" />
+      </span>
+      {/* Sliding knob */}
+      <span
+        aria-hidden="true"
+        className={`relative flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${aiSuggestions ? "translate-x-14" : "translate-x-0"}`}
+      >
+        <span
+          className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-active:opacity-10"
+          style={{ background: "linear-gradient(135deg, #a5f3fc, #c4b5fd)" }}
+        />
+        <Sparkles
+          className="relative h-5 w-5 transition-all duration-300"
+          style={{ color: aiSuggestions ? "#818cf8" : "#94a3b8" }}
+        />
+        <Sparkles
+          className="absolute h-3 w-3 transition-all duration-300"
+          style={{
+            color: aiSuggestions ? "#67e8f9" : "#cbd5e1",
+            right: "10px",
+            top: "10px",
+          }}
+        />
+      </span>
     </button>
   );
 
