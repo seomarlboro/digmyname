@@ -765,7 +765,7 @@ Deno.serve(async (req) => {
       (r) => !r.available && !r.uncertain && !r.forSale
     );
     if (aftermarketTargets.length > 0) {
-      const hits = await pMap(aftermarketTargets, 10, async (r) => ({
+      const hits = await pMap(aftermarketTargets, 20, async (r) => ({
         domain: r.domain,
         hit: await detectAftermarket(r.domain),
       }));
