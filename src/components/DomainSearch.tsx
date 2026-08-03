@@ -201,8 +201,8 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           className="absolute h-3 w-3 transition-all duration-300"
           style={{
             color: aiSuggestions ? "#67e8f9" : "#cbd5e1",
-            right: "10px",
-            top: "10px",
+            right: "9px",
+            bottom: "9px",
           }}
         />
       </span>
