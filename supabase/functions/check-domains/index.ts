@@ -304,6 +304,70 @@ async function checkPorkbun(domain: string, apiKey: string, secretKey: string): 
 }
 
 // ---------------------------------------------------------------------------
+// Porkbun public pricing catalog — no auth, no rate limit.
+// POST https://api.porkbun.com/api/json/v3/pricing/get
+//   → { status:"SUCCESS", pricing: { com: { registration, renewal, transfer } } }
+// Gives us a standard registration price for EVERY available domain, instead of
+// relying on the 1-call-per-10s authenticated checkDomain endpoint.
+// Cached at module scope for 12h.
+// ---------------------------------------------------------------------------
+interface TldPrice { registration?: number; renewal?: number }
+let pricingCache: { map: Map<string, TldPrice>; expiresAt: number } | null = null;
+
+/**
+ * Non-blocking accessor: returns whatever pricing we already have and refreshes
+ * in the background. The catalog is ~80KB and can take >15s on a cold isolate,
+ * so we never make a user request wait for it.
+ */
+let pricingInflight: Promise<Map<string, TldPrice>> | null = null;
+export function getTldPricing(): Map<string, TldPrice> {
+  const fresh = pricingCache && pricingCache.expiresAt > Date.now();
+  if (!fresh && !pricingInflight) {
+    pricingInflight = loadTldPricing().finally(() => {
+      pricingInflight = null;
+    });
+    // Keep the isolate alive until the catalog finishes downloading.
+    const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+    rt?.waitUntil?.(pricingInflight.catch(() => {}));
+  }
+  return pricingCache?.map ?? new Map();
+}
+
+export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
+  const now = Date.now();
+  if (pricingCache && pricingCache.expiresAt > now) return pricingCache.map;
+  try {
+    const resp = await fetch("https://api.porkbun.com/api/json/v3/pricing/get", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+      signal: AbortSignal.timeout(25000),
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    if (data?.status !== "SUCCESS" || !data.pricing) throw new Error("non-success");
+    const map = new Map<string, TldPrice>();
+    for (const [tld, v] of Object.entries(data.pricing as Record<string, Record<string, string>>)) {
+      const reg = Number(v?.registration);
+      const ren = Number(v?.renewal);
+      map.set(tld.toLowerCase(), {
+        registration: Number.isFinite(reg) ? reg : undefined,
+        renewal: Number.isFinite(ren) ? ren : undefined,
+      });
+    }
+    pricingCache = { map, expiresAt: now + 12 * 60 * 60 * 1000 };
+    console.log(`porkbun pricing catalog loaded: ${map.size} TLDs`);
+    return map;
+  } catch (e) {
+    console.warn(`porkbun pricing catalog failed: ${e instanceof Error ? e.message : String(e)}`);
+    const empty = new Map<string, TldPrice>();
+    pricingCache = { map: empty, expiresAt: now + 5 * 60 * 1000 };
+    return empty;
+  }
+}
+
+
+// ---------------------------------------------------------------------------
 // Domainr (via RapidAPI) — batch authoritative status for up to 32 domains.
 // Statuses we care about (space-separated string per domain):
 //   undelegated / inactive    → available for standard registration
@@ -319,8 +383,14 @@ interface DomainrStatusEntry {
   summary?: string;
 }
 
+// Circuit breaker: if RapidAPI answers 401/403 (key invalid / not subscribed)
+// stop calling it for the lifetime of this isolate instead of burning a
+// round-trip on every request.
+let domainrDisabledReason: string | null = null;
+
 async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<Map<string, DomainrStatusEntry> | null> {
   if (domains.length === 0) return new Map();
+  if (domainrDisabledReason) return null;
   try {
     const out = new Map<string, DomainrStatusEntry>();
     // Domainr accepts up to 32 domains per call.
@@ -336,7 +406,12 @@ async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<M
       });
       if (!resp.ok) {
         const txt = await resp.text().catch(() => "");
-        console.warn(`domainr HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+        if (resp.status === 401 || resp.status === 403) {
+          domainrDisabledReason = `HTTP ${resp.status}: ${txt.slice(0, 120)}`;
+          console.error(`domainr DISABLED for this isolate — ${domainrDisabledReason}. Check the RapidAPI subscription for domainr.p.rapidapi.com.`);
+        } else {
+          console.warn(`domainr HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+        }
         return out.size > 0 ? out : null;
       }
       const data = await resp.json();
@@ -353,21 +428,42 @@ async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<M
   }
 }
 
-type DomainrVerdict =
-  | { kind: "available" }
-  | { kind: "taken" }
-  | { kind: "premium" } // marketed / priced / premium — registered or aftermarket, not standard
+// Domainr status tokens are a SET, not a single value. A domain can be
+// "undelegated transferable" (AVAILABLE, buyable through a partner registrar)
+// or "undelegated priced premium" (AVAILABLE at registry-premium pricing) or
+// "active marketed" (TAKEN and listed on an aftermarket).
+// The old implementation treated any of marketed/priced/premium/transferable as
+// "not available", which wrongly marked available premium and partner-registrable
+// names as taken. Availability and premium are now independent axes.
+export type DomainrVerdict =
+  | { kind: "available"; premium: boolean }
+  | { kind: "taken"; marketed: boolean }
   | { kind: "unknown" };
 
-function interpretDomainr(entry: DomainrStatusEntry | undefined): DomainrVerdict {
+const DOMAINR_TAKEN = new Set([
+  "active", "parked", "claimed", "dpml", "deleting", "pending",
+  "reserved", "disallowed", "invalid", "suffix", "tld", "zone",
+]);
+const DOMAINR_FREE = new Set(["undelegated", "inactive", "unregistered"]);
+const DOMAINR_PREMIUM = new Set(["priced", "premium"]);
+
+export function interpretDomainr(entry: DomainrStatusEntry | undefined): DomainrVerdict {
   if (!entry?.status) return { kind: "unknown" };
   const tokens = entry.status.toLowerCase().split(/\s+/).filter(Boolean);
-  if (tokens.includes("suffix")) return { kind: "taken" };
-  if (tokens.some((t) => ["marketed", "priced", "premium", "transferable"].includes(t))) return { kind: "premium" };
-  if (tokens.some((t) => ["active", "parked", "disallowed", "reserved", "tld", "deleting"].includes(t))) return { kind: "taken" };
-  if (tokens.some((t) => ["undelegated", "inactive", "unregistered"].includes(t))) return { kind: "available" };
+  if (tokens.length === 0) return { kind: "unknown" };
+
+  const taken = tokens.some((t) => DOMAINR_TAKEN.has(t));
+  const free = tokens.some((t) => DOMAINR_FREE.has(t));
+  const premium = tokens.some((t) => DOMAINR_PREMIUM.has(t));
+  const marketed = tokens.includes("marketed");
+
+  // "active"/"parked" always wins over "inactive"-style tokens.
+  if (taken) return { kind: "taken", marketed };
+  if (free) return { kind: "available", premium };
+  // Only soft tokens (e.g. bare "transferable" / "marketed") → not conclusive.
   return { kind: "unknown" };
 }
+
 
 // Concurrency limiter (no extra deps).
 async function pMap<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
@@ -384,12 +480,16 @@ async function pMap<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>
   return out;
 }
 
-function isValidDomain(domain: string): boolean {
+export function isValidDomain(domain: string): boolean {
   if (typeof domain !== "string" || domain.length === 0 || domain.length > 253) return false;
-  const re = /^(?!.*\.\.)(?!.*--)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
+  // Allow punycode IDN labels (xn--…) — the previous `(?!.*--)` guard rejected them.
+  const re = /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+(xn--[a-z0-9-]{2,59}|[a-z]{2,63})$/i;
   if (!re.test(domain)) return false;
-  return domain.split(".").every((l) => l.length >= 1 && l.length <= 63);
+  return domain
+    .split(".")
+    .every((l) => l.length >= 1 && l.length <= 63 && !l.startsWith("-") && !l.endsWith("-"));
 }
+
 
 // Tiered cache TTL (P4).
 function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
@@ -417,7 +517,9 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
   if (rdap === "taken") {
     return { domain, available: false, checkedVia: "rdap", likelyPremium };
   }
-  if (rdap === "available" && dns === "no_records") {
+  // RDAP 404 is authoritative for "not registered". A DNS lookup error must not
+  // downgrade that to uncertain — only actual DNS records can contradict it.
+  if (rdap === "available" && dns !== "has_records") {
     return {
       domain,
       available: true,
@@ -425,6 +527,7 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
       likelyPremium: likelyPremium || undefined,
     };
   }
+
 
   // DNS-only signal: records exist → taken.
   if (dns === "has_records") {
@@ -574,22 +677,30 @@ Deno.serve(async (req) => {
       const verdict = interpretDomainr(domainrResults?.get(d.toLowerCase()));
       const likelyPremium = isLikelyPremium(d);
       if (verdict.kind === "available") {
-        fresh.push({ domain: d, available: true, checkedVia: "domainr", likelyPremium: likelyPremium || undefined });
+        // Registry-premium names ARE registerable — available:true + premium flag.
+        fresh.push({
+          domain: d,
+          available: true,
+          checkedVia: "domainr",
+          premium: verdict.premium || undefined,
+          likelyPremium: verdict.premium || likelyPremium || undefined,
+        });
       } else if (verdict.kind === "taken") {
-        fresh.push({ domain: d, available: false, checkedVia: "domainr", likelyPremium });
-      } else if (verdict.kind === "premium") {
-        // Aftermarket / registry premium — registered but listed for sale at non-standard pricing.
         fresh.push({
           domain: d,
           available: false,
           checkedVia: "domainr",
-          premium: true,
-          likelyPremium: true,
+          likelyPremium,
+          // "marketed" = registered and actively listed on an aftermarket.
+          forSale: verdict.marketed || undefined,
+          forSaleVia: verdict.marketed ? "Aftermarket" : undefined,
+          listingUrl: verdict.marketed ? `https://www.afternic.com/domain/${d}` : undefined,
         });
       } else {
         needsFallback.push(d);
       }
     }
+
 
     const fallback = await pMap(needsFallback, 10, (d) => resolveDomain(d));
     fresh.push(...fallback);
@@ -621,15 +732,46 @@ Deno.serve(async (req) => {
     }
 
 
+    // ---- Standard price enrichment (free Porkbun pricing catalog) --------
+    // Every available, non-premium domain gets its real registration price.
+    const pricing = getTldPricing();
+
+    // Primary price source: our own weekly-scraped registrar_prices table
+    // (instant, always warm). Porkbun's live catalog is the fallback.
+    const neededTlds = [...new Set(
+      fresh.filter((r) => r.available && r.price == null).map((r) => r.domain.split(".").slice(1).join("."))
+    )];
+    const dbPrice = new Map<string, number>();
+    if (neededTlds.length > 0) {
+      const { data: priceRows } = await supabase
+        .from("registrar_prices")
+        .select("tld, reg_price")
+        .in("tld", neededTlds);
+      for (const row of priceRows ?? []) {
+        const v = Number(row.reg_price);
+        if (!Number.isFinite(v)) continue;
+        const cur = dbPrice.get(row.tld);
+        if (cur == null || v < cur) dbPrice.set(row.tld, v);
+      }
+    }
+
+    for (let i = 0; i < fresh.length; i++) {
+      const r = fresh[i];
+      if (!r.available || r.price != null) continue;
+      const tld = r.domain.split(".").slice(1).join(".");
+      const p = dbPrice.get(tld) ?? pricing.get(tld)?.registration;
+      if (p != null) fresh[i] = { ...r, price: p };
+    }
+
     // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
-    // Porkbun is the only source that reliably tells us whether an "available"
-    // short/premium-tier name is actually registerable at standard price.
-    // We can call it at most once per ~10s globally → verify the most suspicious
-    // result per request (available + likelyPremium) when budget allows.
+    // Porkbun's authenticated checkDomain is the only source that returns the
+    // REAL premium price for a specific name. Budget is 1 call per ~10s, so we
+    // spend it on the single most suspicious result (available + premium-ish,
+    // no confirmed price yet).
     if (porkbun && porkbunBudgetReady()) {
       const candidates = fresh
-        .filter((r) => r.available && r.likelyPremium && !r.premium)
-        // Prefer shortest SLD (most likely premium) and TLDs we know to be premium.
+        .filter((r) => r.available && (r.premium || r.likelyPremium) && r.checkedVia !== "porkbun")
+        // Prefer shortest SLD (most likely premium).
         .sort((a, b) => a.domain.split(".")[0].length - b.domain.split(".")[0].length);
       const target = candidates[0];
       if (target) {
@@ -638,18 +780,25 @@ Deno.serve(async (req) => {
         if (pb) {
           const idx = fresh.findIndex((r) => r.domain === target.domain);
           if (idx >= 0) {
+            const standard = pricing.get(target.domain.split(".").slice(1).join("."))?.registration;
+            const isPremium =
+              pb.premium ||
+              (pb.price != null && standard != null && pb.price > standard * 2) ||
+              (pb.price != null && standard == null && pb.price >= 50);
             fresh[idx] = {
-              domain: target.domain,
+              ...fresh[idx],
               available: pb.available,
               checkedVia: "porkbun",
-              price: pb.price ?? target.price,
-              premium: pb.premium || (pb.price != null && pb.price >= 50),
-              likelyPremium: pb.premium ? true : undefined,
+              price: pb.price ?? fresh[idx].price,
+              premium: isPremium || undefined,
+              likelyPremium: isPremium || undefined,
+              uncertain: undefined,
             };
           }
         }
       }
     }
+
 
     // Telemetry (visible in edge logs).
     if (fresh.length > 0) {
@@ -660,7 +809,13 @@ Deno.serve(async (req) => {
 
     // Cache only trustworthy results, with tiered TTL.
     const cacheable = fresh
-      .map((r) => ({ r, ttl: ttlSecondsFor(r.checkedVia, r.uncertain === true) }))
+      .map((r) => {
+        let ttl = ttlSecondsFor(r.checkedVia, r.uncertain === true);
+        // Don't lock in a price-less "available" result for hours just because
+        // the pricing catalog was still warming up — re-check it soon.
+        if (ttl > 600 && r.available && r.price == null) ttl = 600;
+        return { r, ttl };
+      })
       .filter(({ ttl }) => ttl > 0);
 
     if (cacheable.length > 0) {
