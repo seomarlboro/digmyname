@@ -309,10 +309,17 @@ Deno.serve(async (req) => {
             reg_price_usd: Number(r.reg_price),
             renew_price_usd: Number(r.renew_price),
             transfer_price_usd: r.transfer_price != null ? Number(r.transfer_price) : null,
+            three_year_total_usd:
+              Number(r.reg_price) + 2 * Number(r.renew_price) || null,
             promo_code: r.promo_code || null,
             affiliate_url: r.affiliate_url || null,
+            register_url:
+              r.affiliate_url ||
+              registerUrl(r.registrar, validateDomain(url.searchParams.get("domain") || "") || null),
             whois_privacy_included: !!r.whois_privacy,
           })),
+          compare_url: `https://digmyname.com/pricing?${UTM}`,
+
         },
         200,
         rlHeaders,
