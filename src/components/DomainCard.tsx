@@ -147,7 +147,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               {name}.<span className="text-primary">{ext}</span>
             </h3>
           </div>
-          {registrarName ? (
+          {available && registrarName ? (
             <span className={`text-xs font-medium min-w-[80px] ${getRegistrarColor(registrarName).text}`}>{registrarName}</span>
           ) : (
             <span className="min-w-[80px]" />
