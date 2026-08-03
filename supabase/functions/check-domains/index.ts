@@ -251,8 +251,11 @@ async function checkRdap(domain: string): Promise<RdapState> {
   // Never block on the bootstrap for more than 700ms — if it isn't warm yet we
   // go straight to the public aggregator instead of stalling the whole batch.
   const bootstrap = await Promise.race([
-    rdapBootstrapPrewarm,
-    new Promise<Map<string, string[]>>((res) => setTimeout(() => res(new Map()), 700)),
+    warmRdapBootstrap(),
+    new Promise<Map<string, string[]>>((res) => {
+      const id = setTimeout(() => res(new Map()), 700);
+      Deno.unrefTimer?.(id);
+    }),
   ]);
   const bases = bootstrap.get(tld) ?? [];
 
