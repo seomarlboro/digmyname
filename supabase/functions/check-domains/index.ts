@@ -901,6 +901,7 @@ Deno.serve(async (req) => {
     if (cacheable.length > 0) {
       const rows = cacheable.map(({ r, ttl }) => {
         // L1: keep it in this isolate too, so a repeat search is instant.
+        pruneHotCache();
         hotCache.set(r.domain, {
           result: r,
           expiresAt: Date.now() + Math.min(ttl * 1000, HOT_CACHE_TTL_MS),
