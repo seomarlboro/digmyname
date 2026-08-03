@@ -213,7 +213,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         title={aiSuggestions ? "AI suggestions on" : "AI suggestions off"}
         className={`relative flex h-[38px] w-[58px] shrink-0 items-center rounded-full p-1 transition-all duration-300 ${
           aiSuggestions
-            ? "bg-[linear-gradient(90deg,hsl(160_70%_80%),hase-in-out hsl(205_90%_78%),hsl(255_85%_78%))] shadow-[0_2px_16px_hsl(var(--primary)/0.4)]"
+            ? "bg-[linear-gradient(90deg,hsl(160_70%_80%),hsl(205_90%_78%),hsl(255_85%_78%))] shadow-[0_2px_16px_hsl(var(--primary)/0.4)]"
             : "bg-white/10 hover:bg-white/[0.16]"
         }`}
       >
