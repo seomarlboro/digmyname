@@ -530,15 +530,29 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
 // Resolve a single domain using RDAP + DNS only. GoDaddy is intentionally
 // removed from the verification chain — production API access requires
 // 50+ domains on the account or Reseller status, which we don't have.
+//
+// Speed: both probes start in parallel and whichever proves "taken" first wins
+// immediately — we don't wait for the slower one just to confirm a negative.
 // ---------------------------------------------------------------------------
-async function resolveDomain(domain: string): Promise<DomainCheckResult> {
-  const [dns, rdap] = await Promise.all([checkDnsDoH(domain), checkRdap(domain)]);
-  const likelyPremium = isLikelyPremium(domain);
+const PENDING_FOREVER = <T,>(): Promise<T> => new Promise<T>(() => {});
 
-  // RDAP is authoritative for registration status.
-  if (rdap === "taken") {
-    return { domain, available: false, checkedVia: "rdap", likelyPremium };
+async function resolveDomain(domain: string): Promise<DomainCheckResult> {
+  const likelyPremium = isLikelyPremium(domain);
+  const dnsP = checkDnsDoH(domain);
+  const rdapP = checkRdap(domain);
+
+  // Fast path: the first decisive "taken" signal ends the check.
+  const winner = await Promise.race([
+    rdapP.then((r) => (r === "taken" ? "rdap" : PENDING_FOREVER<string>())),
+    dnsP.then((d) => (d === "has_records" ? "dns" : PENDING_FOREVER<string>())),
+    Promise.all([dnsP, rdapP]).then(() => "settled"),
+  ]);
+  if (winner === "rdap" || winner === "dns") {
+    return { domain, available: false, checkedVia: winner, likelyPremium };
   }
+
+  const [dns, rdap] = await Promise.all([dnsP, rdapP]);
+
   // RDAP 404 is authoritative for "not registered". A DNS lookup error must not
   // downgrade that to uncertain — only actual DNS records can contradict it.
   if (rdap === "available" && dns !== "has_records") {
@@ -550,12 +564,6 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
     };
   }
 
-
-  // DNS-only signal: records exist → taken.
-  if (dns === "has_records") {
-    return { domain, available: false, checkedVia: "dns", likelyPremium };
-  }
-
   // Heuristic fallback — short SLD on premium TLD with no clear answer.
   if (likelyPremium) {
     return { domain, available: false, checkedVia: "heuristic", likelyPremium: true, uncertain: true };
@@ -563,6 +571,7 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
 
   return { domain, available: false, checkedVia: "unknown", uncertain: true };
 }
+
 
 // ---------------------------------------------------------------------------
 // Lightweight per-IP rate limiter (in-memory, sliding window).
