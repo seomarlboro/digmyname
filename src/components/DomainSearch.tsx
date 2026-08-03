@@ -184,22 +184,34 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           <X className="h-4 w-4" />
         </button>
       )}
-      {/* Mobile: clickable icon, Desktop: icon + label + switch */}
+      {/* Mobile: clickable icon, Desktop: segmented AI toggle */}
       <button
         type="button"
         onClick={() => setAiSuggestions((v) => !v)}
         aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
         aria-pressed={aiSuggestions}
-        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl cursor-pointer transition-all md:hidden
-          ${aiSuggestions ? "btn-gradient shadow-lg" : "text-primary"}`}
+        className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all md:hidden
+          ${aiSuggestions ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" : "text-primary bg-primary/10"}`}
       >
         <Sparkles className="h-6 w-6" />
       </button>
-      <div className="hidden md:flex items-center gap-2 rounded-xl px-3 py-2">
-        <Sparkles className="h-4 w-4 text-primary dark:drop-shadow-[0_0_4px_hsl(218,96%,60%)]" />
-        <span className="text-sm font-medium text-primary whitespace-nowrap">AI</span>
-        <Switch checked={aiSuggestions} onCheckedChange={setAiSuggestions} aria-label="Toggle AI suggestions" className="dark:data-[state=unchecked]:bg-primary/30" />
-      </div>
+      <button
+        type="button"
+        onClick={() => setAiSuggestions((v) => !v)}
+        aria-pressed={aiSuggestions}
+        aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
+        className="hidden md:flex items-center gap-3 rounded-full border border-primary/20 bg-primary/10 px-2 py-2 pr-4 backdrop-blur-sm transition-colors hover:bg-primary/15"
+      >
+        <span className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${aiSuggestions ? "bg-primary text-primary-foreground" : "bg-background/60 text-primary"}`}>
+          <Sparkles className="h-5 w-5" />
+        </span>
+        <span className="text-base font-semibold text-foreground whitespace-nowrap">AI</span>
+        <span className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${aiSuggestions ? "bg-primary" : "bg-background/60"}`}>
+          <span className={`inline-flex h-full w-1/2 items-center justify-center text-[10px] font-bold uppercase tracking-wider ${aiSuggestions ? "text-primary-foreground" : "text-muted-foreground"}`}>ON</span>
+          <span className={`inline-flex h-full w-1/2 items-center justify-center text-[10px] font-bold uppercase tracking-wider ${aiSuggestions ? "text-primary-foreground/60" : "text-foreground"}`}>OFF</span>
+          <span className={`absolute top-0.5 h-7 w-7 rounded-full bg-background shadow-sm transition-all ${aiSuggestions ? "left-[calc(50%-2px)]" : "left-0.5"}`} />
+        </span>
+      </button>
     </div>
   );
 
