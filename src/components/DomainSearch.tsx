@@ -188,7 +188,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         <div className="relative z-10 flex items-center justify-center px-4" style={{ height: 'calc(50vh - 32px - 40px)' }}>
           <div className="text-center">
             <h1 className="text-gradient text-5xl font-extrabold leading-[0.95] tracking-[-0.045em] sm:text-6xl md:text-7xl lg:text-[5.5rem]">
-              Search domains in seconds
+              Search domains
+              <br />
+              in seconds
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
               Check 50+ TLDs, see availability instantly, and compare registrar prices before you buy.
