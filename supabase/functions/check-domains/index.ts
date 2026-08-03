@@ -67,19 +67,33 @@ function isLikelyPremium(domain: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// DNS via Cloudflare DoH (P2) — fast, no Deno.resolveDns hangs.
+// DNS via DoH (P2) — fast, no Deno.resolveDns hangs.
+//
+// Speed: Cloudflare is the primary resolver, Google is a *hedge* fired only if
+// Cloudflare hasn't answered within 400ms. The first decisive answer wins, so a
+// single slow/edge-cold resolver never dictates the latency of the batch.
 // ---------------------------------------------------------------------------
 type DnsState = "has_records" | "no_records" | "error";
 
-async function checkDnsDoH(domain: string): Promise<DnsState> {
-  const types = ["A", "NS"];
+const DOH_ENDPOINTS = [
+  "https://cloudflare-dns.com/dns-query",
+  "https://dns.google/resolve",
+];
+
+const sleep = (ms: number) =>
+  new Promise<void>((res) => {
+    const id = setTimeout(res, ms);
+    Deno.unrefTimer?.(id);
+  });
+
+async function dohProbe(endpoint: string, domain: string, timeoutMs: number): Promise<DnsState> {
   try {
     const responses = await Promise.all(
-      types.map((t) =>
-        fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${t}`, {
+      ["A", "NS"].map((t) =>
+        fetch(`${endpoint}?name=${encodeURIComponent(domain)}&type=${t}`, {
           headers: { Accept: "application/dns-json" },
-          signal: AbortSignal.timeout(2000),
-        }).then((r) => (r.ok ? r.json() : null))
+          signal: AbortSignal.timeout(timeoutMs),
+        }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
       )
     );
     let any = false;
@@ -95,6 +109,21 @@ async function checkDnsDoH(domain: string): Promise<DnsState> {
     return "error";
   }
 }
+
+async function checkDnsDoH(domain: string): Promise<DnsState> {
+  const primary = dohProbe(DOH_ENDPOINTS[0], domain, 2000);
+  const hedge = sleep(400).then(() => dohProbe(DOH_ENDPOINTS[1], domain, 2000));
+
+  const decisive = (p: Promise<DnsState>) =>
+    p.then((s) => (s === "error" ? PENDING_FOREVER<DnsState>() : s));
+
+  return await Promise.race([
+    decisive(primary),
+    decisive(hedge),
+    Promise.all([primary, hedge]).then(([a, b]) => (a !== "error" ? a : b)),
+  ]);
+}
+
 
 
 
