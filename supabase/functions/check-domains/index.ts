@@ -385,12 +385,14 @@ interface DomainrStatusEntry {
 
 // Circuit breaker: if RapidAPI answers 401/403 (key invalid / not subscribed)
 // stop calling it for the lifetime of this isolate instead of burning a
-// round-trip on every request.
+// round-trip on every request. A 429 (quota) triggers a temporary cooldown.
 let domainrDisabledReason: string | null = null;
+let domainrCooldownUntil = 0;
 
 async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<Map<string, DomainrStatusEntry> | null> {
   if (domains.length === 0) return new Map();
   if (domainrDisabledReason) return null;
+  if (Date.now() < domainrCooldownUntil) return null;
   try {
     const out = new Map<string, DomainrStatusEntry>();
     // Domainr accepts up to 32 domains per call.
@@ -409,11 +411,15 @@ async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<M
         if (resp.status === 401 || resp.status === 403) {
           domainrDisabledReason = `HTTP ${resp.status}: ${txt.slice(0, 120)}`;
           console.error(`domainr DISABLED for this isolate — ${domainrDisabledReason}. Check the RapidAPI subscription for domainr.p.rapidapi.com.`);
+        } else if (resp.status === 429) {
+          domainrCooldownUntil = Date.now() + 60_000;
+          console.warn("domainr 429 — cooling down for 60s, RDAP/DNS results stand");
         } else {
           console.warn(`domainr HTTP ${resp.status}: ${txt.slice(0, 200)}`);
         }
         return out.size > 0 ? out : null;
       }
+
       const data = await resp.json();
       if (Array.isArray(data?.status)) {
         for (const entry of data.status as DomainrStatusEntry[]) {
