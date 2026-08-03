@@ -871,22 +871,34 @@ Deno.serve(async (req) => {
       .filter(({ ttl }) => ttl > 0);
 
     if (cacheable.length > 0) {
-      const rows = cacheable.map(({ r, ttl }) => ({
-        domain: r.domain,
-        available: r.available,
-        checked_via: r.checkedVia,
-        rdap_data: {
-          godaddy_price: r.price ?? null,
-          premium: r.premium ?? false,
-          likely_premium: r.likelyPremium ?? false,
-          for_sale: r.forSale ?? false,
-          for_sale_via: r.forSaleVia ?? null,
-          listing_url: r.listingUrl ?? null,
-        },
-        expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
-      }));
-      await supabase.from("domain_cache").upsert(rows, { onConflict: "domain" });
+      const rows = cacheable.map(({ r, ttl }) => {
+        // L1: keep it in this isolate too, so a repeat search is instant.
+        hotCache.set(r.domain, {
+          result: r,
+          expiresAt: Date.now() + Math.min(ttl * 1000, HOT_CACHE_TTL_MS),
+        });
+        return {
+          domain: r.domain,
+          available: r.available,
+          checked_via: r.checkedVia,
+          rdap_data: {
+            godaddy_price: r.price ?? null,
+            premium: r.premium ?? false,
+            likely_premium: r.likelyPremium ?? false,
+            for_sale: r.forSale ?? false,
+            for_sale_via: r.forSaleVia ?? null,
+            listing_url: r.listingUrl ?? null,
+          },
+          expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
+        };
+      });
+      // Persist in the background — the user's response doesn't wait for the write.
+      const write = supabase.from("domain_cache").upsert(rows, { onConflict: "domain" });
+      const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+      if (rt?.waitUntil) rt.waitUntil(Promise.resolve(write).catch(() => {}));
+      else await write;
     }
+
 
     const all = new Map<string, DomainCheckResult>();
     for (const c of cachedMap.values()) all.set(c.domain, c);
