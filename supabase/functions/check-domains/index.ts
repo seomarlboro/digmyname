@@ -46,7 +46,7 @@ const PREMIUM_TLDS = new Set([
 // Single-syllable / very common English words that are aftermarket on .com.
 const COMMON_WORDS_RE = /^(?:[bcdfghjklmnpqrstvwxz][aeiou][bcdfghjklmnpqrstvwxz]?|[aeiou][bcdfghjklmnpqrstvwxz]{1,2})$/i;
 
-function isLikelyPremium(domain: string): boolean {
+export function isLikelyPremium(domain: string): boolean {
   const [sld, ...rest] = domain.split(".");
   const tld = rest.join(".");
   if (!sld || !tld) return false;
