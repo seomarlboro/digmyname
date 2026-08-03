@@ -179,6 +179,20 @@ Deno.test("interpretDomainr: empty / unknown / soft-only status → unknown", ()
   assertEquals(interpretDomainr({ domain: "x.com", status: "unknown" }).kind, "unknown");
 });
 
+// ---- Premium / aftermarket heuristics --------------------------------------
+
+Deno.test("isLikelyPremium: 5-letter pure-letter SLD on premium TLD", () => {
+  assert(isLikelyPremium("indie.studio"), "indie.studio should be flagged likelyPremium");
+  assert(isLikelyPremium("indie.store"), "indie.store should be flagged likelyPremium");
+  assert(isLikelyPremium("hello.world"), "hello.world should be flagged likelyPremium");
+  assert(!isLikelyPremium("indie.zzz-unknown-tld"), "unknown TLD should not be flagged");
+});
+
+Deno.test("isLikelyPremium: common short words on premium TLDs", () => {
+  assert(isLikelyPremium("sky.cloud"), "sky.cloud should be flagged likelyPremium");
+  assert(isLikelyPremium("art.design"), "art.design should be flagged likelyPremium");
+});
+
 // ---- Domain validation ------------------------------------------------------
 
 Deno.test("isValidDomain: punycode IDN is accepted", () => {
