@@ -2,7 +2,7 @@
 // Loads .env so VITE_SUPABASE_URL / KEY are available.
 import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { classifyAftermarket } from "./index.ts";
+import { classifyAftermarket, interpretDomainr, isValidDomain, loadTldPricing } from "./index.ts";
 
 const SUPABASE_URL = Deno.env.get("VITE_SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY")!;
@@ -137,4 +137,55 @@ Deno.test("classifyAftermarket: case-insensitive + trailing dot tolerated", () =
 Deno.test("classifyAftermarket: anti-spoof — sedoparking-as-subdomain on other root is ignored", () => {
   // attacker.com using "sedoparking.com.attacker.example" must NOT match.
   assertEquals(classifyAftermarket(["ns1.sedoparking.com.attacker.example"]), null);
+});
+
+// ---- Domainr status interpretation (pure unit tests) ------------------------
+
+Deno.test("interpretDomainr: undelegated transferable → AVAILABLE (not premium)", () => {
+  const v = interpretDomainr({ domain: "x.com", status: "undelegated transferable" });
+  assertEquals(v.kind, "available");
+  assertEquals(v.kind === "available" && v.premium, false);
+});
+
+Deno.test("interpretDomainr: inactive priced premium → AVAILABLE + premium", () => {
+  const v = interpretDomainr({ domain: "x.io", status: "inactive priced premium transferable" });
+  assertEquals(v.kind, "available");
+  assertEquals(v.kind === "available" && v.premium, true);
+});
+
+Deno.test("interpretDomainr: active marketed → TAKEN + marketed", () => {
+  const v = interpretDomainr({ domain: "x.com", status: "active marketed transferable" });
+  assertEquals(v.kind, "taken");
+  assertEquals(v.kind === "taken" && v.marketed, true);
+});
+
+Deno.test("interpretDomainr: parked/reserved/suffix → TAKEN", () => {
+  for (const s of ["parked", "reserved", "disallowed", "suffix", "deleting"]) {
+    assertEquals(interpretDomainr({ domain: "x.com", status: s }).kind, "taken", s);
+  }
+});
+
+Deno.test("interpretDomainr: empty / unknown status → unknown", () => {
+  assertEquals(interpretDomainr(undefined).kind, "unknown");
+  assertEquals(interpretDomainr({ domain: "x.com", status: "" }).kind, "unknown");
+  assertEquals(interpretDomainr({ domain: "x.com", status: "transferable" }).kind, "unknown");
+});
+
+// ---- Domain validation ------------------------------------------------------
+
+Deno.test("isValidDomain: punycode IDN is accepted", () => {
+  assert(isValidDomain("xn--80ak6aa92e.com"));
+  assert(isValidDomain("xn--e1afmkfd.xn--p1ai"));
+});
+
+Deno.test("isValidDomain: rejects malformed input", () => {
+  for (const d of ["", "not a domain!!", "foo..com", "-foo.com", "foo-.com", "foo"]) {
+    assertEquals(isValidDomain(d), false, d);
+  }
+});
+
+Deno.test("porkbun pricing catalog returns a real .com price", async () => {
+  const map = await loadTldPricing();
+  const com = map.get("com");
+  assert(com?.registration && com.registration > 0, `expected .com price, got ${JSON.stringify(com)}`);
 });
