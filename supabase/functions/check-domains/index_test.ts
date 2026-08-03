@@ -141,34 +141,42 @@ Deno.test("classifyAftermarket: anti-spoof — sedoparking-as-subdomain on other
 
 // ---- Domainr status interpretation (pure unit tests) ------------------------
 
-Deno.test("interpretDomainr: undelegated transferable → AVAILABLE (not premium)", () => {
-  const v = interpretDomainr({ domain: "x.com", status: "undelegated transferable" });
+Deno.test("interpretDomainr: inactive → AVAILABLE (not premium)", () => {
+  const v = interpretDomainr({ domain: "x.com", status: "undelegated inactive" });
   assertEquals(v.kind, "available");
   assertEquals(v.kind === "available" && v.premium, false);
 });
 
-Deno.test("interpretDomainr: inactive priced premium → AVAILABLE + premium", () => {
-  const v = interpretDomainr({ domain: "x.io", status: "inactive priced premium transferable" });
+Deno.test("interpretDomainr: inactive premium → AVAILABLE + premium", () => {
+  const v = interpretDomainr({ domain: "x.io", status: "inactive premium" });
   assertEquals(v.kind, "available");
   assertEquals(v.kind === "available" && v.premium, true);
 });
 
-Deno.test("interpretDomainr: active marketed → TAKEN + marketed", () => {
-  const v = interpretDomainr({ domain: "x.com", status: "active marketed transferable" });
-  assertEquals(v.kind, "taken");
-  assertEquals(v.kind === "taken" && v.marketed, true);
+Deno.test("interpretDomainr: aftermarket tokens → TAKEN + forSale", () => {
+  for (const s of ["marketed", "priced", "transferable"]) {
+    const v = interpretDomainr({ domain: "x.com", status: `inactive ${s}` });
+    assertEquals(v.kind, "taken", s);
+    assertEquals(v.kind === "taken" && v.forSale, true, s);
+  }
 });
 
-Deno.test("interpretDomainr: parked/reserved/suffix → TAKEN", () => {
-  for (const s of ["parked", "reserved", "disallowed", "suffix", "deleting"]) {
+Deno.test("interpretDomainr: active marketed → TAKEN + forSale", () => {
+  const v = interpretDomainr({ domain: "x.com", status: "active marketed transferable" });
+  assertEquals(v.kind, "taken");
+  assertEquals(v.kind === "taken" && v.forSale, true);
+});
+
+Deno.test("interpretDomainr: parked/reserved/suffix/expiring → TAKEN", () => {
+  for (const s of ["parked", "reserved", "disallowed", "suffix", "deleting", "expiring"]) {
     assertEquals(interpretDomainr({ domain: "x.com", status: s }).kind, "taken", s);
   }
 });
 
-Deno.test("interpretDomainr: empty / unknown status → unknown", () => {
+Deno.test("interpretDomainr: empty / unknown / soft-only status → unknown", () => {
   assertEquals(interpretDomainr(undefined).kind, "unknown");
   assertEquals(interpretDomainr({ domain: "x.com", status: "" }).kind, "unknown");
-  assertEquals(interpretDomainr({ domain: "x.com", status: "transferable" }).kind, "unknown");
+  assertEquals(interpretDomainr({ domain: "x.com", status: "unknown" }).kind, "unknown");
 });
 
 // ---- Domain validation ------------------------------------------------------

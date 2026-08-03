@@ -428,24 +428,30 @@ async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<M
   }
 }
 
-// Domainr status tokens are a SET, not a single value. A domain can be
-// "undelegated transferable" (AVAILABLE, buyable through a partner registrar)
-// or "undelegated priced premium" (AVAILABLE at registry-premium pricing) or
-// "active marketed" (TAKEN and listed on an aftermarket).
-// The old implementation treated any of marketed/priced/premium/transferable as
-// "not available", which wrongly marked available premium and partner-registrable
-// names as taken. Availability and premium are now independent axes.
+// Domainr status tokens are a SET ordered by increasing precedence. The docs say
+// the right-most token is the most important, but in practice the tokens fall into
+// three buckets:
+//   • FREE:    inactive | undelegated | unregistered  → available for registration
+//   • PREMIUM: premium                                  → available, registry-premium price
+//   • TAKEN:   active | parked | claimed | reserved | dpml | pending | disallowed |
+//              invalid | suffix | tld | zone | deleting | expiring
+//   • AFTERMARKET: marketed | priced | transferable    → taken, listed for resale
+//
+// The old implementation treated priced/transferable as premium/free, which wrongly
+// marked aftermarket domains as available. Per the docs, priced/transferable are
+// explicitly aftermarket (for-sale) statuses.
 export type DomainrVerdict =
   | { kind: "available"; premium: boolean }
-  | { kind: "taken"; marketed: boolean }
+  | { kind: "taken"; forSale: boolean }
   | { kind: "unknown" };
 
 const DOMAINR_TAKEN = new Set([
-  "active", "parked", "claimed", "dpml", "deleting", "pending",
+  "active", "parked", "claimed", "dpml", "deleting", "pending", "expiring",
   "reserved", "disallowed", "invalid", "suffix", "tld", "zone",
 ]);
 const DOMAINR_FREE = new Set(["undelegated", "inactive", "unregistered"]);
-const DOMAINR_PREMIUM = new Set(["priced", "premium"]);
+const DOMAINR_PREMIUM = new Set(["premium"]);
+const DOMAINR_AFTERMARKET = new Set(["marketed", "priced", "transferable"]);
 
 export function interpretDomainr(entry: DomainrStatusEntry | undefined): DomainrVerdict {
   if (!entry?.status) return { kind: "unknown" };
@@ -455,12 +461,12 @@ export function interpretDomainr(entry: DomainrStatusEntry | undefined): Domainr
   const taken = tokens.some((t) => DOMAINR_TAKEN.has(t));
   const free = tokens.some((t) => DOMAINR_FREE.has(t));
   const premium = tokens.some((t) => DOMAINR_PREMIUM.has(t));
-  const marketed = tokens.includes("marketed");
+  const aftermarket = tokens.some((t) => DOMAINR_AFTERMARKET.has(t));
 
-  // "active"/"parked" always wins over "inactive"-style tokens.
-  if (taken) return { kind: "taken", marketed };
+  // Aftermarket tokens (marketed/priced/transferable) mean the domain is already
+  // registered and listed for sale — they take precedence over free/inactive.
+  if (taken || aftermarket) return { kind: "taken", forSale: aftermarket };
   if (free) return { kind: "available", premium };
-  // Only soft tokens (e.g. bare "transferable" / "marketed") → not conclusive.
   return { kind: "unknown" };
 }
 
@@ -691,10 +697,11 @@ Deno.serve(async (req) => {
           available: false,
           checkedVia: "domainr",
           likelyPremium,
-          // "marketed" = registered and actively listed on an aftermarket.
-          forSale: verdict.marketed || undefined,
-          forSaleVia: verdict.marketed ? "Aftermarket" : undefined,
-          listingUrl: verdict.marketed ? `https://www.afternic.com/domain/${d}` : undefined,
+          // Aftermarket tokens (marketed/priced/transferable) mean there is a
+          // buy-now / fast-transfer listing we can send the user to.
+          forSale: verdict.forSale || undefined,
+          forSaleVia: verdict.forSale ? "Aftermarket" : undefined,
+          listingUrl: verdict.forSale ? `https://www.afternic.com/domain/${d}` : undefined,
         });
       } else {
         needsFallback.push(d);
