@@ -691,6 +691,19 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
     };
   }
 
+  // Zones without a trustworthy RDAP server (.co, .me): a hard NXDOMAIN from
+  // two independent resolvers means the name isn't delegated → not registered.
+  if (rdap === "unknown" && dns === "no_records" && AGGREGATOR_UNRELIABLE_TLDS.has(domain.split(".").pop() ?? "")) {
+    return {
+      domain,
+      available: true,
+      checkedVia: "dns",
+      likelyPremium: likelyPremium || undefined,
+    };
+  }
+
+
+
   // Heuristic fallback — short SLD on premium TLD with no clear answer.
   if (likelyPremium) {
     return { domain, available: false, checkedVia: "heuristic", likelyPremium: true, uncertain: true };
