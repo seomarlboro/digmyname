@@ -1,0 +1,53 @@
+{
+  "name": "domain-check-skills-mcp",
+  "version": "0.2.0",
+  "description": "MCP server for real-time domain availability checks and registrar price comparison, powered by DigMyName.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "domain-check-skills-mcp": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "domain",
+    "domains",
+    "domain-availability",
+    "whois",
+    "rdap",
+    "registrar",
+    "claude",
+    "cursor",
+    "ai-agent",
+    "llm-tools"
+  ],
+  "homepage": "https://digmyname.com/mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digmyname/domain-check-skills-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/digmyname/domain-check-skills-mcp/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}
