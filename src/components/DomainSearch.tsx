@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, X, Loader2, Sparkles, CheckCircle2, LayoutGrid, List, AlertCircle } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/use-mobile";
 import DomainCard from "@/components/DomainCard";
 import HeroBackground from "@/components/HeroBackground";
