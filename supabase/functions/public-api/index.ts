@@ -354,6 +354,15 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (path === "/age") {
+      const raw = url.searchParams.get("domain") || "";
+      const domain = validateDomain(raw);
+      if (!domain) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400, rlHeaders);
+      const ages = await invokeAge([domain]);
+      const info = ages[domain] || { created: null, expires: null };
+      return json({ domain, created: info.created, expires: info.expires }, 200, rlHeaders);
+    }
+
     return json({ error: "not_found", path }, 404, rlHeaders);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "unknown";
