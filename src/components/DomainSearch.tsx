@@ -164,51 +164,6 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   const hasQuery = query.trim().length > 0;
 
-  const aiButton = (
-    <button
-      type="button"
-      onClick={() => setAiSuggestions((v) => !v)}
-      aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
-      aria-pressed={aiSuggestions}
-      className="group relative h-14 w-28 shrink-0 rounded-full border border-white/10 bg-white/5 p-1 shadow-inner backdrop-blur-md transition-colors hover:bg-white/10"
-    >
-      {/* Gradient fill that fades in when active */}
-      <span
-        aria-hidden="true"
-        className={`absolute inset-0 rounded-full transition-opacity duration-300 ${aiSuggestions ? "opacity-100" : "opacity-0"}`}
-        style={{
-          background: "linear-gradient(135deg, #a5f3fc 0%, #67e8f9 25%, #818cf8 70%, #c4b5fd 100%)",
-        }}
-      />
-      {/* Track sparkles (subtle, visible when off) */}
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-opacity duration-300 group-hover:text-white/50">
-        <Sparkles className="h-4 w-4" />
-      </span>
-      {/* Sliding knob */}
-      <span
-        aria-hidden="true"
-        className={`relative flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${aiSuggestions ? "translate-x-14" : "translate-x-0"}`}
-      >
-        <span
-          className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-active:opacity-10"
-          style={{ background: "linear-gradient(135deg, #a5f3fc, #c4b5fd)" }}
-        />
-        <Sparkles
-          className="relative h-5 w-5 transition-all duration-300"
-          style={{ color: aiSuggestions ? "#818cf8" : "#94a3b8" }}
-        />
-        <Sparkles
-          className="absolute h-3 w-3 transition-all duration-300"
-          style={{
-            color: aiSuggestions ? "#67e8f9" : "#cbd5e1",
-            right: "9px",
-            bottom: "9px",
-          }}
-        />
-      </span>
-    </button>
-  );
-
   const searchBar = (
     <div className="flex flex-1 items-center gap-3 rounded-[100px] border border-white/10 bg-white/10 p-4 [backdrop-filter:blur(64px)]">
       <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
@@ -229,6 +184,20 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           <X className="h-4 w-4" />
         </button>
       )}
+      <button
+        type="button"
+        onClick={() => setAiSuggestions((value) => !value)}
+        aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
+        aria-pressed={aiSuggestions}
+        title={aiSuggestions ? "AI suggestions on" : "AI suggestions off"}
+        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors ${
+          aiSuggestions
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+        }`}
+      >
+        <Sparkles className="h-5 w-5" />
+      </button>
     </div>
   );
 
@@ -260,9 +229,8 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         {scrolled && (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 -top-16 bg-background/80 backdrop-blur-xl" aria-hidden="true" />
         )}
-        <div className="container relative mx-auto flex max-w-3xl items-center gap-3 px-4">
+        <div className="container relative mx-auto flex max-w-3xl items-center px-4">
           {searchBar}
-          {aiButton}
         </div>
       </div>
 
