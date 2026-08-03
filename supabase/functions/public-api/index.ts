@@ -247,7 +247,7 @@ Deno.serve(async (req) => {
       return json(
         {
           name: "DigMyName Public API",
-          docs: "https://digmyname.com/api/openapi.json",
+          docs: "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/openapi.json",
           endpoints: ["/check?domain=", "/search?q=&tlds=", "/registrars?tld=", "/openapi.json"],
           rate_limit: `${LIMIT} requests / 60s / IP`,
           website: "https://digmyname.com",
