@@ -186,7 +186,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const hasQuery = query.trim().length > 0;
 
   const searchBar = (
-    <div className="flex flex-1 items-center gap-3 rounded-[100px] border border-white/10 bg-white/10 p-4 [backdrop-filter:blur(64px)]">
+    <div className="flex flex-1 items-center gap-3 rounded-[100px] border border-white/10 bg-white/10 p-5 [backdrop-filter:blur(64px)]">
       <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
         <Search className="h-7 w-7 text-primary" />
       </div>
@@ -198,7 +198,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         placeholder="Enter domain name..."
         autoFocus
         aria-label="Search domain name"
-        className="min-w-0 flex-1 bg-transparent pl-4 pr-4 text-2xl font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
+        className="min-w-0 flex-1 bg-transparent pl-4 pr-8 text-2xl font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
       />
       {query && (
         <button onClick={() => setQuery("")} aria-label="Clear search" className="p-1 text-muted-foreground hover:text-foreground">
@@ -211,7 +211,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
         aria-pressed={aiSuggestions}
         title={aiSuggestions ? "AI suggestions on" : "AI suggestions off"}
-        className={`relative flex h-[38px] w-[50px] shrink-0 items-center rounded-full p-1 transition-all duration-300 ${
+        className={`relative flex h-[38px] w-[64px] shrink-0 items-center rounded-full p-1 transition-all duration-300 ${
           aiSuggestions
             ? "bg-[linear-gradient(90deg,hsl(160_70%_80%),hsl(205_90%_78%),hsl(255_85%_78%))] shadow-[0_2px_16px_hsl(var(--primary)/0.4)]"
             : "bg-white/10 hover:bg-white/[0.16]"
@@ -219,7 +219,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       >
         <span
           className={`flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-            aiSuggestions ? "translate-x-3" : "translate-x-0"
+            aiSuggestions ? "translate-x-[26px]" : "translate-x-0"
           }`}
         >
           <StarsIcon
