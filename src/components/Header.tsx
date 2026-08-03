@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Heart, Moon, Sun, LogOut, User } from "lucide-react";
 import ShovelLogo from "@/components/ShovelLogo";
 import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchPinned, setSearchPinned] = useState(false);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -20,11 +23,21 @@ const Header = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const onSearchStickyChange = (event: Event) => {
+      setSearchPinned(event instanceof CustomEvent && event.detail === true);
+    };
+    window.addEventListener("search-sticky-change", onSearchStickyChange);
+    return () => window.removeEventListener("search-sticky-change", onSearchStickyChange);
+  }, []);
+
+  const usesSharedSearchBackdrop = pathname === "/" && searchPinned;
+
   return (
     <>
       <header
         className={`sticky top-0 z-50 w-full transition-colors duration-300 ${
-          scrolled
+          scrolled && !usesSharedSearchBackdrop
             ? "border-b border-border/40 bg-background/80 backdrop-blur-xl"
             : "border-b border-transparent bg-transparent"
         }`}

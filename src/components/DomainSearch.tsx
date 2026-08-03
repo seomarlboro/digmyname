@@ -12,6 +12,7 @@ interface DomainSearchProps {
 
 const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const stickySearchRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,13 +22,26 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const [scrolled, setScrolled] = useState(false);
   const isMobile = useIsMobile();
 
-  // Track scroll to blur the search bar background only after scrolling
+  // Activate the shared header/search backdrop only when the search bar is pinned.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
+    const onScroll = () => {
+      const stickySearch = stickySearchRef.current;
+      const isPinned = window.scrollY > 10 && Boolean(stickySearch && stickySearch.getBoundingClientRect().top <= 64);
+      setScrolled(isPinned);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("search-sticky-change", { detail: scrolled }));
+    return () => window.dispatchEvent(new CustomEvent("search-sticky-change", { detail: false }));
+  }, [scrolled]);
 
   // Debounce
   useEffect(() => {
@@ -150,11 +164,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
   const hasQuery = query.trim().length > 0;
 
   const searchBar = (
-    <div className={`mx-auto flex max-w-2xl items-center gap-2 rounded-[20px] border p-3 transition-colors duration-300 ${
-      scrolled
-        ? "border-border/50 bg-background/80 backdrop-blur-xl"
-        : "border-border/40 bg-transparent"
-    }`}>
+    <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-[20px] border border-border/40 bg-transparent p-3">
       <div className="hidden md:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
         <Search className="h-6 w-6 text-primary" />
       </div>
@@ -216,10 +226,11 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       )}
 
       {/* Always-rendered sticky search bar */}
-      <div className={`sticky top-16 z-40 py-4 transition-colors duration-300 ${
-        scrolled ? "bg-background/80 backdrop-blur-xl" : "bg-transparent"
-      }`}>
-        <div className="container mx-auto px-4">
+      <div ref={stickySearchRef} className="sticky top-16 z-40 py-4">
+        {scrolled && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 -top-16 bg-background/80 backdrop-blur-xl" aria-hidden="true" />
+        )}
+        <div className="container relative mx-auto px-4">
           {searchBar}
         </div>
       </div>
