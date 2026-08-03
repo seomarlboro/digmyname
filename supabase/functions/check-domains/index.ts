@@ -867,6 +867,9 @@ Deno.serve(async (req) => {
 
       for (const c of cached ?? []) {
         const meta = (c.rdap_data ?? {}) as Record<string, unknown>;
+        // Ignore rows written by older logic versions — they may encode stale
+        // availability/premium interpretations.
+        if ((meta.cache_version as number | undefined) !== CACHE_VERSION) continue;
         const result: DomainCheckResult = {
           domain: c.domain,
           available: c.available,
@@ -881,6 +884,7 @@ Deno.serve(async (req) => {
         cachedMap.set(c.domain, result);
         hotCache.set(c.domain, { result, expiresAt: nowMs + HOT_CACHE_TTL_MS });
       }
+
     }
 
     const uncached = batch.filter((d) => !cachedMap.has(d));
