@@ -130,7 +130,7 @@ const Mcp = () => {
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Cross-platform",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-          softwareVersion: "0.1.0",
+          softwareVersion: "0.2.0",
           downloadUrl: NPM_URL,
           codeRepository: GITHUB_URL,
           license: "https://opensource.org/licenses/MIT",
@@ -169,7 +169,7 @@ const Mcp = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
-              Live on npm · v0.1.0
+              Live on npm · v0.2.0
               <ArrowUpRight className="w-3 h-3" />
             </a>
 
