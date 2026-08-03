@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle, Tag } from "lucide-react";
+import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle, Tag, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
+import { useDomainAge, formatRegisteredSince } from "@/hooks/useDomainAge";
 import AuthDialog from "@/components/AuthDialog";
 import { getRegistrarColor, getRegistrarUrl } from "@/lib/registrarColors";
+
 import type { DomainResult } from "@/lib/domainData";
 
 interface DomainCardProps {
@@ -144,7 +146,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
           ) : (
             <span className="min-w-[80px]" />
           )}
-          <span className="text-xs text-muted-foreground min-w-[80px]">{displayRenew != null ? `renews $${displayRenew}` : ''}</span>
+          <span className="text-xs text-muted-foreground min-w-[80px]">{available ? (displayRenew != null ? `renews $${displayRenew}` : '') : (sinceLabel ?? '')}</span>
           {available ? (
             <>
               <div className="flex items-center gap-2">
@@ -222,11 +224,18 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   </Badge>
                 );
               })()}
+              {!available && sinceLabel && (
+                <Badge variant="secondary" className="text-xs font-normal gap-1">
+                  <CalendarClock className="h-3 w-3" />
+                  {sinceLabel}
+                </Badge>
+              )}
               {tld.features.map((f) => (
                 <Badge key={f} variant="secondary" className="text-xs font-normal">
                   {f}
                 </Badge>
               ))}
+
             </div>
           </div>
 
