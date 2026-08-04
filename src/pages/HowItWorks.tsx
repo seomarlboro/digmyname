@@ -17,7 +17,7 @@ import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
-import { PageMain, PageHeader, Eyebrow, Stat } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
 
 
 const sources = [
@@ -181,11 +181,12 @@ const HowItWorks = () => {
           }
           lede="Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks four independent sources and tells you when it isn't sure — so you never buy a domain that turns out to be taken, or skip one that was actually free."
         >
-          <div className="mt-10 grid grid-cols-3 gap-6">
+          <StatGrid cols={3}>
             <Stat value="4" label="Verification sources" accent="mint" />
             <Stat value="50+" label="TLDs curated" accent="violet" />
             <Stat value="0" label="Guesses shown as facts" />
-          </div>
+          </StatGrid>
+
         </PageHeader>
 
 

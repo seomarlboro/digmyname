@@ -184,7 +184,7 @@ export const Stat = ({
   label: ReactNode;
   accent?: "mint" | "violet";
 }) => (
-  <div className="px-5 py-5">
+  <div className="bg-card/60 px-5 py-5 backdrop-blur-sm transition-colors hover:bg-card/80">
     <div
       className={cn(
         "stat-value text-left",
