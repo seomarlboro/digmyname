@@ -1,5 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import {
   Github,
   Puzzle,
