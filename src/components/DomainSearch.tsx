@@ -315,7 +315,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       {!hasQuery ? (
         <div className="relative z-10 flex min-h-[38vh] items-center justify-center px-4 pb-4 pt-10 sm:h-[calc(50vh-72px)] sm:min-h-0 sm:pb-0 sm:pt-0">
           <div className="mx-auto w-full max-w-5xl text-center">
-            <h1 className="text-gradient overflow-visible px-1 text-[1.65rem] font-extrabold leading-[1.08] tracking-[-0.03em] xs:text-[2rem] sm:text-5xl sm:leading-[1] sm:tracking-[-0.045em] md:text-6xl lg:text-7xl">
+            <h1 className="text-gradient overflow-visible px-1 text-[2rem] font-extrabold leading-[1.08] tracking-[-0.03em] xs:text-[2.5rem] sm:text-6xl sm:leading-[1] sm:tracking-[-0.045em] md:text-7xl lg:text-[5rem]">
               <span className="block whitespace-nowrap">World's fastest domain</span>
               <span className="block whitespace-nowrap">search. Fight us.</span>
             </h1>
