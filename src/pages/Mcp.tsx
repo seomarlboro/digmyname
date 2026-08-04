@@ -1,5 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import {
   Github,
   Puzzle,
@@ -353,12 +355,27 @@ const Mcp = () => {
                   {copiedCli ? "Copied" : "Copy"}
                 </Button>
               </div>
-              <pre className="p-6 text-sm overflow-x-auto font-mono leading-relaxed">
-                <code className="text-foreground/90">
-                  <span className="text-primary select-none">$ </span>
-                  {oneLineCommand}
-                </code>
-              </pre>
+              <div className="p-6 overflow-x-auto text-[13px] leading-relaxed">
+                <SyntaxHighlighter
+                  language="bash"
+                  style={vscDarkPlus}
+                  customStyle={{
+                    margin: 0,
+                    padding: 0,
+                    background: "transparent",
+                    fontSize: "13px",
+                    lineHeight: "1.6",
+                  }}
+                  codeTagProps={{
+                    style: {
+                      fontFamily:
+                        'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+                    },
+                  }}
+                >
+                  {`$ ${oneLineCommand}`}
+                </SyntaxHighlighter>
+              </div>
             </div>
 
             {/* JSON config */}
@@ -381,9 +398,27 @@ const Mcp = () => {
                   {copied ? "Copied" : "Copy"}
                 </Button>
               </div>
-              <pre className="p-6 text-sm overflow-x-auto font-mono leading-relaxed">
-                <code className="text-foreground/90">{configSnippet}</code>
-              </pre>
+              <div className="p-6 overflow-x-auto text-[13px] leading-relaxed">
+                <SyntaxHighlighter
+                  language="json"
+                  style={vscDarkPlus}
+                  customStyle={{
+                    margin: 0,
+                    padding: 0,
+                    background: "transparent",
+                    fontSize: "13px",
+                    lineHeight: "1.6",
+                  }}
+                  codeTagProps={{
+                    style: {
+                      fontFamily:
+                        'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+                    },
+                  }}
+                >
+                  {configSnippet}
+                </SyntaxHighlighter>
+              </div>
             </div>
             <p className="text-sm text-muted-foreground mt-4 flex items-center gap-2">
               <Terminal className="w-4 h-4 text-primary" />
