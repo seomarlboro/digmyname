@@ -162,19 +162,14 @@ const Speed = () => {
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {pipeline.map((step) => (
-              <div
+              <FeatureCard
                 key={step.title}
-                className="group relative overflow-hidden surface-card p-6 card-hover transition-colors hover:border-primary/40"
+                icon={step.icon}
+                index={step.step}
+                title={step.title}
               >
-                <div className="absolute right-5 top-4 font-mono text-3xl font-bold text-muted-foreground/10 transition-colors group-hover:text-primary/20">
-                  {step.step}
-                </div>
-                <div className="icon-frame">
-                  <step.icon />
-                </div>
-                <h3 className="mt-4 font-semibold">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.detail}</p>
-              </div>
+                {step.detail}
+              </FeatureCard>
             ))}
           </div>
         </section>
