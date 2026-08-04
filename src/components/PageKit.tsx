@@ -166,7 +166,7 @@ export const StatGrid = ({
 }) => (
   <div
     className={cn(
-      "mt-10 grid grid-cols-2 overflow-hidden rounded-2xl border border-border/60",
+      "surface-card mt-10 grid grid-cols-2 overflow-hidden",
       cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4",
       className,
     )}
@@ -252,9 +252,7 @@ export const FeatureCard = ({
   <As
     className={cn(
       "group relative flex flex-col overflow-hidden p-6 transition-colors",
-      plain
-        ? "border-b border-border/40 last:border-0"
-        : "surface-card card-hover hover:border-primary/40",
+      "surface-card card-hover hover:border-primary/40",
       className,
     )}
     {...rest}

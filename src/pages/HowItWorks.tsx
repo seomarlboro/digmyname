@@ -216,7 +216,7 @@ const HowItWorks = () => {
 
         {/* Unverified state */}
         <section className="py-12">
-          <div className="rounded-xl border border-warning/30 bg-warning/5 p-8">
+          <div className="surface-card p-8">
             <div className="mb-4 flex items-center gap-3">
               <div className="icon-frame icon-frame-warning">
                 <AlertCircle />
@@ -249,7 +249,7 @@ const HowItWorks = () => {
           <p className="mb-8 text-muted-foreground">
             Honest take after using each tool ourselves.
           </p>
-          <div className="overflow-hidden rounded-3xl border border-border/70">
+          <div className="surface-card-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -316,7 +316,7 @@ const HowItWorks = () => {
             What we're <span className="text-muted-foreground">not</span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-border p-5">
+            <div className="surface-card p-5">
               <Globe className="mb-3 h-5 w-5 text-muted-foreground" />
               <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
 
@@ -327,7 +327,7 @@ const HowItWorks = () => {
                 obscure ccTLD. Quality over noise.
               </p>
             </div>
-            <div className="rounded-2xl border border-border p-5">
+            <div className="surface-card p-5">
               <Scale className="mb-3 h-5 w-5 text-muted-foreground" />
               <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
 
@@ -338,7 +338,7 @@ const HowItWorks = () => {
                 buy it from whichever registrar you prefer.
               </p>
             </div>
-            <div className="rounded-2xl border border-border p-5">
+            <div className="surface-card p-5">
               <Heart className="mb-3 h-5 w-5 text-muted-foreground" />
               <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
                 Not an affiliate farm
@@ -361,7 +361,7 @@ const HowItWorks = () => {
             {faqs.map((f) => (
               <div
                 key={f.q}
-                className="rounded-2xl border border-border p-5"
+                className="surface-card p-5"
               >
                 <dt className="text-base font-semibold text-foreground">{f.q}</dt>
                 <dd className="mt-2 text-sm text-muted-foreground leading-relaxed">
@@ -423,7 +423,7 @@ print(res.json()["available"])`,
             ]}
           />
 
-          <div className="mt-6 rounded-2xl border border-border p-5">
+          <div className="surface-card mt-6 p-5">
             <h3 className="text-sm font-semibold text-foreground">Endpoints</h3>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>
