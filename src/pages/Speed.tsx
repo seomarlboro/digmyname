@@ -190,8 +190,8 @@ const Speed = () => {
                 <div className="font-mono text-lg font-bold tabular-nums text-available">
                   {row.ms}
                 </div>
-                <div className="col-span-2 flex items-center gap-3 sm:col-span-1">
-                  <div className="h-3 flex-1 overflow-hidden rounded-full bg-muted/20">
+                <div className="col-span-2 flex items-center justify-center gap-3 sm:col-span-1">
+                  <div className="h-3 w-56 overflow-hidden rounded-full bg-muted/50 sm:w-64">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         row.us
