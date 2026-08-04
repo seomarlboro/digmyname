@@ -241,6 +241,7 @@ export const FeatureCard = ({
   footer,
   className,
   as: As = "div",
+  plain = false,
   ...rest
 }: {
   icon: any;
@@ -251,11 +252,15 @@ export const FeatureCard = ({
   footer?: ReactNode;
   className?: string;
   as?: any;
+  plain?: boolean;
   [key: string]: any;
 }) => (
   <As
     className={cn(
-      "group relative flex flex-col overflow-hidden surface-card p-6 card-hover transition-colors hover:border-primary/40",
+      "group relative flex flex-col overflow-hidden p-6 transition-colors",
+      plain
+        ? "border-b border-border/40 last:border-0"
+        : "surface-card card-hover hover:border-primary/40",
       className,
     )}
     {...rest}
