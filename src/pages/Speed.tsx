@@ -114,7 +114,7 @@ const Speed = () => {
             <LottieAward className="h-20 w-20 shrink-0" />
             <div className="min-w-0 flex-1">
               <h2 className="text-2xl font-bold tracking-tight sm:text-[28px]">Beat our number, take the crown</h2>
-              <p className="mt-2 whitespace-nowrap text-sm text-muted-foreground sm:text-base">
+              <p className="mt-2 whitespace-nowrap text-base text-muted-foreground sm:text-lg">
                 Show us a faster public lookup and we'll feature your time here with full credit and a link back.
               </p>
             </div>
