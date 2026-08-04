@@ -88,6 +88,7 @@ const Speed = () => {
 
       <PageMain>
         <PageHeader
+          plain
           eyebrow={<Eyebrow live>Timed live on every search</Eyebrow>}
           title={
             <>
@@ -107,7 +108,7 @@ const Speed = () => {
 
 
         {/* Claim */}
-        <section className="mt-6 flex flex-row flex-wrap items-center justify-between gap-5 rounded-xl border border-primary/30 bg-primary/5 p-8">
+        <section className="mt-6 flex flex-row flex-wrap items-center justify-between gap-5 rounded-xl border border-border/60 p-8">
           <div className="flex flex-1 items-center gap-5 min-w-0">
             <LottieAward className="h-20 w-20 shrink-0" />
             <div className="min-w-0 flex-1">
@@ -142,7 +143,7 @@ const Speed = () => {
             ].map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-3 surface-card px-4 py-3 text-sm"
+                className="flex items-center gap-3 py-2 text-sm"
               >
                 <Zap className="h-4 w-4 shrink-0 text-primary" />
                 {item}
@@ -164,6 +165,7 @@ const Speed = () => {
             {pipeline.map((step) => (
               <FeatureCard
                 key={step.title}
+                plain
                 icon={step.icon}
                 index={step.step}
                 title={step.title}
@@ -188,8 +190,8 @@ const Speed = () => {
             </span>
           </div>
 
-          <div className="mt-6 overflow-hidden surface-card">
-            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 bg-muted/40 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_120px]">
+          <div className="mt-6 overflow-hidden">
+            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_180px]">
               <div>Target</div>
               <div className="hidden sm:block">Latency</div>
               <div className="text-right">Relative</div>
@@ -197,9 +199,7 @@ const Speed = () => {
             {benchmark.map((row) => (
               <div
                 key={row.name}
-                className={`grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_180px] ${
-                  row.us ? "bg-primary/[0.05]" : ""
-                }`}
+                className="grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_180px]"
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -245,7 +245,7 @@ const Speed = () => {
         </section>
 
         {/* Honesty */}
-        <section className="mt-16 surface-card p-6 sm:p-8">
+        <section className="mt-16 border-t border-border/60 pt-8">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">The small print on “fastest”</h2>
           <p className="mt-3 max-w-none text-muted-foreground">
             Nobody can prove a universal latency record, and anybody who states one flat-out is selling you

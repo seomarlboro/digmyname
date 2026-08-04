@@ -38,6 +38,7 @@ export const PageHeader = ({
   actions,
   children,
   align = "left",
+  plain = false,
 }: {
   eyebrow?: ReactNode;
   title: ReactNode;
@@ -45,10 +46,15 @@ export const PageHeader = ({
   actions?: ReactNode;
   children?: ReactNode;
   align?: "left" | "center";
+  plain?: boolean;
 }) => (
-  <section className="bento bento-p-lg mb-10">
-    <div className="aurora-glow-mint -left-24 -top-24 h-72 w-72" />
-    <div className="aurora-glow-violet -bottom-32 -right-20 h-72 w-72" />
+  <section className={cn("mb-10", plain ? "py-2" : "bento bento-p-lg")}>
+    {!plain && (
+      <>
+        <div className="aurora-glow-mint -left-24 -top-24 h-72 w-72" />
+        <div className="aurora-glow-violet -bottom-32 -right-20 h-72 w-72" />
+      </>
+    )}
     <div
       className={cn(
         "relative",
@@ -235,6 +241,7 @@ export const FeatureCard = ({
   footer,
   className,
   as: As = "div",
+  plain = false,
   ...rest
 }: {
   icon: any;
@@ -245,11 +252,15 @@ export const FeatureCard = ({
   footer?: ReactNode;
   className?: string;
   as?: any;
+  plain?: boolean;
   [key: string]: any;
 }) => (
   <As
     className={cn(
-      "group relative flex flex-col overflow-hidden surface-card p-6 card-hover transition-colors hover:border-primary/40",
+      "group relative flex flex-col overflow-hidden p-6 transition-colors",
+      plain
+        ? "border-b border-border/40 last:border-0"
+        : "surface-card card-hover hover:border-primary/40",
       className,
     )}
     {...rest}
