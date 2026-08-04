@@ -93,8 +93,8 @@ const Speed = () => {
           eyebrow={<Eyebrow live>Timed live on every search</Eyebrow>}
           title={
             <>
-              <span className="whitespace-nowrap">The fastest domain search in the universe.</span>
-              <span className="text-aurora-gradient"> Or the second.</span>
+              The fastest domain search in the universe. {" "}
+              <span className="text-aurora-gradient">Or the second.</span>
             </>
           }
           lede="We are not going to pretend we measured every tool on every planet. So here is the deal: every search on DigMyName runs a stopwatch. It starts on your last keystroke and stops the moment the first answer hits the screen. Find something faster and we will put it at the top of this page ourselves."
@@ -109,12 +109,12 @@ const Speed = () => {
 
 
         {/* Claim */}
-        <section className="surface-card surface-gradient-15 mt-6 flex flex-col items-start gap-6 p-6 sm:p-8 md:flex-row md:flex-wrap md:items-center md:justify-between">
+        <section className="surface-card surface-gradient-15 mt-6 flex flex-col items-stretch gap-6 p-5 sm:p-8 md:flex-row md:flex-wrap md:items-center md:justify-between">
           <div className="flex flex-1 items-center gap-4 sm:gap-5 min-w-0">
             <LottieAward className="h-16 w-16 shrink-0 sm:h-20 sm:w-20" />
             <div className="min-w-0 flex-1">
               <h2 className="text-xl font-bold tracking-tight sm:text-[28px]">Beat our number, take the crown</h2>
-              <p className="mt-2 text-sm text-muted-foreground sm:text-lg md:whitespace-nowrap">
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-lg">
                 Show us a faster public lookup and we'll feature your time here with full credit and a link back.
               </p>
             </div>
@@ -163,7 +163,7 @@ const Speed = () => {
           </div>
 
           <div className="surface-card-lg mt-6 overflow-hidden">
-            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_320px]">
+            <div className="hidden grid-cols-[1fr_140px_320px] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid">
               <div>Target</div>
               <div className="hidden sm:block">Latency</div>
               <div className="text-right">Relative</div>
@@ -171,7 +171,7 @@ const Speed = () => {
             {benchmark.map((row) => (
               <div
                 key={row.name}
-                className="grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_320px]"
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_320px] sm:items-center"
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -188,11 +188,11 @@ const Speed = () => {
                   </div>
                   <div className="mt-1 text-sm text-muted-foreground">{row.note}</div>
                 </div>
-                <div className="font-mono text-lg font-bold tabular-nums text-available">
+                <div className="whitespace-nowrap font-mono text-lg font-bold tabular-nums text-available">
                   {row.ms}
                 </div>
-                <div className="col-span-2 flex items-center justify-center gap-3 sm:col-span-1">
-                  <div className="h-3 w-56 overflow-hidden rounded-full bg-muted/50 sm:w-64">
+                <div className="col-span-2 flex min-w-0 items-center gap-3 sm:col-span-1">
+                  <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-muted/50 sm:w-64 sm:flex-none">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         row.us

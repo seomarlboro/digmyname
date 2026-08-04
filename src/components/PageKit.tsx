@@ -21,7 +21,7 @@ export const PageMain = ({
 }) => (
   <main
     className={cn(
-      "content-wrap pb-24 pt-10",
+      "content-wrap pb-20 pt-6 sm:pb-24 sm:pt-10",
       className,
     )}
   >
@@ -48,7 +48,7 @@ export const PageHeader = ({
   align?: "left" | "center";
   plain?: boolean;
 }) => (
-  <section className="mb-10 py-2">
+  <section className="mb-8 py-2 sm:mb-10">
     <div
       className={cn(
         "relative",
@@ -68,7 +68,7 @@ export const PageHeader = ({
         </p>
       )}
 
-      {actions && <div className="mt-8 flex flex-wrap gap-3">{actions}</div>}
+      {actions && <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap">{actions}</div>}
       {children}
     </div>
   </section>
@@ -166,7 +166,7 @@ export const StatGrid = ({
 }) => (
   <div
     className={cn(
-      "surface-card mt-10 grid overflow-hidden",
+      "surface-card mt-8 grid overflow-hidden sm:mt-10",
       cols === 2
         ? "grid-cols-1 sm:grid-cols-2"
         : cols === 3
@@ -191,11 +191,11 @@ export const Stat = ({
   accent?: "mint" | "violet" | "warning";
   icon?: (props: { className?: string }) => ReactNode;
 }) => (
-  <div className="flex items-center gap-4 px-6 py-6 transition-colors hover:bg-muted/10 sm:gap-5 sm:px-10 sm:py-10">
+  <div className="flex min-w-0 items-center gap-4 border-b border-border/60 px-5 py-5 transition-colors last:border-b-0 hover:bg-muted/10 sm:gap-5 sm:border-b-0 sm:border-r sm:px-7 sm:py-8 sm:last:border-r-0 lg:px-10 lg:py-10">
     {Icon && (
       <Icon
         className={cn(
-          "h-[56px] w-[56px] shrink-0",
+          "h-12 w-12 shrink-0 sm:h-[56px] sm:w-[56px]",
           accent === "mint"
             ? "text-mint"
             : accent === "violet"
@@ -274,7 +274,7 @@ export const FeatureCard = ({
 }) => (
   <As
     className={cn(
-      "group relative flex flex-col overflow-hidden p-6 transition-colors",
+      "group relative flex flex-col overflow-hidden p-5 transition-colors sm:p-6",
       "surface-card card-hover hover:border-primary/40",
       className,
     )}

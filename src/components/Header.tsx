@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
-import { Heart, Moon, Sun, LogOut, User } from "lucide-react";
+import { Heart, Menu, Moon, Sun, LogOut, User } from "lucide-react";
 import ShovelLogo from "@/components/ShovelLogo";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/AuthDialog";
+import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+
+const navItems = [
+  { to: "/", label: "Domains" },
+  { to: "/pricing", label: "Pricing" },
+  { to: "/how-it-works", label: "How it works" },
+  { to: "/speed", label: "Speed" },
+  { to: "/mcp", label: "MCP" },
+];
 
 const Header = () => {
   const { theme, setTheme } = useTheme();
@@ -48,24 +57,38 @@ const Header = () => {
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">
-            <Link to="/" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
-              Domains
-            </Link>
-            <Link to="/pricing" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
-              Pricing
-            </Link>
-            <Link to="/how-it-works" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
-              How it works
-            </Link>
-            <Link to="/speed" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
-              Speed
-            </Link>
-            <Link to="/mcp" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
-              MCP
-            </Link>
+            {navItems.map((item) => (
+              <Link key={item.to} to={item.to} className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
+                {item.label}
+              </Link>
+            ))}
           </nav>
 
           <div className="flex items-center gap-2">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground md:hidden" aria-label="Open navigation">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="w-[82vw] max-w-xs border-border bg-background p-6">
+                <SheetTitle className="pr-8 text-left text-xl">Navigate</SheetTitle>
+                <nav className="mt-8 flex flex-col">
+                  {navItems.map((item) => (
+                    <SheetClose asChild key={item.to}>
+                      <Link
+                        to={item.to}
+                        className={`border-b border-border/60 py-4 text-lg font-semibold transition-colors hover:text-foreground ${
+                          pathname === item.to ? "text-foreground" : "text-muted-foreground"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    </SheetClose>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
             <Button
               variant="ghost"
               size="icon"
@@ -102,7 +125,7 @@ const Header = () => {
                 onClick={() => setAuthOpen(true)}
               >
                 <User className="h-4 w-4" />
-                Sign in
+                <span className="hidden sm:inline">Sign in</span>
               </Button>
             )}
           </div>

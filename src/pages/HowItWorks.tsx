@@ -177,7 +177,7 @@ const HowItWorks = () => {
           eyebrow={<Eyebrow>Why DigMyName</Eyebrow>}
           title={
             <>
-              Built for <span className="text-aurora-gradient">honesty</span>, not just speed.
+              Built for <span className="text-aurora-gradient">honesty,</span> not just speed.
             </>
           }
           lede="Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks four independent sources and tells you when it isn't sure — so you never buy a domain that turns out to be taken, or skip one that was actually free."
