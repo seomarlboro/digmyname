@@ -77,7 +77,7 @@ const tools = [
 const stats = [
   { icon: Globe, value: "52", label: "TLDs covered" },
   { icon: ShieldCheck, value: "7", label: "Registrars compared" },
-  { icon: Zap, value: "<2s", label: "Avg response" },
+  { icon: Zap, value: "<100ms", label: "Typical response" },
   { icon: Cpu, value: "MIT", label: "Open source" },
 ];
 
@@ -120,7 +120,7 @@ const Mcp = () => {
         <title>MCP Server, Claude Skill & Custom GPT — DigMyName</title>
         <meta
           name="description"
-          content="Check domain availability from any LLM. Free MCP server, Claude Skill and Custom GPT — 7 registrars, 52 TLDs, no hallucinations."
+          content="The fastest domain availability MCP server on the internet. Free MCP server, Claude Skill and Custom GPT — 7 registrars, 52 TLDs, no hallucinations."
         />
         <link rel="canonical" href="https://digmyname.com/mcp" />
         <meta property="og:title" content="Domain Check Skills — MCP / Claude Skill / Custom GPT" />

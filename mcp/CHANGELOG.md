@@ -50,6 +50,7 @@ First stable release.
 
 - Initial preview release.
 
+[1.1.2]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.1.2
 [1.1.1]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.1.1
 [1.1.0]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.1.0
 [1.0.0]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.0.0
