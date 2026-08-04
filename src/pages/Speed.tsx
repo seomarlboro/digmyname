@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Zap, Timer, Network, Gauge, ShieldCheck, ArrowRight, Trophy } from "lucide-react";
+import { Zap, Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
+import { LottieAward } from "@/components/LottieAward";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 
@@ -129,8 +130,8 @@ const Speed = () => {
 
         {/* Claim */}
         <section className="mt-6 flex flex-col gap-4 rounded-xl border border-primary/30 bg-primary/5 p-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <Trophy className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+          <div className="flex items-start gap-4">
+            <LottieAward className="mt-0.5 h-16 w-16 shrink-0" />
             <div>
               <h2 className="font-semibold">Beat our number, take the crown</h2>
               <p className="mt-1 text-sm text-muted-foreground">
