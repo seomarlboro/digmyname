@@ -158,7 +158,7 @@ const Pricing = () => {
                     return (
                       <tr key={s.tld} className="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/10">
                         <td className="px-5 py-5">
-                          <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
+                          <span className="font-display text-3xl font-extrabold tracking-tight text-[hsl(var(--aurora-mint))]">.{s.tld}</span>
                         </td>
                         <td className="px-5 py-5">
                           <SummaryPriceCell registrar={s.cheapestReg.registrar} price={s.cheapestReg.reg_price} promo={s.cheapestReg.promo_code} />
