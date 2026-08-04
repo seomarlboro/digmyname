@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="470" viewBox="0 0 900 470" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B1020"/>
+      <stop offset="100%" stop-color="#141033"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#145DFB"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="470" rx="16" fill="url(#bg)"/>
+  <rect x="0" y="0" width="900" height="44" rx="16" fill="#ffffff" fill-opacity="0.05"/>
+  <circle cx="26" cy="22" r="6" fill="#FF5F57"/>
+  <circle cx="46" cy="22" r="6" fill="#FEBC2E"/>
+  <circle cx="66" cy="22" r="6" fill="#28C840"/>
+  <text x="96" y="27" fill="#8B93B0" font-size="13">Claude · domain-check-skills-mcp</text>
+
+  <text x="28" y="86" fill="#5B647F" font-size="14">you</text>
+  <text x="28" y="112" fill="#E6EAF5" font-size="15">check nebula across com, io, ai, dev and app</text>
+
+  <text x="28" y="156" fill="#5B647F" font-size="14">domain-check · search_domains</text>
+
+  <g font-size="15">
+    <text x="28" y="192" fill="#3DDC97">✓  nebula.io</text>
+    <text x="300" y="192" fill="#E6EAF5">available</text>
+    <text x="520" y="192" fill="#8B93B0">$32.99 · Porkbun</text>
+    <text x="760" y="192" fill="#3DDC97">buy →</text>
+
+    <text x="28" y="226" fill="#3DDC97">✓  nebula.dev</text>
+    <text x="300" y="226" fill="#E6EAF5">available</text>
+    <text x="520" y="226" fill="#8B93B0">$12.18 · Cloudflare</text>
+    <text x="760" y="226" fill="#3DDC97">buy →</text>
+
+    <text x="28" y="260" fill="#FEBC2E">★  nebula.ai</text>
+    <text x="300" y="260" fill="#E6EAF5">premium</text>
+    <text x="520" y="260" fill="#8B93B0">$3,500 · GoDaddy</text>
+
+    <text x="28" y="294" fill="#FF6B6B">✕  nebula.com</text>
+    <text x="300" y="294" fill="#E6EAF5">taken</text>
+    <text x="520" y="294" fill="#8B93B0">since 1998</text>
+
+    <text x="28" y="328" fill="#FF6B6B">✕  nebula.app</text>
+    <text x="300" y="328" fill="#E6EAF5">taken</text>
+    <text x="520" y="328" fill="#8B93B0">since 2019</text>
+  </g>
+
+  <rect x="28" y="360" width="844" height="1" fill="#ffffff" fill-opacity="0.08"/>
+  <rect x="28" y="384" width="196" height="30" rx="15" fill="url(#accent)" fill-opacity="0.18" stroke="url(#accent)" stroke-opacity="0.5"/>
+  <text x="46" y="404" fill="#9FC0FF" font-size="13">⚡ 5 TLDs in 104 ms</text>
+  <text x="248" y="404" fill="#5B647F" font-size="13">parallel DNS → RDAP → hot cache · digmyname.com/speed</text>
+</svg>
