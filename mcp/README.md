@@ -18,6 +18,8 @@ MCP server to check domain availability from any LLM — Claude, Cursor, Windsur
 | Coverage | 7 registrars · 52 TLDs |
 | Cost | Free — no API key, no account |
 
+![domain-check-skills-mcp in action](https://digmyname.com/mcp-demo.svg)
+
 ## Install
 
 Claude Code — one line:
@@ -38,6 +40,42 @@ Claude Desktop / Cursor / Windsurf — add to your MCP config:
   }
 }
 ```
+
+Continue (`~/.continue/config.json`):
+
+```json
+{
+  "experimental": {
+    "modelContextProtocolServers": [
+      { "transport": { "type": "stdio", "command": "npx", "args": ["-y", "domain-check-skills-mcp"] } }
+    ]
+  }
+}
+```
+
+Zed (`settings.json`):
+
+```json
+{
+  "context_servers": {
+    "domain-check": {
+      "command": { "path": "npx", "args": ["-y", "domain-check-skills-mcp"] }
+    }
+  }
+}
+```
+
+VS Code (`.vscode/mcp.json`):
+
+```json
+{
+  "servers": {
+    "domain-check": { "type": "stdio", "command": "npx", "args": ["-y", "domain-check-skills-mcp"] }
+  }
+}
+```
+
+No API key, no account, no config — it works right after install.
 
 ## Tools
 
@@ -77,7 +115,7 @@ Releases are published from CI with npm provenance:
 
 ```bash
 # after bumping the version in mcp/package.json
-git tag mcp-v1.1.5 && git push origin mcp-v1.1.5
+git tag mcp-v1.1.6 && git push origin mcp-v1.1.6
 ```
 
 The `Publish MCP to npm` workflow builds, smoke-tests and publishes with `--provenance`. It needs an `NPM_TOKEN` (automation token) repo secret.
@@ -88,7 +126,7 @@ Node.js 18+
 
 ## Changelog
 
-See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.5**.
+See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.6**.
 
 ## License
 
