@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Zap, Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
+import { Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
 import { LottieAward } from "@/components/LottieAward";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
