@@ -388,8 +388,8 @@
   .hero-bg {
     z-index: 0;
     background:
-      radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--aurora-mint) / 0.08), transparent 60%),
-      radial-gradient(ellipse 70% 50% at 50% 100%, hsl(var(--aurora-violet) / 0.06), transparent 60%);
+      radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--aurora-mint) / 0.12), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 50% 100%, hsl(var(--aurora-violet) / 0.10), transparent 60%);
   }
 
 
@@ -398,9 +398,9 @@
     border-radius: 50%;
     filter: blur(120px);
     will-change: transform;
-    opacity: 0.6;
+    opacity: 0.75;
   }
-  .dark .hero-blob { opacity: 0.5; }
+  .dark .hero-blob { opacity: 0.65; }
 
   .hero-blob-1 {
     width: 55vw; height: 55vw;
@@ -454,8 +454,8 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    opacity: 0.18;
-    filter: drop-shadow(0 0 24px hsl(var(--aurora-mint) / 0.25));
+    opacity: 0.22;
+    filter: drop-shadow(0 0 28px hsl(var(--aurora-mint) / 0.35));
     animation-name: hero-float;
     animation-iteration-count: infinite;
     animation-timing-function: ease-in-out;
@@ -463,7 +463,7 @@
     will-change: transform;
     user-select: none;
   }
-  .dark .hero-tld { opacity: 0.22; }
+  .dark .hero-tld { opacity: 0.28; }
 
   .hero-grid {
     position: absolute; inset: 0;
