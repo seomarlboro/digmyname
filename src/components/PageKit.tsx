@@ -187,11 +187,11 @@ export const Stat = ({
   accent?: "mint" | "violet";
   icon?: (props: { className?: string }) => ReactNode;
 }) => (
-  <div className="px-5 py-5 transition-colors hover:bg-muted/10">
+  <div className="flex items-center gap-4 px-5 py-5 transition-colors hover:bg-muted/10">
     {Icon && (
       <Icon
         className={cn(
-          "mb-3 h-8 w-8",
+          "h-9 w-9 shrink-0",
           accent === "mint"
             ? "text-mint"
             : accent === "violet"
@@ -200,16 +200,18 @@ export const Stat = ({
         )}
       />
     )}
-    <div
-      className={cn(
-        "stat-value text-left",
-        accent === "mint" && "text-mint",
-        accent === "violet" && "text-violet",
-      )}
-    >
-      {value}
+    <div className="min-w-0">
+      <div
+        className={cn(
+          "stat-value text-left",
+          accent === "mint" && "text-mint",
+          accent === "violet" && "text-violet",
+        )}
+      >
+        {value}
+      </div>
+      <div className="stat-label mt-0.5 text-left">{label}</div>
     </div>
-    <div className="stat-label mt-1 text-left">{label}</div>
   </div>
 );
 
