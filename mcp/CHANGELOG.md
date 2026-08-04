@@ -5,6 +5,14 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] — 2026-08-04
+
+### Changed
+- Package description now leads with the speed claim: "The world's fastest domain availability MCP server — ~100 ms checks from any LLM… Think something is faster? Dispute it."
+- README rewritten with a speed benchmark table and the published-method link (digmyname.com/speed).
+- Added `domain-search`, `windsurf` and `fastest` keywords for npm discovery.
+- Bumped server version to 1.1.4.
+
 ## [1.1.3] — 2026-08-04
 
 ### Changed
