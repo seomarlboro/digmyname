@@ -10,6 +10,7 @@ import Pricing from "./pages/Pricing";
 import Favorites from "./pages/Favorites";
 import HowItWorks from "./pages/HowItWorks";
 import Mcp from "./pages/Mcp";
+import Speed from "./pages/Speed";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
