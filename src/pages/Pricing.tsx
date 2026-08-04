@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import { Loader2, Shield, ShieldOff, Award, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getRegistrarColor } from "@/lib/registrarColors";
+import { NetworkIcon, StoreIcon, CertificateIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
 
 interface RegistrarPrice {
@@ -123,9 +124,9 @@ const Pricing = () => {
           lede={`Registration, renewal and transfer prices compared across ${registrars.length} registrars and ${tldSummaries.length} extensions — including the renewal traps everyone else hides.`}
         >
           <StatGrid cols={3}>
-            <Stat value={tldSummaries.length || "—"} label="TLDs tracked" accent="mint" />
-            <Stat value={registrars.length || "—"} label="Registrars" accent="violet" />
-            <Stat value="3yr" label="True cost basis" />
+            <Stat value={tldSummaries.length || "—"} label="TLDs tracked" accent="mint" icon={NetworkIcon} />
+            <Stat value={registrars.length || "—"} label="Registrars" accent="violet" icon={StoreIcon} />
+            <Stat value="3yr" label="True cost basis" icon={CertificateIcon} />
           </StatGrid>
 
         </PageHeader>
