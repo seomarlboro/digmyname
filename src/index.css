@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@100..900&display=swap');
 
 @layer base {
   :root {
@@ -51,6 +51,11 @@
     --search-bg: 240 20% 97%;
     --hero-bg: 225 30% 96%;
 
+    /* Glass Aurora accents */
+    --aurora-mint: 152 70% 40%;
+    --aurora-violet: 258 75% 60%;
+    --aurora: 258 75% 60%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -92,6 +97,11 @@
 
     --hero-bg: 230 25% 10%;
     --search-bg: 230 20% 18%;
+
+    /* Glass Aurora accents */
+    --aurora-mint: 142 71% 65%;
+    --aurora-violet: 258 90% 76%;
+    --aurora: 258 90% 76%;
     --logo-filter: invert(46%) sepia(98%) saturate(2060%) hue-rotate(212deg) brightness(100%) contrast(97%);
 
     --sidebar-background: 240 5.9% 10%;
@@ -112,19 +122,18 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     letter-spacing: -0.005em;
   }
 
   h1, h2, h3, h4 {
-    font-family: 'Geist', system-ui, sans-serif;
-    letter-spacing: -0.035em;
+    font-family: 'Sora', system-ui, sans-serif;
+    letter-spacing: -0.03em;
     font-weight: 700;
     text-wrap: balance;
   }
 
-  h1 { letter-spacing: -0.045em; }
+  h1 { letter-spacing: -0.04em; }
 
 
   code, pre, .font-mono {
@@ -142,7 +151,7 @@
   }
 
   .logo-text {
-    font-family: 'Geist', sans-serif !important;
+    font-family: 'Sora', sans-serif !important;
     font-weight: 800 !important;
     font-synthesis: none !important;
     font-size: 1.3rem;
@@ -186,22 +195,83 @@
     transform: translateY(-1px);
   }
 
-  /* Unified surfaces — one card language across all pages */
-  .surface-card {
-    @apply rounded-xl border border-border bg-card;
-  }
+  /* ==========================================================
+     DESIGN SYSTEM v2 — one language across Pricing / How it works /
+     Speed / MCP. Glass Aurora palette, Sora + Manrope, bento grid.
+     ========================================================== */
 
-  .surface-card-lg {
+  /* Surfaces */
+  .surface-card {
     @apply rounded-2xl border border-border bg-card;
   }
 
+  .surface-card-lg {
+    @apply rounded-3xl border border-border bg-card;
+  }
+
   .surface-muted {
-    @apply rounded-xl border border-border bg-muted/30;
+    @apply rounded-2xl border border-border bg-muted/30;
+  }
+
+  /* Glass bento tile — the single card primitive for all info pages */
+  .bento {
+    @apply relative overflow-hidden rounded-3xl border border-border/70 bg-card/60 backdrop-blur-xl
+           transition-[border-color,transform,box-shadow] duration-300;
+  }
+  .dark .bento {
+    background-color: hsl(230 22% 12% / 0.55);
+    box-shadow: inset 0 1px 0 0 hsl(0 0% 100% / 0.04);
+  }
+  .bento-hover:hover {
+    @apply -translate-y-0.5 border-aurora/40;
+    box-shadow: 0 18px 50px -24px hsl(var(--aurora-violet) / 0.45);
+  }
+  /* Padding scale — always one of these two */
+  .bento-p   { @apply p-6 sm:p-7; }
+  .bento-p-lg { @apply p-8 sm:p-12; }
+
+  /* Typography scale — identical on every page */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-aurora/30 bg-aurora/10
+           px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-aurora;
+  }
+  .page-title {
+    @apply text-4xl font-bold tracking-tight text-foreground sm:text-5xl 2xl:text-6xl;
+  }
+  .page-lede {
+    @apply text-base leading-relaxed text-muted-foreground sm:text-lg;
+  }
+  .section-title {
+    @apply text-2xl font-bold tracking-tight text-foreground sm:text-3xl;
+  }
+  .section-lede {
+    @apply mt-2 text-sm text-muted-foreground sm:text-base;
+  }
+  .card-title {
+    @apply text-lg font-semibold tracking-tight text-foreground;
+  }
+  .card-body {
+    @apply text-sm leading-relaxed text-muted-foreground;
+  }
+  .stat-value {
+    @apply font-mono text-3xl font-bold tabular-nums tracking-tight text-foreground sm:text-4xl;
+  }
+  .stat-label {
+    @apply mt-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
+  }
+
+  /* Aurora text gradient — emerald → violet */
+  .text-aurora-gradient {
+    background: linear-gradient(100deg, hsl(var(--aurora-mint)), hsl(var(--aurora-violet)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding-bottom: 0.1em;
   }
 
   /* Unified icon frames — one icon language across all pages */
   .icon-frame {
-    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary;
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-aurora/25 bg-aurora/10 text-aurora;
   }
 
   .icon-frame svg {
@@ -210,16 +280,31 @@
 
   /* Accent variant — for the primary icon of a page/section */
   .icon-frame-accent {
-    @apply h-14 w-14 rounded-2xl border-primary/40 bg-gradient-to-br from-primary/25 to-purple-500/25 text-primary;
+    @apply h-14 w-14 rounded-3xl border-aurora/40 text-aurora;
+    background-image: linear-gradient(135deg, hsl(var(--aurora-mint) / 0.22), hsl(var(--aurora-violet) / 0.22));
   }
 
   .icon-frame-accent svg {
     @apply h-7 w-7;
   }
 
+  .icon-frame-mint {
+    @apply border-mint/25 bg-mint/10 text-mint;
+  }
+
   .icon-frame-warning {
     @apply border-warning/25 bg-warning/15 text-warning;
   }
+
+  /* Aurora glow blobs for page headers */
+  .aurora-glow-mint,
+  .aurora-glow-violet {
+    @apply pointer-events-none absolute rounded-full blur-[100px];
+  }
+  .aurora-glow-mint   { background: hsl(var(--aurora-mint) / 0.10); }
+  .aurora-glow-violet { background: hsl(var(--aurora-violet) / 0.12); }
+
+
 
 
 
@@ -359,7 +444,7 @@
   /* Inner span handles the slow floating drift */
   .hero-tld {
     display: inline-block;
-    font-family: 'Geist', sans-serif;
+    font-family: 'Sora', sans-serif;
     font-weight: 900;
     letter-spacing: -0.04em;
     background: linear-gradient(135deg, hsl(218 96% 60%), hsl(262 83% 65%));

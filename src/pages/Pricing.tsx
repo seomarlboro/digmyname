@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import { Loader2, Shield, ShieldOff, Award, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getRegistrarColor } from "@/lib/registrarColors";
+import { PageMain, PageHeader, Section, Eyebrow, Stat } from "@/components/PageKit";
 
 interface RegistrarPrice {
   id: string;
@@ -110,47 +111,52 @@ const Pricing = () => {
         })}</script>
       </Helmet>
       <Header />
-      <main>
-      <section className="hero-gradient pb-8 pt-16 md:pb-12 md:pt-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            Domain Pricing Comparison
-          </h1>
-          <p className="mx-auto mt-3 max-w-lg text-base md:text-lg text-muted-foreground">
-            Compare registration, renewal & transfer prices across {registrars.length} registrars
-          </p>
-        </div>
-      </section>
-
-      <section className="container mx-auto max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px] px-4 pb-20">
+      <PageMain>
+        <PageHeader
+          eyebrow={<Eyebrow>Pricing</Eyebrow>}
+          title={
+            <>
+              Domain pricing,{" "}
+              <span className="text-aurora-gradient">side by side.</span>
+            </>
+          }
+          lede={`Registration, renewal and transfer prices compared across ${registrars.length} registrars and ${tldSummaries.length} extensions — including the renewal traps everyone else hides.`}
+        >
+          <div className="mt-10 grid grid-cols-3 gap-6">
+            <Stat value={tldSummaries.length || "—"} label="TLDs tracked" accent="mint" />
+            <Stat value={registrars.length || "—"} label="Registrars" accent="violet" />
+            <Stat value="3yr" label="True cost basis" />
+          </div>
+        </PageHeader>
 
         {isLoading ? (
           <div className="flex flex-col items-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-aurora" />
             <p className="mt-3 text-sm text-muted-foreground">Loading prices…</p>
           </div>
         ) : (
           <>
             {/* Summary table */}
-            <div className="mt-8 overflow-hidden surface-card">
+            <Section title="Cheapest per extension" lede="One row per TLD — the best price we found for each action." aside="Updated daily">
+              <div className="bento overflow-hidden">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Domain</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Cheapest Registration</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Cheapest Renewal</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Cheapest Transfer</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Best 3-Year Value</th>
-                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">WHOIS Privacy</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Domain</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest Registration</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest Renewal</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest Transfer</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Best 3-Year Value</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">WHOIS Privacy</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tldSummaries.map((s) => {
                     const best3Cost = s.best3Year.reg_price + s.best3Year.renew_price * 2;
                     return (
-                      <tr key={s.tld} className="border-b border-border transition-colors hover:bg-secondary/30">
+                      <tr key={s.tld} className="border-b border-border/60 transition-colors last:border-0 hover:bg-secondary/30">
                         <td className="px-5 py-5">
-                          <span className="text-2xl font-extrabold text-primary">.{s.tld}</span>
+                          <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
                         </td>
                         <td className="px-5 py-5">
                           <SummaryPriceCell registrar={s.cheapestReg.registrar} price={s.cheapestReg.reg_price} promo={s.cheapestReg.promo_code} />
@@ -172,14 +178,14 @@ const Pricing = () => {
                           <div>
                             <span className={`text-sm font-medium ${getRegistrarColor(s.best3Year.registrar).text}`}>{s.best3Year.registrar}</span>
                             <p className="mt-0.5">
-                              <span className="text-base font-extrabold text-foreground">${best3Cost.toFixed(2)}</span>
+                              <span className="font-mono font-mono text-base font-extrabold tabular-nums text-foreground">${best3Cost.toFixed(2)}</span>
                               <span className="text-sm text-muted-foreground"> /3yr</span>
                             </p>
                           </div>
                         </td>
                         <td className="px-5 py-5">
                           {s.prices.some((p) => p.whois_privacy) ? (
-                            <Shield className="h-5 w-5 text-available" />
+                            <Shield className="h-5 w-5 text-mint" />
                           ) : (
                             <ShieldOff className="h-5 w-5 text-muted-foreground" />
                           )}
@@ -189,19 +195,21 @@ const Pricing = () => {
                   })}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </Section>
 
             {/* Full comparison by TLD */}
-            <h2 className="mt-12 mb-6 text-2xl md:text-3xl font-bold tracking-tight text-foreground">Detailed Price Comparison</h2>
-            <div className="space-y-6">
-              {tldSummaries.map((s) => (
-                <DetailedTldTable key={s.tld} summary={s} />
-              ))}
-            </div>
+            <Section title="Detailed price comparison" lede="Every registrar we track, per extension. Cheapest first." aside="Lower is better">
+              <div className="space-y-4">
+                {tldSummaries.map((s) => (
+                  <DetailedTldTable key={s.tld} summary={s} />
+                ))}
+              </div>
+            </Section>
           </>
         )}
-      </section>
-      </main>
+      </PageMain>
+      
     </div>
   );
 };
@@ -245,21 +253,21 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
   const range = maxRegPrice - cheapestRegPrice || 1;
 
   return (
-    <div className="overflow-hidden surface-card">
+    <div className="bento overflow-hidden">
       <div className="flex items-center gap-3 border-b border-border bg-secondary/30 px-5 py-4">
-        <span className="text-2xl font-extrabold text-primary">.{s.tld}</span>
+        <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
         <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>
       </div>
       <table className="w-full text-left">
         <thead>
           <tr className="border-b border-border bg-secondary/20">
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Registrar</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Register</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Renew</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Transfer</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">ICANN Fee</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Promo</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">WHOIS</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Registrar</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Register</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Renew</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Transfer</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">ICANN Fee</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Promo</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">WHOIS</th>
           </tr>
         </thead>
         <tbody>
@@ -270,21 +278,21 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
             const barWidth = range > 0 ? ((p.reg_price - cheapestRegPrice) / range) * 100 : 0;
 
             return (
-              <tr key={p.id} className={`border-b border-border transition-colors hover:bg-secondary/30 ${isCheapest ? "bg-available/5" : ""}`}>
+              <tr key={p.id} className={`border-b border-border transition-colors hover:bg-secondary/30 ${isCheapest ? "bg-mint/5" : ""}`}>
                 <td className="px-5 py-4">
-                  <span className={`text-base font-bold ${isCheapest ? "text-available" : c.text}`}>
+                  <span className={`text-base font-bold ${isCheapest ? "text-mint" : c.text}`}>
                     {p.registrar}
                   </span>
-                  {isCheapest && <Award className="ml-1.5 inline h-4 w-4 text-available" />}
+                  {isCheapest && <Award className="ml-1.5 inline h-4 w-4 text-mint" />}
                 </td>
                 <td className="px-5 py-4">
-                  <span className={`text-base font-extrabold tabular-nums ${isCheapest ? "text-available" : "text-foreground"}`}>
+                  <span className={`font-mono text-base font-extrabold tabular-nums ${isCheapest ? "text-mint" : "text-foreground"}`}>
                     ${p.reg_price.toFixed(2)}
                   </span>
                   <span className="text-sm text-muted-foreground">/yr</span>
                 </td>
                 <td className="px-5 py-4">
-                  <span className={`text-base font-extrabold tabular-nums ${renewHigher ? "text-warning" : "text-foreground"}`}>
+                  <span className={`font-mono text-base font-extrabold tabular-nums ${renewHigher ? "text-warning" : "text-foreground"}`}>
                     ${p.renew_price.toFixed(2)}
                   </span>
                   <span className="text-sm text-muted-foreground">/yr</span>
@@ -292,7 +300,7 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
                 <td className="px-5 py-4">
                   {p.transfer_price != null ? (
                     <>
-                      <span className="text-base font-extrabold tabular-nums text-foreground">${p.transfer_price.toFixed(2)}</span>
+                      <span className="font-mono text-base font-extrabold tabular-nums text-foreground">${p.transfer_price.toFixed(2)}</span>
                       <span className="text-sm text-muted-foreground">/yr</span>
                     </>
                   ) : (
@@ -313,7 +321,7 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
                 </td>
                 <td className="px-5 py-4">
                   {p.whois_privacy ? (
-                    <Shield className="h-5 w-5 text-available" />
+                    <Shield className="h-5 w-5 text-mint" />
                   ) : (
                     <ShieldOff className="h-5 w-5 text-muted-foreground/50" />
                   )}

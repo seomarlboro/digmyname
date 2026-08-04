@@ -25,6 +25,11 @@ export default {
     },
     extend: {
 
+      fontFamily: {
+        sans: ["Manrope", "system-ui", "sans-serif"],
+        display: ["Sora", "system-ui", "sans-serif"],
+        mono: ["Geist Mono", "ui-monospace", "monospace"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -71,6 +76,13 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        aurora: {
+          DEFAULT: "hsl(var(--aurora))",
+          mint: "hsl(var(--aurora-mint))",
+          violet: "hsl(var(--aurora-violet))",
+        },
+        mint: "hsl(var(--aurora-mint))",
+        violet: "hsl(var(--aurora-violet))",
         hero: "hsl(var(--hero-bg))",
         "search-bg": "hsl(var(--search-bg))",
         sidebar: {
