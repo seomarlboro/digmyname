@@ -6,7 +6,7 @@ interface LottieAwardProps extends Omit<LottieComponentProps, "animationData"> {
   className?: string;
 }
 
-const PRIMARY_RGB: [number, number, number] = [0.08, 0.365, 0.984]; // #145DFB
+const PRIMARY_RGB: [number, number, number] = [0.1225, 0.6925, 0.9775]; // new primary hsl(220 95% 55%)
 const WHITE_RGB: [number, number, number] = [1, 1, 1];
 
 function isStarOrHighlightLayer(name: string | undefined): boolean {
