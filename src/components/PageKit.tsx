@@ -21,7 +21,7 @@ export const PageMain = ({
 }) => (
   <main
     className={cn(
-      "mx-auto max-w-[968px] px-4 pb-24 pt-10 xl:max-w-[1200px] 2xl:max-w-[1320px]",
+      "content-wrap pb-24 pt-10",
       className,
     )}
   >
