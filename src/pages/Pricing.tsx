@@ -279,7 +279,7 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
             const barWidth = range > 0 ? ((p.reg_price - cheapestRegPrice) / range) * 100 : 0;
 
             return (
-              <tr key={p.id} className={`border-b border-border transition-colors hover:bg-muted/10 ${isCheapest ? "text-mint" : ""}`}>
+              <tr key={p.id} className="border-b border-border transition-colors hover:bg-muted/10">
                 <td className="px-5 py-4">
                   <span className={`text-base font-bold ${isCheapest ? "text-mint" : c.text}`}>
                     {p.registrar}
