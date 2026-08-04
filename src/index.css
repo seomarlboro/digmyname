@@ -39,22 +39,22 @@
 
 
     /* Custom tokens */
-    --gradient-start: 218 96% 53%;
-    --gradient-end: 270 80% 58%;
+    --gradient-start: 220 95% 55%;
+    --gradient-end: 265 90% 62%;
     --logo-filter: invert(29%) sepia(98%) saturate(4842%) hue-rotate(219deg) brightness(99%) contrast(97%);
-    --available: 152 60% 45%;
+    --available: 160 65% 42%;
     --available-foreground: 0 0% 100%;
-    --taken: 0 70% 55%;
+    --taken: 0 72% 58%;
     --taken-foreground: 0 0% 100%;
-    --warning: 30 90% 50%;
+    --warning: 28 92% 52%;
     --warning-foreground: 0 0% 100%;
     --search-bg: 240 20% 97%;
     --hero-bg: 225 30% 96%;
 
-    /* Glass Aurora accents */
-    --aurora-mint: 152 70% 40%;
-    --aurora-violet: 258 75% 60%;
-    --aurora: 258 75% 60%;
+    /* Modern aurora accents: electric cyan + vivid violet */
+    --aurora-mint: 165 80% 42%;
+    --aurora-violet: 258 75% 58%;
+    --aurora: 258 75% 58%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
