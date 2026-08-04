@@ -152,7 +152,28 @@ export const BentoTile = ({
   );
 };
 
-/* ── Stat tile ──────────────────────────────────────────── */
+/* ── Stat tile + grid ───────────────────────────────────── */
+
+export const StatGrid = ({
+  children,
+  cols = 4,
+  className,
+}: {
+  children: ReactNode;
+  cols?: 3 | 4;
+  className?: string;
+}) => (
+  <div
+    className={cn(
+      "mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60",
+      cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4",
+      className,
+    )}
+  >
+    {children}
+  </div>
+);
+
 
 export const Stat = ({
   value,
@@ -163,19 +184,20 @@ export const Stat = ({
   label: ReactNode;
   accent?: "mint" | "violet";
 }) => (
-  <div className="text-center">
+  <div className="bg-card px-5 py-5 transition-colors hover:bg-muted/40">
     <div
       className={cn(
-        "stat-value",
+        "stat-value text-left",
         accent === "mint" && "text-mint",
         accent === "violet" && "text-violet",
       )}
     >
       {value}
     </div>
-    <div className="stat-label">{label}</div>
+    <div className="stat-label mt-1 text-left">{label}</div>
   </div>
 );
+
 
 /* ── Eyebrow chip ───────────────────────────────────────── */
 
