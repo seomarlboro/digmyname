@@ -230,7 +230,7 @@ const HowItWorks = () => {
           <div className="rounded-xl border border-warning/30 bg-warning/5 p-8">
             <div className="mb-4 flex items-center gap-3">
               <div className="icon-frame icon-frame-warning">
-                <AlertCircle className="h-5 w-5" />
+                <AlertCircle />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 The "Unverified" state
