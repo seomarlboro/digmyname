@@ -100,7 +100,7 @@ const Speed = () => {
             </div>
 
             <h1 className="mt-6 w-full text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
-              The fastest domain search in the universe.
+              <span className="whitespace-nowrap">The fastest domain search in the universe.</span>
               <span className="text-gradient"> Or the second.</span>
             </h1>
 
