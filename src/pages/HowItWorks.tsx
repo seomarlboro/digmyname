@@ -86,7 +86,7 @@ const comparison = [
     lean: false,
   },
   {
-    feature: "50+ curated TLDs with smart prioritisation",
+    feature: "52 curated TLDs with smart prioritisation",
     us: true,
     instant: true,
     domainr: true,
@@ -184,7 +184,7 @@ const HowItWorks = () => {
         >
           <StatGrid cols={3}>
             <Stat value="4" label="Verification sources" accent="mint" icon={SearchIcon} />
-            <Stat value="50+" label="TLDs curated" accent="violet" icon={NetworkIcon} />
+            <Stat value="52" label="TLDs curated" accent="violet" icon={NetworkIcon} />
             <Stat value="100%" label="Honest uncertainty" accent="warning" icon={ShieldIcon} />
           </StatGrid>
 
@@ -324,7 +324,7 @@ const HowItWorks = () => {
                 Not 800+ TLDs
               </div>
               <p className="text-sm text-muted-foreground">
-                We curate ~50 useful extensions instead of listing every
+                We curate 52 useful extensions instead of listing every
                 obscure ccTLD. Quality over noise.
               </p>
             </div>
