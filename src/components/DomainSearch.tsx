@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, X, Loader2, CheckCircle2, LayoutGrid, List, AlertCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Search, X, Loader2, CheckCircle2, LayoutGrid, List, AlertCircle, Zap } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const StarsIcon = ({ className, active }: { className?: string; active?: boolean }) => (
@@ -65,20 +66,56 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     };
   }, [scrolled]);
 
+  // ---- Honest speed measurement -------------------------------------------
+  // The clock starts on the LAST keystroke (so the 80 ms debounce is counted
+  // against us) and stops when the first availability answer lands on screen.
+  const typingStopRef = useRef<number | null>(null);
+  const [liveMs, setLiveMs] = useState<number | null>(null);
+  const [firstAnswerMs, setFirstAnswerMs] = useState<number | null>(null);
+
+  const markFirstAnswer = useCallback(() => {
+    if (typingStopRef.current == null) return;
+    setFirstAnswerMs(Math.round(performance.now() - typingStopRef.current));
+    typingStopRef.current = null;
+    setLiveMs(null);
+  }, []);
+
   // Debounce: very short so results feel instant, but not so short that every
   // keystroke triggers a request storm.
   useEffect(() => {
     if (!query.trim()) {
       setDebouncedQuery("");
       setResults([]);
+      typingStopRef.current = null;
+      setLiveMs(null);
+      setFirstAnswerMs(null);
       return;
     }
     setLoading(true);
+    typingStopRef.current = performance.now();
+    setFirstAnswerMs(null);
+    setLiveMs(0);
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
     }, 80);
     return () => clearTimeout(timer);
   }, [query]);
+
+  // Live ticking counter while we wait for the first answer.
+  useEffect(() => {
+    if (liveMs === null) return;
+    let raf = 0;
+    const tick = () => {
+      if (typingStopRef.current != null) {
+        setLiveMs(Math.round(performance.now() - typingStopRef.current));
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveMs === null]);
+
 
   // Generate domain list + check availability
   useEffect(() => {
@@ -113,7 +150,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
               return r;
             })
           );
+          markFirstAnswer();
         }
+
       } catch {
         // Fast check is best-effort; authoritative check will overwrite.
       }
@@ -146,6 +185,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
       const applyBatch = (availMap: Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>) => {
         if (cancelled) return;
+        markFirstAnswer();
         setResults((prev) =>
           prev.map((r) => {
             const info = availMap.get(r.domain);
@@ -187,7 +227,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
     run();
     return () => { cancelled = true; };
-  }, [debouncedQuery, aiSuggestions, selectedTlds]);
+  }, [debouncedQuery, aiSuggestions, selectedTlds, markFirstAnswer]);
 
 
   const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
@@ -286,6 +326,14 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
             <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
               Check 50+ TLDs, see availability instantly, and compare registrar prices before you buy.
             </p>
+            <Link
+              to="/speed"
+              className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Zap className="h-3.5 w-3.5 text-primary" />
+              First answer in ~100 ms — timed live on every search
+            </Link>
+
           </div>
 
         </div>
@@ -328,7 +376,21 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                   Checking…
                 </span>
               )}
+              {(liveMs !== null || firstAnswerMs !== null) && (
+                <Link
+                  to="/speed"
+                  title="How we measure: clock starts on your last keystroke, stops on the first answer"
+                  className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <Zap className="h-3.5 w-3.5 text-primary" />
+                  <span className="tabular-nums font-semibold text-foreground">
+                    {liveMs !== null ? liveMs : firstAnswerMs} ms
+                  </span>
+                  <span className="hidden sm:inline">first answer</span>
+                </Link>
+              )}
             </div>
+
 
             {/* Available */}
             {availableCount > 0 && (

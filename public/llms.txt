@@ -20,6 +20,7 @@ Founders launching startups, indie hackers, freelancers, agencies, and developer
 - [Pricing](https://digmyname.com/pricing): Side-by-side comparison of registration, renewal, transfer prices, ICANN fees, promo codes, and WHOIS privacy across major registrars for popular TLDs.
 - [How it works](https://digmyname.com/how-it-works): Explanation of the multi-source availability verification chain (RDAP, DNS, Domainr, registrar APIs) and how DigMyName compares to other domain search tools.
 - [MCP server](https://digmyname.com/mcp): Free Model Context Protocol server (`domain-check-skills-mcp` on npm) that gives AI agents real-time domain availability and registrar price comparison.
+- [Speed](https://digmyname.com/speed): Methodology behind DigMyName's search latency — a live timer starts on the user's last keystroke and stops on the first availability answer (typically ~100–200 ms). Includes reference benchmarks and why no "world's fastest" claim is made.
 - [Favorites](https://digmyname.com/favorites): Saved-domain shortlist (requires sign-in).
 
 ## Key facts

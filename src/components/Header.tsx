@@ -57,6 +57,9 @@ const Header = () => {
             <Link to="/how-it-works" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
               How it works
             </Link>
+            <Link to="/speed" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
+              Speed
+            </Link>
             <Link to="/mcp" className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
               MCP
             </Link>
