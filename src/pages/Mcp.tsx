@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trackMcpEvent } from "@/lib/trackMcpEvent";
 import WaitlistForm from "@/components/WaitlistForm";
-import { PageMain, PageHeader, Eyebrow, Stat } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
 
 
 const GITHUB_URL = "https://github.com/seomarlboro/domain-check-skills";
