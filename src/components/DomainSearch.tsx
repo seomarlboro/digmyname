@@ -314,12 +314,12 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       {/* Spacer + title to push search bar to vertical center */}
       {!hasQuery ? (
         <div className="relative z-10 flex min-h-[38vh] items-center justify-center px-4 pb-4 pt-10 sm:h-[calc(50vh-72px)] sm:min-h-0 sm:pb-0 sm:pt-0">
-          <div className="mx-auto w-full max-w-3xl text-center">
-            <h1 className="text-gradient overflow-visible px-1 text-[2rem] font-extrabold leading-[1.05] tracking-[-0.03em] xs:text-[2.35rem] sm:text-6xl sm:leading-[0.95] sm:tracking-[-0.045em] md:text-7xl lg:text-[5.5rem]">
-              World's fastest domain
-              <br />{" "}
-              search. Fight us.
+          <div className="mx-auto w-full max-w-5xl text-center">
+            <h1 className="text-gradient overflow-visible px-1 text-[1.65rem] font-extrabold leading-[1.08] tracking-[-0.03em] xs:text-[2rem] sm:text-5xl sm:leading-[1] sm:tracking-[-0.045em] md:text-6xl lg:text-7xl">
+              <span className="block whitespace-nowrap">World's fastest domain</span>
+              <span className="block whitespace-nowrap">search. Fight us.</span>
             </h1>
+
             <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:mt-6 sm:text-lg md:text-xl">
               Probably the fastest domain search in the universe. Or the second — the timer on screen will
               tell you which.
