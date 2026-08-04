@@ -129,18 +129,16 @@ const Speed = () => {
         </section>
 
         {/* Claim */}
-        <section className="mt-6 flex flex-col gap-4 rounded-xl border border-primary/30 bg-primary/5 p-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-4">
-            <LottieAward className="mt-0.5 h-16 w-16 shrink-0" />
-            <div>
-              <h2 className="font-semibold">Beat our number, take the crown</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Screenshot a faster measured first answer from any public domain search and we will publish it
-                here, credited. No press release, no asterisk.
-              </p>
-            </div>
+        <section className="mt-6 flex flex-col items-center gap-5 rounded-xl border border-primary/30 bg-primary/5 p-8 text-center">
+          <LottieAward className="h-20 w-20" />
+          <div className="max-w-2xl">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Beat our number, take the crown</h2>
+            <p className="mt-2 text-base text-muted-foreground sm:text-lg">
+              Screenshot a faster measured first answer from any public domain search and we will publish it
+              here, credited. No press release, no asterisk.
+            </p>
           </div>
-          <Button asChild variant="outline" className="shrink-0">
+          <Button asChild variant="outline" size="lg" className="shrink-0">
             <Link to="/">Run the timer</Link>
           </Button>
         </section>
