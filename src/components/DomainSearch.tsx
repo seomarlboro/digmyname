@@ -353,7 +353,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       </div>
 
       {/* Results */}
-      <section className="content-wrap pb-20">
+      <section className={`content-wrap pb-20 ${results.length > 0 ? "results-shell" : ""}`}>
         {loading && (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
