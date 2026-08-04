@@ -249,11 +249,11 @@ const HowItWorks = () => {
           <p className="mb-8 text-muted-foreground">
             Honest take after using each tool ourselves.
           </p>
-          <div className="overflow-hidden surface-card">
+          <div className="overflow-hidden rounded-3xl border border-border/70">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-muted/30 text-left">
+                  <tr className="border-b border-border text-left">
                     <th className="px-4 py-3 font-semibold text-foreground">
                       Feature
                     </th>
@@ -316,7 +316,7 @@ const HowItWorks = () => {
             What we're <span className="text-muted-foreground">not</span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="surface-card p-5">
+            <div className="rounded-2xl border border-border p-5">
               <Globe className="mb-3 h-5 w-5 text-muted-foreground" />
               <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
 
@@ -327,7 +327,7 @@ const HowItWorks = () => {
                 obscure ccTLD. Quality over noise.
               </p>
             </div>
-            <div className="surface-card p-5">
+            <div className="rounded-2xl border border-border p-5">
               <Scale className="mb-3 h-5 w-5 text-muted-foreground" />
               <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
 
@@ -338,7 +338,7 @@ const HowItWorks = () => {
                 buy it from whichever registrar you prefer.
               </p>
             </div>
-            <div className="surface-card p-5">
+            <div className="rounded-2xl border border-border p-5">
               <Heart className="mb-3 h-5 w-5 text-muted-foreground" />
               <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
                 Not an affiliate farm
@@ -361,7 +361,7 @@ const HowItWorks = () => {
             {faqs.map((f) => (
               <div
                 key={f.q}
-                className="surface-card p-5"
+                className="rounded-2xl border border-border p-5"
               >
                 <dt className="text-base font-semibold text-foreground">{f.q}</dt>
                 <dd className="mt-2 text-sm text-muted-foreground leading-relaxed">
@@ -423,23 +423,23 @@ print(res.json()["available"])`,
             ]}
           />
 
-          <div className="mt-6 surface-card p-5">
+          <div className="mt-6 rounded-2xl border border-border p-5">
             <h3 className="text-sm font-semibold text-foreground">Endpoints</h3>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>
-                <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">GET /check?domain=</code>
+                <code className="rounded bg-muted/30 px-1.5 py-0.5 text-foreground">GET /check?domain=</code>
                 <span className="ml-2">Single domain availability + price</span>
               </li>
               <li>
-                <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">GET /search?q=&amp;tlds=</code>
+                <code className="rounded bg-muted/30 px-1.5 py-0.5 text-foreground">GET /search?q=&amp;tlds=</code>
                 <span className="ml-2">Multi-TLD lookup in one call</span>
               </li>
               <li>
-                <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">GET /registrars?tld=</code>
+                <code className="rounded bg-muted/30 px-1.5 py-0.5 text-foreground">GET /registrars?tld=</code>
                 <span className="ml-2">Cheapest registrars for a TLD</span>
               </li>
               <li>
-                <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">GET /openapi.json</code>
+                <code className="rounded bg-muted/30 px-1.5 py-0.5 text-foreground">GET /openapi.json</code>
                 <span className="ml-2">Full OpenAPI schema</span>
               </li>
             </ul>
