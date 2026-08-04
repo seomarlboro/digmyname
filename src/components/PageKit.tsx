@@ -38,6 +38,7 @@ export const PageHeader = ({
   actions,
   children,
   align = "left",
+  plain = false,
 }: {
   eyebrow?: ReactNode;
   title: ReactNode;
@@ -45,10 +46,15 @@ export const PageHeader = ({
   actions?: ReactNode;
   children?: ReactNode;
   align?: "left" | "center";
+  plain?: boolean;
 }) => (
-  <section className="bento bento-p-lg mb-10">
-    <div className="aurora-glow-mint -left-24 -top-24 h-72 w-72" />
-    <div className="aurora-glow-violet -bottom-32 -right-20 h-72 w-72" />
+  <section className={cn("mb-10", plain ? "py-2" : "bento bento-p-lg")}>
+    {!plain && (
+      <>
+        <div className="aurora-glow-mint -left-24 -top-24 h-72 w-72" />
+        <div className="aurora-glow-violet -bottom-32 -right-20 h-72 w-72" />
+      </>
+    )}
     <div
       className={cn(
         "relative",
