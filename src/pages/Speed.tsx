@@ -162,7 +162,7 @@ const Speed = () => {
           </div>
 
           <div className="surface-card-lg mt-6 overflow-hidden">
-            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_180px]">
+            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_320px]">
               <div>Target</div>
               <div className="hidden sm:block">Latency</div>
               <div className="text-right">Relative</div>
@@ -170,7 +170,7 @@ const Speed = () => {
             {benchmark.map((row) => (
               <div
                 key={row.name}
-                className="grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_180px]"
+                className="grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_320px]"
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -190,8 +190,8 @@ const Speed = () => {
                 <div className="font-mono text-lg font-bold tabular-nums text-available">
                   {row.ms}
                 </div>
-                <div className="col-span-2 flex items-center gap-3 sm:col-span-1">
-                  <div className="h-3 flex-1 overflow-hidden rounded-full bg-muted/20">
+                <div className="col-span-2 flex items-center justify-center gap-3 sm:col-span-1">
+                  <div className="h-3 w-56 overflow-hidden rounded-full bg-muted/50 sm:w-64">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         row.us
