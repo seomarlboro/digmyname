@@ -136,26 +136,25 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
       const domainNames = domains.map((d) => d.domain);
 
-      // Step 2: Fast DNS pre-check (~30-80ms). Updates cards with a preliminary
-      // available/taken/uncertain signal while the authoritative check runs.
-      try {
-        const fastMap = await checkDomainsFast(domainNames);
-        if (!cancelled && fastMap.size) {
-          setResults((prev) =>
-            prev.map((r) => {
-              const info = fastMap.get(r.domain);
-              if (info) {
-                return { ...r, available: info.available, uncertain: info.uncertain };
-              }
-              return r;
-            })
-          );
-          markFirstAnswer();
-        }
-
-      } catch {
-        // Fast check is best-effort; authoritative check will overwrite.
+      // Step 2: Fast DNS pre-check — fired in the BACKGROUND (never awaited) so a
+      // slow/large DNS batch can't delay the authoritative lookups below.
+      // Split into small chunks so the first chunk lands in ~50-100ms.
+      const FAST_CHUNK = 10;
+      const applyFast = (fastMap: Map<string, { available: boolean; uncertain: boolean }>) => {
+        if (cancelled || !fastMap.size) return;
+        setResults((prev) =>
+          prev.map((r) => {
+            const info = fastMap.get(r.domain);
+            return info ? { ...r, available: info.available, uncertain: info.uncertain } : r;
+          })
+        );
+        markFirstAnswer();
+      };
+      for (let i = 0; i < domainNames.length; i += FAST_CHUNK) {
+        const chunk = domainNames.slice(i, i + FAST_CHUNK);
+        void checkDomainsFast(chunk).then(applyFast).catch(() => {});
       }
+
 
       // Step 3: Authoritative availability + pricing.
       // Strategy: the ~10 most popular TLDs are each sent as their OWN request so
