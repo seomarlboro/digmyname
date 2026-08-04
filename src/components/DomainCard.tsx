@@ -101,7 +101,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground"
+            className="h-9 gap-1.5 rounded-3xl text-sm text-muted-foreground hover:text-foreground"
             onClick={() => onRetry?.(domain)}
             disabled={!onRetry}
           >
@@ -125,7 +125,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
           </div>
           <Button
             variant="outline"
-            className="gap-1.5 rounded-lg border-amber-500/40 text-amber-600 hover:text-amber-600 dark:text-amber-400"
+            className="gap-1.5 rounded-3xl border-amber-500/40 text-amber-600 hover:text-amber-600 dark:text-amber-400"
             onClick={() => onRetry?.(domain)}
             disabled={!onRetry}
           >
@@ -164,7 +164,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   <span className="text-lg font-bold text-foreground">${displayPrice}</span>
                 )}
               </div>
-              <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4" asChild>
+              <Button size="sm" className="h-9 gap-1.5 rounded-3xl btn-gradient text-sm border-0 px-4" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-3.5 w-3.5" />
                   Buy
@@ -188,21 +188,21 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               )}
               <div className="flex items-center gap-1">
                 {result.forSale && result.listingUrl ? (
-                  <Button size="sm" className="h-9 gap-1.5 rounded-lg btn-gradient text-sm border-0 px-4" asChild>
+                  <Button size="sm" className="h-9 gap-1.5 rounded-3xl btn-gradient text-sm border-0 px-4" asChild>
                     <a href={result.listingUrl} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-3.5 w-3.5" />
                       {result.forSaleVia ?? "View"}
                     </a>
                   </Button>
                 ) : (
-                  <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground" asChild>
+                  <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-3xl text-sm text-muted-foreground hover:text-foreground" asChild>
                     <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-3.5 w-3.5" />
                       Whois
                     </a>
                   </Button>
                 )}
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-primary" asChild aria-label={`Open ${domain}`}>
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-3xl text-muted-foreground hover:text-primary" asChild aria-label={`Open ${domain}`}>
                   <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
                     <ArrowUpRight className="h-4 w-4" />
                   </a>
@@ -308,7 +308,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
             </Button>
 
             {available ? (
-              <Button className="gap-1.5 rounded-lg btn-gradient border-0" asChild>
+              <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4" />
                   Buy Now
@@ -316,13 +316,13 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               </Button>
             ) : result.forSale && result.listingUrl ? (
               <div className="flex items-center gap-2">
-                <Button className="gap-1.5 rounded-lg btn-gradient border-0" asChild>
+                <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
                   <a href={result.listingUrl} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4" />
                     View listing
                   </a>
                 </Button>
-                <Button variant="outline" size="icon" className="rounded-lg" asChild aria-label={`Open ${domain}`}>
+                <Button variant="outline" size="icon" className="rounded-3xl" asChild aria-label={`Open ${domain}`}>
                   <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
                     <ArrowUpRight className="h-4 w-4" />
                   </a>
@@ -330,13 +330,13 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Button variant="outline" className="gap-1.5 rounded-lg" asChild>
+                <Button variant="outline" className="gap-1.5 rounded-3xl" asChild>
                   <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4" />
                     Whois
                   </a>
                 </Button>
-                <Button variant="outline" size="icon" className="rounded-lg" asChild aria-label={`Open ${domain}`}>
+                <Button variant="outline" size="icon" className="rounded-3xl" asChild aria-label={`Open ${domain}`}>
                   <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
                     <ArrowUpRight className="h-4 w-4" />
                   </a>
