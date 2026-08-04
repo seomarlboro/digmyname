@@ -411,19 +411,19 @@
   .hero-blob-2 {
     width: 50vw; height: 50vw;
     right: -8vw; top: 8%;
-    background: radial-gradient(circle at 70% 40%, hsl(var(--primary) / 0.65), transparent 70%);
+    background: radial-gradient(circle at 70% 40%, hsl(var(--aurora-mint) / 0.55), transparent 70%);
     animation: hero-drift-b 32s ease-in-out infinite;
   }
   .hero-blob-3 {
     width: 45vw; height: 45vw;
     left: 22%; bottom: -20vw;
-    background: radial-gradient(circle at 50% 50%, hsl(var(--aurora-mint) / 0.55), transparent 70%);
+    background: radial-gradient(circle at 50% 50%, hsl(190 95% 55% / 0.45), transparent 70%);
     animation: hero-drift-c 28s ease-in-out infinite;
   }
   .hero-blob-4 {
     width: 38vw; height: 38vw;
     right: 18%; bottom: -10vw;
-    background: radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.45), transparent 70%);
+    background: radial-gradient(circle at 50% 50%, hsl(var(--aurora-mint) / 0.35), transparent 70%);
     animation: hero-drift-d 34s ease-in-out infinite;
   }
 
