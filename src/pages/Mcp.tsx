@@ -162,68 +162,77 @@ const Mcp = () => {
 
         <Header />
 
-        <main className="container mx-auto px-4 py-16 max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px]">
-          {/* Hero */}
-          <section className="text-center mb-20">
-            <div className="flex flex-wrap gap-2 justify-center mb-6">
-              <a
-                href={NPM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackMcpEvent("click", "npm_pill")}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10 backdrop-blur text-xs font-medium hover:bg-primary/15 transition-colors"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-                </span>
-                Live on npm · v1.1.6
-                <ArrowUpRight className="w-3 h-3" />
-              </a>
-              <Link
-                to="/speed"
-                onClick={() => trackMcpEvent("click", "speed_pill")}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur text-xs font-medium hover:bg-emerald-500/15 transition-colors"
-              >
-                <Zap className="w-3 h-3 text-emerald-400" />
-                Fastest on the internet · dispute it
-                <ArrowUpRight className="w-3 h-3" />
-              </Link>
-            </div>
-
-            <h1 className="mb-5 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-              Domain availability,
-              <br className="hidden sm:block" />{" "}
-              <span className="text-gradient">inside every LLM.</span>
-            </h1>
-
-            <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-              One install. Live answers in ~100 ms from DNS → RDAP → registrar APIs — straight into
-              Claude, Cursor, ChatGPT and any MCP-compatible client. If you find a faster domain
-              checker, <Link to="/speed" className="text-primary hover:underline">we want to know</Link>.
-            </p>
-
-            <div className="flex flex-wrap gap-3 justify-center mb-10">
-              <Button asChild size="lg" className="gap-2 h-12 px-6 shadow-lg shadow-primary/20">
+        <PageMain>
+          <PageHeader
+            eyebrow={
+              <div className="flex flex-wrap gap-2">
                 <a
-                  href={GITHUB_URL}
+                  href={NPM_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => trackMcpEvent("click", "github_hero")}
+                  onClick={() => trackMcpEvent("click", "npm_pill")}
+                  className="eyebrow transition-colors hover:bg-aurora/20"
                 >
-                  <Github className="w-5 h-5" />
-                  View on GitHub
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-aurora opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-aurora" />
+                  </span>
+                  Live on npm · v1.1.6
+                  <ArrowUpRight className="h-3 w-3" />
                 </a>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="gap-2 h-12 px-6 backdrop-blur bg-card/30">
-                <Link to="/" onClick={() => trackMcpEvent("click", "try_web")}>
-                  Try the web version
+                <Link
+                  to="/speed"
+                  onClick={() => trackMcpEvent("click", "speed_pill")}
+                  className="eyebrow transition-colors hover:bg-aurora/20"
+                >
+                  <Zap className="h-3 w-3" />
+                  Fastest on the internet · dispute it
+                  <ArrowUpRight className="h-3 w-3" />
                 </Link>
-              </Button>
+              </div>
+            }
+            title={
+              <>
+                Domain availability,{" "}
+                <span className="text-aurora-gradient">inside every LLM.</span>
+              </>
+            }
+            lede={
+              <>
+                One install. Live answers in ~100 ms from DNS → RDAP → registrar APIs — straight into
+                Claude, Cursor, ChatGPT and any MCP-compatible client. If you find a faster domain
+                checker, <Link to="/speed" className="text-aurora hover:underline">we want to know</Link>.
+              </>
+            }
+            actions={
+              <>
+                <Button asChild size="lg" className="h-12 gap-2 px-6 shadow-lg shadow-primary/20">
+                  <a
+                    href={GITHUB_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackMcpEvent("click", "github_hero")}
+                  >
+                    <Github className="h-5 w-5" />
+                    View on GitHub
+                  </a>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="h-12 gap-2 bg-card/30 px-6 backdrop-blur">
+                  <Link to="/" onClick={() => trackMcpEvent("click", "try_web")}>
+                    Try the web version
+                  </Link>
+                </Button>
+              </>
+            }
+          >
+            <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4">
+              <Stat value="52" label="TLDs covered" accent="mint" />
+              <Stat value="7" label="Registrars compared" accent="violet" />
+              <Stat value="<100ms" label="Typical response" />
+              <Stat value="MIT" label="Open source" />
             </div>
 
-            {/* Live badges */}
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="mt-8 flex flex-wrap gap-2">
               <a href={NPM_URL} target="_blank" rel="noopener noreferrer" aria-label="npm version">
                 <img
                   src="https://img.shields.io/npm/v/domain-check-skills-mcp?color=145DFB&label=npm&style=flat-square"
@@ -247,31 +256,8 @@ const Mcp = () => {
                 alt="MIT license"
               />
             </div>
-          </section>
+          </PageHeader>
 
-
-          {/* Stats strip */}
-          <section className="mb-20">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {stats.map((s) => (
-                <div
-                  key={s.label}
-                  className="group p-6 surface-card hover:border-primary/40 transition-colors flex flex-col items-center text-center"
-                >
-                  <div className="icon-frame mb-3">
-                    <s.icon />
-                  </div>
-                  <div className="text-2xl md:text-3xl font-bold tracking-tight leading-none bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
-                    {s.value}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-2 uppercase tracking-widest font-semibold">
-                    {s.label}
-                  </div>
-                </div>
-              ))}
-
-            </div>
-          </section>
 
           {/* Three formats */}
           <section className="mb-20">
