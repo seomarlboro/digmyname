@@ -188,8 +188,8 @@ const Speed = () => {
             </span>
           </div>
 
-          <div className="mt-6 overflow-hidden surface-card">
-            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 bg-muted/40 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_120px]">
+          <div className="mt-6 overflow-hidden">
+            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_180px]">
               <div>Target</div>
               <div className="hidden sm:block">Latency</div>
               <div className="text-right">Relative</div>
@@ -197,9 +197,7 @@ const Speed = () => {
             {benchmark.map((row) => (
               <div
                 key={row.name}
-                className={`grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_180px] ${
-                  row.us ? "bg-primary/[0.05]" : ""
-                }`}
+                className="grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_180px]"
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
