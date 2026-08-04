@@ -18,7 +18,7 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api";
 
-const USER_AGENT = "domain-check-skills-mcp/1.1.2 (+https://digmyname.com/mcp)";
+const USER_AGENT = "domain-check-skills-mcp/1.1.3 (+https://digmyname.com/mcp)";
 const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
 const MAX_RETRIES = Number(process.env.DIGMYNAME_MAX_RETRIES || "2");
 
@@ -172,7 +172,7 @@ function formatResult(r: DomainResult): string {
 
 const server = new McpServer({
   name: "domain-check-skills",
-  version: "1.1.2",
+  version: "1.1.3",
 });
 
 // Work around MCP SDK's deep type inference by registering tools via an any-typed wrapper.
@@ -317,7 +317,7 @@ registerTool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("domain-check-skills-mcp v1.1.2 ready (stdio)");
+  console.error("domain-check-skills-mcp v1.1.3 ready (stdio)");
 }
 
 main().catch((err) => {

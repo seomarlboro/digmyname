@@ -5,6 +5,12 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] — 2026-08-04
+
+### Changed
+- Updated package description to clarify supported clients and coverage: "MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName."
+- Bumped server version to 1.1.3.
+
 ## [1.1.2] — 2026-08-04
 
 ### Changed
@@ -50,6 +56,7 @@ First stable release.
 
 - Initial preview release.
 
+[1.1.3]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.1.3
 [1.1.2]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.1.2
 [1.1.1]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.1.1
 [1.1.0]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.1.0
