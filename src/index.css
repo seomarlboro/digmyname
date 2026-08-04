@@ -51,6 +51,11 @@
     --search-bg: 240 20% 97%;
     --hero-bg: 225 30% 96%;
 
+    /* Glass Aurora accents */
+    --aurora-mint: 152 70% 40%;
+    --aurora-violet: 258 75% 60%;
+    --aurora: 258 75% 60%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -92,6 +97,11 @@
 
     --hero-bg: 230 25% 10%;
     --search-bg: 230 20% 18%;
+
+    /* Glass Aurora accents */
+    --aurora-mint: 142 71% 65%;
+    --aurora-violet: 258 90% 76%;
+    --aurora: 258 90% 76%;
     --logo-filter: invert(46%) sepia(98%) saturate(2060%) hue-rotate(212deg) brightness(100%) contrast(97%);
 
     --sidebar-background: 240 5.9% 10%;
@@ -251,7 +261,7 @@
   }
 
   /* Aurora text gradient — emerald → violet */
-  .text-aurora {
+  .text-aurora-gradient {
     background: linear-gradient(100deg, hsl(var(--aurora-mint)), hsl(var(--aurora-violet)));
     -webkit-background-clip: text;
     background-clip: text;
