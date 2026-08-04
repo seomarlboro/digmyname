@@ -98,7 +98,7 @@ const Speed = () => {
               Timed live on every search
             </div>
 
-            <h1 className="mt-6 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground text-balance">
+            <h1 className="mt-6 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
               The fastest domain search in the universe.
               <span className="text-gradient"> Or the second.</span>
             </h1>
