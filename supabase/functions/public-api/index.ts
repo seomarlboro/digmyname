@@ -235,6 +235,13 @@ const OPENAPI = {
         responses: { "200": { description: "Sorted registrar pricing" } },
       },
     },
+    "/fast": {
+      get: {
+        summary: "Fast DNS-only availability signal",
+        parameters: [{ name: "domains", in: "query", required: true, schema: { type: "string", example: "myname.com,myname.io" } }],
+        responses: { "200": { description: "Quick available/taken/uncertain signal" } },
+      },
+    },
     "/age": {
       get: {
         summary: "Registration year for a taken domain",
