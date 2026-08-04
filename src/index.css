@@ -186,6 +186,20 @@
     transform: translateY(-1px);
   }
 
+  /* Unified surfaces — one card language across all pages */
+  .surface-card {
+    @apply rounded-xl border border-border bg-card;
+  }
+
+  .surface-card-lg {
+    @apply rounded-2xl border border-border bg-card;
+  }
+
+  .surface-muted {
+    @apply rounded-xl border border-border bg-muted/30;
+  }
+
+
   @property --border-angle {
     syntax: "<angle>";
     initial-value: 0deg;

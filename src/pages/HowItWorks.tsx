@@ -201,7 +201,7 @@ const HowItWorks = () => {
             {sources.map((s, i) => (
               <div
                 key={s.name}
-                className="rounded-xl border border-border bg-card p-5 card-hover"
+                className="surface-card p-5 card-hover"
               >
                 <div className="mb-3 flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -226,7 +226,7 @@ const HowItWorks = () => {
 
         {/* Unverified state */}
         <section className="py-12">
-          <div className="rounded-2xl border border-warning/30 bg-warning/5 p-8">
+          <div className="rounded-xl border border-warning/30 bg-warning/5 p-8">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/15 text-warning">
                 <AlertCircle className="h-5 w-5" />
@@ -259,7 +259,7 @@ const HowItWorks = () => {
           <p className="mb-8 text-muted-foreground">
             Honest take after using each tool ourselves.
           </p>
-          <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <div className="overflow-hidden surface-card">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -326,7 +326,7 @@ const HowItWorks = () => {
             What we're <span className="text-muted-foreground">not</span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-border bg-card p-5">
+            <div className="surface-card p-5">
               <Globe className="mb-3 h-5 w-5 text-muted-foreground" />
               <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
 
@@ -337,7 +337,7 @@ const HowItWorks = () => {
                 obscure ccTLD. Quality over noise.
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-card p-5">
+            <div className="surface-card p-5">
               <Scale className="mb-3 h-5 w-5 text-muted-foreground" />
               <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
 
@@ -348,7 +348,7 @@ const HowItWorks = () => {
                 buy it from whichever registrar you prefer.
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-card p-5">
+            <div className="surface-card p-5">
               <Heart className="mb-3 h-5 w-5 text-muted-foreground" />
               <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
                 Not an affiliate farm
@@ -371,7 +371,7 @@ const HowItWorks = () => {
             {faqs.map((f) => (
               <div
                 key={f.q}
-                className="rounded-xl border border-border bg-card p-5"
+                className="surface-card p-5"
               >
                 <dt className="text-base font-semibold text-foreground">{f.q}</dt>
                 <dd className="mt-2 text-sm text-muted-foreground leading-relaxed">
@@ -392,7 +392,7 @@ const HowItWorks = () => {
             and your own scripts can answer "is this domain available?"
             without scraping. 60 requests / 60 s / IP.
           </p>
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="surface-card p-5">
             <div className="mb-3 text-sm font-semibold text-foreground">
               Quick example
             </div>

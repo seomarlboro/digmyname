@@ -85,7 +85,7 @@ const Speed = () => {
 
       <main className="mx-auto max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px] px-4 pb-24 pt-12">
         {/* Hero */}
-        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/40 px-6 py-14 backdrop-blur-xl sm:px-12">
+        <section className="relative overflow-hidden surface-card-lg px-6 py-14 sm:px-12">
           <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-32 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
 
@@ -130,7 +130,7 @@ const Speed = () => {
         </section>
 
         {/* Claim */}
-        <section className="mt-6 flex flex-col gap-4 rounded-2xl border border-primary/20 bg-primary/[0.06] p-6 sm:flex-row sm:items-center sm:justify-between">
+        <section className="mt-6 flex flex-col gap-4 rounded-xl border border-primary/30 bg-primary/5 p-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <Trophy className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
@@ -166,7 +166,7 @@ const Speed = () => {
             ].map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-3 rounded-xl border border-border/60 bg-card/30 px-4 py-3 text-sm"
+                className="flex items-center gap-3 surface-card px-4 py-3 text-sm"
               >
                 <Zap className="h-4 w-4 shrink-0 text-primary" />
                 {item}
@@ -188,7 +188,7 @@ const Speed = () => {
             {pipeline.map((step) => (
               <div
                 key={step.title}
-                className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/40 p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40"
+                className="group relative overflow-hidden surface-card p-6 card-hover transition-colors hover:border-primary/40"
               >
                 <div className="absolute right-5 top-4 font-mono text-3xl font-bold text-muted-foreground/10 transition-colors group-hover:text-primary/20">
                   {step.step}
@@ -217,7 +217,7 @@ const Speed = () => {
             </span>
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
+          <div className="mt-6 overflow-hidden surface-card">
             <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 bg-muted/40 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_120px]">
               <div>Target</div>
               <div className="hidden sm:block">Latency</div>
@@ -272,7 +272,7 @@ const Speed = () => {
         </section>
 
         {/* Honesty */}
-        <section className="mt-16 rounded-2xl border border-border/60 bg-card/30 p-6 sm:p-8">
+        <section className="mt-16 surface-card p-6 sm:p-8">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">The small print on “fastest”</h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
             Nobody can prove a universal latency record, and anybody who states one flat-out is selling you
