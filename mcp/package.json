@@ -1,7 +1,7 @@
 {
   "name": "domain-check-skills-mcp",
-  "version": "1.1.1",
-  "description": "MCP server for real-time domain availability checks and registrar price comparison, powered by DigMyName.",
+  "version": "1.1.2",
+  "description": "The fastest domain availability MCP server on the internet. If you disagree — dispute it. Real-time checks, registrar pricing and domain age for any LLM client.",
   "license": "MIT",
   "type": "module",
   "bin": {
