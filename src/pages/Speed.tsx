@@ -85,7 +85,7 @@ const Speed = () => {
 
       <main className="container mx-auto max-w-[968px] px-4 pb-24 pt-12">
         {/* Hero */}
-        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-14 backdrop-blur-xl sm:px-12">
+        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/40 px-6 py-14 backdrop-blur-xl sm:px-12">
           <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-32 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
 
@@ -150,7 +150,7 @@ const Speed = () => {
         <section className="mt-16">
           <div className="flex items-center gap-4">
             <h2 className="text-2xl font-bold tracking-tight">What the timer includes</h2>
-            <div className="hidden h-px flex-1 bg-gradient-to-r from-white/15 to-transparent sm:block" />
+            <div className="hidden h-px flex-1 bg-gradient-to-r from-border to-transparent sm:block" />
           </div>
           <p className="mt-3 max-w-2xl text-muted-foreground">
             Everything. The stopwatch starts at your final keypress, so our own debounce, your network round
@@ -166,7 +166,7 @@ const Speed = () => {
             ].map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm"
+                className="flex items-center gap-3 rounded-xl border border-border/60 bg-card/30 px-4 py-3 text-sm"
               >
                 <Zap className="h-4 w-4 shrink-0 text-primary" />
                 {item}
@@ -179,7 +179,7 @@ const Speed = () => {
         <section className="mt-16">
           <div className="flex items-center gap-4">
             <h2 className="text-2xl font-bold tracking-tight">The pipeline</h2>
-            <div className="hidden h-px flex-1 bg-gradient-to-r from-white/15 to-transparent sm:block" />
+            <div className="hidden h-px flex-1 bg-gradient-to-r from-border to-transparent sm:block" />
             <span className="hidden text-xs uppercase tracking-widest text-muted-foreground sm:block">
               Parallel execution
             </span>
@@ -188,9 +188,9 @@ const Speed = () => {
             {pipeline.map((step) => (
               <div
                 key={step.title}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40"
+                className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/40 p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40"
               >
-                <div className="absolute right-5 top-4 font-mono text-3xl font-bold text-white/5 transition-colors group-hover:text-primary/20">
+                <div className="absolute right-5 top-4 font-mono text-3xl font-bold text-muted-foreground/10 transition-colors group-hover:text-primary/20">
                   {step.step}
                 </div>
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
@@ -217,8 +217,8 @@ const Speed = () => {
             </span>
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
-            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-white/10 bg-white/[0.04] px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_120px]">
+          <div className="mt-6 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
+            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 bg-muted/40 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_120px]">
               <div>Target</div>
               <div className="hidden sm:block">Latency</div>
               <div className="text-right">Relative</div>
@@ -226,7 +226,7 @@ const Speed = () => {
             {benchmark.map((row) => (
               <div
                 key={row.name}
-                className={`grid grid-cols-[1fr_auto] items-center gap-4 border-b border-white/5 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_120px] ${
+                className={`grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_120px] ${
                   row.us ? "bg-primary/[0.05]" : ""
                 }`}
               >
@@ -238,7 +238,7 @@ const Speed = () => {
                       className={`rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase ${
                         row.us
                           ? "border-primary/30 bg-primary/15 text-primary"
-                          : "border-white/10 bg-white/5 text-muted-foreground"
+                          : "border-border/60 bg-muted/50 text-muted-foreground"
                       }`}
                     >
                       {row.tag}
@@ -254,9 +254,9 @@ const Speed = () => {
                   {row.ms}
                 </div>
                 <div className="col-span-2 sm:col-span-1">
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className={`h-full rounded-full ${row.us ? "bg-primary" : "bg-white/25"}`}
+                      className={`h-full rounded-full ${row.us ? "bg-primary" : "bg-muted-foreground/40"}`}
                       style={{ width: `${row.bar}%` }}
                     />
                   </div>
@@ -272,7 +272,7 @@ const Speed = () => {
         </section>
 
         {/* Honesty */}
-        <section className="mt-16 rounded-2xl border border-white/10 bg-white/[0.02] p-6 sm:p-8">
+        <section className="mt-16 rounded-2xl border border-border/60 bg-card/30 p-6 sm:p-8">
           <h2 className="text-2xl font-bold tracking-tight">The small print on “fastest”</h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
             Nobody can prove a universal latency record, and anybody who states one flat-out is selling you
