@@ -147,7 +147,7 @@ const Mcp = () => {
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-transparent relative overflow-hidden">
+      <div className="min-h-screen bg-background relative overflow-hidden">
         <Header />
 
         <PageMain>
