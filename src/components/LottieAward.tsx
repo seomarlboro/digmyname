@@ -70,22 +70,11 @@ function recolorAnimationData(
 }
 
 export function LottieAward({ className, ...props }: LottieAwardProps) {
-  const [animationData, setAnimationData] = useState<unknown | null>(null);
+  const animationData = useMemo(
+    () => recolorAnimationData(trophyAnimation),
+    []
+  );
 
-  useEffect(() => {
-    fetch(awardAsset.url)
-      .then((res) => res.json())
-      .then((raw) => {
-        const recolored = recolorAnimationData(raw);
-        setAnimationData(recolored);
-      })
-      .catch((err) => {
-        // Suppress in production per project security rule
-        if (import.meta.env.DEV) console.error("Failed to load award Lottie:", err);
-      });
-  }, []);
-
-  if (!animationData) return null;
 
   return (
     <Lottie
