@@ -185,7 +185,7 @@ const HowItWorks = () => {
           <StatGrid cols={3}>
             <Stat value="4" label="Verification sources" accent="mint" icon={SearchIcon} />
             <Stat value="50+" label="TLDs curated" accent="violet" icon={NetworkIcon} />
-            <Stat value="0" label="Guesses shown as facts" icon={ShieldIcon} />
+            <Stat value="100%" label="Honest uncertainty" accent="warning" icon={ShieldIcon} />
           </StatGrid>
 
         </PageHeader>
