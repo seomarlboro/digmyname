@@ -17,6 +17,8 @@ import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
+import { PageMain, PageHeader, Eyebrow, Stat } from "@/components/PageKit";
+
 
 const sources = [
   {
@@ -169,25 +171,23 @@ const HowItWorks = () => {
 
       <Header />
 
-      <main className="mx-auto max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px] px-4">
+      <PageMain>
+        <PageHeader
+          eyebrow={<Eyebrow>Why DigMyName</Eyebrow>}
+          title={
+            <>
+              Built for <span className="text-aurora-gradient">honesty</span>, not just speed.
+            </>
+          }
+          lede="Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks four independent sources and tells you when it isn't sure — so you never buy a domain that turns out to be taken, or skip one that was actually free."
+        >
+          <div className="mt-10 grid grid-cols-3 gap-6">
+            <Stat value="4" label="Verification sources" accent="mint" />
+            <Stat value="50+" label="TLDs curated" accent="violet" />
+            <Stat value="0" label="Guesses shown as facts" />
+          </div>
+        </PageHeader>
 
-        {/* Hero */}
-        <section className="pt-16 pb-12 text-center">
-          <Badge variant="secondary" className="mb-5 gap-1.5">
-            <Sparkles className="h-3.5 w-3.5" /> Why DigMyName
-          </Badge>
-          <h1 className="mb-5 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            Built for <span className="text-gradient">honesty</span>,
-            <br className="hidden sm:block" /> not just speed.
-          </h1>
-          <p className="mx-auto max-w-2xl text-base md:text-lg text-muted-foreground">
-
-            Most domain checkers rely on a single data source and quietly guess
-            when it fails. DigMyName cross-checks four independent sources and
-            tells you when it isn't sure — so you never buy a domain that turns
-            out to be taken, or skip one that was actually free.
-          </p>
-        </section>
 
         {/* Sources */}
         <section className="py-12">
@@ -481,7 +481,7 @@ print(res.json()["available"])`,
             <Link to="/">Start searching</Link>
           </Button>
         </section>
-      </main>
+      </PageMain>
     </div>
   );
 };
