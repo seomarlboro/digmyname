@@ -91,7 +91,7 @@ const Speed = () => {
           eyebrow={<Eyebrow live>Timed live on every search</Eyebrow>}
           title={
             <>
-              The fastest domain search in the universe.
+              <span className="whitespace-nowrap">The fastest domain search in the universe.</span>
               <span className="text-aurora-gradient"> Or the second.</span>
             </>
           }
