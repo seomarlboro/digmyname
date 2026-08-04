@@ -251,13 +251,24 @@ const Speed = () => {
                 >
                   {row.ms}
                 </div>
-                <div className="col-span-2 sm:col-span-1">
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                <div className="col-span-2 flex items-center gap-3 sm:col-span-1">
+                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted/80">
                     <div
-                      className={`h-full rounded-full ${row.us ? "bg-primary" : "bg-muted-foreground/40"}`}
+                      className={`h-full rounded-full transition-all duration-700 ${
+                        row.us
+                          ? "bg-gradient-to-r from-primary to-purple-500 shadow-[0_0_12px_hsl(var(--primary)/0.45)]"
+                          : "bg-gradient-to-r from-muted-foreground/50 to-muted-foreground/25"
+                      }`}
                       style={{ width: `${row.bar}%` }}
                     />
                   </div>
+                  <span
+                    className={`min-w-[2.5rem] text-right font-mono text-xs font-semibold tabular-nums ${
+                      row.us ? "text-primary" : "text-muted-foreground/70"
+                    }`}
+                  >
+                    {row.bar}%
+                  </span>
                 </div>
               </div>
             ))}
