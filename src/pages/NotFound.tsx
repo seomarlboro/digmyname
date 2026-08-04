@@ -187,7 +187,7 @@ const NotFound = () => {
           opacity: 0.5;
         }
         .nf-vignette {
-          background: radial-gradient(ellipse at center, transparent 40%, hsl(230 40% 3% / 0.9) 100%);
+          background: radial-gradient(ellipse at center, transparent 40%, hsl(var(--aurora-violet) / 0.9) 100%);
           pointer-events: none;
         }
         .nf-star {
@@ -256,9 +256,9 @@ const NotFound = () => {
           width: 100%; height: 100%;
           border-radius: 50%;
           background:
-            radial-gradient(circle at 30% 30%, hsl(218 96% 75%), hsl(262 83% 45%) 60%, hsl(260 60% 20%));
+            radial-gradient(circle at 30% 30%, hsl(var(--aurora-mint)), hsl(var(--aurora-violet)) 60%, hsl(260 60% 20%));
           box-shadow:
-            inset -6px -6px 12px hsl(260 60% 10% / 0.8),
+            inset -6px -6px 12px hsl(var(--aurora-violet) / 0.8),
             0 0 24px hsl(var(--aurora-mint) / 0.7);
           animation: nf-spin-rev 40s linear infinite;
         }
