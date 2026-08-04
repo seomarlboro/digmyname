@@ -139,10 +139,10 @@ const Pricing = () => {
           <>
             {/* Summary table */}
             <Section title="Cheapest per extension" lede="One row per TLD — the best price we found for each action." aside="Updated daily">
-              <div className="bento overflow-hidden">
+              <div className="overflow-hidden rounded-3xl border border-border/70">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-border bg-secondary/50">
+                  <tr className="border-b border-border">
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Domain</th>
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest Registration</th>
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest Renewal</th>
@@ -155,7 +155,7 @@ const Pricing = () => {
                   {tldSummaries.map((s) => {
                     const best3Cost = s.best3Year.reg_price + s.best3Year.renew_price * 2;
                     return (
-                      <tr key={s.tld} className="border-b border-border/60 transition-colors last:border-0 hover:bg-secondary/30">
+                      <tr key={s.tld} className="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/10">
                         <td className="px-5 py-5">
                           <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
                         </td>
@@ -254,14 +254,14 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
   const range = maxRegPrice - cheapestRegPrice || 1;
 
   return (
-    <div className="bento overflow-hidden">
-      <div className="flex items-center gap-3 border-b border-border bg-secondary/30 px-5 py-4">
+    <div className="overflow-hidden rounded-3xl border border-border/70">
+      <div className="flex items-center gap-3 border-b border-border px-5 py-4">
         <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
         <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>
       </div>
       <table className="w-full text-left">
         <thead>
-          <tr className="border-b border-border bg-secondary/20">
+          <tr className="border-b border-border">
             <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Registrar</th>
             <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Register</th>
             <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Renew</th>
@@ -279,7 +279,7 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
             const barWidth = range > 0 ? ((p.reg_price - cheapestRegPrice) / range) * 100 : 0;
 
             return (
-              <tr key={p.id} className={`border-b border-border transition-colors hover:bg-secondary/30 ${isCheapest ? "bg-mint/5" : ""}`}>
+              <tr key={p.id} className={`border-b border-border transition-colors hover:bg-muted/10 ${isCheapest ? "text-mint" : ""}`}>
                 <td className="px-5 py-4">
                   <span className={`text-base font-bold ${isCheapest ? "text-mint" : c.text}`}>
                     {p.registrar}

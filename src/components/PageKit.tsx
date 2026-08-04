@@ -172,7 +172,7 @@ export const StatGrid = ({
 }) => (
   <div
     className={cn(
-      "mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60",
+      "mt-10 grid grid-cols-2 overflow-hidden rounded-2xl border border-border/60",
       cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4",
       className,
     )}
@@ -191,7 +191,7 @@ export const Stat = ({
   label: ReactNode;
   accent?: "mint" | "violet";
 }) => (
-  <div className="bg-card px-5 py-5 transition-colors hover:bg-muted/40">
+  <div className="px-5 py-5 transition-colors hover:bg-muted/10">
     <div
       className={cn(
         "stat-value text-left",

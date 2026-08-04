@@ -200,31 +200,31 @@
      Speed / MCP. Glass Aurora palette, Sora + Manrope, bento grid.
      ========================================================== */
 
-  /* Surfaces */
+  /* Surfaces — flat, no tinted fills */
   .surface-card {
-    @apply rounded-2xl border border-border bg-card;
+    @apply rounded-2xl border border-border;
   }
 
   .surface-card-lg {
-    @apply rounded-3xl border border-border bg-card;
+    @apply rounded-3xl border border-border;
   }
 
   .surface-muted {
-    @apply rounded-2xl border border-border bg-muted/30;
+    @apply rounded-2xl border border-border;
   }
 
-  /* Glass bento tile — the single card primitive for all info pages */
+  /* Glass bento tile — transparent, only border */
   .bento {
-    @apply relative overflow-hidden rounded-3xl border border-border/70 bg-card/60 backdrop-blur-xl
+    @apply relative overflow-hidden rounded-3xl border border-border/70
            transition-[border-color,transform,box-shadow] duration-300;
   }
   .dark .bento {
-    background-color: hsl(var(--aurora-violet) / 0.55);
-    box-shadow: inset 0 1px 0 0 hsl(0 0% 100% / 0.04);
+    background-color: transparent;
+    box-shadow: none;
   }
   .bento-hover:hover {
     @apply -translate-y-0.5 border-aurora/40;
-    box-shadow: 0 18px 50px -24px hsl(var(--aurora-violet) / 0.45);
+    box-shadow: none;
   }
   /* Padding scale — always one of these two */
   .bento-p   { @apply p-6 sm:p-7; }
