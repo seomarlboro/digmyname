@@ -6,8 +6,8 @@ interface LottieAwardProps extends Omit<LottieComponentProps, "animationData"> {
   className?: string;
 }
 
-const PRIMARY_RGB: [number, number, number] = [0.1225, 0.6925, 0.9775]; // new primary hsl(220 95% 55%)
-const WHITE_RGB: [number, number, number] = [1, 1, 1];
+const AURORA_VIOLET_RGB: [number, number, number] = [0.644, 0.501, 0.979]; // aurora violet hsl(258 92% 74%)
+const AURORA_MINT_RGB: [number, number, number] = [0.244, 0.916, 0.748]; // aurora mint hsl(165 80% 58%)
 
 function isStarOrHighlightLayer(name: string | undefined): boolean {
   if (!name) return false;
