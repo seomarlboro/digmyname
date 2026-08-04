@@ -86,7 +86,7 @@ const comparison = [
     lean: false,
   },
   {
-    feature: "52 curated TLDs with smart prioritisation",
+    feature: "Smart TLD prioritisation",
     us: true,
     instant: true,
     domainr: true,
@@ -182,9 +182,8 @@ const HowItWorks = () => {
           }
           lede="Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks four independent sources and tells you when it isn't sure — so you never buy a domain that turns out to be taken, or skip one that was actually free."
         >
-          <StatGrid cols={3}>
+          <StatGrid cols={2}>
             <Stat value="4" label="Verification sources" accent="mint" icon={SearchIcon} />
-            <Stat value="52" label="TLDs curated" accent="violet" icon={NetworkIcon} />
             <Stat value="100%" label="Honest uncertainty" accent="warning" icon={ShieldIcon} />
           </StatGrid>
 
@@ -324,7 +323,7 @@ const HowItWorks = () => {
                 Not 800+ TLDs
               </div>
               <p className="text-sm text-muted-foreground">
-                We curate 52 useful extensions instead of listing every
+                We curate a focused set of extensions instead of listing every
                 obscure ccTLD. Quality over noise.
               </p>
             </div>
