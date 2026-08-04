@@ -266,7 +266,11 @@ async function fastStatus(domain: string): Promise<{ available: boolean; uncerta
         }
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        if (msg.includes("NXDOMAIN") || msg.toLowerCase().includes("not found")) {
+        if (
+          msg.includes("NXDOMAIN") ||
+          msg.toLowerCase().includes("not found") ||
+          msg.toLowerCase().includes("no records found")
+        ) {
           return { available: true, uncertain: true };
         }
         // Try next record type
