@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import Lottie, { type LottieComponentProps } from "lottie-react";
-import trophyAnimation from "@/assets/trophy-animated.json";
+import trophyAnimation from "@/assets/award.json";
 
 interface LottieAwardProps extends Omit<LottieComponentProps, "animationData"> {
   className?: string;
