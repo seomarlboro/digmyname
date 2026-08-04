@@ -152,7 +152,25 @@ export const BentoTile = ({
   );
 };
 
-/* ── Stat tile ──────────────────────────────────────────── */
+/* ── Stat tile + grid ───────────────────────────────────── */
+
+export const StatGrid = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => (
+  <div
+    className={cn(
+      "mt-10 grid grid-cols-2 overflow-hidden rounded-2xl border border-border/60 bg-background/30 backdrop-blur-sm sm:grid-cols-4",
+      "[&>*]:border-border/60 [&>*]:border-b [&>*]:border-r [&>*:nth-child(2n)]:border-r-0 sm:[&>*]:border-b-0 sm:[&>*:nth-child(2n)]:border-r sm:[&>*:last-child]:border-r-0 [&>*:nth-last-child(-n+2)]:border-b-0",
+      className,
+    )}
+  >
+    {children}
+  </div>
+);
 
 export const Stat = ({
   value,
@@ -163,19 +181,20 @@ export const Stat = ({
   label: ReactNode;
   accent?: "mint" | "violet";
 }) => (
-  <div className="text-center">
+  <div className="px-5 py-5">
     <div
       className={cn(
-        "stat-value",
+        "stat-value text-left",
         accent === "mint" && "text-mint",
         accent === "violet" && "text-violet",
       )}
     >
       {value}
     </div>
-    <div className="stat-label">{label}</div>
+    <div className="stat-label mt-1 text-left">{label}</div>
   </div>
 );
+
 
 /* ── Eyebrow chip ───────────────────────────────────────── */
 
