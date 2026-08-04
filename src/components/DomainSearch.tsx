@@ -363,13 +363,14 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         {!loading && results.length > 0 && (
           <>
             {/* Stats */}
-            <div className="mb-6 mt-8 flex items-center justify-center gap-8 text-base">
-              <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-foreground">{results.length}</span> found</span>
-              <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-available">{availableCount}</span> available</span>
-              <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-muted-foreground/60">{takenCount}</span> taken</span>
+            <div className="mb-6 mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm sm:gap-8 sm:text-base">
+              <span className="text-muted-foreground"><span className="text-xl font-extrabold text-foreground sm:text-2xl">{results.length}</span> found</span>
+              <span className="text-muted-foreground"><span className="text-xl font-extrabold text-available sm:text-2xl">{availableCount}</span> available</span>
+              <span className="text-muted-foreground"><span className="text-xl font-extrabold text-muted-foreground/60 sm:text-2xl">{takenCount}</span> taken</span>
               {uncertainCount > 0 && (
-                <span className="text-muted-foreground"><span className="text-2xl font-extrabold text-amber-500">{uncertainCount}</span> unverified</span>
+                <span className="text-muted-foreground"><span className="text-xl font-extrabold text-amber-500 sm:text-2xl">{uncertainCount}</span> unverified</span>
               )}
+
               {stillChecking && (
                 <span className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />
