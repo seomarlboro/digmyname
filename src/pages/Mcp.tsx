@@ -435,21 +435,22 @@ const Mcp = () => {
               API surface
             </p>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-8">Tools exposed</h2>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {tools.map((t, i) => (
                 <div
                   key={t.name}
-                  className="group relative p-5 md:p-6 surface-card hover:border-primary/40 transition-colors"
+                  className="group relative p-5 md:p-6 surface-card hover:border-foreground/20 transition-colors"
                 >
-                  <div className="absolute left-0 top-6 bottom-6 w-1 rounded-r-full bg-gradient-to-b from-primary to-purple-500 opacity-60 group-hover:opacity-100 transition-opacity" />
-                  <div className="flex items-baseline gap-2 flex-wrap mb-2">
-                    <span className="text-xs font-mono text-muted-foreground/50">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <code className="text-foreground font-mono font-semibold text-lg">
+                        {t.name}
+                      </code>
+                      <code className="text-muted-foreground/70 font-mono text-sm">{t.sig}</code>
+                    </div>
+                    <span className="shrink-0 text-xs font-mono font-bold text-foreground/90 bg-foreground/10 px-2 py-1 rounded-md">
                       0{i + 1}
                     </span>
-                    <code className="text-primary font-mono font-semibold text-base">
-                      {t.name}
-                    </code>
-                    <code className="text-muted-foreground/70 font-mono text-sm">{t.sig}</code>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">{t.desc}</p>
                 </div>
