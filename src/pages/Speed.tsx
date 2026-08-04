@@ -108,11 +108,11 @@ const Speed = () => {
 
         {/* Claim */}
         <section className="mt-6 flex flex-row flex-wrap items-center justify-between gap-5 rounded-xl border border-primary/30 bg-primary/5 p-8">
-          <div className="flex flex-1 items-center gap-6 min-w-0">
-            <LottieAward className="h-24 w-24 shrink-0" />
+          <div className="flex flex-1 items-center gap-5 min-w-0">
+            <LottieAward className="h-20 w-20 shrink-0" />
             <div className="min-w-0 flex-1">
-              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Beat our number, take the crown</h2>
-              <p className="mt-2 text-base text-muted-foreground sm:text-lg">
+              <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Beat our number, take the crown</h2>
+              <p className="mt-2 text-sm text-muted-foreground sm:text-base">
                 Screenshot a faster measured first answer from any public domain search and we will publish it
                 here, credited. No press release, no asterisk.
               </p>
