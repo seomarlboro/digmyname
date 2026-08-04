@@ -272,7 +272,7 @@ const Speed = () => {
         {/* Honesty */}
         <section className="mt-16 surface-card p-6 sm:p-8">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">The small print on “fastest”</h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
+          <p className="mt-3 max-w-none text-muted-foreground">
             Nobody can prove a universal latency record, and anybody who states one flat-out is selling you
             something. Latency depends on where you are, which TLD you query and whether the answer was cached.
             So we make the loud claim and then hand you the stopwatch to check it. If we are second, the number
