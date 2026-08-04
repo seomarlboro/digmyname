@@ -6,7 +6,7 @@
 
 MCP server that gives any AI agent **real-time domain availability**, **registrar price comparison** and **domain age lookup**, powered by [DigMyName](https://digmyname.com).
 
-Typical first answer lands in **~100–200 ms** (measured end-to-end, cache-warm). We publish the method instead of a superlative — see [digmyname.com/speed](https://digmyname.com/speed).
+Typical first answer lands in **~100–200 ms** (measured end-to-end, cache-warm). Fastest domain search in the universe, or the second — we publish the method along with the claim — see [digmyname.com/speed](https://digmyname.com/speed).
 
 No API key. No account. Free.
 
