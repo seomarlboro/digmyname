@@ -230,7 +230,7 @@ const Speed = () => {
                       style={{ width: `${row.bar}%` }}
                     />
                   </div>
-                  <span className="min-w-[2.5rem] text-right font-mono text-xs font-semibold tabular-nums text-available">
+                  <span className="min-w-[2.5rem] text-right font-mono text-lg font-bold tabular-nums text-available">
                     {row.bar}%
                   </span>
                 </div>
