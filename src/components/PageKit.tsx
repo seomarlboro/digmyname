@@ -56,17 +56,18 @@ export const PageHeader = ({
       )}
     >
       {eyebrow}
-      <h1 className={cn("page-title", eyebrow ? "mt-6" : "")}>{title}</h1>
+      <h1 className={cn("page-title w-full", eyebrow ? "mt-6" : "")}>{title}</h1>
       {lede && (
         <p
           className={cn(
-            "page-lede mt-5",
-            align === "center" ? "max-w-2xl" : "max-w-3xl",
+            "page-lede mt-5 w-full",
+            align === "center" && "max-w-3xl",
           )}
         >
           {lede}
         </p>
       )}
+
       {actions && <div className="mt-8 flex flex-wrap gap-3">{actions}</div>}
       {children}
     </div>
