@@ -162,7 +162,7 @@ const Speed = () => {
           </div>
 
           <div className="surface-card-lg mt-6 overflow-hidden">
-            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_180px]">
+            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_320px]">
               <div>Target</div>
               <div className="hidden sm:block">Latency</div>
               <div className="text-right">Relative</div>
