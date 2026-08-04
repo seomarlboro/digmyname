@@ -218,15 +218,26 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
 
   return (
     <>
-      <div className="card-hover rounded-xl border border-border p-4 sm:p-5">
+      <div className="card-hover relative rounded-xl border border-border p-4 sm:p-5">
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`absolute right-2 top-2 h-9 w-9 rounded-full ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
+          onClick={handleFavorite}
+          aria-label={favorited ? `Remove ${domain} from favorites` : `Save ${domain} to favorites`}
+          aria-pressed={favorited}
+        >
+          <Heart className={`h-4 w-4 ${favorited ? "fill-current" : ""}`} />
+        </Button>
+
         {/* Mobile: stacked, Desktop: single row */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           {/* Left: domain + badges */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 pr-8">
             <h3 className="text-xl font-bold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
             </h3>
-            <div className="flex items-center gap-1.5 mt-1.5">
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
               {available && registrarName && (() => {
                 const rc = getRegistrarColor(registrarName);
                 return (
@@ -258,7 +269,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   </>
                 ) : isLikelyPremium ? (
                   <>
-                    <p className="text-xl font-bold text-amber-500">Likely premium</p>
+                    <p className="text-base font-semibold whitespace-nowrap text-amber-500">Likely premium</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Verify on registrar
                     </p>
@@ -295,17 +306,6 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                 </p>
               </div>
             ) : null}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-9 w-9 ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
-              onClick={handleFavorite}
-              aria-label={favorited ? `Remove ${domain} from favorites` : `Save ${domain} to favorites`}
-              aria-pressed={favorited}
-            >
-              <Heart className={`h-4 w-4 ${favorited ? "fill-current" : ""}`} />
-            </Button>
 
             {available ? (
               <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
