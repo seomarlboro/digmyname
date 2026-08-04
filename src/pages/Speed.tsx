@@ -88,6 +88,7 @@ const Speed = () => {
 
       <PageMain>
         <PageHeader
+          plain
           eyebrow={<Eyebrow live>Timed live on every search</Eyebrow>}
           title={
             <>
