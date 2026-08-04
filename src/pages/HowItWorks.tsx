@@ -17,6 +17,8 @@ import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
+import { PageMain, PageHeader, Eyebrow, Stat } from "@/components/PageKit";
+
 
 const sources = [
   {
@@ -479,7 +481,7 @@ print(res.json()["available"])`,
             <Link to="/">Start searching</Link>
           </Button>
         </section>
-      </main>
+      </PageMain>
     </div>
   );
 };
