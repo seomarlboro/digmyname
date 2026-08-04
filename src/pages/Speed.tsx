@@ -113,7 +113,7 @@ const Speed = () => {
             <div className="min-w-0 flex-1">
               <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Beat our number, take the crown</h2>
               <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-                Show us a faster public domain result and we'll feature it here, credited.
+                Show us a faster public result and we'll feature your winning time here—with full credit.
               </p>
             </div>
           </div>
