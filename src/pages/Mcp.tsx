@@ -120,11 +120,11 @@ const Mcp = () => {
         <title>MCP Server, Claude Skill & Custom GPT — DigMyName</title>
         <meta
           name="description"
-          content="MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName."
+          content="The world's fastest domain availability MCP server — ~100 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName."
         />
         <link rel="canonical" href="https://digmyname.com/mcp" />
         <meta property="og:title" content="Domain Check Skills — MCP / Claude Skill / Custom GPT" />
-        <meta property="og:description" content="MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs." />
+        <meta property="og:description" content="The world's fastest domain availability MCP server — ~100 ms checks from any LLM. 7 registrars, 52 TLDs." />
         <meta property="og:url" content="https://digmyname.com/mcp" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -139,7 +139,7 @@ const Mcp = () => {
           downloadUrl: NPM_URL,
           codeRepository: GITHUB_URL,
           license: "https://opensource.org/licenses/MIT",
-          description: "MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName.",
+          description: "The world's fastest domain availability MCP server — ~100 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName.",
         })}</script>
       </Helmet>
 
