@@ -142,6 +142,10 @@
 }
 
 @layer utilities {
+  /* Shared page width — header + main content stay aligned */
+  .content-wrap {
+    @apply mx-auto w-full max-w-[968px] px-4 xl:max-w-[1200px] 2xl:max-w-[1320px];
+  }
   .text-gradient {
     background: linear-gradient(135deg, hsl(var(--aurora-mint)), hsl(var(--aurora-violet)));
     -webkit-background-clip: text;

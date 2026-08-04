@@ -41,7 +41,7 @@ const Header = () => {
             : "border-b border-transparent bg-transparent"
         }`}
       >
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="content-wrap flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
             <ShovelLogo className="h-8 w-8" />
             <span className="logo-text text-foreground">DigMyName</span>
