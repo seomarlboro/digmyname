@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import { Loader2, Shield, ShieldOff, Award, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getRegistrarColor } from "@/lib/registrarColors";
+import { PageMain, PageHeader, Section, Eyebrow, Stat } from "@/components/PageKit";
 
 interface RegistrarPrice {
   id: string;
