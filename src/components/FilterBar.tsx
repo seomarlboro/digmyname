@@ -217,7 +217,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
     return (
       <Drawer>
         <DrawerTrigger asChild>
-          <button aria-label="Open filters" className="fixed bottom-6 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full btn-gradient shadow-2xl active:scale-95 transition-transform">
+          <button aria-label="Open filters" className="fixed bottom-6 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-2xl btn-gradient shadow-2xl active:scale-95 transition-transform">
             <SlidersHorizontal className="h-6 w-6" />
             {activeCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-warning text-[11px] font-bold text-warning-foreground">
@@ -247,11 +247,11 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
   return (
     <div ref={barRef} className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
       {/* Gradient glow behind */}
-      <div className="absolute inset-0 -z-10 rounded-[56px] blur-xl opacity-60" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(225 85% 55% / 0.35), hsl(270 80% 58% / 0.3), hsl(30 90% 50% / 0.25), hsl(225 85% 55% / 0.2))" }} />
-      <div className="absolute inset-0 -z-10 rounded-[56px] blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(225 85% 55% / 0.25), hsl(270 80% 58% / 0.2))" }} />
+      <div className="absolute inset-0 -z-10 rounded-[28px] blur-xl opacity-60" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(225 85% 55% / 0.35), hsl(270 80% 58% / 0.3), hsl(30 90% 50% / 0.25), hsl(225 85% 55% / 0.2))" }} />
+      <div className="absolute inset-0 -z-10 rounded-[28px] blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(225 85% 55% / 0.25), hsl(270 80% 58% / 0.2))" }} />
 
       {/* Floating bar */}
-      <div className="relative flex items-stretch gap-3 rounded-[56px] border border-transparent bg-white p-3.5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
+      <div className="relative flex items-stretch gap-3 rounded-[28px] border border-transparent bg-white p-3.5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
         {/* Popovers */}
         {openFilter && openFilter !== "extensions" && (
           <div
@@ -261,14 +261,14 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
               left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
             }}
           >
-            <div className="rounded-3xl border border-border bg-card p-5 shadow-xl">
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
               <PopoverContent id={openFilter} />
             </div>
           </div>
         )}
         {openFilter === "extensions" && (
           <div className="absolute left-0 right-0 z-50" style={{ bottom: "calc(100% + 16px)" }}>
-            <div className="rounded-3xl border border-border bg-card p-5 shadow-xl">
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
               <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} />
             </div>
           </div>
@@ -281,7 +281,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
           >
             <button
               onClick={() => toggle(f.id)}
-              className={`flex min-w-[136px] h-full items-center justify-between gap-4 rounded-full border px-5 py-3 text-left whitespace-nowrap transition-all ${
+              className={`flex min-w-[136px] h-full items-center justify-between gap-4 rounded-2xl border px-5 py-3 text-left whitespace-nowrap transition-all ${
                 openFilter === f.id
                   ? "border-primary/40 bg-primary/10 shadow-lg"
                   : "border-border/60 bg-secondary/60 hover:bg-secondary dark:border-white/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.1]"
