@@ -4,7 +4,7 @@ import { Zap, Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-reac
 import { LottieAward } from "@/components/LottieAward";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
 
 
 const pipeline = [

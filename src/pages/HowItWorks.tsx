@@ -17,7 +17,7 @@ import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
 
 
 const sources = [
