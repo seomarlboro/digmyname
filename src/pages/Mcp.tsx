@@ -355,12 +355,27 @@ const Mcp = () => {
                   {copiedCli ? "Copied" : "Copy"}
                 </Button>
               </div>
-              <pre className="p-6 text-sm overflow-x-auto font-mono leading-relaxed">
-                <code className="text-foreground/90">
-                  <span className="text-primary select-none">$ </span>
-                  {oneLineCommand}
-                </code>
-              </pre>
+              <div className="p-6 overflow-x-auto text-[13px] leading-relaxed">
+                <SyntaxHighlighter
+                  language="bash"
+                  style={vscDarkPlus}
+                  customStyle={{
+                    margin: 0,
+                    padding: 0,
+                    background: "transparent",
+                    fontSize: "13px",
+                    lineHeight: "1.6",
+                  }}
+                  codeTagProps={{
+                    style: {
+                      fontFamily:
+                        'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+                    },
+                  }}
+                >
+                  {`$ ${oneLineCommand}`}
+                </SyntaxHighlighter>
+              </div>
             </div>
 
             {/* JSON config */}
