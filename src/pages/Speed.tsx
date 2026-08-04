@@ -192,8 +192,8 @@ const Speed = () => {
                 <div className="absolute right-5 top-4 font-mono text-3xl font-bold text-muted-foreground/10 transition-colors group-hover:text-primary/20">
                   {step.step}
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
-                  <step.icon className="h-5 w-5 text-primary" />
+                <div className="icon-frame">
+                  <step.icon />
                 </div>
                 <h3 className="mt-4 font-semibold">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.detail}</p>

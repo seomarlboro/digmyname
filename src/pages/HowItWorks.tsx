@@ -205,8 +205,8 @@ const HowItWorks = () => {
                 className="surface-card p-5 card-hover"
               >
                 <div className="mb-3 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <s.icon className="h-5 w-5" />
+                  <div className="icon-frame">
+                    <s.icon />
                   </div>
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -229,7 +229,7 @@ const HowItWorks = () => {
         <section className="py-12">
           <div className="rounded-xl border border-warning/30 bg-warning/5 p-8">
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/15 text-warning">
+              <div className="icon-frame icon-frame-warning">
                 <AlertCircle className="h-5 w-5" />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">

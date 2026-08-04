@@ -258,8 +258,8 @@ const Mcp = () => {
                   key={s.label}
                   className="group p-6 surface-card hover:border-primary/40 transition-colors flex flex-col items-center text-center"
                 >
-                  <div className="w-11 h-11 mb-3 rounded-xl bg-gradient-to-br from-primary/20 to-purple-500/20 border border-primary/20 flex items-center justify-center">
-                    <s.icon className="w-5 h-5 text-primary" />
+                  <div className="icon-frame mb-3">
+                    <s.icon />
                   </div>
                   <div className="text-2xl md:text-3xl font-bold tracking-tight leading-none bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
                     {s.value}
@@ -298,8 +298,8 @@ const Mcp = () => {
                   className="group relative p-6 surface-card card-hover transition-colors hover:border-primary/50 flex flex-col"
                 >
                   <div className="flex items-start justify-between mb-6">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-purple-500/20 border border-primary/20 flex items-center justify-center">
-                      <f.icon className="w-6 h-6 text-primary" />
+                    <div className="icon-frame">
+                      <f.icon />
                     </div>
                     <span className="text-xs font-mono text-muted-foreground/60">{f.n}</span>
                   </div>
