@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Zap, Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
+import { Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
 import { LottieAward } from "@/components/LottieAward";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -14,28 +14,28 @@ const pipeline = [
     icon: Timer,
     title: "80 ms debounce",
     detail:
-      "We fire 80 ms after your last keystroke. Long enough to avoid a request storm, short enough that you never feel it — and we count it against ourselves in the timer you see on screen.",
+      "We fire 80 ms after your last keystroke and count it against ourselves in the timer you see.",
   },
   {
     step: "02",
     icon: Network,
     title: "Parallel DNS pre-check",
     detail:
-      "One edge call resolves NS/A records for every candidate at once. Typically 30–80 ms, and it is what flips most cards to a preliminary available / taken state.",
+      "One edge call resolves NS/A records for every candidate at once, typically 30–80 ms.",
   },
   {
     step: "03",
     icon: ShieldCheck,
     title: "Authoritative pass, per card",
     detail:
-      "RDAP against each TLD's own registry, in parallel. The ten most popular extensions each get their own request, so no card waits for a slower sibling. Prices arrive in the same response.",
+      "RDAP against each TLD registry in parallel. No card waits for a slower sibling.",
   },
   {
     step: "04",
     icon: Gauge,
     title: "Hot cache at the edge",
     detail:
-      "Recent lookups are served from a short-lived edge cache, so repeated and popular queries return in single-digit milliseconds — without ever going stale enough to mislead you.",
+      "Recent lookups are served from a short-lived edge cache in single-digit milliseconds.",
   },
 ];
 
@@ -124,44 +124,15 @@ const Speed = () => {
           </Button>
         </section>
 
-        {/* Timer scope */}
+        {/* What the timer includes */}
         <section className="mt-16">
           <div className="flex items-center gap-4">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">What the timer includes</h2>
             <div className="hidden h-px flex-1 bg-gradient-to-r from-border to-transparent sm:block" />
           </div>
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            Everything. The stopwatch starts at your final keypress, so our own debounce, your network round
-            trip, the lookup and the React render are all inside the number. It is the time you actually
-            waited — not the time our server spent.
+            The stopwatch starts at your final keystroke and stops when the first card paints.
           </p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {[
-              "Debounce after the last keystroke (80 ms)",
-              "Round trip from your browser to our edge",
-              "The DNS / RDAP lookup itself",
-              "Painting the first resolved card",
-            ].map((item) => (
-              <div
-                key={item}
-                className="flex items-center gap-4 py-3 text-base font-medium"
-              >
-                <Zap className="h-6 w-6 shrink-0 text-primary" />
-                {item}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Pipeline */}
-        <section className="mt-16">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">The pipeline</h2>
-            <div className="hidden h-px flex-1 bg-gradient-to-r from-border to-transparent sm:block" />
-            <span className="hidden text-xs uppercase tracking-widest text-muted-foreground sm:block">
-              Parallel execution
-            </span>
-          </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {pipeline.map((step) => (
               <FeatureCard
