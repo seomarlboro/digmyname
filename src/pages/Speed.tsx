@@ -107,7 +107,7 @@ const Speed = () => {
 
 
         {/* Claim */}
-        <section className="mt-6 flex flex-row flex-wrap items-center justify-between gap-5 rounded-xl border border-primary/30 bg-primary/5 p-8">
+        <section className="mt-6 flex flex-row flex-wrap items-center justify-between gap-5 rounded-xl border border-border/60 p-8">
           <div className="flex flex-1 items-center gap-5 min-w-0">
             <LottieAward className="h-20 w-20 shrink-0" />
             <div className="min-w-0 flex-1">
