@@ -187,7 +187,7 @@ export const Stat = ({
   accent?: "mint" | "violet";
   icon?: (props: { className?: string }) => ReactNode;
 }) => (
-  <div className="flex items-center gap-5 px-5 py-5 transition-colors hover:bg-muted/10">
+  <div className="flex items-center gap-5 px-10 py-10 transition-colors hover:bg-muted/10">
     {Icon && (
       <Icon
         className={cn(
