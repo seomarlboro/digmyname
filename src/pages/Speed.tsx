@@ -1,54 +1,78 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Zap, Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
+import { Zap, Timer, Network, Gauge, ShieldCheck, ArrowRight, Trophy } from "lucide-react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 const pipeline = [
   {
+    step: "01",
     icon: Timer,
     title: "80 ms debounce",
     detail:
-      "We wait just 80 ms after your last keystroke before firing. Long enough to avoid a request storm, short enough that you never feel it. This delay is counted against us in the timer you see on screen.",
+      "We fire 80 ms after your last keystroke. Long enough to avoid a request storm, short enough that you never feel it — and we count it against ourselves in the timer you see on screen.",
   },
   {
+    step: "02",
     icon: Network,
     title: "Parallel DNS pre-check",
     detail:
-      "A single edge call resolves NS/A records for every candidate at once. Typically 30–80 ms, and it is what flips most cards to a preliminary available / taken state.",
+      "One edge call resolves NS/A records for every candidate at once. Typically 30–80 ms, and it is what flips most cards to a preliminary available / taken state.",
   },
   {
+    step: "03",
     icon: ShieldCheck,
     title: "Authoritative pass, per card",
     detail:
-      "RDAP against each TLD's own registry runs in parallel — the ten most popular extensions each get their own request, so no card waits for a slower sibling. Prices arrive with the same response.",
+      "RDAP against each TLD's own registry, in parallel. The ten most popular extensions each get their own request, so no card waits for a slower sibling. Prices arrive in the same response.",
   },
   {
+    step: "04",
     icon: Gauge,
-    title: "Hot cache",
+    title: "Hot cache at the edge",
     detail:
-      "Recent lookups are served from a short-lived cache at the edge, so repeated and popular queries return in single-digit milliseconds without ever going stale enough to mislead.",
+      "Recent lookups are served from a short-lived edge cache, so repeated and popular queries return in single-digit milliseconds — without ever going stale enough to mislead you.",
   },
 ];
 
 const benchmark = [
-  { name: "Raw registry RDAP (Verisign, .com)", ms: "~47 ms", note: "Theoretical floor — one TLD, no pricing, no UI" },
-  { name: "DigMyName /fast (warm)", ms: "~170 ms", note: "Availability signal across the full TLD set" },
-  { name: "DigMyName full check (warm)", ms: "~0.4–1.6 s", note: "Availability + premium detection + registrar pricing" },
+  {
+    name: "DigMyName /fast",
+    note: "Availability signal across the full TLD set",
+    ms: "~170 ms",
+    bar: 92,
+    us: true,
+    tag: "Ours",
+  },
+  {
+    name: "Raw registry RDAP",
+    note: "Verisign .com — one TLD, no pricing, no UI. The physical floor.",
+    ms: "~47 ms",
+    bar: 100,
+    us: false,
+    tag: "Theoretical floor",
+  },
+  {
+    name: "DigMyName full check",
+    note: "Availability + premium detection + registrar pricing",
+    ms: "~0.4–1.6 s",
+    bar: 55,
+    us: true,
+    tag: "Ours",
+  },
 ];
 
 const Speed = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>How fast is DigMyName? Measured domain search speed</title>
+        <title>Fastest domain search in the universe (or second) — DigMyName</title>
         <meta
           name="description"
-          content="We show a live timer on every search: the clock starts on your last keystroke and stops on the first answer. Here is exactly how DigMyName measures domain search speed."
+          content="We think we run the fastest domain search in the universe. If we're second, the timer on every search will tell you. Here is the full methodology, pipeline and benchmarks."
         />
         <link rel="canonical" href="https://digmyname.com/speed" />
-        <meta property="og:title" content="How fast is DigMyName? Measured domain search speed" />
+        <meta property="og:title" content="Fastest domain search in the universe (or second)" />
         <meta
           property="og:description"
           content="A live, honest timer on every domain search — and the full methodology behind it."
@@ -60,95 +84,205 @@ const Speed = () => {
       <Header />
 
       <main className="container mx-auto max-w-[968px] px-4 pb-24 pt-12">
-        <Badge variant="secondary" className="mb-4 gap-1.5">
-          <Zap className="h-3.5 w-3.5 text-primary" />
-          Measured, not marketed
-        </Badge>
+        {/* Hero */}
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-14 backdrop-blur-xl sm:px-12">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
 
-        <h1 className="text-gradient text-4xl font-extrabold leading-[1.05] tracking-[-0.04em] sm:text-5xl md:text-6xl">
-          Speed you can check yourself
-        </h1>
+          <div className="relative">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              </span>
+              Timed live on every search
+            </div>
 
-        <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-          Plenty of tools claim to be the fastest. We would rather show you a number. Every search on DigMyName
-          runs a live timer: it starts on your last keystroke and stops the moment the first availability answer
-          appears on screen. Nothing is excluded to make the number look better.
-        </p>
+            <h1 className="mt-6 text-4xl font-extrabold leading-[1.02] tracking-[-0.045em] sm:text-5xl md:text-6xl">
+              The fastest domain search
+              <br />
+              in the universe.
+              <span className="text-gradient"> Or the second.</span>
+            </h1>
 
-        <section className="mt-12">
-          <h2 className="text-2xl font-bold tracking-tight">What the timer includes</h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            The stopwatch starts at your final keypress — so our own 80 ms debounce, your network round trip,
-            the lookup itself and the React render are all inside the measurement. It is the time you actually
-            waited, not the time our server spent.
-          </p>
-          <ul className="mt-6 space-y-2 text-muted-foreground">
-            <li className="flex gap-3">
-              <span className="text-primary">•</span> Debounce after the last keystroke (80 ms)
-            </li>
-            <li className="flex gap-3">
-              <span className="text-primary">•</span> Round trip from your browser to our edge function
-            </li>
-            <li className="flex gap-3">
-              <span className="text-primary">•</span> The DNS / RDAP lookup itself
-            </li>
-            <li className="flex gap-3">
-              <span className="text-primary">•</span> Painting the first resolved card
-            </li>
-          </ul>
+            <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
+              We are not going to pretend we measured every tool on every planet. So here is the deal: every
+              search on DigMyName runs a stopwatch. It starts on your last keystroke and stops the moment the
+              first answer hits the screen. Find something faster and we will put it at the top of this page
+              ourselves.
+            </p>
+
+            <div className="mt-8 flex flex-wrap items-end gap-8">
+              <div>
+                <div className="font-mono text-5xl font-bold tabular-nums text-primary">~170</div>
+                <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">ms · first answer</div>
+              </div>
+              <div>
+                <div className="font-mono text-5xl font-bold tabular-nums">80</div>
+                <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">ms · debounce (ours)</div>
+              </div>
+              <div>
+                <div className="font-mono text-5xl font-bold tabular-nums">50+</div>
+                <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">TLDs · in parallel</div>
+              </div>
+            </div>
+          </div>
         </section>
 
-        <section className="mt-14">
-          <h2 className="text-2xl font-bold tracking-tight">How we get there</h2>
+        {/* Claim */}
+        <section className="mt-6 flex flex-col gap-4 rounded-2xl border border-primary/20 bg-primary/[0.06] p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <Trophy className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div>
+              <h2 className="font-semibold">Beat our number, take the crown</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Screenshot a faster measured first answer from any public domain search and we will publish it
+                here, credited. No press release, no asterisk.
+              </p>
+            </div>
+          </div>
+          <Button asChild variant="outline" className="shrink-0">
+            <Link to="/">Run the timer</Link>
+          </Button>
+        </section>
+
+        {/* Timer scope */}
+        <section className="mt-16">
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold tracking-tight">What the timer includes</h2>
+            <div className="hidden h-px flex-1 bg-gradient-to-r from-white/15 to-transparent sm:block" />
+          </div>
+          <p className="mt-3 max-w-2xl text-muted-foreground">
+            Everything. The stopwatch starts at your final keypress, so our own debounce, your network round
+            trip, the lookup and the React render are all inside the number. It is the time you actually
+            waited — not the time our server spent.
+          </p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {[
+              "Debounce after the last keystroke (80 ms)",
+              "Round trip from your browser to our edge",
+              "The DNS / RDAP lookup itself",
+              "Painting the first resolved card",
+            ].map((item) => (
+              <div
+                key={item}
+                className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm"
+              >
+                <Zap className="h-4 w-4 shrink-0 text-primary" />
+                {item}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Pipeline */}
+        <section className="mt-16">
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold tracking-tight">The pipeline</h2>
+            <div className="hidden h-px flex-1 bg-gradient-to-r from-white/15 to-transparent sm:block" />
+            <span className="hidden text-xs uppercase tracking-widest text-muted-foreground sm:block">
+              Parallel execution
+            </span>
+          </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {pipeline.map((step) => (
               <div
                 key={step.title}
-                className="rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl"
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40"
               >
-                <step.icon className="h-5 w-5 text-primary" />
-                <h3 className="mt-3 font-semibold">{step.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{step.detail}</p>
+                <div className="absolute right-5 top-4 font-mono text-3xl font-bold text-white/5 transition-colors group-hover:text-primary/20">
+                  {step.step}
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
+                  <step.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="mt-4 font-semibold">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.detail}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mt-14">
-          <h2 className="text-2xl font-bold tracking-tight">Reference numbers</h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            Measured from a single datacenter connection in August 2026. Your own numbers will differ with
-            distance, network and TLD — which is exactly why the timer in the app measures your session, not ours.
-          </p>
-          <div className="mt-6 overflow-hidden rounded-xl border border-white/10">
-            {benchmark.map((row, i) => (
+        {/* Benchmarks */}
+        <section className="mt-16">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Reference numbers</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Single datacenter connection, August 2026. Lower is better.
+              </p>
+            </div>
+            <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+              Measured, not marketed
+            </span>
+          </div>
+
+          <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+            <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-white/10 bg-white/[0.04] px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_120px]">
+              <div>Target</div>
+              <div className="hidden sm:block">Latency</div>
+              <div className="text-right">Relative</div>
+            </div>
+            {benchmark.map((row) => (
               <div
                 key={row.name}
-                className={`flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between ${
-                  i > 0 ? "border-t border-white/10" : ""
+                className={`grid grid-cols-[1fr_auto] items-center gap-4 border-b border-white/5 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_120px] ${
+                  row.us ? "bg-primary/[0.05]" : ""
                 }`}
               >
                 <div>
-                  <div className="font-medium">{row.name}</div>
-                  <div className="text-sm text-muted-foreground">{row.note}</div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {row.us && <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))]" />}
+                    <span className="font-medium">{row.name}</span>
+                    <span
+                      className={`rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase ${
+                        row.us
+                          ? "border-primary/30 bg-primary/15 text-primary"
+                          : "border-white/10 bg-white/5 text-muted-foreground"
+                      }`}
+                    >
+                      {row.tag}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-sm text-muted-foreground">{row.note}</div>
                 </div>
-                <div className="text-lg font-bold tabular-nums text-primary">{row.ms}</div>
+                <div
+                  className={`font-mono text-lg font-bold tabular-nums ${
+                    row.us ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  {row.ms}
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className={`h-full rounded-full ${row.us ? "bg-primary" : "bg-white/25"}`}
+                      style={{ width: `${row.bar}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-        </section>
 
-        <section className="mt-14">
-          <h2 className="text-2xl font-bold tracking-tight">Why we do not say “world’s fastest”</h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            Because we cannot prove it, and neither can anyone else who says it. Latency depends on where you
-            are, which TLD you query and whether the answer was cached. A superlative that flips with the
-            network is marketing; a timer you can read on your own screen is a fact. We publish the number and
-            the method, and we keep working the number down.
+          <p className="mt-3 text-xs text-muted-foreground">
+            Your own numbers will differ with distance, network and TLD — which is exactly why the timer in the
+            app measures your session, not ours.
           </p>
         </section>
 
-        <div className="mt-14 flex flex-wrap gap-3">
+        {/* Honesty */}
+        <section className="mt-16 rounded-2xl border border-white/10 bg-white/[0.02] p-6 sm:p-8">
+          <h2 className="text-2xl font-bold tracking-tight">The small print on “fastest”</h2>
+          <p className="mt-3 max-w-2xl text-muted-foreground">
+            Nobody can prove a universal latency record, and anybody who states one flat-out is selling you
+            something. Latency depends on where you are, which TLD you query and whether the answer was cached.
+            So we make the loud claim and then hand you the stopwatch to check it. If we are second, the number
+            on your screen will say so — and we will keep shaving it down until we are not.
+          </p>
+        </section>
+
+        <div className="mt-12 flex flex-wrap gap-3">
           <Button asChild size="lg">
             <Link to="/">
               Try it and watch the timer
