@@ -5,6 +5,16 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] — 2026-08-04
+
+### Added
+- npm **provenance**: releases are now built and published from GitHub Actions (`.github/workflows/publish-mcp.yml`), giving the package a verified provenance badge on npm.
+- `publishConfig` with `access: public` and `provenance: true`.
+- CI smoke test that boots the server over stdio before publishing.
+
+### Fixed
+- `repository` / `bugs` now point at the real source repo (`Seomarlboro/digmyname`, directory `mcp`) so npm renders the README, issues link and source view correctly.
+
 ## [1.1.4] — 2026-08-04
 
 ### Changed
