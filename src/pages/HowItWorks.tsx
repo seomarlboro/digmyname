@@ -17,7 +17,7 @@ import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
-import { SearchIcon, ShieldIcon } from "@/components/StatIcons";
+import { SearchIcon, ShieldIcon, StoreIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
 
 
@@ -182,8 +182,9 @@ const HowItWorks = () => {
           }
           lede="Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks four independent sources and tells you when it isn't sure — so you never buy a domain that turns out to be taken, or skip one that was actually free."
         >
-          <StatGrid cols={2}>
+          <StatGrid cols={3}>
             <Stat value="4" label="Verification sources" accent="mint" icon={SearchIcon} />
+            <Stat value="7" label="Registrars compared" accent="violet" icon={StoreIcon} />
             <Stat value="100%" label="Honest uncertainty" accent="warning" icon={ShieldIcon} />
           </StatGrid>
 
