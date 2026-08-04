@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import Lottie, { type LottieComponentProps } from "lottie-react";
-import awardAsset from "@/assets/trophy-animated.json.asset.json";
+import trophyAnimation from "@/assets/trophy-animated.json";
 
 interface LottieAwardProps extends Omit<LottieComponentProps, "animationData"> {
   className?: string;
@@ -70,22 +70,11 @@ function recolorAnimationData(
 }
 
 export function LottieAward({ className, ...props }: LottieAwardProps) {
-  const [animationData, setAnimationData] = useState<unknown | null>(null);
+  const animationData = useMemo(
+    () => recolorAnimationData(trophyAnimation),
+    []
+  );
 
-  useEffect(() => {
-    fetch(awardAsset.url)
-      .then((res) => res.json())
-      .then((raw) => {
-        const recolored = recolorAnimationData(raw);
-        setAnimationData(recolored);
-      })
-      .catch((err) => {
-        // Suppress in production per project security rule
-        if (import.meta.env.DEV) console.error("Failed to load award Lottie:", err);
-      });
-  }, []);
-
-  if (!animationData) return null;
 
   return (
     <Lottie
