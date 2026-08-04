@@ -108,7 +108,7 @@ const Speed = () => {
 
 
         {/* Claim */}
-        <section className="mt-6 flex flex-row flex-wrap items-center justify-between gap-5 rounded-xl border border-border/60 p-8">
+        <section className="surface-card mt-6 flex flex-row flex-wrap items-center justify-between gap-5 p-8">
           <div className="flex flex-1 items-center gap-5 min-w-0">
             <LottieAward className="h-20 w-20 shrink-0" />
             <div className="min-w-0 flex-1">
@@ -165,7 +165,6 @@ const Speed = () => {
             {pipeline.map((step) => (
               <FeatureCard
                 key={step.title}
-                plain
                 icon={step.icon}
                 index={step.step}
                 title={step.title}
@@ -190,7 +189,7 @@ const Speed = () => {
             </span>
           </div>
 
-          <div className="mt-6 overflow-hidden">
+          <div className="surface-card-lg mt-6 overflow-hidden">
             <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid-cols-[1fr_140px_180px]">
               <div>Target</div>
               <div className="hidden sm:block">Latency</div>

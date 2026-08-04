@@ -139,7 +139,7 @@ const Pricing = () => {
           <>
             {/* Summary table */}
             <Section title="Cheapest per extension" lede="One row per TLD — the best price we found for each action." aside="Updated daily">
-              <div className="overflow-hidden rounded-3xl border border-border/70">
+              <div className="surface-card-lg overflow-hidden">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border">
@@ -254,7 +254,7 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
   const range = maxRegPrice - cheapestRegPrice || 1;
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-border/70">
+    <div className="surface-card-lg overflow-hidden">
       <div className="flex items-center gap-3 border-b border-border px-5 py-4">
         <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
         <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>

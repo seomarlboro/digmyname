@@ -283,7 +283,7 @@ const Mcp = () => {
             </p>
 
             {/* One-line CLI install */}
-            <div className="mb-4 overflow-hidden rounded-3xl border border-border/70">
+            <div className="surface-card-lg mb-4 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40">
                 <div className="flex items-center gap-3">
                   <Terminal className="w-3.5 h-3.5 text-primary" />
@@ -326,7 +326,7 @@ const Mcp = () => {
             </div>
 
             {/* JSON config */}
-            <div className="overflow-hidden rounded-3xl border border-border/70">
+            <div className="surface-card-lg overflow-hidden">
               <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40">
                 <div className="flex items-center gap-3">
                   <Terminal className="w-3.5 h-3.5 text-primary" />
@@ -386,7 +386,7 @@ const Mcp = () => {
               {tools.map((t, i) => (
                 <div
                   key={t.name}
-                  className="group relative p-5 md:p-6 rounded-2xl border border-border hover:border-foreground/20 transition-colors"
+                  className="surface-card group relative p-5 transition-colors hover:border-foreground/20 md:p-6"
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-baseline gap-2 flex-wrap">
@@ -409,7 +409,7 @@ const Mcp = () => {
           {/* Waitlist */}
           <section
             id="waitlist"
-            className="mb-20 relative overflow-hidden p-8 md:p-10 rounded-xl border border-border scroll-mt-24"
+            className="surface-card mb-20 relative scroll-mt-24 overflow-hidden p-8 md:p-10"
           >
             <div className="relative grid md:grid-cols-2 gap-8 md:gap-10 items-center">
               <div>
@@ -433,7 +433,7 @@ const Mcp = () => {
           </section>
 
           {/* Footer CTA */}
-          <section className="text-center p-10 rounded-2xl border border-border">
+          <section className="surface-card p-10 text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-border text-xs">
               MIT licensed · Built in Ukraine 🇺🇦
             </div>

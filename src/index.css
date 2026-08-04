@@ -200,35 +200,35 @@
      Speed / MCP. Glass Aurora palette, Sora + Manrope, bento grid.
      ========================================================== */
 
-  /* Surfaces — neutral fills, no purple tint */
+  /* Surfaces — clearly separated neutral fills, no purple tint */
   .surface-card {
-    @apply rounded-2xl border border-border bg-white/70;
+    @apply rounded-2xl border border-border bg-card;
   }
-  .dark .surface-card { background-color: hsl(0 0% 100% / 0.035); }
+  .dark .surface-card { background-color: hsl(var(--card)); }
 
   .surface-card-lg {
-    @apply rounded-3xl border border-border bg-white/70;
+    @apply rounded-3xl border border-border bg-card;
   }
-  .dark .surface-card-lg { background-color: hsl(0 0% 100% / 0.035); }
+  .dark .surface-card-lg { background-color: hsl(var(--card)); }
 
   .surface-muted {
-    @apply rounded-2xl border border-border bg-black/[0.03];
+    @apply rounded-2xl border border-border bg-muted/60;
   }
-  .dark .surface-muted { background-color: hsl(0 0% 100% / 0.025); }
+  .dark .surface-muted { background-color: hsl(var(--muted) / 0.72); }
 
   /* Bento tile — neutral glass fill */
   .bento {
-    @apply relative overflow-hidden rounded-3xl border border-border/70 bg-white/70
+    @apply relative overflow-hidden rounded-3xl border border-border bg-card
            transition-[border-color,transform,box-shadow,background-color] duration-300;
   }
   .dark .bento {
-    background-color: hsl(0 0% 100% / 0.035);
+    background-color: hsl(var(--card));
     box-shadow: none;
   }
   .bento-hover:hover {
     @apply -translate-y-0.5 border-aurora/40;
   }
-  .dark .bento-hover:hover { background-color: hsl(0 0% 100% / 0.06); }
+  .dark .bento-hover:hover { background-color: hsl(var(--secondary)); }
   /* Padding scale — always one of these two */
   .bento-p   { @apply p-6 sm:p-7; }
   .bento-p-lg { @apply p-8 sm:p-12; }
