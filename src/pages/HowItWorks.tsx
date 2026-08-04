@@ -17,7 +17,7 @@ import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
 
 
 const sources = [
@@ -201,27 +201,15 @@ const HowItWorks = () => {
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             {sources.map((s, i) => (
-              <div
+              <FeatureCard
                 key={s.name}
-                className="surface-card p-5 card-hover"
+                icon={s.icon}
+                index={String(i + 1).padStart(2, "0")}
+                eyebrow={`Step ${i + 1} · ${s.role}`}
+                title={s.name}
               >
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="icon-frame">
-                    <s.icon />
-                  </div>
-                  <div>
-                    <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                      Step {i + 1} · {s.role}
-                    </div>
-                    <div className="text-lg font-semibold tracking-tight text-foreground">
-                      {s.name}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {s.detail}
-                </p>
-              </div>
+                {s.detail}
+              </FeatureCard>
             ))}
           </div>
         </section>

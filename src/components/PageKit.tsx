@@ -219,3 +219,60 @@ export const Eyebrow = ({
     {children}
   </span>
 );
+
+/* ── Feature card ───────────────────────────────────────
+ * The single card primitive for numbered/feature grids on
+ * How it works · Speed · MCP. Same geometry everywhere:
+ * icon top-left · index top-right · eyebrow · title · body · footer.
+ */
+
+export const FeatureCard = ({
+  icon: Icon,
+  index,
+  eyebrow,
+  title,
+  children,
+  footer,
+  className,
+  as: As = "div",
+  ...rest
+}: {
+  icon: any;
+  index?: ReactNode;
+  eyebrow?: ReactNode;
+  title: ReactNode;
+  children?: ReactNode;
+  footer?: ReactNode;
+  className?: string;
+  as?: any;
+  [key: string]: any;
+}) => (
+  <As
+    className={cn(
+      "group relative flex flex-col overflow-hidden surface-card p-6 card-hover transition-colors hover:border-primary/40",
+      className,
+    )}
+    {...rest}
+  >
+    <div className="mb-5 flex items-start justify-between gap-4">
+      <div className="icon-frame">
+        <Icon />
+      </div>
+      {index && (
+        <span className="font-mono text-xs text-muted-foreground/60">{index}</span>
+      )}
+    </div>
+    {eyebrow && (
+      <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        {eyebrow}
+      </div>
+    )}
+    <h3 className="text-lg font-semibold tracking-tight text-foreground">{title}</h3>
+    {children && (
+      <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+        {children}
+      </p>
+    )}
+    {footer && <div className="mt-5 flex items-center justify-between">{footer}</div>}
+  </As>
+);

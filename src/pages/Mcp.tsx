@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trackMcpEvent } from "@/lib/trackMcpEvent";
 import WaitlistForm from "@/components/WaitlistForm";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
 
 
 const GITHUB_URL = "https://github.com/seomarlboro/domain-check-skills";
@@ -251,34 +251,31 @@ const Mcp = () => {
             </div>
             <div className="grid md:grid-cols-3 gap-4">
               {formats.map((f) => (
-                <a
+                <FeatureCard
                   key={f.title}
+                  as="a"
+                  icon={f.icon}
+                  index={f.n}
+                  title={f.title}
                   href={f.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() =>
                     trackMcpEvent("click", `format_${f.title.toLowerCase().replace(/\s+/g, "_")}`)
                   }
-                  className="group relative p-6 surface-card card-hover transition-colors hover:border-primary/50 flex flex-col"
+                  footer={
+                    <>
+                      <Badge variant="outline" className="text-xs">
+                        {f.badge}
+                      </Badge>
+                      <span className="text-sm text-primary inline-flex items-center gap-1 group-hover:gap-2 transition-all font-medium">
+                        Install <ArrowUpRight className="w-4 h-4" />
+                      </span>
+                    </>
+                  }
                 >
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="icon-frame">
-                      <f.icon />
-                    </div>
-                    <span className="text-xs font-mono text-muted-foreground/60">{f.n}</span>
-                  </div>
-                  <h3 className="text-lg font-semibold tracking-tight mb-2">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-5 leading-relaxed flex-1">{f.for}</p>
-
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs">
-                      {f.badge}
-                    </Badge>
-                    <span className="text-sm text-primary inline-flex items-center gap-1 group-hover:gap-2 transition-all font-medium">
-                      Install <ArrowUpRight className="w-4 h-4" />
-                    </span>
-                  </div>
-                </a>
+                  {f.for}
+                </FeatureCard>
               ))}
             </div>
           </section>
