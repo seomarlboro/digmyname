@@ -112,15 +112,15 @@ const Speed = () => {
             </p>
 
             <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div>
+              <div className="text-center">
                 <div className="font-mono text-4xl sm:text-5xl font-bold tabular-nums text-primary">~170</div>
                 <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">ms · first answer</div>
               </div>
-              <div>
+              <div className="text-center">
                 <div className="font-mono text-4xl sm:text-5xl font-bold tabular-nums">80</div>
                 <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">ms · debounce (ours)</div>
               </div>
-              <div>
+              <div className="text-center">
                 <div className="font-mono text-4xl sm:text-5xl font-bold tabular-nums">50+</div>
                 <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">TLDs · in parallel</div>
               </div>
