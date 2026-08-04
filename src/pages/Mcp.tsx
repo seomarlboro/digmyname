@@ -148,20 +148,6 @@ const Mcp = () => {
       </Helmet>
 
       <div className="min-h-screen bg-transparent relative overflow-hidden">
-        {/* Ambient background */}
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-          <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full bg-primary/10 blur-[140px]" />
-          <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-500/10 blur-[140px]" />
-          <div
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage:
-                "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
-              backgroundSize: "48px 48px",
-            }}
-          />
-        </div>
-
         <Header />
 
         <PageMain>
@@ -219,7 +205,7 @@ const Mcp = () => {
                     View on GitHub
                   </a>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-12 gap-2 bg-card/30 px-6 backdrop-blur">
+                <Button asChild size="lg" variant="outline" className="h-12 gap-2 px-6">
                   <Link to="/" onClick={() => trackMcpEvent("click", "try_web")}>
                     Try the web version
                   </Link>
@@ -297,8 +283,8 @@ const Mcp = () => {
             </p>
 
             {/* One-line CLI install */}
-            <div className="mb-4 surface-card overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-card/40">
+            <div className="mb-4 overflow-hidden rounded-3xl border border-border/70">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40">
                 <div className="flex items-center gap-3">
                   <Terminal className="w-3.5 h-3.5 text-primary" />
 
@@ -340,8 +326,8 @@ const Mcp = () => {
             </div>
 
             {/* JSON config */}
-            <div className="surface-card overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40 bg-card/40">
+            <div className="overflow-hidden rounded-3xl border border-border/70">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40">
                 <div className="flex items-center gap-3">
                   <Terminal className="w-3.5 h-3.5 text-primary" />
                   <span className="text-xs text-muted-foreground font-mono">
@@ -400,7 +386,7 @@ const Mcp = () => {
               {tools.map((t, i) => (
                 <div
                   key={t.name}
-                  className="group relative p-5 md:p-6 surface-card hover:border-foreground/20 transition-colors"
+                  className="group relative p-5 md:p-6 rounded-2xl border border-border hover:border-foreground/20 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-baseline gap-2 flex-wrap">
@@ -423,12 +409,8 @@ const Mcp = () => {
           {/* Waitlist */}
           <section
             id="waitlist"
-            className="mb-20 relative overflow-hidden p-8 md:p-10 rounded-xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card to-purple-500/15 scroll-mt-24"
+            className="mb-20 relative overflow-hidden p-8 md:p-10 rounded-xl border border-border scroll-mt-24"
           >
-            <div
-              aria-hidden
-              className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-primary/20 blur-[120px] -z-0"
-            />
             <div className="relative grid md:grid-cols-2 gap-8 md:gap-10 items-center">
               <div>
                 <Badge variant="secondary" className="mb-3">
@@ -451,8 +433,8 @@ const Mcp = () => {
           </section>
 
           {/* Footer CTA */}
-          <section className="text-center p-10 surface-card">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-primary/10 border border-primary/20 text-xs">
+          <section className="text-center p-10 rounded-2xl border border-border">
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-border text-xs">
               MIT licensed · Built in Ukraine 🇺🇦
             </div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">

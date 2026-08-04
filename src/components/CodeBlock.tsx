@@ -29,7 +29,7 @@ export function CodeBlock({ tabs, defaultTab = 0 }: CodeBlockProps) {
 
   return (
     <div className="overflow-hidden rounded-xl border border-border/60 bg-[#0d1117]">
-      <div className="flex items-center justify-between border-b border-border/60 bg-muted/30 px-4 py-2">
+      <div className="flex items-center justify-between border-b border-border/60 px-4 py-2">
         <div className="flex gap-1">
           {tabs.map((tab, idx) => (
             <button
@@ -37,7 +37,7 @@ export function CodeBlock({ tabs, defaultTab = 0 }: CodeBlockProps) {
               onClick={() => setActive(idx)}
               className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
                 idx === active
-                  ? "bg-primary/15 text-primary"
+                  ? "bg-muted/30 text-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >

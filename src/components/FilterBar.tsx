@@ -48,10 +48,10 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
             <div
               key={tld.extension}
               onClick={() => onToggle(tld.extension)}
-            className={`flex flex-1 items-center justify-between gap-1 rounded-2xl px-3 py-2.5 transition-colors cursor-pointer ${
+            className={`flex flex-1 items-center justify-between gap-1 rounded-2xl border border-border px-3 py-2.5 transition-colors cursor-pointer ${
                 selected
-                  ? "bg-primary/15 ring-1 ring-primary/30"
-                  : "bg-[hsl(211_100%_96%)] dark:bg-secondary hover:bg-secondary"
+                  ? "bg-muted/30 ring-1 ring-border"
+                  : "bg-transparent hover:bg-muted/10"
               }`}
             >
               <span className={`${mobile ? "text-base" : "text-lg"} font-bold text-primary`}>.{tld.extension}</span>
@@ -94,7 +94,7 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-3 text-xs text-muted-foreground">Additional requirements</p>
         <div className="space-y-1">
           {featureOptions.map((f) => (
-            <label key={f} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+            <label key={f} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
               <Checkbox />
               <span className="text-sm text-foreground">{f}</span>
             </label>
@@ -110,7 +110,7 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-3 text-xs text-muted-foreground">Filter by availability</p>
         <div className="space-y-1">
           {statusOptions.map((s) => (
-            <label key={s} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+            <label key={s} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
               <Checkbox />
               <span className="text-sm text-foreground">{s}</span>
             </label>
@@ -146,7 +146,7 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
       <p className="mb-3 text-sm text-muted-foreground">Additional requirements</p>
       <div className="space-y-1">
         {featureOptions.map((f) => (
-          <label key={f} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+          <label key={f} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
             <Checkbox />
             <span className="text-sm text-foreground">{f}</span>
           </label>
@@ -160,7 +160,7 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
       <p className="mb-3 text-sm text-muted-foreground">Filter by availability</p>
       <div className="space-y-1">
         {statusOptions.map((s) => (
-          <label key={s} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+          <label key={s} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
             <Checkbox />
             <span className="text-sm text-foreground">{s}</span>
           </label>
@@ -230,7 +230,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
           <div className="flex items-center justify-between px-5 pt-4 pb-2">
             <h2 className="text-lg font-bold text-foreground">Filters</h2>
             <DrawerClose asChild>
-              <button aria-label="Close filters" className="rounded-full p-1.5 hover:bg-secondary transition-colors">
+              <button aria-label="Close filters" className="rounded-full p-1.5 hover:bg-muted/10 transition-colors">
                 <X className="h-5 w-5 text-muted-foreground" />
               </button>
             </DrawerClose>
@@ -261,14 +261,14 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
               left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
             }}
           >
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
+            <div className="rounded-2xl border border-border p-5 shadow-xl">
               <PopoverContent id={openFilter} />
             </div>
           </div>
         )}
         {openFilter === "extensions" && (
           <div className="absolute left-0 right-0 z-50" style={{ bottom: "calc(100% + 16px)" }}>
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
+            <div className="rounded-2xl border border-border p-5 shadow-xl">
               <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} />
             </div>
           </div>
@@ -284,7 +284,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
               className={`flex min-w-[136px] h-full items-center justify-between gap-4 rounded-2xl border px-5 py-3 text-left whitespace-nowrap transition-all ${
                 openFilter === f.id
                   ? "border-primary/40 bg-primary/10 shadow-lg"
-                  : "border-border/60 bg-secondary/60 hover:bg-secondary dark:border-white/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.1]"
+                  : "border-border/60 bg-muted/10 hover:bg-muted/20 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
               }`}
             >
               <div>

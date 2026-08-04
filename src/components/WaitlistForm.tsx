@@ -51,7 +51,7 @@ const WaitlistForm = () => {
 
   if (status === "success") {
     return (
-      <div className="flex items-center justify-center gap-2 p-6 rounded-xl border border-primary/30 bg-primary/5 text-primary">
+      <div className="flex items-center justify-center gap-2 p-6 rounded-xl border border-border text-foreground">
         <Check className="w-5 h-5" />
         <span className="font-medium">You're on the list. We'll email when paid tier launches.</span>
       </div>

@@ -396,12 +396,12 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
               <div className="mb-4 flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-available" />
                 <h2 className="text-lg font-bold text-foreground flex-1">Available Domains</h2>
-                <div className="flex items-center rounded-2xl border border-border bg-card p-0.5">
+                <div className="flex items-center rounded-2xl border border-border p-0.5">
                   <button
                     onClick={() => setViewMode("cards")}
                     aria-label="Card view"
                     aria-pressed={viewMode === "cards"}
-                    className={`rounded-2xl p-1.5 transition-colors ${viewMode === "cards" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                    className={`rounded-2xl p-1.5 transition-colors ${viewMode === "cards" ? "bg-muted/50 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     <LayoutGrid className="h-4 w-4" />
                   </button>
@@ -409,14 +409,14 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                     onClick={() => setViewMode("compact")}
                     aria-label="Compact list view"
                     aria-pressed={viewMode === "compact"}
-                    className={`rounded-2xl p-1.5 transition-colors ${viewMode === "compact" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                    className={`rounded-2xl p-1.5 transition-colors ${viewMode === "compact" ? "bg-muted/50 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     <List className="h-4 w-4" />
                   </button>
                 </div>
               </div>
             )}
-            <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
+            <div className={viewMode === "compact" ? "rounded-xl border border-border overflow-hidden" : "space-y-3"}>
               {results
                 .filter((r) => !r.checking && r.available && !r.uncertain)
                 .map((r) => (
@@ -431,7 +431,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
                   <h2 className="text-lg font-bold text-foreground">Checking…</h2>
                 </div>
-                <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
+                <div className={viewMode === "compact" ? "rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {checkingResults
                     .slice(0, 20)
                     .map((r) => (
@@ -448,7 +448,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                   <AlertCircle className="h-5 w-5 text-amber-500" />
                   <h2 className="text-lg font-bold text-foreground">Couldn't verify</h2>
                 </div>
-                <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
+                <div className={viewMode === "compact" ? "rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && r.uncertain)
                     .slice(0, 10)
@@ -466,7 +466,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                   <X className="h-5 w-5 text-taken" />
                   <h2 className="text-lg font-bold text-foreground">Taken Domains</h2>
                 </div>
-                <div className={viewMode === "compact" ? "rounded-xl border border-border bg-card overflow-hidden" : "space-y-3"}>
+                <div className={viewMode === "compact" ? "rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && !r.available && !r.uncertain)
                     .slice(0, 10)

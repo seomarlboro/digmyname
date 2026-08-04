@@ -200,31 +200,31 @@
      Speed / MCP. Glass Aurora palette, Sora + Manrope, bento grid.
      ========================================================== */
 
-  /* Surfaces */
+  /* Surfaces — flat, no tinted fills */
   .surface-card {
-    @apply rounded-2xl border border-border bg-card;
+    @apply rounded-2xl border border-border;
   }
 
   .surface-card-lg {
-    @apply rounded-3xl border border-border bg-card;
+    @apply rounded-3xl border border-border;
   }
 
   .surface-muted {
-    @apply rounded-2xl border border-border bg-muted/30;
+    @apply rounded-2xl border border-border;
   }
 
-  /* Glass bento tile — the single card primitive for all info pages */
+  /* Glass bento tile — transparent, only border */
   .bento {
-    @apply relative overflow-hidden rounded-3xl border border-border/70 bg-card/60 backdrop-blur-xl
+    @apply relative overflow-hidden rounded-3xl border border-border/70
            transition-[border-color,transform,box-shadow] duration-300;
   }
   .dark .bento {
-    background-color: hsl(var(--aurora-violet) / 0.55);
-    box-shadow: inset 0 1px 0 0 hsl(0 0% 100% / 0.04);
+    background-color: transparent;
+    box-shadow: none;
   }
   .bento-hover:hover {
     @apply -translate-y-0.5 border-aurora/40;
-    box-shadow: 0 18px 50px -24px hsl(var(--aurora-violet) / 0.45);
+    box-shadow: none;
   }
   /* Padding scale — always one of these two */
   .bento-p   { @apply p-6 sm:p-7; }
@@ -232,8 +232,8 @@
 
   /* Typography scale — identical on every page */
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-aurora/30 bg-aurora/10
-           px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-aurora;
+    @apply inline-flex items-center gap-2 rounded-full border border-border bg-muted/30
+           px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
   }
   .page-title {
     @apply text-4xl font-bold tracking-tight text-foreground sm:text-5xl 2xl:text-6xl;
@@ -405,25 +405,25 @@
   .hero-blob-1 {
     width: 55vw; height: 55vw;
     left: -10vw; top: -15vw;
-    background: radial-gradient(circle at 30% 30%, hsl(var(--aurora-mint) / 0.9), transparent 70%);
+    background: radial-gradient(circle at 30% 30%, hsl(var(--aurora-mint) / 0.75), transparent 70%);
     animation: hero-drift-a 26s ease-in-out infinite;
   }
   .hero-blob-2 {
     width: 50vw; height: 50vw;
     right: -8vw; top: 8%;
-    background: radial-gradient(circle at 70% 40%, hsl(var(--aurora-violet) / 0.85), transparent 70%);
+    background: radial-gradient(circle at 70% 40%, hsl(var(--aurora-mint) / 0.55), transparent 70%);
     animation: hero-drift-b 32s ease-in-out infinite;
   }
   .hero-blob-3 {
     width: 45vw; height: 45vw;
     left: 22%; bottom: -20vw;
-    background: radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.75), transparent 70%);
+    background: radial-gradient(circle at 50% 50%, hsl(190 95% 55% / 0.45), transparent 70%);
     animation: hero-drift-c 28s ease-in-out infinite;
   }
   .hero-blob-4 {
     width: 38vw; height: 38vw;
     right: 18%; bottom: -10vw;
-    background: radial-gradient(circle at 50% 50%, hsl(var(--aurora-mint) / 0.55), transparent 70%);
+    background: radial-gradient(circle at 50% 50%, hsl(var(--aurora-mint) / 0.35), transparent 70%);
     animation: hero-drift-d 34s ease-in-out infinite;
   }
 

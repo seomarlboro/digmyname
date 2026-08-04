@@ -49,12 +49,6 @@ export const PageHeader = ({
   plain?: boolean;
 }) => (
   <section className={cn("mb-10", plain ? "py-2" : "bento bento-p-lg")}>
-    {!plain && (
-      <>
-        <div className="aurora-glow-mint -left-24 -top-24 h-72 w-72" />
-        <div className="aurora-glow-violet -bottom-32 -right-20 h-72 w-72" />
-      </>
-    )}
     <div
       className={cn(
         "relative",
@@ -172,7 +166,7 @@ export const StatGrid = ({
 }) => (
   <div
     className={cn(
-      "mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60",
+      "mt-10 grid grid-cols-2 overflow-hidden rounded-2xl border border-border/60",
       cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4",
       className,
     )}
@@ -191,7 +185,7 @@ export const Stat = ({
   label: ReactNode;
   accent?: "mint" | "violet";
 }) => (
-  <div className="bg-card px-5 py-5 transition-colors hover:bg-muted/40">
+  <div className="px-5 py-5 transition-colors hover:bg-muted/10">
     <div
       className={cn(
         "stat-value text-left",

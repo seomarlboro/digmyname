@@ -147,7 +147,7 @@ const NotFound = () => {
         .nf-bg {
           background:
             radial-gradient(ellipse 60% 50% at 50% 10%, hsl(var(--aurora-mint) / 0.18), transparent 60%),
-            radial-gradient(ellipse 70% 55% at 50% 100%, hsl(var(--aurora-violet) / 0.22), transparent 60%),
+            radial-gradient(ellipse 70% 55% at 50% 100%, hsl(var(--primary) / 0.22), transparent 60%),
             linear-gradient(180deg, hsl(230 40% 4%), hsl(240 45% 6%) 60%, hsl(260 50% 5%));
         }
         .nf-nebula-a, .nf-nebula-b, .nf-nebula-c {
@@ -167,7 +167,7 @@ const NotFound = () => {
           position: absolute;
           width: 50vw; height: 50vw;
           right: -10vw; top: 20%;
-          background: radial-gradient(circle, hsl(var(--aurora-violet) / 0.55), transparent 70%);
+          background: radial-gradient(circle, hsl(var(--primary) / 0.55), transparent 70%);
           animation: nf-drift-b 36s ease-in-out infinite;
         }
         .nf-nebula-c {
@@ -187,7 +187,7 @@ const NotFound = () => {
           opacity: 0.5;
         }
         .nf-vignette {
-          background: radial-gradient(ellipse at center, transparent 40%, hsl(var(--aurora-violet) / 0.9) 100%);
+          background: radial-gradient(ellipse at center, transparent 40%, hsl(var(--primary) / 0.9) 100%);
           pointer-events: none;
         }
         .nf-star {
@@ -242,7 +242,7 @@ const NotFound = () => {
         }
         .nf-orbit-ring--2 {
           inset: 12%;
-          border-color: hsl(var(--aurora-violet) / 0.14);
+          border-color: hsl(var(--primary) / 0.14);
           border-style: solid;
           border-width: 1px;
         }
@@ -256,9 +256,9 @@ const NotFound = () => {
           width: 100%; height: 100%;
           border-radius: 50%;
           background:
-            radial-gradient(circle at 30% 30%, hsl(var(--aurora-mint)), hsl(var(--aurora-violet)) 60%, hsl(260 60% 20%));
+            radial-gradient(circle at 30% 30%, hsl(var(--aurora-mint)), hsl(var(--primary)) 60%, hsl(260 60% 20%));
           box-shadow:
-            inset -6px -6px 12px hsl(var(--aurora-violet) / 0.8),
+            inset -6px -6px 12px hsl(var(--primary) / 0.8),
             0 0 24px hsl(var(--aurora-mint) / 0.7);
           animation: nf-spin-rev 40s linear infinite;
         }
