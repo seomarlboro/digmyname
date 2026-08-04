@@ -37,10 +37,15 @@
   "homepage": "https://digmyname.com/mcp",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Seomarlboro/digmyname.git"
+    "url": "git+https://github.com/Seomarlboro/digmyname.git",
+    "directory": "mcp"
   },
   "bugs": {
     "url": "https://github.com/Seomarlboro/digmyname/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "tsc",
