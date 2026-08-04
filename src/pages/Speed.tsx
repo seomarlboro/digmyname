@@ -14,28 +14,28 @@ const pipeline = [
     icon: Timer,
     title: "80 ms debounce",
     detail:
-      "We fire 80 ms after your last keystroke. Long enough to avoid a request storm, short enough that you never feel it — and we count it against ourselves in the timer you see on screen.",
+      "We fire 80 ms after your last keystroke and count it against ourselves in the timer you see.",
   },
   {
     step: "02",
     icon: Network,
     title: "Parallel DNS pre-check",
     detail:
-      "One edge call resolves NS/A records for every candidate at once. Typically 30–80 ms, and it is what flips most cards to a preliminary available / taken state.",
+      "One edge call resolves NS/A records for every candidate at once, typically 30–80 ms.",
   },
   {
     step: "03",
     icon: ShieldCheck,
     title: "Authoritative pass, per card",
     detail:
-      "RDAP against each TLD's own registry, in parallel. The ten most popular extensions each get their own request, so no card waits for a slower sibling. Prices arrive in the same response.",
+      "RDAP against each TLD registry in parallel. No card waits for a slower sibling.",
   },
   {
     step: "04",
     icon: Gauge,
     title: "Hot cache at the edge",
     detail:
-      "Recent lookups are served from a short-lived edge cache, so repeated and popular queries return in single-digit milliseconds — without ever going stale enough to mislead you.",
+      "Recent lookups are served from a short-lived edge cache in single-digit milliseconds.",
   },
 ];
 
