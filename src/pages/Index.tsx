@@ -11,11 +11,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <Helmet>
-        <title>DigMyName — Find Your Perfect Domain</title>
-        <meta name="description" content="Smart domain search across 50+ TLDs with instant availability checks and AI-powered name suggestions." />
+        <title>Fast Domain Search — World's Fastest Domain Checker | DigMyName</title>
+        <meta name="description" content="The world's fastest domain search. Check availability across 50+ TLDs in milliseconds. If you find a faster checker, come dispute it." />
         <link rel="canonical" href="https://digmyname.com/" />
-        <meta property="og:title" content="DigMyName — Find Your Perfect Domain" />
-        <meta property="og:description" content="Smart domain search across 50+ TLDs with instant availability checks." />
+        <meta property="og:title" content="Fast Domain Search — World's Fastest Domain Checker | DigMyName" />
+        <meta property="og:description" content="The world's fastest domain search. Check availability across 50+ TLDs in milliseconds." />
         <meta property="og:url" content="https://digmyname.com/" />
         <meta property="og:image" content="https://digmyname.com/og-image.jpg" />
       </Helmet>
