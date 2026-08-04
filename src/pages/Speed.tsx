@@ -118,7 +118,7 @@ const Speed = () => {
               </p>
             </div>
           </div>
-          <Button asChild variant="gradient" size="lg" className="shrink-0">
+          <Button asChild variant="gradient" size="lg" className="shrink-0 text-lg font-bold text-black [&_*]:text-black">
             <Link to="/">Run the timer</Link>
           </Button>
         </section>
