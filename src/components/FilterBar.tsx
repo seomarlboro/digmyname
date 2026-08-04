@@ -13,10 +13,10 @@ interface FilterConfig {
 }
 
 const filterConfigs: FilterConfig[] = [
-  { id: "extensions", label: "EXTENSIONS", color: "bg-primary/20 border-primary/25" },
-  { id: "price", label: "PRICE", color: "bg-available/20 border-available/25" },
-  { id: "features", label: "FEATURES", color: "bg-warning/20 border-warning/25" },
-  { id: "status", label: "STATUS", color: "bg-secondary/70 border-border dark:bg-white/15 dark:border-white/20" },
+  { id: "extensions", label: "EXTENSIONS", color: "" },
+  { id: "price", label: "PRICE", color: "" },
+  { id: "features", label: "FEATURES", color: "" },
+  { id: "status", label: "STATUS", color: "" },
 ];
 
 const featureOptions = ["Premium", "Free SSL", "Instant activation", "Trending"];
@@ -274,30 +274,27 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
           </div>
         )}
 
-        {filterConfigs.map((f) => {
-          const labelColor = f.id === "extensions" ? "text-primary" 
-            : f.id === "price" ? "text-available" 
-            : f.id === "features" ? "text-warning" 
-            : "text-muted-foreground";
-
-          return (
-            <div
-              key={f.id}
-              ref={(el) => { if (el) buttonRefs.current[f.id] = el; }}
+        {filterConfigs.map((f) => (
+          <div
+            key={f.id}
+            ref={(el) => { if (el) buttonRefs.current[f.id] = el; }}
+          >
+            <button
+              onClick={() => toggle(f.id)}
+              className={`flex min-w-[136px] h-full items-center justify-between gap-4 rounded-full border px-5 py-3 text-left whitespace-nowrap transition-all ${
+                openFilter === f.id
+                  ? "border-primary/40 bg-primary/10 shadow-lg"
+                  : "border-border/60 bg-secondary/60 hover:bg-secondary dark:border-white/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.1]"
+              }`}
             >
-              <button
-                onClick={() => toggle(f.id)}
-                className={`flex min-w-[130px] h-full items-center justify-between gap-3 rounded-4xl border px-4 py-3 text-left whitespace-nowrap transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/20 scale-[1.02] shadow-lg" : "hover:scale-[1.01] hover:shadow-md"}`}
-              >
-                <div>
-                  <p className={`text-[11px] font-extrabold uppercase tracking-widest ${labelColor}`}>{f.label}</p>
-                  <p className="text-lg font-bold text-foreground mt-0.5">{getFilterValue(f.id)}</p>
-                </div>
-                <ChevronUp className={`h-4 w-4 shrink-0 transition-transform ${labelColor} opacity-50 ${openFilter === f.id ? "rotate-180" : ""}`} />
-              </button>
-            </div>
-          );
-        })}
+              <div>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted-foreground">{f.label}</p>
+                <p className="text-base font-bold text-foreground mt-0.5">{getFilterValue(f.id)}</p>
+              </div>
+              <ChevronUp className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${openFilter === f.id ? "rotate-180 text-primary" : ""}`} />
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
