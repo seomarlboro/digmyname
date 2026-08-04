@@ -180,12 +180,26 @@ export const Stat = ({
   value,
   label,
   accent,
+  icon: Icon,
 }: {
   value: ReactNode;
   label: ReactNode;
   accent?: "mint" | "violet";
+  icon?: (props: { className?: string }) => ReactNode;
 }) => (
   <div className="px-5 py-5 transition-colors hover:bg-muted/10">
+    {Icon && (
+      <Icon
+        className={cn(
+          "mb-3 h-8 w-8",
+          accent === "mint"
+            ? "text-mint"
+            : accent === "violet"
+              ? "text-violet"
+              : "text-foreground/70",
+        )}
+      />
+    )}
     <div
       className={cn(
         "stat-value text-left",

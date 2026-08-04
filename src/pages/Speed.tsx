@@ -5,6 +5,7 @@ import { LottieAward } from "@/components/LottieAward";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
+import { StopwatchIcon, KeyboardIcon, NetworkIcon } from "@/components/StatIcons";
 
 
 const pipeline = [
@@ -99,9 +100,9 @@ const Speed = () => {
           lede="We are not going to pretend we measured every tool on every planet. So here is the deal: every search on DigMyName runs a stopwatch. It starts on your last keystroke and stops the moment the first answer hits the screen. Find something faster and we will put it at the top of this page ourselves."
         >
           <StatGrid cols={3}>
-            <Stat value="~170" label="ms · first answer" accent="mint" />
-            <Stat value="80" label="ms · debounce (ours)" accent="violet" />
-            <Stat value="50+" label="TLDs · in parallel" />
+            <Stat value="~170" label="ms · first answer" accent="mint" icon={StopwatchIcon} />
+            <Stat value="80" label="ms · debounce (ours)" accent="violet" icon={KeyboardIcon} />
+            <Stat value="50+" label="TLDs · in parallel" icon={NetworkIcon} />
           </StatGrid>
 
         </PageHeader>
