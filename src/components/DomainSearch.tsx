@@ -264,7 +264,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   const searchBar = (
     <div className="flex flex-1 items-center gap-0.5 rounded-[100px] border border-white/40 bg-white/25 py-[14px] pl-5 pr-6 [backdrop-filter:blur(64px)] dark:border-white/10 dark:bg-white/[0.05]">
-      <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
+      <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl">
         <Search className="h-7 w-7 text-primary" />
       </div>
       <input
@@ -398,12 +398,12 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
               <div className="mb-4 flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-available" />
                 <h2 className="text-lg font-bold text-foreground flex-1">Available Domains</h2>
-                <div className="flex items-center rounded-lg border border-border bg-card p-0.5">
+                <div className="flex items-center rounded-2xl border border-border bg-card p-0.5">
                   <button
                     onClick={() => setViewMode("cards")}
                     aria-label="Card view"
                     aria-pressed={viewMode === "cards"}
-                    className={`rounded-md p-1.5 transition-colors ${viewMode === "cards" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                    className={`rounded-2xl p-1.5 transition-colors ${viewMode === "cards" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     <LayoutGrid className="h-4 w-4" />
                   </button>
@@ -411,7 +411,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                     onClick={() => setViewMode("compact")}
                     aria-label="Compact list view"
                     aria-pressed={viewMode === "compact"}
-                    className={`rounded-md p-1.5 transition-colors ${viewMode === "compact" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                    className={`rounded-2xl p-1.5 transition-colors ${viewMode === "compact" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     <List className="h-4 w-4" />
                   </button>

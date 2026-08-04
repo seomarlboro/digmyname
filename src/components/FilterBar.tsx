@@ -48,7 +48,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
             <div
               key={tld.extension}
               onClick={() => onToggle(tld.extension)}
-              className={`flex flex-1 items-center justify-between gap-1 rounded-xl px-3 py-2.5 transition-colors cursor-pointer ${
+            className={`flex flex-1 items-center justify-between gap-1 rounded-2xl px-3 py-2.5 transition-colors cursor-pointer ${
                 selected
                   ? "bg-primary/15 ring-1 ring-primary/30"
                   : "bg-[hsl(211_100%_96%)] dark:bg-secondary hover:bg-secondary"
@@ -94,7 +94,7 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-3 text-xs text-muted-foreground">Additional requirements</p>
         <div className="space-y-1">
           {featureOptions.map((f) => (
-            <label key={f} className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+            <label key={f} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
               <Checkbox />
               <span className="text-sm text-foreground">{f}</span>
             </label>
