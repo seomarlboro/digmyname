@@ -24,7 +24,7 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
 );
 import DomainCard from "@/components/DomainCard";
 import HeroBackground from "@/components/HeroBackground";
-import { generateDomainList, checkDomainsAvailability, type DomainResult } from "@/lib/domainData";
+import { generateDomainList, checkDomainsAvailability, checkDomainsFast, type DomainResult } from "@/lib/domainData";
 
 interface DomainSearchProps {
   selectedTlds: Set<string>;
@@ -65,7 +65,8 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     };
   }, [scrolled]);
 
-  // Debounce (short: we want results within ~1s of the last keystroke)
+  // Debounce: very short so results feel instant, but not so short that every
+  // keystroke triggers a request storm.
   useEffect(() => {
     if (!query.trim()) {
       setDebouncedQuery("");
@@ -75,7 +76,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     setLoading(true);
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 150);
+    }, 80);
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -96,11 +97,31 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       setResults(domains);
       setLoading(false);
 
-      // Step 2: Check real availability.
+      const domainNames = domains.map((d) => d.domain);
+
+      // Step 2: Fast DNS pre-check (~30-80ms). Updates cards with a preliminary
+      // available/taken/uncertain signal while the authoritative check runs.
+      try {
+        const fastMap = await checkDomainsFast(domainNames);
+        if (!cancelled && fastMap.size) {
+          setResults((prev) =>
+            prev.map((r) => {
+              const info = fastMap.get(r.domain);
+              if (info) {
+                return { ...r, available: info.available, uncertain: info.uncertain };
+              }
+              return r;
+            })
+          );
+        }
+      } catch {
+        // Fast check is best-effort; authoritative check will overwrite.
+      }
+
+      // Step 3: Authoritative availability + pricing.
       // Strategy: the ~10 most popular TLDs are each sent as their OWN request so
       // every card resolves at its own speed (no waiting for the slowest sibling
       // in a batch). Everything else fans out in parallel batches of 20.
-      const domainNames = domains.map((d) => d.domain);
       const BATCH_SIZE = 20;
       const TOP_TLDS = ["com", "io", "net", "org", "ai", "co", "app", "dev", "xyz", "me"];
 

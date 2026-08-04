@@ -5,6 +5,16 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] — 2026-08-04
+
+### Added
+- In-memory TTL cache for API responses (default 30s, configurable via `DIGMYNAME_CACHE_TTL_MS`).
+- Exponential backoff retry for transient network errors and HTTP 429 rate limits.
+- Domain input normalization: strips `www.`, `https://`, trailing paths and ports.
+
+### Changed
+- Bumped server version to 1.1.1.
+
 ## [1.1.0] — 2026-08-04
 
 ### Added
@@ -34,6 +44,7 @@ First stable release.
 
 - Initial preview release.
 
+[1.1.1]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.1.1
 [1.1.0]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.1.0
 [1.0.0]: https://www.npmjs.com/package/domain-check-skills-mcp/v/1.0.0
 [0.1.0]: https://www.npmjs.com/package/domain-check-skills-mcp/v/0.1.0

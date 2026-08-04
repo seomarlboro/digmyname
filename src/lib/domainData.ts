@@ -146,6 +146,31 @@ export function generateDomainList(query: string, withVariations = false, allowe
   return results;
 }
 
+/** Fast DNS-only pre-check via public API. Returns in ~30-80ms so cards can
+ *  flip to a preliminary state before the authoritative RDAP/pricing check. */
+export async function checkDomainsFast(
+  domains: string[]
+): Promise<Map<string, { available: boolean; uncertain: boolean }>> {
+  const resultMap = new Map<string, { available: boolean; uncertain: boolean }>();
+  if (!domains.length) return resultMap;
+
+  try {
+    const base = import.meta.env.VITE_SUPABASE_URL ?? "";
+    if (!base) return resultMap;
+    const url = `${base.replace(/\/$/, "")}/functions/v1/public-api/fast?domains=${encodeURIComponent(domains.join(","))}`;
+    const res = await fetch(url, { headers: { accept: "application/json" } });
+    if (!res.ok) return resultMap;
+    const data = await res.json();
+    for (const r of data.results ?? []) {
+      resultMap.set(r.domain, { available: !!r.available, uncertain: !!r.uncertain });
+    }
+  } catch (err) {
+    if (import.meta.env.DEV) console.error("Fast check failed:", err);
+  }
+
+  return resultMap;
+}
+
 /** Check real availability via edge function */
 export async function checkDomainsAvailability(
   domains: string[]
