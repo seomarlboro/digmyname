@@ -85,7 +85,7 @@ const Pricing = () => {
   }, [prices]);
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="min-h-screen bg-background">
       <Helmet>
         <title>Domain Pricing Comparison — DigMyName</title>
         <meta name="description" content="Compare domain registration, renewal, and transfer prices side-by-side across major registrars." />

@@ -3,13 +3,15 @@ import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import DomainSearch from "@/components/DomainSearch";
 import FilterBar from "@/components/FilterBar";
+import HeroBackground from "@/components/HeroBackground";
 
 
 const Index = () => {
   const [selectedTlds, setSelectedTlds] = useState<Set<string>>(new Set());
 
   return (
-    <div className="min-h-screen bg-transparent pb-20">
+    <div className="relative min-h-screen bg-transparent pb-20">
+      <HeroBackground />
       <Helmet>
         <title>Fast Domain Search — World's Fastest Domain Checker | DigMyName</title>
         <meta name="description" content="The world's fastest domain search. Check availability across 50+ TLDs in milliseconds. If you find a faster checker, come dispute it." />
