@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Lottie, { type LottieComponentProps } from "lottie-react";
-import awardAsset from "@/assets/award.json.asset.json";
+import awardAsset from "@/assets/trophy-animated.json.asset.json";
 
 interface LottieAwardProps extends Omit<LottieComponentProps, "animationData"> {
   className?: string;
