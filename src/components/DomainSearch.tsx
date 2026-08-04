@@ -24,7 +24,7 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
 );
 import DomainCard from "@/components/DomainCard";
 import HeroBackground from "@/components/HeroBackground";
-import { generateDomainList, checkDomainsAvailability, type DomainResult } from "@/lib/domainData";
+import { generateDomainList, checkDomainsAvailability, checkDomainsFast, type DomainResult } from "@/lib/domainData";
 
 interface DomainSearchProps {
   selectedTlds: Set<string>;
