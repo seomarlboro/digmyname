@@ -419,7 +419,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                 </div>
               </div>
             )}
-            <div className={viewMode === "compact" ? "rounded-xl border border-border overflow-hidden" : "space-y-3"}>
+            <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
               {results
                 .filter((r) => !r.checking && r.available && !r.uncertain)
                 .map((r) => (
@@ -434,7 +434,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
                   <h2 className="text-lg font-bold text-foreground">Checking…</h2>
                 </div>
-                <div className={viewMode === "compact" ? "rounded-xl border border-border overflow-hidden" : "space-y-3"}>
+                <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {checkingResults
                     .slice(0, 20)
                     .map((r) => (
@@ -451,7 +451,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                   <AlertCircle className="h-5 w-5 text-amber-500" />
                   <h2 className="text-lg font-bold text-foreground">Couldn't verify</h2>
                 </div>
-                <div className={viewMode === "compact" ? "rounded-xl border border-border overflow-hidden" : "space-y-3"}>
+                <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && r.uncertain)
                     .slice(0, 10)
@@ -469,7 +469,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                   <X className="h-5 w-5 text-taken" />
                   <h2 className="text-lg font-bold text-foreground">Taken Domains</h2>
                 </div>
-                <div className={viewMode === "compact" ? "rounded-xl border border-border overflow-hidden" : "space-y-3"}>
+                <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && !r.available && !r.uncertain)
                     .slice(0, 10)
