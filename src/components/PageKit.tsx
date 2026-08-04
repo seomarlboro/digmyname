@@ -156,21 +156,24 @@ export const BentoTile = ({
 
 export const StatGrid = ({
   children,
+  cols = 4,
   className,
 }: {
   children: ReactNode;
+  cols?: 3 | 4;
   className?: string;
 }) => (
   <div
     className={cn(
-      "mt-10 grid grid-cols-2 overflow-hidden rounded-2xl border border-border/60 bg-background/30 backdrop-blur-sm sm:grid-cols-4",
-      "[&>*]:border-border/60 [&>*]:border-b [&>*]:border-r [&>*:nth-child(2n)]:border-r-0 sm:[&>*]:border-b-0 sm:[&>*:nth-child(2n)]:border-r sm:[&>*:last-child]:border-r-0 [&>*:nth-last-child(-n+2)]:border-b-0",
+      "mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60",
+      cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4",
       className,
     )}
   >
     {children}
   </div>
 );
+
 
 export const Stat = ({
   value,
