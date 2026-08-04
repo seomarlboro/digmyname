@@ -451,13 +451,13 @@
     font-family: 'Sora', sans-serif;
     font-weight: 900;
     letter-spacing: -0.04em;
-    background: linear-gradient(135deg, hsl(218 96% 60%), hsl(262 83% 65%));
+    background: linear-gradient(135deg, hsl(var(--aurora-mint)), hsl(var(--aurora-violet)));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
     opacity: 0.18;
-    filter: drop-shadow(0 0 24px hsl(218 96% 53% / 0.25));
+    filter: drop-shadow(0 0 24px hsl(var(--aurora-mint) / 0.25));
     animation-name: hero-float;
     animation-iteration-count: infinite;
     animation-timing-function: ease-in-out;
