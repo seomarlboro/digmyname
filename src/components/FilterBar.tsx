@@ -48,10 +48,10 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
             <div
               key={tld.extension}
               onClick={() => onToggle(tld.extension)}
-            className={`flex flex-1 items-center justify-between gap-1 rounded-2xl px-3 py-2.5 transition-colors cursor-pointer ${
+            className={`flex flex-1 items-center justify-between gap-1 rounded-2xl border border-border px-3 py-2.5 transition-colors cursor-pointer ${
                 selected
-                  ? "bg-primary/15 ring-1 ring-primary/30"
-                  : "bg-[hsl(211_100%_96%)] dark:bg-secondary hover:bg-secondary"
+                  ? "bg-muted/30 ring-1 ring-border"
+                  : "bg-transparent hover:bg-muted/10"
               }`}
             >
               <span className={`${mobile ? "text-base" : "text-lg"} font-bold text-primary`}>.{tld.extension}</span>
