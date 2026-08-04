@@ -141,7 +141,7 @@
   }
 
   .logo-text {
-    font-family: 'Geist', sans-serif !important;
+    font-family: 'Sora', sans-serif !important;
     font-weight: 800 !important;
     font-synthesis: none !important;
     font-size: 1.3rem;
@@ -358,7 +358,7 @@
   /* Inner span handles the slow floating drift */
   .hero-tld {
     display: inline-block;
-    font-family: 'Geist', sans-serif;
+    font-family: 'Sora', sans-serif;
     font-weight: 900;
     letter-spacing: -0.04em;
     background: linear-gradient(135deg, hsl(218 96% 60%), hsl(262 83% 65%));
