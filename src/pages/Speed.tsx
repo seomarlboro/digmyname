@@ -243,7 +243,7 @@ const Speed = () => {
         </section>
 
         {/* Honesty */}
-        <section className="mt-16 surface-card p-6 sm:p-8">
+        <section className="mt-16 border-t border-border/60 pt-8">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">The small print on “fastest”</h2>
           <p className="mt-3 max-w-none text-muted-foreground">
             Nobody can prove a universal latency record, and anybody who states one flat-out is selling you
