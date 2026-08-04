@@ -5,6 +5,12 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] — 2026-08-04
+
+### Added
+- README demo image showing a real `search_domains` run (available / premium / taken + latency badge).
+- Copy-paste install snippets for Continue, Zed and VS Code alongside Claude Code, Claude Desktop, Cursor and Windsurf.
+
 ## [1.1.5] — 2026-08-04
 
 ### Added
