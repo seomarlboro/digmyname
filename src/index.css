@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 230 25% 15%;
 
-    --primary: 218 96% 53%;
+    --primary: 252 86% 58%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 240 15% 95%;
@@ -32,7 +32,7 @@
 
     --border: 240 10% 90%;
     --input: 240 10% 90%;
-    --ring: 218 96% 53%;
+    --ring: 252 86% 58%;
 
     --radius: 1rem;
 
@@ -76,7 +76,7 @@
     --popover: 230 22% 8%;
     --popover-foreground: 210 25% 94%;
 
-    --primary: 220 95% 55%;
+    --primary: 254 90% 66%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 230 18% 14%;
@@ -93,7 +93,7 @@
 
     --border: 230 18% 16%;
     --input: 230 18% 16%;
-    --ring: 220 95% 55%;
+    --ring: 254 90% 66%;
 
     --hero-bg: 232 28% 6%;
     --search-bg: 230 20% 13%;
@@ -106,12 +106,12 @@
 
     --sidebar-background: 232 28% 5%;
     --sidebar-foreground: 210 25% 94%;
-    --sidebar-primary: 220 95% 55%;
+    --sidebar-primary: 254 90% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 230 18% 14%;
     --sidebar-accent-foreground: 210 25% 94%;
     --sidebar-border: 230 18% 16%;
-    --sidebar-ring: 220 95% 55%;
+    --sidebar-ring: 254 90% 66%;
   }
 }
 
@@ -159,19 +159,19 @@
   }
 
   .hero-gradient {
-    background: radial-gradient(ellipse at top, hsl(218 96% 53% / 0.08) 0%, hsl(270 80% 58% / 0.04) 40%, transparent 70%);
+    background: radial-gradient(ellipse at top, hsl(var(--aurora-mint) / 0.08) 0%, hsl(var(--aurora-violet) / 0.04) 40%, transparent 70%);
   }
 
   .search-shadow {
     box-shadow:
-      0 4px 30px hsl(218 96% 53% / 0.12),
+      0 4px 30px hsl(var(--aurora-mint) / 0.12),
       0 1px 3px hsl(0 0% 0% / 0.05);
   }
   .dark .search-shadow {
     box-shadow:
-      0 0 0 1px hsl(218 96% 60% / 0.15),
-      0 20px 60px -10px hsl(218 96% 40% / 0.55),
-      0 8px 32px -4px hsl(262 83% 50% / 0.35),
+      0 0 0 1px hsl(var(--aurora-mint) / 0.15),
+      0 20px 60px -10px hsl(var(--aurora-mint) / 0.55),
+      0 8px 32px -4px hsl(var(--aurora-violet) / 0.35),
       0 2px 8px hsl(0 0% 0% / 0.4);
   }
 
@@ -191,7 +191,7 @@
   }
 
   .card-hover:hover {
-    box-shadow: 0 8px 30px hsl(218 96% 53% / 0.1);
+    box-shadow: 0 8px 30px hsl(var(--aurora-mint) / 0.1);
     transform: translateY(-1px);
   }
 
@@ -340,10 +340,10 @@
       hsl(218 60% 70% / 0) 15%,
       hsl(218 60% 75% / 0.15) 22%,
       hsl(218 70% 65% / 0.35) 28%,
-      hsl(240 60% 60% / 0.5) 34%,
-      hsl(262 55% 58% / 0.5) 40%,
-      hsl(270 50% 60% / 0.35) 46%,
-      hsl(270 40% 65% / 0.15) 52%,
+      hsl(var(--aurora-violet) / 0.5) 34%,
+      hsl(var(--aurora-violet) / 0.5) 40%,
+      hsl(var(--aurora-violet) / 0.35) 46%,
+      hsl(var(--aurora-violet) / 0.15) 52%,
       hsl(218 60% 70% / 0) 58%,
       hsl(218 60% 70% / 0) 100%
     );
@@ -365,16 +365,16 @@
   .dark .search-border-glow::before {
     background: conic-gradient(
       from var(--border-angle),
-      hsl(218 96% 60% / 0) 0%,
-      hsl(218 96% 60% / 0) 25%,
-      hsl(218 96% 60% / 0.25) 30%,
-      hsl(218 96% 65% / 0.8) 34%,
-      hsl(240 90% 70% / 1) 37%,
-      hsl(270 80% 60% / 1) 40%,
-      hsl(270 80% 58% / 0.5) 43%,
-      hsl(218 96% 60% / 0.1) 47%,
-      hsl(218 96% 60% / 0) 50%,
-      hsl(218 96% 60% / 0) 100%
+      hsl(var(--aurora-mint) / 0) 0%,
+      hsl(var(--aurora-mint) / 0) 25%,
+      hsl(var(--aurora-mint) / 0.25) 30%,
+      hsl(var(--aurora-mint) / 0.8) 34%,
+      hsl(var(--aurora-violet) / 1) 37%,
+      hsl(var(--aurora-violet) / 1) 40%,
+      hsl(var(--aurora-violet) / 0.5) 43%,
+      hsl(var(--aurora-mint) / 0.1) 47%,
+      hsl(var(--aurora-mint) / 0) 50%,
+      hsl(var(--aurora-mint) / 0) 100%
     );
   }
 
@@ -388,8 +388,8 @@
   .hero-bg {
     z-index: 0;
     background:
-      radial-gradient(ellipse 80% 60% at 50% 0%, hsl(218 96% 53% / 0.08), transparent 60%),
-      radial-gradient(ellipse 70% 50% at 50% 100%, hsl(262 83% 60% / 0.06), transparent 60%);
+      radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--aurora-mint) / 0.08), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 50% 100%, hsl(var(--aurora-violet) / 0.06), transparent 60%);
   }
 
 
