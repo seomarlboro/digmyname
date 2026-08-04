@@ -4,9 +4,11 @@
 [![downloads](https://img.shields.io/npm/dm/domain-check-skills-mcp?color=145DFB&style=flat-square)](https://www.npmjs.com/package/domain-check-skills-mcp)
 [![license](https://img.shields.io/npm/l/domain-check-skills-mcp?style=flat-square)](./LICENSE)
 
+**The fastest domain availability MCP server on the internet.** If you find a faster one — [dispute it](https://digmyname.com/speed).
+
 MCP server that gives any AI agent **real-time domain availability**, **registrar price comparison** and **domain age lookup**, powered by [DigMyName](https://digmyname.com).
 
-Typical first answer lands in **~100–200 ms** (measured end-to-end, cache-warm). Fastest domain search in the universe, or the second — we publish the method along with the claim — see [digmyname.com/speed](https://digmyname.com/speed).
+Typical first answer lands in **~100–200 ms** end-to-end (cache-warm). We publish the method with the claim — see [digmyname.com/speed](https://digmyname.com/speed).
 
 No API key. No account. Free.
 
@@ -69,7 +71,7 @@ Node.js 18+
 
 ## Changelog
 
-See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.1**.
+See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.2**.
 
 ## License
 

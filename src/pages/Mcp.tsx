@@ -77,7 +77,7 @@ const tools = [
 const stats = [
   { icon: Globe, value: "52", label: "TLDs covered" },
   { icon: ShieldCheck, value: "7", label: "Registrars compared" },
-  { icon: Zap, value: "<2s", label: "Avg response" },
+  { icon: Zap, value: "<100ms", label: "Typical response" },
   { icon: Cpu, value: "MIT", label: "Open source" },
 ];
 
@@ -120,7 +120,7 @@ const Mcp = () => {
         <title>MCP Server, Claude Skill & Custom GPT — DigMyName</title>
         <meta
           name="description"
-          content="Check domain availability from any LLM. Free MCP server, Claude Skill and Custom GPT — 7 registrars, 52 TLDs, no hallucinations."
+          content="The fastest domain availability MCP server on the internet. Free MCP server, Claude Skill and Custom GPT — 7 registrars, 52 TLDs, no hallucinations."
         />
         <link rel="canonical" href="https://digmyname.com/mcp" />
         <meta property="og:title" content="Domain Check Skills — MCP / Claude Skill / Custom GPT" />
@@ -135,11 +135,11 @@ const Mcp = () => {
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Cross-platform",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-          softwareVersion: "1.1.1",
+          softwareVersion: "1.1.2",
           downloadUrl: NPM_URL,
           codeRepository: GITHUB_URL,
           license: "https://opensource.org/licenses/MIT",
-          description: "MCP server, Claude Skill and Custom GPT for live domain availability, registrar pricing and domain age across 52 TLDs and 7 registrars.",
+          description: "The fastest domain availability MCP server on the internet. Real-time checks, registrar pricing and domain age for any LLM client.",
         })}</script>
       </Helmet>
 
@@ -163,20 +163,31 @@ const Mcp = () => {
         <main className="container mx-auto px-4 py-16 max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px]">
           {/* Hero */}
           <section className="text-center mb-20">
-            <a
-              href={NPM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackMcpEvent("click", "npm_pill")}
-              className="inline-flex items-center gap-2 px-3 py-1.5 mb-6 rounded-full border border-primary/30 bg-primary/10 backdrop-blur text-xs font-medium hover:bg-primary/15 transition-colors"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-            </span>
-            Live on npm · v1.1.1
-            <ArrowUpRight className="w-3 h-3" />
-          </a>
+            <div className="flex flex-wrap gap-2 justify-center mb-6">
+              <a
+                href={NPM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackMcpEvent("click", "npm_pill")}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10 backdrop-blur text-xs font-medium hover:bg-primary/15 transition-colors"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                </span>
+                Live on npm · v1.1.2
+                <ArrowUpRight className="w-3 h-3" />
+              </a>
+              <Link
+                to="/speed"
+                onClick={() => trackMcpEvent("click", "speed_pill")}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur text-xs font-medium hover:bg-emerald-500/15 transition-colors"
+              >
+                <Zap className="w-3 h-3 text-emerald-400" />
+                Fastest on the internet · dispute it
+                <ArrowUpRight className="w-3 h-3" />
+              </Link>
+            </div>
 
             <h1 className="mb-5 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               Domain availability,
@@ -185,8 +196,9 @@ const Mcp = () => {
             </h1>
 
             <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-              One install. Live answers from Domainr, RDAP, DNS and Porkbun — straight into Claude,
-              Cursor, ChatGPT and any MCP-compatible client.
+              One install. Live answers in ~100 ms from DNS → RDAP → registrar APIs — straight into
+              Claude, Cursor, ChatGPT and any MCP-compatible client. If you find a faster domain
+              checker, <Link to="/speed" className="text-primary hover:underline">we want to know</Link>.
             </p>
 
             <div className="flex flex-wrap gap-3 justify-center mb-10">
