@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/domain-check-skills-mcp?color=145DFB&label=npm&style=flat-square)](https://www.npmjs.com/package/domain-check-skills-mcp)
 [![downloads](https://img.shields.io/npm/dm/domain-check-skills-mcp?color=145DFB&style=flat-square)](https://www.npmjs.com/package/domain-check-skills-mcp)
+[![provenance](https://img.shields.io/badge/npm-provenance-145DFB?style=flat-square)](https://www.npmjs.com/package/domain-check-skills-mcp)
 [![license](https://img.shields.io/npm/l/domain-check-skills-mcp?style=flat-square)](./LICENSE)
 
 ## ⚡ The world's fastest domain availability MCP server
@@ -70,13 +71,24 @@ Rate limit: 60 requests / minute / IP.
 | --- | --- | --- |
 | `DIGMYNAME_API_BASE` | DigMyName public API | Point at a self-hosted API instance. |
 
+## Releasing (maintainers)
+
+Releases are published from CI with npm provenance:
+
+```bash
+# after bumping the version in mcp/package.json
+git tag mcp-v1.1.5 && git push origin mcp-v1.1.5
+```
+
+The `Publish MCP to npm` workflow builds, smoke-tests and publishes with `--provenance`. It needs an `NPM_TOKEN` (automation token) repo secret.
+
 ## Requirements
 
 Node.js 18+
 
 ## Changelog
 
-See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.4**.
+See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.5**.
 
 ## License
 
