@@ -178,7 +178,7 @@ const Pricing = () => {
                           <div>
                             <span className={`text-sm font-medium ${getRegistrarColor(s.best3Year.registrar).text}`}>{s.best3Year.registrar}</span>
                             <p className="mt-0.5">
-                              <span className="font-mono text-base font-extrabold tabular-nums text-foreground">${best3Cost.toFixed(2)}</span>
+                              <span className="font-mono font-mono text-base font-extrabold tabular-nums text-foreground">${best3Cost.toFixed(2)}</span>
                               <span className="text-sm text-muted-foreground"> /3yr</span>
                             </p>
                           </div>
@@ -253,21 +253,21 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
   const range = maxRegPrice - cheapestRegPrice || 1;
 
   return (
-    <div className="overflow-hidden surface-card">
+    <div className="bento overflow-hidden">
       <div className="flex items-center gap-3 border-b border-border bg-secondary/30 px-5 py-4">
-        <span className="text-2xl font-extrabold text-primary">.{s.tld}</span>
+        <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
         <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>
       </div>
       <table className="w-full text-left">
         <thead>
           <tr className="border-b border-border bg-secondary/20">
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Registrar</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Register</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Renew</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Transfer</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">ICANN Fee</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Promo</th>
-            <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">WHOIS</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Registrar</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Register</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Renew</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Transfer</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">ICANN Fee</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Promo</th>
+            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">WHOIS</th>
           </tr>
         </thead>
         <tbody>
@@ -278,21 +278,21 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
             const barWidth = range > 0 ? ((p.reg_price - cheapestRegPrice) / range) * 100 : 0;
 
             return (
-              <tr key={p.id} className={`border-b border-border transition-colors hover:bg-secondary/30 ${isCheapest ? "bg-available/5" : ""}`}>
+              <tr key={p.id} className={`border-b border-border transition-colors hover:bg-secondary/30 ${isCheapest ? "bg-mint/5" : ""}`}>
                 <td className="px-5 py-4">
-                  <span className={`text-base font-bold ${isCheapest ? "text-available" : c.text}`}>
+                  <span className={`text-base font-bold ${isCheapest ? "text-mint" : c.text}`}>
                     {p.registrar}
                   </span>
-                  {isCheapest && <Award className="ml-1.5 inline h-4 w-4 text-available" />}
+                  {isCheapest && <Award className="ml-1.5 inline h-4 w-4 text-mint" />}
                 </td>
                 <td className="px-5 py-4">
-                  <span className={`text-base font-extrabold tabular-nums ${isCheapest ? "text-available" : "text-foreground"}`}>
+                  <span className={`font-mono text-base font-extrabold tabular-nums ${isCheapest ? "text-mint" : "text-foreground"}`}>
                     ${p.reg_price.toFixed(2)}
                   </span>
                   <span className="text-sm text-muted-foreground">/yr</span>
                 </td>
                 <td className="px-5 py-4">
-                  <span className={`text-base font-extrabold tabular-nums ${renewHigher ? "text-warning" : "text-foreground"}`}>
+                  <span className={`font-mono text-base font-extrabold tabular-nums ${renewHigher ? "text-warning" : "text-foreground"}`}>
                     ${p.renew_price.toFixed(2)}
                   </span>
                   <span className="text-sm text-muted-foreground">/yr</span>
@@ -300,7 +300,7 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
                 <td className="px-5 py-4">
                   {p.transfer_price != null ? (
                     <>
-                      <span className="text-base font-extrabold tabular-nums text-foreground">${p.transfer_price.toFixed(2)}</span>
+                      <span className="font-mono text-base font-extrabold tabular-nums text-foreground">${p.transfer_price.toFixed(2)}</span>
                       <span className="text-sm text-muted-foreground">/yr</span>
                     </>
                   ) : (
@@ -321,7 +321,7 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
                 </td>
                 <td className="px-5 py-4">
                   {p.whois_privacy ? (
-                    <Shield className="h-5 w-5 text-available" />
+                    <Shield className="h-5 w-5 text-mint" />
                   ) : (
                     <ShieldOff className="h-5 w-5 text-muted-foreground/50" />
                   )}
