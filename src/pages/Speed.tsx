@@ -231,7 +231,6 @@ const Speed = () => {
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    {row.us && <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))]" />}
                     <span className="font-medium">{row.name}</span>
                     <span
                       className={`rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase ${
@@ -245,11 +244,7 @@ const Speed = () => {
                   </div>
                   <div className="mt-1 text-sm text-muted-foreground">{row.note}</div>
                 </div>
-                <div
-                  className={`font-mono text-lg font-bold tabular-nums ${
-                    row.us ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
+                <div className="font-mono text-lg font-bold tabular-nums text-available">
                   {row.ms}
                 </div>
                 <div className="col-span-2 flex items-center gap-3 sm:col-span-1">
@@ -263,11 +258,7 @@ const Speed = () => {
                       style={{ width: `${row.bar}%` }}
                     />
                   </div>
-                  <span
-                    className={`min-w-[2.5rem] text-right font-mono text-xs font-semibold tabular-nums ${
-                      row.us ? "text-primary" : "text-muted-foreground/70"
-                    }`}
-                  >
+                  <span className="min-w-[2.5rem] text-right font-mono text-xs font-semibold tabular-nums text-available">
                     {row.bar}%
                   </span>
                 </div>
