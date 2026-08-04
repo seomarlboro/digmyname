@@ -167,7 +167,11 @@ export const StatGrid = ({
   <div
     className={cn(
       "surface-card mt-10 grid overflow-hidden",
-      cols === 2 ? "grid-cols-2" : cols === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 sm:grid-cols-4",
+      cols === 2
+        ? "grid-cols-1 sm:grid-cols-2"
+        : cols === 3
+          ? "grid-cols-1 sm:grid-cols-3"
+          : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
       className,
     )}
   >
@@ -187,7 +191,7 @@ export const Stat = ({
   accent?: "mint" | "violet" | "warning";
   icon?: (props: { className?: string }) => ReactNode;
 }) => (
-  <div className="flex items-center gap-5 px-10 py-10 transition-colors hover:bg-muted/10">
+  <div className="flex items-center gap-4 px-6 py-6 transition-colors hover:bg-muted/10 sm:gap-5 sm:px-10 sm:py-10">
     {Icon && (
       <Icon
         className={cn(
