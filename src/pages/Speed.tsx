@@ -207,8 +207,8 @@ const Speed = () => {
                     <span
                       className={`rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase ${
                         row.us
-                          ? "border-primary/30 bg-primary/15 text-primary"
-                          : "border-border/60 bg-muted/50 text-muted-foreground"
+                          ? "border-border/60 bg-muted/20 text-foreground"
+                          : "border-border/60 bg-muted/20 text-muted-foreground"
                       }`}
                     >
                       {row.tag}
@@ -220,7 +220,7 @@ const Speed = () => {
                   {row.ms}
                 </div>
                 <div className="col-span-2 flex items-center gap-3 sm:col-span-1">
-                  <div className="h-3 flex-1 overflow-hidden rounded-full bg-muted/30">
+                  <div className="h-3 flex-1 overflow-hidden rounded-full bg-muted/20">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         row.us

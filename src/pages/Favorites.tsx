@@ -35,11 +35,11 @@ const Favorites = () => {
         )}
 
         {user && favorites.length > 0 && (
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="rounded-xl border border-border overflow-hidden">
             {favorites.map((domain) => (
               <div
                 key={domain}
-                className="flex items-center justify-between border-b border-border px-6 py-4 last:border-b-0 transition-colors hover:bg-secondary/50"
+                className="flex items-center justify-between border-b border-border px-6 py-4 last:border-b-0 transition-colors hover:bg-muted/10"
               >
                 <span className="text-lg font-semibold text-foreground">{domain}</span>
                 <Button

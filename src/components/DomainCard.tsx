@@ -71,7 +71,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
       );
     }
     return (
-      <div className="card-hover rounded-xl border border-border bg-card p-4 sm:p-5">
+      <div className="card-hover rounded-xl border border-border p-4 sm:p-5">
         <div className="flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-foreground">
@@ -88,7 +88,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   if (isUncertain) {
     if (compact) {
       return (
-        <div className="grid border-b border-border px-4 py-4 transition-colors hover:bg-secondary/50" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+        <div className="grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
@@ -112,7 +112,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
       );
     }
     return (
-      <div className="card-hover rounded-xl border border-amber-500/30 bg-card p-4 sm:p-5">
+      <div className="card-hover rounded-xl border border-amber-500/30 p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
@@ -141,7 +141,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   if (compact) {
     return (
       <>
-        <div className="grid border-b border-border px-4 py-4 transition-colors hover:bg-secondary/50" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+        <div className="grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
@@ -218,7 +218,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
 
   return (
     <>
-      <div className="card-hover rounded-xl border border-border bg-card p-4 sm:p-5">
+      <div className="card-hover rounded-xl border border-border p-4 sm:p-5">
         {/* Mobile: stacked, Desktop: single row */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           {/* Left: domain + badges */}
