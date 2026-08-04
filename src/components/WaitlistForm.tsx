@@ -74,7 +74,7 @@ const WaitlistForm = () => {
             maxLength={255}
           />
         </div>
-        <Button type="submit" size="lg" disabled={status === "loading"} className="gap-2">
+        <Button type="submit" variant="gradient" size="lg" disabled={status === "loading"} className="gap-2">
           {status === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           Join waitlist
         </Button>
