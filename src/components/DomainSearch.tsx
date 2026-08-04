@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, X, Loader2, CheckCircle2, LayoutGrid, List, AlertCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Search, X, Loader2, CheckCircle2, LayoutGrid, List, AlertCircle, Zap } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const StarsIcon = ({ className, active }: { className?: string; active?: boolean }) => (
@@ -367,7 +368,21 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
                   Checking…
                 </span>
               )}
+              {(liveMs !== null || firstAnswerMs !== null) && (
+                <Link
+                  to="/speed"
+                  title="How we measure: clock starts on your last keystroke, stops on the first answer"
+                  className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <Zap className="h-3.5 w-3.5 text-primary" />
+                  <span className="tabular-nums font-semibold text-foreground">
+                    {liveMs !== null ? liveMs : firstAnswerMs} ms
+                  </span>
+                  <span className="hidden sm:inline">first answer</span>
+                </Link>
+              )}
             </div>
+
 
             {/* Available */}
             {availableCount > 0 && (
