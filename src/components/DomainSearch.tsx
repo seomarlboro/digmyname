@@ -313,7 +313,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     <div className="w-full">
       {/* Spacer + title to push search bar to vertical center */}
       {!hasQuery ? (
-        <div className="relative z-10 flex items-center justify-center px-4 pt-10 pb-4 sm:pt-0 sm:pb-0 min-h-[38vh] sm:min-h-0" style={{ height: undefined }}>
+        <div className="relative z-10 flex min-h-[38vh] items-center justify-center px-4 pb-4 pt-10 sm:h-[calc(50vh-72px)] sm:min-h-0 sm:pb-0 sm:pt-0">
           <div className="mx-auto w-full max-w-3xl text-center">
             <h1 className="text-gradient overflow-visible px-1 text-[2rem] font-extrabold leading-[1.05] tracking-[-0.03em] xs:text-[2.35rem] sm:text-6xl sm:leading-[0.95] sm:tracking-[-0.045em] md:text-7xl lg:text-[5.5rem]">
               World's fastest domain
