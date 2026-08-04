@@ -104,7 +104,6 @@ const Speed = () => {
             </h1>
 
             <p className="mt-5 max-w-none text-base md:text-lg text-muted-foreground">
-              We are not going to pretend we measured every tool on every planet. So here is the deal:foreground text-muted-foreground">
               We are not going to pretend we measured every tool on every planet. So here is the deal: every
               search on DigMyName runs a stopwatch. It starts on your last keystroke and stops the moment the
               first answer hits the screen. Find something faster and we will put it at the top of this page
