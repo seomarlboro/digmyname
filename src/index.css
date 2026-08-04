@@ -205,22 +205,35 @@
   }
 
   .card-hover {
-    background-color: hsl(var(--card) / 0.92);
-    backdrop-filter: blur(10px);
+    background-color: hsl(var(--card));
     transition: box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
   }
 
   .card-hover:hover {
-    background-color: hsl(var(--card));
+    background-color: hsl(var(--secondary));
     box-shadow: 0 8px 30px hsl(var(--aurora-mint) / 0.1);
     transform: translateY(-1px);
   }
 
   /* Compact list container gets the same solid surface */
   .list-surface {
-    background-color: hsl(var(--card) / 0.92);
-    backdrop-filter: blur(10px);
+    background-color: hsl(var(--card));
   }
+
+  /* Results area sits on a solid backdrop so hero blobs never bleed through */
+  .results-shell {
+    position: relative;
+    z-index: 1;
+    background-color: hsl(var(--background));
+  }
+  .results-shell::before {
+    content: "";
+    position: absolute;
+    inset: -2rem -50vw 0 -50vw;
+    background-color: hsl(var(--background));
+    z-index: -1;
+  }
+
 
 
   /* ==========================================================
