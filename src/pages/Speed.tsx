@@ -83,7 +83,7 @@ const Speed = () => {
 
       <Header />
 
-      <main className="container mx-auto max-w-[968px] px-4 pb-24 pt-12">
+      <main className="mx-auto max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px] px-4 pb-24 pt-12">
         {/* Hero */}
         <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/40 px-6 py-14 backdrop-blur-xl sm:px-12">
           <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
@@ -98,14 +98,14 @@ const Speed = () => {
               Timed live on every search
             </div>
 
-            <h1 className="mt-6 text-4xl font-extrabold leading-[1.02] tracking-[-0.045em] sm:text-5xl md:text-6xl">
+            <h1 className="mt-6 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               The fastest domain search
               <br />
               in the universe.
               <span className="text-gradient"> Or the second.</span>
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
+            <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground">
               We are not going to pretend we measured every tool on every planet. So here is the deal: every
               search on DigMyName runs a stopwatch. It starts on your last keystroke and stops the moment the
               first answer hits the screen. Find something faster and we will put it at the top of this page
@@ -149,7 +149,7 @@ const Speed = () => {
         {/* Timer scope */}
         <section className="mt-16">
           <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold tracking-tight">What the timer includes</h2>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">What the timer includes</h2>
             <div className="hidden h-px flex-1 bg-gradient-to-r from-border to-transparent sm:block" />
           </div>
           <p className="mt-3 max-w-2xl text-muted-foreground">
@@ -178,7 +178,7 @@ const Speed = () => {
         {/* Pipeline */}
         <section className="mt-16">
           <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold tracking-tight">The pipeline</h2>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">The pipeline</h2>
             <div className="hidden h-px flex-1 bg-gradient-to-r from-border to-transparent sm:block" />
             <span className="hidden text-xs uppercase tracking-widest text-muted-foreground sm:block">
               Parallel execution
@@ -207,7 +207,7 @@ const Speed = () => {
         <section className="mt-16">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">Reference numbers</h2>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">Reference numbers</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Single datacenter connection, August 2026. Lower is better.
               </p>
@@ -273,7 +273,7 @@ const Speed = () => {
 
         {/* Honesty */}
         <section className="mt-16 rounded-2xl border border-border/60 bg-card/30 p-6 sm:p-8">
-          <h2 className="text-2xl font-bold tracking-tight">The small print on “fastest”</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">The small print on “fastest”</h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
             Nobody can prove a universal latency record, and anybody who states one flat-out is selling you
             something. Latency depends on where you are, which TLD you query and whether the answer was cached.
