@@ -174,7 +174,7 @@ const Speed = () => {
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">{row.name}</span>
+                    <span className="text-base font-bold sm:text-lg">{row.name}</span>
                     <span
                       className={`rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase ${
                         row.us
