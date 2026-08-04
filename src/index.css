@@ -266,7 +266,9 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    padding-bottom: 0.1em;
+    display: inline-block;
+    padding-bottom: 0.18em;
+    margin-bottom: -0.18em;
   }
 
   /* Unified icon frames — one icon language across all pages */
