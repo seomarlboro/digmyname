@@ -227,37 +227,13 @@ const Mcp = () => {
               </>
             }
           >
-            <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4">
+            <StatGrid>
               <Stat value="52" label="TLDs covered" accent="mint" />
               <Stat value="7" label="Registrars compared" accent="violet" />
               <Stat value="<100ms" label="Typical response" />
               <Stat value="MIT" label="Open source" />
-            </div>
+            </StatGrid>
 
-            <div className="mt-8 flex flex-wrap gap-2">
-              <a href={NPM_URL} target="_blank" rel="noopener noreferrer" aria-label="npm version">
-                <img
-                  src="https://img.shields.io/npm/v/domain-check-skills-mcp?color=145DFB&label=npm&style=flat-square"
-                  alt="npm version"
-                />
-              </a>
-              <a href={NPM_URL} target="_blank" rel="noopener noreferrer" aria-label="npm downloads">
-                <img
-                  src="https://img.shields.io/npm/dm/domain-check-skills-mcp?color=145DFB&label=downloads&style=flat-square"
-                  alt="npm downloads"
-                />
-              </a>
-              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" aria-label="GitHub stars">
-                <img
-                  src="https://img.shields.io/github/stars/seomarlboro/domain-check-skills?color=145DFB&style=flat-square"
-                  alt="GitHub stars"
-                />
-              </a>
-              <img
-                src="https://img.shields.io/badge/license-MIT-145DFB?style=flat-square"
-                alt="MIT license"
-              />
-            </div>
           </PageHeader>
 
 
