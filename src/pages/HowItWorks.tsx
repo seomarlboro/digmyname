@@ -16,6 +16,7 @@ import {
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CodeBlock } from "@/components/CodeBlock";
 
 const sources = [
   {
@@ -388,40 +389,78 @@ const HowItWorks = () => {
             For AI agents & developers
           </h2>
           <p className="mb-6 max-w-2xl text-muted-foreground">
-            We expose a free, no-auth JSON API so ChatGPT, Claude, Perplexity
-            and your own scripts can answer "is this domain available?"
-            without scraping. 60 requests / 60 s / IP.
+            Free, no-auth JSON API. ChatGPT, Claude, Perplexity and your own
+            scripts can ask "is this domain available?" without scraping. 60
+            requests / 60 s / IP.
           </p>
-          <div className="surface-card p-5">
-            <div className="mb-3 text-sm font-semibold text-foreground">
-              Quick example
-            </div>
-            <pre className="overflow-x-auto rounded-md bg-muted/40 p-3 text-xs leading-relaxed text-foreground">
-{`curl "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/check?domain=acme.io"`}
-            </pre>
-            <ul className="mt-4 space-y-1 text-sm text-muted-foreground">
+
+          <CodeBlock
+            tabs={[
+              {
+                label: "cURL",
+                language: "bash",
+                code: `curl "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/check?domain=acme.io"`,
+              },
+              {
+                label: "JavaScript",
+                language: "javascript",
+                code: `const res = await fetch(
+  "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/check?domain=acme.io"
+);
+const data = await res.json();
+console.log(data.available, data.price);`,
+              },
+              {
+                label: "Python",
+                language: "python",
+                code: `import requests
+
+url = "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/check"
+res = requests.get(url, params={"domain": "acme.io"})
+print(res.json()["available"])`,
+              },
+              {
+                label: "Response",
+                language: "json",
+                code: `{
+  "domain": "acme.io",
+  "available": true,
+  "premium": false,
+  "price": 34.56,
+  "currency": "USD",
+  "registrar": "porkbun"
+}`,
+              },
+            ]}
+          />
+
+          <div className="mt-6 surface-card p-5">
+            <h3 className="text-sm font-semibold text-foreground">Endpoints</h3>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>
-                <code className="text-foreground">GET /check?domain=</code> — single domain
+                <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">GET /check?domain=</code>
+                <span className="ml-2">Single domain availability + price</span>
               </li>
               <li>
-                <code className="text-foreground">GET /search?q=&amp;tlds=</code> — multi-TLD lookup
+                <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">GET /search?q=&amp;tlds=</code>
+                <span className="ml-2">Multi-TLD lookup in one call</span>
               </li>
               <li>
-                <code className="text-foreground">GET /registrars?tld=</code> — cheapest registrars
+                <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">GET /registrars?tld=</code>
+                <span className="ml-2">Cheapest registrars for a TLD</span>
               </li>
               <li>
-                <code className="text-foreground">GET /openapi.json</code> — full schema
+                <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">GET /openapi.json</code>
+                <span className="ml-2">Full OpenAPI schema</span>
               </li>
             </ul>
-            <div className="mt-4 text-xs text-muted-foreground">
-              Plugin manifest:{" "}
+            <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
               <a
                 href="/.well-known/ai-plugin.json"
                 className="underline hover:text-foreground"
               >
                 /.well-known/ai-plugin.json
-              </a>{" "}
-              · LLM docs:{" "}
+              </a>
               <a href="/llms.txt" className="underline hover:text-foreground">
                 /llms.txt
               </a>
