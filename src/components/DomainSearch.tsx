@@ -313,17 +313,18 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     <div className="w-full">
       {/* Spacer + title to push search bar to vertical center */}
       {!hasQuery ? (
-        <div className="relative z-10 flex items-center justify-center px-4" style={{ height: 'calc(50vh - 32px - 40px)' }}>
-          <div className="text-center">
-            <h1 className="text-gradient overflow-visible pr-2 text-5xl font-extrabold leading-[0.95] tracking-[-0.045em] sm:text-6xl md:text-7xl lg:text-[5.5rem]">
+        <div className="relative z-10 flex items-center justify-center px-4 pt-10 pb-4 sm:pt-0 sm:pb-0 min-h-[38vh] sm:min-h-0" style={{ height: undefined }}>
+          <div className="mx-auto w-full max-w-3xl text-center">
+            <h1 className="text-gradient overflow-visible px-1 text-[2rem] font-extrabold leading-[1.05] tracking-[-0.03em] xs:text-[2.35rem] sm:text-6xl sm:leading-[0.95] sm:tracking-[-0.045em] md:text-7xl lg:text-[5.5rem]">
               World's fastest domain
-              <br />
+              <br className="hidden sm:inline" />{" "}
               search. Fight us.
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
+            <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:mt-6 sm:text-lg md:text-xl">
               Probably the fastest domain search in the universe. Or the second — the timer on screen will
               tell you which.
             </p>
+
             <Link
               to="/speed"
               className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
