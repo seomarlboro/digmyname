@@ -4,6 +4,8 @@ import { Zap, Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-reac
 import { LottieAward } from "@/components/LottieAward";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import { PageMain, PageHeader, Eyebrow, Stat } from "@/components/PageKit";
+
 
 const pipeline = [
   {
@@ -267,7 +269,7 @@ const Speed = () => {
             <Link to="/how-it-works">How the checks work</Link>
           </Button>
         </div>
-      </main>
+      </PageMain>
     </div>
   );
 };
