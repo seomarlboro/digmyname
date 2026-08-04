@@ -184,7 +184,7 @@ export const Stat = ({
 }: {
   value: ReactNode;
   label: ReactNode;
-  accent?: "mint" | "violet";
+  accent?: "mint" | "violet" | "warning";
   icon?: (props: { className?: string }) => ReactNode;
 }) => (
   <div className="flex items-center gap-5 px-10 py-10 transition-colors hover:bg-muted/10">
@@ -196,7 +196,9 @@ export const Stat = ({
             ? "text-mint"
             : accent === "violet"
               ? "text-violet"
-              : "text-foreground/70",
+              : accent === "warning"
+                ? "text-warning"
+                : "text-foreground/70",
         )}
       />
     )}
@@ -206,6 +208,7 @@ export const Stat = ({
           "stat-value text-left",
           accent === "mint" && "text-mint",
           accent === "violet" && "text-violet",
+          accent === "warning" && "text-warning",
         )}
       >
         {value}
