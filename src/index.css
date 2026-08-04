@@ -232,8 +232,8 @@
 
   /* Typography scale — identical on every page */
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-aurora/30 bg-aurora/10
-           px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-aurora;
+    @apply inline-flex items-center gap-2 rounded-full border border-border bg-muted/30
+           px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
   }
   .page-title {
     @apply text-4xl font-bold tracking-tight text-foreground sm:text-5xl 2xl:text-6xl;
