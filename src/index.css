@@ -39,8 +39,8 @@
 
 
     /* Custom tokens */
-    --gradient-start: 220 95% 55%;
-    --gradient-end: 265 90% 62%;
+    --gradient-start: 165 80% 42%;
+    --gradient-end: 258 75% 58%;
     --logo-filter: invert(29%) sepia(98%) saturate(4842%) hue-rotate(219deg) brightness(99%) contrast(97%);
     --available: 160 65% 42%;
     --available-foreground: 0 0% 100%;
@@ -143,7 +143,7 @@
 
 @layer utilities {
   .text-gradient {
-    background: linear-gradient(135deg, hsl(195, 100%, 58%), hsl(270, 80%, 58%));
+    background: linear-gradient(135deg, hsl(var(--aurora-mint)), hsl(var(--aurora-violet)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -407,25 +407,25 @@
   .hero-blob-1 {
     width: 55vw; height: 55vw;
     left: -10vw; top: -15vw;
-    background: radial-gradient(circle at 30% 30%, hsl(218 96% 53% / 0.9), transparent 70%);
+    background: radial-gradient(circle at 30% 30%, hsl(var(--aurora-mint) / 0.9), transparent 70%);
     animation: hero-drift-a 26s ease-in-out infinite;
   }
   .hero-blob-2 {
     width: 50vw; height: 50vw;
     right: -8vw; top: 8%;
-    background: radial-gradient(circle at 70% 40%, hsl(262 83% 60% / 0.85), transparent 70%);
+    background: radial-gradient(circle at 70% 40%, hsl(var(--aurora-violet) / 0.85), transparent 70%);
     animation: hero-drift-b 32s ease-in-out infinite;
   }
   .hero-blob-3 {
     width: 45vw; height: 45vw;
     left: 22%; bottom: -20vw;
-    background: radial-gradient(circle at 50% 50%, hsl(240 90% 65% / 0.75), transparent 70%);
+    background: radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.75), transparent 70%);
     animation: hero-drift-c 28s ease-in-out infinite;
   }
   .hero-blob-4 {
     width: 38vw; height: 38vw;
     right: 18%; bottom: -10vw;
-    background: radial-gradient(circle at 50% 50%, hsl(190 95% 55% / 0.55), transparent 70%);
+    background: radial-gradient(circle at 50% 50%, hsl(var(--aurora-mint) / 0.55), transparent 70%);
     animation: hero-drift-d 34s ease-in-out infinite;
   }
 
@@ -451,13 +451,13 @@
     font-family: 'Sora', sans-serif;
     font-weight: 900;
     letter-spacing: -0.04em;
-    background: linear-gradient(135deg, hsl(218 96% 60%), hsl(262 83% 65%));
+    background: linear-gradient(135deg, hsl(var(--aurora-mint)), hsl(var(--aurora-violet)));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
     opacity: 0.18;
-    filter: drop-shadow(0 0 24px hsl(218 96% 53% / 0.25));
+    filter: drop-shadow(0 0 24px hsl(var(--aurora-mint) / 0.25));
     animation-name: hero-float;
     animation-iteration-count: infinite;
     animation-timing-function: ease-in-out;
