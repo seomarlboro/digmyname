@@ -109,20 +109,21 @@ const Speed = () => {
 
 
         {/* Claim */}
-        <section className="surface-card surface-gradient-15 mt-6 flex flex-row flex-wrap items-center justify-between gap-5 p-8">
-          <div className="flex flex-1 items-center gap-5 min-w-0">
-            <LottieAward className="h-20 w-20 shrink-0" />
+        <section className="surface-card surface-gradient-15 mt-6 flex flex-col items-start gap-6 p-6 sm:p-8 md:flex-row md:flex-wrap md:items-center md:justify-between">
+          <div className="flex flex-1 items-center gap-4 sm:gap-5 min-w-0">
+            <LottieAward className="h-16 w-16 shrink-0 sm:h-20 sm:w-20" />
             <div className="min-w-0 flex-1">
-              <h2 className="text-2xl font-bold tracking-tight sm:text-[28px]">Beat our number, take the crown</h2>
-              <p className="mt-2 whitespace-nowrap text-base text-muted-foreground sm:text-lg">
+              <h2 className="text-xl font-bold tracking-tight sm:text-[28px]">Beat our number, take the crown</h2>
+              <p className="mt-2 text-sm text-muted-foreground sm:text-lg md:whitespace-nowrap">
                 Show us a faster public lookup and we'll feature your time here with full credit and a link back.
               </p>
             </div>
           </div>
-          <Button asChild variant="gradient" size="lg" className="shrink-0 text-lg font-bold text-black [&_*]:text-black">
+          <Button asChild variant="gradient" size="lg" className="w-full shrink-0 text-lg font-bold text-black md:w-auto [&_*]:text-black">
             <Link to="/">Run the timer</Link>
           </Button>
         </section>
+
 
         {/* What the timer includes */}
         <section className="mt-16">
