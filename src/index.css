@@ -176,7 +176,7 @@
   }
 
   .btn-gradient {
-    background: linear-gradient(135deg, hsl(218, 96%, 53%), hsl(270, 80%, 58%));
+    background: linear-gradient(135deg, hsl(var(--aurora-mint)), hsl(var(--aurora-violet)));
     color: white;
     transition: opacity 0.2s ease, transform 0.2s ease;
   }
