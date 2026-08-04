@@ -191,7 +191,7 @@ export const Stat = ({
     {Icon && (
       <Icon
         className={cn(
-          "h-[72px] w-[72px] shrink-0",
+          "h-[56px] w-[56px] shrink-0",
           accent === "mint"
             ? "text-mint"
             : accent === "violet"
