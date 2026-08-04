@@ -48,7 +48,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
             <div
               key={tld.extension}
               onClick={() => onToggle(tld.extension)}
-              className={`flex flex-1 items-center justify-between gap-1 rounded-xl px-3 py-2.5 transition-colors cursor-pointer ${
+            className={`flex flex-1 items-center justify-between gap-1 rounded-2xl px-3 py-2.5 transition-colors cursor-pointer ${
                 selected
                   ? "bg-primary/15 ring-1 ring-primary/30"
                   : "bg-[hsl(211_100%_96%)] dark:bg-secondary hover:bg-secondary"
@@ -94,7 +94,7 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-3 text-xs text-muted-foreground">Additional requirements</p>
         <div className="space-y-1">
           {featureOptions.map((f) => (
-            <label key={f} className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+            <label key={f} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
               <Checkbox />
               <span className="text-sm text-foreground">{f}</span>
             </label>
@@ -110,7 +110,7 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-3 text-xs text-muted-foreground">Filter by availability</p>
         <div className="space-y-1">
           {statusOptions.map((s) => (
-            <label key={s} className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+            <label key={s} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
               <Checkbox />
               <span className="text-sm text-foreground">{s}</span>
             </label>
@@ -146,7 +146,7 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
       <p className="mb-3 text-sm text-muted-foreground">Additional requirements</p>
       <div className="space-y-1">
         {featureOptions.map((f) => (
-          <label key={f} className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+          <label key={f} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
             <Checkbox />
             <span className="text-sm text-foreground">{f}</span>
           </label>
@@ -160,7 +160,7 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
       <p className="mb-3 text-sm text-muted-foreground">Filter by availability</p>
       <div className="space-y-1">
         {statusOptions.map((s) => (
-          <label key={s} className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+          <label key={s} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
             <Checkbox />
             <span className="text-sm text-foreground">{s}</span>
           </label>
@@ -247,11 +247,11 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
   return (
     <div ref={barRef} className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
       {/* Gradient glow behind */}
-      <div className="absolute inset-0 -z-10 rounded-3xl blur-xl opacity-60" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(225 85% 55% / 0.35), hsl(270 80% 58% / 0.3), hsl(30 90% 50% / 0.25), hsl(225 85% 55% / 0.2))" }} />
-      <div className="absolute inset-0 -z-10 rounded-3xl blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(225 85% 55% / 0.25), hsl(270 80% 58% / 0.2))" }} />
+      <div className="absolute inset-0 -z-10 rounded-[56px] blur-xl opacity-60" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(225 85% 55% / 0.35), hsl(270 80% 58% / 0.3), hsl(30 90% 50% / 0.25), hsl(225 85% 55% / 0.2))" }} />
+      <div className="absolute inset-0 -z-10 rounded-[56px] blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(225 85% 55% / 0.25), hsl(270 80% 58% / 0.2))" }} />
 
       {/* Floating bar */}
-      <div className="relative flex items-stretch gap-3 rounded-[28px] border border-transparent bg-white p-3.5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
+      <div className="relative flex items-stretch gap-3 rounded-[56px] border border-transparent bg-white p-3.5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
         {/* Popovers */}
         {openFilter && openFilter !== "extensions" && (
           <div
@@ -261,14 +261,14 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
               left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
             }}
           >
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
+            <div className="rounded-3xl border border-border bg-card p-5 shadow-xl">
               <PopoverContent id={openFilter} />
             </div>
           </div>
         )}
         {openFilter === "extensions" && (
           <div className="absolute left-0 right-0 z-50" style={{ bottom: "calc(100% + 16px)" }}>
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-xl">
+            <div className="rounded-3xl border border-border bg-card p-5 shadow-xl">
               <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} />
             </div>
           </div>
@@ -287,7 +287,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
             >
               <button
                 onClick={() => toggle(f.id)}
-                className={`flex min-w-[130px] h-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left whitespace-nowrap transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/20 scale-[1.02] shadow-lg" : "hover:scale-[1.01] hover:shadow-md"}`}
+                className={`flex min-w-[130px] h-full items-center justify-between gap-3 rounded-4xl border px-4 py-3 text-left whitespace-nowrap transition-all ${f.color} ${openFilter === f.id ? "ring-2 ring-primary/20 scale-[1.02] shadow-lg" : "hover:scale-[1.01] hover:shadow-md"}`}
               >
                 <div>
                   <p className={`text-[11px] font-extrabold uppercase tracking-widest ${labelColor}`}>{f.label}</p>
