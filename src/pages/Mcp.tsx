@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trackMcpEvent } from "@/lib/trackMcpEvent";
 import WaitlistForm from "@/components/WaitlistForm";
+import { PageMain, PageHeader, Eyebrow, Stat } from "@/components/PageKit";
+
 
 const GITHUB_URL = "https://github.com/seomarlboro/domain-check-skills";
 const NPM_URL = "https://www.npmjs.com/package/domain-check-skills-mcp";
@@ -498,7 +500,7 @@ const Mcp = () => {
               </a>
             </Button>
           </section>
-        </main>
+        </PageMain>
       </div>
     </>
   );
