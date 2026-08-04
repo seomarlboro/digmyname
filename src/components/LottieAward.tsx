@@ -32,7 +32,7 @@ function recolorAnimationData(
       if (a <= 0.01 || (r > 0.95 && g > 0.95 && b > 0.95)) {
         return data;
       }
-      const target = isStarOrHighlightLayer(layerName) ? WHITE_RGB : PRIMARY_RGB;
+      const target = isStarOrHighlightLayer(layerName) ? AURORA_MINT_RGB : AURORA_VIOLET_RGB;
       return [...target, a];
     }
     return data.map((item) => recolorAnimationData(item, layerName));
@@ -58,7 +58,7 @@ function recolorAnimationData(
       if (Array.isArray(colorObj.k) && colorObj.k.length === 4) {
         const [r, g, b, a] = colorObj.k as number[];
         if (a > 0.01 && !(r > 0.95 && g > 0.95 && b > 0.95)) {
-          const target = isStarOrHighlightLayer(layerName) ? WHITE_RGB : PRIMARY_RGB;
+          const target = isStarOrHighlightLayer(layerName) ? AURORA_MINT_RGB : AURORA_VIOLET_RGB;
           return [key, { ...colorObj, k: [...target, a] }];
         }
       }
