@@ -65,7 +65,8 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     };
   }, [scrolled]);
 
-  // Debounce (short: we want results within ~1s of the last keystroke)
+  // Debounce: very short so results feel instant, but not so short that every
+  // keystroke triggers a request storm.
   useEffect(() => {
     if (!query.trim()) {
       setDebouncedQuery("");
@@ -75,7 +76,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     setLoading(true);
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 150);
+    }, 80);
     return () => clearTimeout(timer);
   }, [query]);
 

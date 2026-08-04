@@ -245,6 +245,32 @@ const OPENAPI = {
   },
 };
 
+// Fast DNS-only status. Returns quickly so the UI can flip cards before the
+// authoritative RDAP/pricing check finishes. A domain with any DNS records
+// (NS/A/MX) is treated as taken; NXDOMAIN means likely available; everything
+// else is uncertain.
+async function fastStatus(domain: string): Promise<{ available: boolean; uncertain: boolean }> {
+  try {
+    for (const recordType of ["NS", "A", "MX"] as const) {
+      try {
+        const records = await Deno.resolveDns(domain, recordType);
+        if (records.length > 0) {
+          return { available: false, uncertain: false };
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (msg.includes("NXDOMAIN") || msg.toLowerCase().includes("not found")) {
+          return { available: true, uncertain: true };
+        }
+        // Try next record type
+      }
+    }
+    return { available: false, uncertain: true };
+  } catch {
+    return { available: false, uncertain: true };
+  }
+}
+
 // ---------- router ----------
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -275,13 +301,25 @@ Deno.serve(async (req) => {
         {
           name: "DigMyName Public API",
           docs: "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/openapi.json",
-          endpoints: ["/check?domain=", "/search?q=&tlds=", "/registrars?tld=", "/openapi.json"],
+          endpoints: ["/check?domain=", "/search?q=&tlds=", "/registrars?tld=", "/fast?domains=", "/openapi.json"],
           rate_limit: `${LIMIT} requests / 60s / IP`,
           website: "https://digmyname.com",
         },
         200,
         rlHeaders,
       );
+    }
+
+    if (path === "/fast") {
+      const raw = url.searchParams.get("domains") || url.searchParams.get("domain") || "";
+      const domains = raw
+        .split(",")
+        .map((d) => validateDomain(d))
+        .filter((d): d is string => !!d)
+        .slice(0, 24);
+      if (!domains.length) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400, rlHeaders);
+      const results = await Promise.all(domains.map(async (domain) => ({ domain, ...(await fastStatus(domain)) })));
+      return json({ count: results.length, results }, 200, { ...rlHeaders, "Cache-Control": "no-store" });
     }
 
     if (path === "/check") {

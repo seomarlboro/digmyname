@@ -18,7 +18,9 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api";
 
-const USER_AGENT = "domain-check-skills-mcp/1.1.0 (+https://digmyname.com/mcp)";
+const USER_AGENT = "domain-check-skills-mcp/1.1.1 (+https://digmyname.com/mcp)";
+const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
+const MAX_RETRIES = Number(process.env.DIGMYNAME_MAX_RETRIES || "2");
 
 const RegistrarSchema = z.object({
   name: z.string(),
@@ -44,19 +46,85 @@ const DomainResultSchema = z.object({
 });
 
 type DomainResult = z.infer<typeof DomainResultSchema>;
-type AgeBatch = { count: number; results: Array<{ domain: string; created: string | null; expires: string | null }> };
+type AgeBatch = {
+  count: number;
+  results: Array<{ domain: string; created: string | null; expires: string | null }>;
+};
 
-async function api<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
+// Simple in-memory TTL cache so repeated queries in the same conversation are instant.
+const apiCache = new Map<string, { value: unknown; expires: number }>();
+
+function cacheGet(key: string): unknown | undefined {
+  const entry = apiCache.get(key);
+  if (!entry) return undefined;
+  if (Date.now() > entry.expires) {
+    apiCache.delete(key);
+    return undefined;
+  }
+  return entry.value;
+}
+
+function cacheSet(key: string, value: unknown, ttlMs = CACHE_TTL_MS): void {
+  apiCache.set(key, { value, expires: Date.now() + ttlMs });
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchApi(path: string): Promise<unknown> {
+  const url = `${API_BASE}${path}`;
+  const res = await fetch(url, {
     headers: { accept: "application/json", "user-agent": USER_AGENT },
   });
+
   if (res.status === 429) {
     throw new Error("Rate limited by DigMyName API (60 req/min). Try again in a minute.");
   }
   if (!res.ok) {
-    throw new Error(`DigMyName API error ${res.status}: ${await res.text()}`);
+    const body = await res.text().catch(() => "unknown");
+    throw new Error(`DigMyName API error ${res.status}: ${body}`);
   }
-  return (await res.json()) as T;
+  return res.json();
+}
+
+async function api<T>(path: string): Promise<T> {
+  const cached = cacheGet(path);
+  if (cached) return cached as T;
+
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const data = await fetchApi(path);
+      cacheSet(path, data);
+      return data as T;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      const isNetwork =
+        lastError.message.includes("fetch") ||
+        lastError.message.includes("network") ||
+        lastError.message.includes("ECONNREFUSED") ||
+        lastError.message.includes("ETIMEDOUT");
+      const isRateLimit = lastError.message.includes("Rate limited");
+      if ((isNetwork || isRateLimit) && attempt < MAX_RETRIES) {
+        await sleep(500 * 2 ** attempt);
+        continue;
+      }
+      throw lastError;
+    }
+  }
+
+  throw lastError ?? new Error("Unknown API error");
+}
+
+function normalizeDomain(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/^(https?:\/\/)?(www\.)?/, "")
+    .split("/")[0]
+    .split(":")[0];
 }
 
 function money(n: number | null | undefined): string {
@@ -104,18 +172,31 @@ function formatResult(r: DomainResult): string {
 
 const server = new McpServer({
   name: "domain-check-skills",
-  version: "1.1.0",
+  version: "1.1.1",
 });
 
-server.tool(
+// Work around MCP SDK's deep type inference by registering tools via an any-typed wrapper.
+function registerTool(
+  name: string,
+  description: string,
+  schema: Record<string, z.ZodTypeAny>,
+  handler: (...args: any[]) => any
+) {
+  (server as any).tool(name, description, schema, handler);
+}
+
+registerTool(
   "check_domain",
   "Check whether a specific domain (e.g. acme.io) is available. Returns cheapest registrar, buy link, and registration year when taken.",
   { domain: z.string().describe("Fully-qualified domain, e.g. acme.io") },
-  async ({ domain }: { domain: string }) => {
-    const clean = domain.trim().toLowerCase();
+  async ({ domain }) => {
+    const clean = normalizeDomain(domain);
     const [check, age] = await Promise.all([
       api<{ result: DomainResult }>(`/check?domain=${encodeURIComponent(clean)}`),
-      api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => ({ count: 1, results: [{ domain: clean, created: null, expires: null }] })),
+      api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => ({
+        count: 1,
+        results: [{ domain: clean, created: null, expires: null }],
+      })),
     ]);
     const created = age.results.find((a) => a.domain === clean)?.created ?? null;
     const result = { ...check.result, since_year: yearFromIso(created) };
@@ -123,7 +204,7 @@ server.tool(
   }
 );
 
-server.tool(
+registerTool(
   "search_domains",
   "Check one name across many TLDs at once. Returns availability, cheapest price, buy link and registration year (for taken domains) for each.",
   {
@@ -133,7 +214,7 @@ server.tool(
       .optional()
       .describe("Comma-separated TLDs, e.g. com,io,ai. Defaults to a curated set of 12."),
   },
-  async ({ query, tlds }: { query: string; tlds?: string }) => {
+  async ({ query, tlds }) => {
     const qs = new URLSearchParams({ q: query.trim().toLowerCase() });
     if (tlds) qs.set("tlds", tlds.replace(/\s/g, "").toLowerCase());
 
@@ -175,11 +256,11 @@ server.tool(
   }
 );
 
-server.tool(
+registerTool(
   "compare_registrars",
   "Compare registrar registration and renewal prices for a TLD (e.g. com, io, ai).",
   { tld: z.string().describe("TLD without the dot, e.g. com") },
-  async ({ tld }: { tld: string }) => {
+  async ({ tld }) => {
     const data = await api<{
       tld: string;
       registrars: Array<{
@@ -208,20 +289,26 @@ server.tool(
   }
 );
 
-server.tool(
+registerTool(
   "get_domain_age",
   "Return the registration (creation) year and expiration date for a taken domain using RDAP.",
   { domain: z.string().describe("Fully-qualified domain, e.g. acme.com") },
-  async ({ domain }: { domain: string }) => {
-    const clean = domain.trim().toLowerCase();
+  async ({ domain }) => {
+    const clean = normalizeDomain(domain);
     const data = await api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`);
     const info = data.results.find((a) => a.domain === clean);
     if (!info) {
-      return { content: [{ type: "text" as const, text: `Could not determine registration date for ${clean}.` }] };
+      return {
+        content: [
+          { type: "text" as const, text: `Could not determine registration date for ${clean}.` },
+        ],
+      };
     }
     const y = yearFromIso(info.created);
     const text = info.created
-      ? `${info.domain} — registered ${info.created}${y ? ` (since ${y})` : ""}${info.expires ? `, expires ${info.expires}` : ""}`
+      ? `${info.domain} — registered ${info.created}${y ? ` (since ${y})` : ""}${
+          info.expires ? `, expires ${info.expires}` : ""
+        }`
       : `Could not determine registration date for ${info.domain}.`;
     return { content: [{ type: "text" as const, text }] };
   }
@@ -230,7 +317,7 @@ server.tool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("domain-check-skills-mcp v1.1.0 ready (stdio)");
+  console.error("domain-check-skills-mcp v1.1.1 ready (stdio)");
 }
 
 main().catch((err) => {
