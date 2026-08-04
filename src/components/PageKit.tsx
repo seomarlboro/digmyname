@@ -48,7 +48,7 @@ export const PageHeader = ({
   align?: "left" | "center";
   plain?: boolean;
 }) => (
-  <section className={cn("mb-10", plain ? "py-2" : "bento bento-p-lg")}>
+  <section className="mb-10 py-2">
     <div
       className={cn(
         "relative",
