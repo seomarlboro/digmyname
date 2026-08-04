@@ -326,6 +326,14 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
             <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
               Check 50+ TLDs, see availability instantly, and compare registrar prices before you buy.
             </p>
+            <Link
+              to="/speed"
+              className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Zap className="h-3.5 w-3.5 text-primary" />
+              First answer in ~100 ms — timed live on every search
+            </Link>
+
           </div>
 
         </div>
