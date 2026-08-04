@@ -307,17 +307,6 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               </div>
             ) : null}
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-9 w-9 ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
-              onClick={handleFavorite}
-              aria-label={favorited ? `Remove ${domain} from favorites` : `Save ${domain} to favorites`}
-              aria-pressed={favorited}
-            >
-              <Heart className={`h-4 w-4 ${favorited ? "fill-current" : ""}`} />
-            </Button>
-
             {available ? (
               <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
