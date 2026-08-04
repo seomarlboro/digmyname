@@ -124,44 +124,15 @@ const Speed = () => {
           </Button>
         </section>
 
-        {/* Timer scope */}
+        {/* What the timer includes */}
         <section className="mt-16">
           <div className="flex items-center gap-4">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">What the timer includes</h2>
             <div className="hidden h-px flex-1 bg-gradient-to-r from-border to-transparent sm:block" />
           </div>
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            Everything. The stopwatch starts at your final keypress, so our own debounce, your network round
-            trip, the lookup and the React render are all inside the number. It is the time you actually
-            waited — not the time our server spent.
+            The stopwatch starts at your final keystroke and stops when the first card paints.
           </p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {[
-              "Debounce after the last keystroke (80 ms)",
-              "Round trip from your browser to our edge",
-              "The DNS / RDAP lookup itself",
-              "Painting the first resolved card",
-            ].map((item) => (
-              <div
-                key={item}
-                className="flex items-center gap-4 py-3 text-base font-medium"
-              >
-                <Zap className="h-6 w-6 shrink-0 text-primary" />
-                {item}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Pipeline */}
-        <section className="mt-16">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">The pipeline</h2>
-            <div className="hidden h-px flex-1 bg-gradient-to-r from-border to-transparent sm:block" />
-            <span className="hidden text-xs uppercase tracking-widest text-muted-foreground sm:block">
-              Parallel execution
-            </span>
-          </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {pipeline.map((step) => (
               <FeatureCard
