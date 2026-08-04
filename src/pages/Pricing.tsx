@@ -208,7 +208,7 @@ const Pricing = () => {
           </>
         )}
       </PageMain>
-      </main>
+      
     </div>
   );
 };
