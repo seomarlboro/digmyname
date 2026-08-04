@@ -39,7 +39,7 @@ const NotFound = () => {
   );
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <main className="relative min-h-screen overflow-hidden bg-transparent text-foreground">
       {/* ------- Cosmic backdrop ------- */}
       <div aria-hidden className="absolute inset-0 nf-bg" />
       <div aria-hidden className="absolute inset-0 nf-nebula-a" />

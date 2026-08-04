@@ -10,7 +10,7 @@ const Favorites = () => {
   const { favorites, toggleFavorite } = useFavorites();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <Helmet>
         <title>Saved Domains — DigMyName</title>
         <meta name="description" content="Your saved domain shortlist on DigMyName." />

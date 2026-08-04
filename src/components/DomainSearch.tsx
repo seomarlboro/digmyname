@@ -24,7 +24,7 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
   </svg>
 );
 import DomainCard from "@/components/DomainCard";
-import HeroBackground from "@/components/HeroBackground";
+
 import { generateDomainList, checkDomainsAvailability, checkDomainsFast, type DomainResult } from "@/lib/domainData";
 
 interface DomainSearchProps {
@@ -311,8 +311,6 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
   return (
     <div className="w-full">
-      {!hasQuery && <HeroBackground />}
-
       {/* Spacer + title to push search bar to vertical center */}
       {!hasQuery ? (
         <div className="relative z-10 flex items-center justify-center px-4" style={{ height: 'calc(50vh - 32px - 40px)' }}>
