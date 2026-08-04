@@ -142,7 +142,7 @@ const Speed = () => {
             ].map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-3 surface-card px-4 py-3 text-sm"
+                className="flex items-center gap-3 border-b border-border/40 px-4 py-3 text-sm last:border-0"
               >
                 <Zap className="h-4 w-4 shrink-0 text-primary" />
                 {item}
