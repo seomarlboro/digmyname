@@ -149,7 +149,9 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
               return r;
             })
           );
+          markFirstAnswer();
         }
+
       } catch {
         // Fast check is best-effort; authoritative check will overwrite.
       }
@@ -182,6 +184,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
       const applyBatch = (availMap: Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>) => {
         if (cancelled) return;
+        markFirstAnswer();
         setResults((prev) =>
           prev.map((r) => {
             const info = availMap.get(r.domain);
