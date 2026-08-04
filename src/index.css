@@ -274,6 +274,7 @@
   /* Unified icon frames — one icon language across all pages */
   .icon-frame {
     @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-aurora/25 bg-aurora/10 text-aurora;
+    transform: translateY(-4px);
   }
 
   .icon-frame svg {
@@ -284,6 +285,7 @@
   .icon-frame-accent {
     @apply h-14 w-14 rounded-3xl border-aurora/40 text-aurora;
     background-image: linear-gradient(135deg, hsl(var(--aurora-mint) / 0.22), hsl(var(--aurora-violet) / 0.22));
+    transform: translateY(-4px);
   }
 
   .icon-frame-accent svg {
