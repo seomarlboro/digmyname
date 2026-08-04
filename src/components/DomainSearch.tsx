@@ -65,7 +65,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     };
   }, [scrolled]);
 
-  // Debounce
+  // Debounce (short: we want results within ~1s of the last keystroke)
   useEffect(() => {
     if (!query.trim()) {
       setDebouncedQuery("");
@@ -75,7 +75,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     setLoading(true);
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 300);
+    }, 150);
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -97,12 +97,31 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
       setLoading(false);
 
       // Step 2: Check real availability.
-      // Strategy: send the most popular TLDs (first 20) as a small priority batch,
-      // then fan out the rest in parallel batches of 20. Each batch updates the UI
-      // as soon as it returns, so the popular TLDs feel near-instant.
+      // Strategy: the ~10 most popular TLDs are each sent as their OWN request so
+      // every card resolves at its own speed (no waiting for the slowest sibling
+      // in a batch). Everything else fans out in parallel batches of 20.
       const domainNames = domains.map((d) => d.domain);
-      const PRIORITY_SIZE = 20;
       const BATCH_SIZE = 20;
+      const TOP_TLDS = ["com", "io", "net", "org", "ai", "co", "app", "dev", "xyz", "me"];
+
+      const isTop = (d: string) => {
+        const tld = d.slice(d.indexOf(".") + 1);
+        return TOP_TLDS.includes(tld);
+      };
+
+      // Keep only the first occurrence per TLD (base name first when AI variations are on).
+      const seenTop = new Set<string>();
+      const solo: string[] = [];
+      const rest: string[] = [];
+      for (const d of domainNames) {
+        const tld = d.slice(d.indexOf(".") + 1);
+        if (isTop(d) && !seenTop.has(tld)) {
+          seenTop.add(tld);
+          solo.push(d);
+        } else {
+          rest.push(d);
+        }
+      }
 
       const applyBatch = (availMap: Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>) => {
         if (cancelled) return;
@@ -133,17 +152,14 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
         applyBatch(availMap);
       };
 
-      // Priority batch (popular TLDs) fires first and is awaited so we surface
-      // results to the user ASAP; remaining batches run in parallel.
-      const priority = domainNames.slice(0, PRIORITY_SIZE);
-      const rest = domainNames.slice(PRIORITY_SIZE);
       const restBatches: string[][] = [];
       for (let i = 0; i < rest.length; i += BATCH_SIZE) {
         restBatches.push(rest.slice(i, i + BATCH_SIZE));
       }
 
       await Promise.all([
-        priority.length > 0 ? runBatch(priority) : Promise.resolve(),
+        // one request per top TLD → each card flips as soon as its own lookup lands
+        ...solo.map((d) => runBatch([d])),
         ...restBatches.map(runBatch),
       ]);
     };
@@ -151,6 +167,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     run();
     return () => { cancelled = true; };
   }, [debouncedQuery, aiSuggestions, selectedTlds]);
+
 
   const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
   const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
