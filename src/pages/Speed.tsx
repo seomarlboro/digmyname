@@ -1,11 +1,11 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
+import { Timer, Network, Gauge, ShieldCheck, ArrowRight, Zap } from "lucide-react";
 import { LottieAward } from "@/components/LottieAward";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
-import { StopwatchIcon, KeyboardIcon, NetworkIcon } from "@/components/StatIcons";
+import { StopwatchIcon, KeyboardIcon } from "@/components/StatIcons";
 
 
 const pipeline = [
@@ -102,7 +102,7 @@ const Speed = () => {
           <StatGrid cols={3}>
             <Stat value="~170" label="ms · first answer" accent="mint" icon={StopwatchIcon} />
             <Stat value="80" label="ms · debounce (ours)" accent="violet" icon={KeyboardIcon} />
-            <Stat value="50+" label="TLDs · in parallel" icon={NetworkIcon} />
+            <Stat value="<1s" label="Full pipeline" icon={Zap} />
           </StatGrid>
 
         </PageHeader>

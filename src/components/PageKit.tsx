@@ -161,13 +161,13 @@ export const StatGrid = ({
   className,
 }: {
   children: ReactNode;
-  cols?: 3 | 4;
+  cols?: 2 | 3 | 4;
   className?: string;
 }) => (
   <div
     className={cn(
-      "surface-card mt-10 grid grid-cols-2 overflow-hidden",
-      cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4",
+      "surface-card mt-10 grid overflow-hidden",
+      cols === 2 ? "grid-cols-2" : cols === 3 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 sm:grid-cols-4",
       className,
     )}
   >
