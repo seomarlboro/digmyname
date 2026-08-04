@@ -226,7 +226,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
 
     run();
     return () => { cancelled = true; };
-  }, [debouncedQuery, aiSuggestions, selectedTlds]);
+  }, [debouncedQuery, aiSuggestions, selectedTlds, markFirstAnswer]);
 
 
   const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
