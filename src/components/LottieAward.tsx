@@ -6,8 +6,8 @@ interface LottieAwardProps extends Omit<LottieComponentProps, "animationData"> {
   className?: string;
 }
 
-const PRIMARY_RGB: [number, number, number] = [0.1225, 0.6925, 0.9775]; // new primary hsl(220 95% 55%)
-const WHITE_RGB: [number, number, number] = [1, 1, 1];
+const AURORA_VIOLET_RGB: [number, number, number] = [0.644, 0.501, 0.979]; // aurora violet hsl(258 92% 74%)
+const AURORA_MINT_RGB: [number, number, number] = [0.244, 0.916, 0.748]; // aurora mint hsl(165 80% 58%)
 
 function isStarOrHighlightLayer(name: string | undefined): boolean {
   if (!name) return false;
@@ -32,7 +32,7 @@ function recolorAnimationData(
       if (a <= 0.01 || (r > 0.95 && g > 0.95 && b > 0.95)) {
         return data;
       }
-      const target = isStarOrHighlightLayer(layerName) ? WHITE_RGB : PRIMARY_RGB;
+      const target = isStarOrHighlightLayer(layerName) ? AURORA_MINT_RGB : AURORA_VIOLET_RGB;
       return [...target, a];
     }
     return data.map((item) => recolorAnimationData(item, layerName));
@@ -58,7 +58,7 @@ function recolorAnimationData(
       if (Array.isArray(colorObj.k) && colorObj.k.length === 4) {
         const [r, g, b, a] = colorObj.k as number[];
         if (a > 0.01 && !(r > 0.95 && g > 0.95 && b > 0.95)) {
-          const target = isStarOrHighlightLayer(layerName) ? WHITE_RGB : PRIMARY_RGB;
+          const target = isStarOrHighlightLayer(layerName) ? AURORA_MINT_RGB : AURORA_VIOLET_RGB;
           return [key, { ...colorObj, k: [...target, a] }];
         }
       }
