@@ -94,7 +94,7 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-3 text-xs text-muted-foreground">Additional requirements</p>
         <div className="space-y-1">
           {featureOptions.map((f) => (
-            <label key={f} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+            <label key={f} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
               <Checkbox />
               <span className="text-sm text-foreground">{f}</span>
             </label>
@@ -110,7 +110,7 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-3 text-xs text-muted-foreground">Filter by availability</p>
         <div className="space-y-1">
           {statusOptions.map((s) => (
-            <label key={s} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-secondary cursor-pointer">
+            <label key={s} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
               <Checkbox />
               <span className="text-sm text-foreground">{s}</span>
             </label>
