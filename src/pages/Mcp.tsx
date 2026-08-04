@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trackMcpEvent } from "@/lib/trackMcpEvent";
 import WaitlistForm from "@/components/WaitlistForm";
+import { NetworkIcon, StoreIcon, StopwatchIcon, LicenseIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
 
 
@@ -214,10 +215,10 @@ const Mcp = () => {
             }
           >
             <StatGrid>
-              <Stat value="52" label="TLDs covered" accent="mint" />
-              <Stat value="7" label="Registrars compared" accent="violet" />
-              <Stat value="<100ms" label="Typical response" />
-              <Stat value="MIT" label="Open source" />
+              <Stat value="52" label="TLDs covered" accent="mint" icon={NetworkIcon} />
+              <Stat value="7" label="Registrars compared" accent="violet" icon={StoreIcon} />
+              <Stat value="<100ms" label="Typical response" icon={StopwatchIcon} />
+              <Stat value="MIT" label="Open source" icon={LicenseIcon} />
             </StatGrid>
 
           </PageHeader>
