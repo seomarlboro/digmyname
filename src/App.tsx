@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import HeroBackground from "@/components/HeroBackground";
 import Index from "./pages/Index";
 import Pricing from "./pages/Pricing";
 import Favorites from "./pages/Favorites";
@@ -23,19 +24,22 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/favorites" element={<Favorites />} />
-              <Route path="/how-it-works" element={<HowItWorks />} />
-              <Route path="/about" element={<HowItWorks />} />
-              <Route path="/mcp" element={<Mcp />} />
-              <Route path="/skill" element={<Mcp />} />
-              <Route path="/gpt" element={<Mcp />} />
-              <Route path="/speed" element={<Speed />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <div className="relative min-h-screen bg-background/95">
+              <HeroBackground />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/favorites" element={<Favorites />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/about" element={<HowItWorks />} />
+                <Route path="/mcp" element={<Mcp />} />
+                <Route path="/skill" element={<Mcp />} />
+                <Route path="/gpt" element={<Mcp />} />
+                <Route path="/speed" element={<Speed />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

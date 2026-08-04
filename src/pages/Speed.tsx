@@ -67,7 +67,7 @@ const benchmark = [
 
 const Speed = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <Helmet>
         <title>Fastest domain search in the universe (or second) — DigMyName</title>
         <meta

@@ -147,7 +147,7 @@ const Mcp = () => {
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-background relative overflow-hidden">
+      <div className="min-h-screen bg-transparent relative overflow-hidden">
         {/* Ambient background */}
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
           <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full bg-primary/10 blur-[140px]" />

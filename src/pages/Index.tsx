@@ -9,7 +9,7 @@ const Index = () => {
   const [selectedTlds, setSelectedTlds] = useState<Set<string>>(new Set());
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-transparent pb-20">
       <Helmet>
         <title>Fast Domain Search — World's Fastest Domain Checker | DigMyName</title>
         <meta name="description" content="The world's fastest domain search. Check availability across 50+ TLDs in milliseconds. If you find a faster checker, come dispute it." />

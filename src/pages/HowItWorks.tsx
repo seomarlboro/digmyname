@@ -139,7 +139,7 @@ const faqs = [
 
 const HowItWorks = () => {
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-transparent pb-20">
       <Helmet>
         <title>How DigMyName Works — Honest Domain Availability Checks</title>
         <meta
