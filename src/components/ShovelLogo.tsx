@@ -3,7 +3,7 @@ const ShovelLogo = ({ className }: { className?: string }) => (
     <defs>
       <linearGradient id="shovel-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stopColor="hsl(var(--aurora-mint))" />
-        <stop offset="100%" stopColor="hsl(var(--aurora-violet))" />
+        <stop offset="100%" stopColor="hsl(var(--primary))" />
       </linearGradient>
     </defs>
     <path
