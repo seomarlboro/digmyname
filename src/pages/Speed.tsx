@@ -165,6 +165,7 @@ const Speed = () => {
             {pipeline.map((step) => (
               <FeatureCard
                 key={step.title}
+                plain
                 icon={step.icon}
                 index={step.step}
                 title={step.title}
