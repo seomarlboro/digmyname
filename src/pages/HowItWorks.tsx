@@ -427,19 +427,19 @@ print(res.json()["available"])`,
             <h3 className="text-sm font-semibold text-foreground">Endpoints</h3>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>
-                <code className="rounded bg-muted/30 px-1.5 py-0.5 text-foreground">GET /check?domain=</code>
+                <code className="rounded bg-muted/10 px-1.5 py-0.5 text-foreground">GET /check?domain=</code>
                 <span className="ml-2">Single domain availability + price</span>
               </li>
               <li>
-                <code className="rounded bg-muted/30 px-1.5 py-0.5 text-foreground">GET /search?q=&amp;tlds=</code>
+                <code className="rounded bg-muted/10 px-1.5 py-0.5 text-foreground">GET /search?q=&amp;tlds=</code>
                 <span className="ml-2">Multi-TLD lookup in one call</span>
               </li>
               <li>
-                <code className="rounded bg-muted/30 px-1.5 py-0.5 text-foreground">GET /registrars?tld=</code>
+                <code className="rounded bg-muted/10 px-1.5 py-0.5 text-foreground">GET /registrars?tld=</code>
                 <span className="ml-2">Cheapest registrars for a TLD</span>
               </li>
               <li>
-                <code className="rounded bg-muted/30 px-1.5 py-0.5 text-foreground">GET /openapi.json</code>
+                <code className="rounded bg-muted/10 px-1.5 py-0.5 text-foreground">GET /openapi.json</code>
                 <span className="ml-2">Full OpenAPI schema</span>
               </li>
             </ul>
