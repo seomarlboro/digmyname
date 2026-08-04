@@ -197,7 +197,7 @@ const Speed = () => {
             {benchmark.map((row) => (
               <div
                 key={row.name}
-                className={`grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_120px] ${
+                className={`grid grid-cols-[1fr_auto] items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_180px] ${
                   row.us ? "bg-primary/[0.05]" : ""
                 }`}
               >
@@ -220,12 +220,12 @@ const Speed = () => {
                   {row.ms}
                 </div>
                 <div className="col-span-2 flex items-center gap-3 sm:col-span-1">
-                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted/80">
+                  <div className="h-3 flex-1 overflow-hidden rounded-full bg-muted/30">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         row.us
-                          ? "bg-gradient-to-r from-primary to-purple-500 shadow-[0_0_12px_hsl(var(--primary)/0.45)]"
-                          : "bg-gradient-to-r from-muted-foreground/50 to-muted-foreground/25"
+                          ? "bg-gradient-to-r from-primary to-aurora-violet shadow-[0_0_12px_hsl(var(--primary)/0.45)]"
+                          : "bg-gradient-to-r from-muted-foreground/60 to-muted-foreground/30"
                       }`}
                       style={{ width: `${row.bar}%` }}
                     />
