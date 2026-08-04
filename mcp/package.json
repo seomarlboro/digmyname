@@ -1,7 +1,7 @@
 {
   "name": "domain-check-skills-mcp",
   "version": "1.1.2",
-  "description": "The fastest domain availability MCP server on the internet. If you disagree — dispute it. Real-time checks, registrar pricing and domain age for any LLM client.",
+  "description": "MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName.",
   "license": "MIT",
   "type": "module",
   "bin": {

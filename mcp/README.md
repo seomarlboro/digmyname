@@ -6,7 +6,7 @@
 
 **The fastest domain availability MCP server on the internet.** If you find a faster one — [dispute it](https://digmyname.com/speed).
 
-MCP server that gives any AI agent **real-time domain availability**, **registrar price comparison** and **domain age lookup**, powered by [DigMyName](https://digmyname.com).
+MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by [DigMyName](https://digmyname.com).
 
 Typical first answer lands in **~100–200 ms** end-to-end (cache-warm). We publish the method with the claim — see [digmyname.com/speed](https://digmyname.com/speed).
 
