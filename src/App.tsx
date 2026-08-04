@@ -32,6 +32,7 @@ const App = () => (
               <Route path="/mcp" element={<Mcp />} />
               <Route path="/skill" element={<Mcp />} />
               <Route path="/gpt" element={<Mcp />} />
+              <Route path="/speed" element={<Speed />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
