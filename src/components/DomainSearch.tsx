@@ -65,20 +65,56 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     };
   }, [scrolled]);
 
+  // ---- Honest speed measurement -------------------------------------------
+  // The clock starts on the LAST keystroke (so the 80 ms debounce is counted
+  // against us) and stops when the first availability answer lands on screen.
+  const typingStopRef = useRef<number | null>(null);
+  const [liveMs, setLiveMs] = useState<number | null>(null);
+  const [firstAnswerMs, setFirstAnswerMs] = useState<number | null>(null);
+
+  const markFirstAnswer = useCallback(() => {
+    if (typingStopRef.current == null) return;
+    setFirstAnswerMs(Math.round(performance.now() - typingStopRef.current));
+    typingStopRef.current = null;
+    setLiveMs(null);
+  }, []);
+
   // Debounce: very short so results feel instant, but not so short that every
   // keystroke triggers a request storm.
   useEffect(() => {
     if (!query.trim()) {
       setDebouncedQuery("");
       setResults([]);
+      typingStopRef.current = null;
+      setLiveMs(null);
+      setFirstAnswerMs(null);
       return;
     }
     setLoading(true);
+    typingStopRef.current = performance.now();
+    setFirstAnswerMs(null);
+    setLiveMs(0);
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
     }, 80);
     return () => clearTimeout(timer);
   }, [query]);
+
+  // Live ticking counter while we wait for the first answer.
+  useEffect(() => {
+    if (liveMs === null) return;
+    let raf = 0;
+    const tick = () => {
+      if (typingStopRef.current != null) {
+        setLiveMs(Math.round(performance.now() - typingStopRef.current));
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveMs === null]);
+
 
   // Generate domain list + check availability
   useEffect(() => {
