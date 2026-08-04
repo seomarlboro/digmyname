@@ -317,7 +317,7 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
           <div className="mx-auto w-full max-w-3xl text-center">
             <h1 className="text-gradient overflow-visible px-1 text-[2rem] font-extrabold leading-[1.05] tracking-[-0.03em] xs:text-[2.35rem] sm:text-6xl sm:leading-[0.95] sm:tracking-[-0.045em] md:text-7xl lg:text-[5.5rem]">
               World's fastest domain
-              <br className="hidden sm:inline" />{" "}
+              <br />{" "}
               search. Fight us.
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:mt-6 sm:text-lg md:text-xl">
