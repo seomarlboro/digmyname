@@ -84,49 +84,24 @@ const Speed = () => {
 
       <Header />
 
-      <main className="mx-auto max-w-[968px] xl:max-w-[1200px] 2xl:max-w-[1320px] px-4 pb-24 pt-12">
-        {/* Hero */}
-        <section className="relative overflow-hidden surface-card-lg px-6 py-14 sm:px-12">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
-
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
-              Timed live on every search
-            </div>
-
-            <h1 className="mt-6 w-full text-4xl md:text-5xl 2xl:text-6xl font-bold tracking-tight text-foreground">
+      <PageMain>
+        <PageHeader
+          eyebrow={<Eyebrow live>Timed live on every search</Eyebrow>}
+          title={
+            <>
               The fastest domain search in the universe.
-              <span className="text-gradient"> Or the second.</span>
-            </h1>
-
-            <p className="mt-5 max-w-none text-base md:text-lg text-muted-foreground">
-              We are not going to pretend we measured every tool on every planet. So here is the deal: every
-              search on DigMyName runs a stopwatch. It starts on your last keystroke and stops the moment the
-              first answer hits the screen. Find something faster and we will put it at the top of this page
-              ourselves.
-            </p>
-
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="font-mono text-4xl sm:text-5xl font-bold tabular-nums text-primary">~170</div>
-                <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">ms · first answer</div>
-              </div>
-              <div className="text-center">
-                <div className="font-mono text-4xl sm:text-5xl font-bold tabular-nums">80</div>
-                <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">ms · debounce (ours)</div>
-              </div>
-              <div className="text-center">
-                <div className="font-mono text-4xl sm:text-5xl font-bold tabular-nums">50+</div>
-                <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">TLDs · in parallel</div>
-              </div>
-            </div>
+              <span className="text-aurora-gradient"> Or the second.</span>
+            </>
+          }
+          lede="We are not going to pretend we measured every tool on every planet. So here is the deal: every search on DigMyName runs a stopwatch. It starts on your last keystroke and stops the moment the first answer hits the screen. Find something faster and we will put it at the top of this page ourselves."
+        >
+          <div className="mt-10 grid grid-cols-3 gap-6">
+            <Stat value="~170" label="ms · first answer" accent="mint" />
+            <Stat value="80" label="ms · debounce (ours)" accent="violet" />
+            <Stat value="50+" label="TLDs · in parallel" />
           </div>
-        </section>
+        </PageHeader>
+
 
         {/* Claim */}
         <section className="mt-6 flex flex-col items-center gap-5 rounded-xl border border-primary/30 bg-primary/5 p-8 text-center">
