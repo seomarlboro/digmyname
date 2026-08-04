@@ -132,7 +132,7 @@ const Pricing = () => {
         ) : (
           <>
             {/* Summary table */}
-            <div className="mt-8 overflow-hidden rounded-xl border border-border">
+            <div className="mt-8 overflow-hidden surface-card">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
@@ -245,7 +245,7 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
   const range = maxRegPrice - cheapestRegPrice || 1;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border">
+    <div className="overflow-hidden surface-card">
       <div className="flex items-center gap-3 border-b border-border bg-secondary/30 px-5 py-4">
         <span className="text-2xl font-extrabold text-primary">.{s.tld}</span>
         <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>
