@@ -89,7 +89,7 @@ const Speed = () => {
           <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-32 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
 
-          <div className="relative">
+          <div className="relative mx-auto max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
@@ -98,34 +98,34 @@ const Speed = () => {
               Timed live on every search
             </div>
 
-            <h1 className="mt-6 text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-              The fastest domain search
-              <br />
-              in the universe.
+            <h1 className="mt-6 text-4xl md:text-5xl font-bold tracking-tight text-foreground text-balance">
+              The fastest domain search in the universe.
               <span className="text-gradient"> Or the second.</span>
             </h1>
 
-            <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground">
+            <p className="mt-5 mx-auto max-w-2xl text-base md:text-lg text-muted-foreground">
               We are not going to pretend we measured every tool on every planet. So here is the deal: every
               search on DigMyName runs a stopwatch. It starts on your last keystroke and stops the moment the
               first answer hits the screen. Find something faster and we will put it at the top of this page
               ourselves.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-end gap-8">
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
-                <div className="font-mono text-5xl font-bold tabular-nums text-primary">~170</div>
+                <div className="font-mono text-4xl sm:text-5xl font-bold tabular-nums text-primary">~170</div>
                 <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">ms · first answer</div>
               </div>
               <div>
-                <div className="font-mono text-5xl font-bold tabular-nums">80</div>
+                <div className="font-mono text-4xl sm:text-5xl font-bold tabular-nums">80</div>
                 <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">ms · debounce (ours)</div>
               </div>
               <div>
-                <div className="font-mono text-5xl font-bold tabular-nums">50+</div>
+                <div className="font-mono text-4xl sm:text-5xl font-bold tabular-nums">50+</div>
                 <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">TLDs · in parallel</div>
               </div>
             </div>
+          </div>
+
           </div>
         </section>
 
