@@ -224,7 +224,7 @@ const Speed = () => {
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         row.us
-                          ? "bg-gradient-to-r from-primary to-aurora-violet shadow-[0_0_12px_hsl(var(--primary)/0.45)]"
+                          ? "bg-gradient-to-r from-primary to-aurora-mint shadow-[0_0_12px_hsl(var(--primary)/0.45)]"
                           : "bg-gradient-to-r from-muted-foreground/60 to-muted-foreground/30"
                       }`}
                       style={{ width: `${row.bar}%` }}
