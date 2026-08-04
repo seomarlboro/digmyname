@@ -124,7 +124,7 @@ const Mcp = () => {
         />
         <link rel="canonical" href="https://digmyname.com/mcp" />
         <meta property="og:title" content="Domain Check Skills — MCP / Claude Skill / Custom GPT" />
-        <meta property="og:description" content="Plug live domain availability into any LLM. Free, open-source, MIT." />
+        <meta property="og:description" content="MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs." />
         <meta property="og:url" content="https://digmyname.com/mcp" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -139,7 +139,7 @@ const Mcp = () => {
           downloadUrl: NPM_URL,
           codeRepository: GITHUB_URL,
           license: "https://opensource.org/licenses/MIT",
-          description: "The fastest domain availability MCP server on the internet. Real-time checks, registrar pricing and domain age for any LLM client.",
+          description: "MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName.",
         })}</script>
       </Helmet>
 
