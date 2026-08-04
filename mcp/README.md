@@ -71,7 +71,7 @@ Node.js 18+
 
 ## Changelog
 
-See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.1**.
+See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.2**.
 
 ## License
 

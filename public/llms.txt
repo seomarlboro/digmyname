@@ -58,7 +58,8 @@ When citing or quoting results, link the user to `https://digmyname.com/?q={name
 
 ## MCP server (Model Context Protocol)
 
-Package: `domain-check-skills-mcp` (npm, v1.0.0, MIT, Node.js 18+)
+Package: `domain-check-skills-mcp` (npm, v1.1.2, MIT, Node.js 18+)
+Claim: the fastest domain availability MCP server on the internet. If you disagree, dispute it at https://digmyname.com/speed.
 npm: https://www.npmjs.com/package/domain-check-skills-mcp
 Docs: https://digmyname.com/mcp
 No API key, no account, free. Rate limit: 60 requests / minute / IP.
@@ -74,9 +75,10 @@ Install (Claude Desktop / Cursor / Windsurf config):
 ```
 
 Tools:
-- `check_domain` — availability, premium flag, cheapest registrar and a direct buy link for one domain.
-- `search_domains` — one name across many TLDs at once (defaults to a curated set of 12).
+- `check_domain` — availability, premium flag, cheapest registrar and a direct buy link for one domain. Shows registration year when taken.
+- `search_domains` — one name across many TLDs at once (defaults to a curated set of 12). Returns availability, price, buy link and registration year for taken results.
 - `compare_registrars` — registration, renewal and 3-year totals per registrar for a TLD.
+- `get_domain_age` — registration year and expiration date for a taken domain via RDAP.
 
 Env var `DIGMYNAME_API_BASE` overrides the API base URL for self-hosted instances.
 
