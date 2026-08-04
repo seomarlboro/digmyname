@@ -125,8 +125,6 @@ const Speed = () => {
               </div>
             </div>
           </div>
-
-          </div>
         </section>
 
         {/* Claim */}
