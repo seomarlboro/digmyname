@@ -11,9 +11,9 @@ const TLDS = [
   { label: ".ai",  x: "82%", y: "18%", size: 56, depth: 32, delay: "1.5s", dur: "16s" },
   { label: ".io",  x: "16%", y: "70%", size: 48, depth: 24, delay: "3s",   dur: "18s" },
   { label: ".dev", x: "74%", y: "62%", size: 52, depth: 28, delay: "0.8s", dur: "15s" },
-  { label: ".app", x: "46%", y: "12%", size: 40, depth: 18, delay: "2.2s", dur: "17s" },
+  { label: ".app", x: "40%", y: "88%", size: 40, depth: 18, delay: "2.2s", dur: "17s" },
   { label: ".xyz", x: "60%", y: "82%", size: 36, depth: 14, delay: "4s",   dur: "19s" },
-  { label: ".co",  x: "30%", y: "40%", size: 30, depth: 12, delay: "1s",   dur: "20s" },
+  { label: ".co",  x: "20%", y: "80%", size: 30, depth: 12, delay: "1s",   dur: "20s" },
   { label: ".so",  x: "88%", y: "44%", size: 28, depth: 10, delay: "2.8s", dur: "16s" },
 ];
 
