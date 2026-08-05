@@ -125,8 +125,8 @@ const faqs = [
     a: "Yes — search, verification, premium pricing and registrar comparison are all free. We earn a small commission only when you choose to register through one of the buy links. That's it.",
   },
   {
-    q: "Why is it sometimes a bit slow?",
-    a: "We prioritise accuracy over speed. The top 20 TLDs are checked in a fast parallel batch and stream in first; less common extensions follow. If you only need .com / .io / .ai you'll typically see results in under a second.",
+    q: "Is it fast, or accurate?",
+    a: "Both, these days. We prioritise accuracy — and after recent work it's fast too: ~170 ms to the first answer and ~370 ms median for the full check, with 94% of lookups under a second. When sources disagree we still say Unverified rather than guess.",
   },
 ];
 
