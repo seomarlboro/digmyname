@@ -222,7 +222,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
         <Button
           variant="ghost"
           size="icon"
-          className={`absolute right-2 top-2 h-9 w-9 rounded-full ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
+          className={`absolute right-2 top-2 h-9 w-9 rounded-full sm:hidden ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
           onClick={handleFavorite}
           aria-label={favorited ? `Remove ${domain} from favorites` : `Save ${domain} to favorites`}
           aria-pressed={favorited}
@@ -343,6 +343,16 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                 </Button>
               </div>
             )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`hidden h-9 w-9 rounded-full sm:flex ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
+              onClick={handleFavorite}
+              aria-label={favorited ? `Remove ${domain} from favorites` : `Save ${domain} to favorites`}
+              aria-pressed={favorited}
+            >
+              <Heart className={`h-4 w-4 ${favorited ? "fill-current" : ""}`} />
+            </Button>
           </div>
         </div>
       </div>
