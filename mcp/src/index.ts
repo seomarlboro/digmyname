@@ -196,7 +196,7 @@ function formatResult(r: DomainResult): string {
 
 const server = new McpServer({
   name: "domain-check-skills",
-  version: "1.1.6",
+  version: VERSION,
 });
 
 // Work around MCP SDK's deep type inference by registering tools via an any-typed wrapper.
