@@ -8,7 +8,8 @@ select cron.schedule(
   '* * * * *',
   $$
   select net.http_get(
-    url := 'https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/ping',
+    -- project ref redacted for public repo; the live cron job is already configured in the database
+    url := 'https://<YOUR_SUPABASE_PROJECT_REF>.supabase.co/functions/v1/public-api/ping',
     timeout_milliseconds := 3000
   );
   $$
