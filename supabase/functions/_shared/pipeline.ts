@@ -528,37 +528,49 @@ export function getTldPricing(): Map<string, TldPrice> {
   return pricingCache?.map ?? new Map();
 }
 
+// Each attempt is hard-capped at 4s so a cold catalog can never add a long
+// tail anywhere; the loader is background-only, so we simply retry a couple of
+// times instead of waiting out one very long request.
+const PRICING_ATTEMPT_TIMEOUT_MS = 4000;
+const PRICING_ATTEMPTS = 3;
+
 export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
   const now = Date.now();
   if (pricingCache && pricingCache.expiresAt > now) return pricingCache.map;
-  try {
-    const resp = await fetch("https://api.porkbun.com/api/json/v3/pricing/get", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: "{}",
-      signal: AbortSignal.timeout(4000),
-    });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-    if (data?.status !== "SUCCESS" || !data.pricing) throw new Error("non-success");
-    const map = new Map<string, TldPrice>();
-    for (const [tld, v] of Object.entries(data.pricing as Record<string, Record<string, string>>)) {
-      const reg = Number(v?.registration);
-      const ren = Number(v?.renewal);
-      map.set(tld.toLowerCase(), {
-        registration: Number.isFinite(reg) ? reg : undefined,
-        renewal: Number.isFinite(ren) ? ren : undefined,
+
+  let lastError = "unknown";
+  for (let attempt = 1; attempt <= PRICING_ATTEMPTS; attempt++) {
+    try {
+      const resp = await fetch("https://api.porkbun.com/api/json/v3/pricing/get", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+        signal: AbortSignal.timeout(PRICING_ATTEMPT_TIMEOUT_MS),
       });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      if (data?.status !== "SUCCESS" || !data.pricing) throw new Error("non-success");
+      const map = new Map<string, TldPrice>();
+      for (const [tld, v] of Object.entries(data.pricing as Record<string, Record<string, string>>)) {
+        const reg = Number(v?.registration);
+        const ren = Number(v?.renewal);
+        map.set(tld.toLowerCase(), {
+          registration: Number.isFinite(reg) ? reg : undefined,
+          renewal: Number.isFinite(ren) ? ren : undefined,
+        });
+      }
+      pricingCache = { map, expiresAt: Date.now() + 12 * 60 * 60 * 1000 };
+      console.log(`porkbun pricing catalog loaded: ${map.size} TLDs (attempt ${attempt})`);
+      return map;
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : String(e);
+      console.warn(`porkbun pricing catalog attempt ${attempt} failed: ${lastError}`);
     }
-    pricingCache = { map, expiresAt: now + 12 * 60 * 60 * 1000 };
-    console.log(`porkbun pricing catalog loaded: ${map.size} TLDs`);
-    return map;
-  } catch (e) {
-    console.warn(`porkbun pricing catalog failed: ${e instanceof Error ? e.message : String(e)}`);
-    const empty = new Map<string, TldPrice>();
-    pricingCache = { map: empty, expiresAt: now + 5 * 60 * 1000 };
-    return empty;
   }
+
+  const empty = new Map<string, TldPrice>();
+  pricingCache = { map: empty, expiresAt: Date.now() + 5 * 60 * 1000 };
+  return empty;
 }
 
 
