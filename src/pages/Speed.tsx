@@ -33,9 +33,9 @@ const pipeline = [
   {
     step: "04",
     icon: Gauge,
-    title: "Hot cache at the edge",
+    title: "Cloudflare edge cache",
     detail:
-      "Recent lookups are served from a short-lived edge cache in single-digit milliseconds.",
+      "Repeat lookups inside a 60-second window are served from a real Cloudflare edge cache in ~70 ms, bypassing the origin entirely. First-time lookups still run the full live pipeline.",
   },
 ];
 

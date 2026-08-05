@@ -179,7 +179,10 @@ const Mcp = () => {
               <>
                 One install. Live answers in ~170 ms from DNS → RDAP → registrar APIs — straight into
                 Claude, Cursor, ChatGPT and any MCP-compatible client. Fastest on the internet —{" "}
-                <Link to="/speed" className="text-aurora hover:underline">dispute it</Link>.
+                <Link to="/speed" className="text-aurora hover:underline">dispute it</Link>. The server
+                now calls <code className="font-mono text-foreground/80">api.digmyname.com</code>, a
+                Cloudflare edge cache: repeat domain lookups return in ~70 ms, first-time lookups run
+                the full live check (~170 ms first answer, ~370 ms median full pipeline).
               </>
             }
             actions={
