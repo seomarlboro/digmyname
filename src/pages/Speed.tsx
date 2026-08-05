@@ -33,9 +33,9 @@ const pipeline = [
   {
     step: "04",
     icon: Gauge,
-    title: "Hot cache at the edge",
+    title: "Cloudflare edge cache",
     detail:
-      "Recent lookups are served from a short-lived edge cache in single-digit milliseconds.",
+      "Repeat lookups inside a 60-second window are served from a real Cloudflare edge cache in ~70 ms, bypassing the origin entirely. First-time lookups still run the full live pipeline.",
   },
 ];
 
@@ -55,6 +55,14 @@ const benchmark = [
     bar: 100,
     us: false,
     tag: "Theoretical floor",
+  },
+  {
+    name: "DigMyName cached (repeat)",
+    note: "Repeat lookup within 60s — served from the Cloudflare edge cache, not a first-time check",
+    ms: "~70 ms",
+    bar: 88,
+    us: true,
+    tag: "Ours · cached",
   },
   {
     name: "DigMyName full check",
@@ -158,7 +166,9 @@ const Speed = () => {
             <div>
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">Reference numbers</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Single datacenter connection, August 2026. Lower is better.
+                Single datacenter connection, August 2026. Lower is better. Repeat lookups within a
+                60-second window are served from a global edge cache in ~70 ms — first-time lookups
+                run the full live pipeline (~370 ms median).
               </p>
             </div>
             <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">

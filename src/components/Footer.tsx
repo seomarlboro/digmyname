@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import ShovelLogo from "@/components/ShovelLogo";
 
 const GITHUB_URL = "https://github.com/seomarlboro/domain-check-skills";
-const API_BASE = "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api";
+const API_BASE = "https://api.digmyname.com/functions/v1/public-api";
 
 const product = [
   { to: "/", label: "Domains" },
