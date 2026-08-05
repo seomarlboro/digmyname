@@ -400,12 +400,14 @@ Deno.serve(async (req) => {
       const domain = validateDomain(raw);
       if (!domain) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400, rlHeaders);
 
-      const results = await invokeCheck([domain]);
       const tld = domain.split(".").slice(1).join(".");
-      const cheap = await cheapestForTlds([tld]);
+      const [results, cheap] = await Promise.all([invokeCheck([domain]), cheapestForTlds([tld])]);
       const r = results[0];
       if (!r) return json({ error: "upstream_error" }, 502, rlHeaders);
-      return json({ result: shapeResult(r, cheap.get(tld) || null) }, 200, rlHeaders);
+      const shaped = shapeResult(r, cheap.get(tld) || null);
+      const body = { result: shaped };
+      if (!shaped.uncertain) writeResponseCache(key, body);
+      return json(body, 200, missHeaders);
     }
 
     if (path === "/search") {
@@ -425,8 +427,11 @@ Deno.serve(async (req) => {
         const tld = d.split(".").slice(1).join(".");
         return shapeResult(r, cheapest.get(tld) || null);
       });
-      return json({ query: sld, count: shaped.length, results: shaped }, 200, rlHeaders);
+      const body = { query: sld, count: shaped.length, results: shaped };
+      if (!shaped.some((s) => s.uncertain)) writeResponseCache(key, body);
+      return json(body, 200, missHeaders);
     }
+
 
     if (path === "/registrars") {
       const tld = validateTld(url.searchParams.get("tld") || "");
