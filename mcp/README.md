@@ -115,7 +115,7 @@ Releases are published from CI with npm provenance:
 
 ```bash
 # after bumping the version in mcp/package.json
-git tag mcp-v1.1.6 && git push origin mcp-v1.1.6
+git tag mcp-v1.2.0 && git push origin mcp-v1.2.0
 ```
 
 The `Publish MCP to npm` workflow builds, smoke-tests and publishes with `--provenance`. It needs an `NPM_TOKEN` (automation token) repo secret.
@@ -126,7 +126,7 @@ Node.js 18+
 
 ## Changelog
 
-See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.8**.
+See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.2.0**.
 
 ## License
 
