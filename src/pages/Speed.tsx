@@ -58,9 +58,9 @@ const benchmark = [
   },
   {
     name: "DigMyName full check",
-    note: "Availability + premium detection + registrar pricing",
-    ms: "~0.4–1.6 s",
-    bar: 55,
+    note: "Availability + premium detection + registrar pricing · p95 < 1s",
+    ms: "~370 ms",
+    bar: 78,
     us: true,
     tag: "Ours",
   },
