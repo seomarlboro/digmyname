@@ -101,13 +101,13 @@ Pricing comes from DigMyName's registrar price cache across 7 registrars and 52 
 
 Domain age is read from registry RDAP endpoints.
 
-Rate limit: 60 requests / minute / IP.
+Rate limit: 60 requests / minute / IP. Repeat lookups are served from the Cloudflare edge cache in ~10ms.
 
 ## Configuration
 
 | Env var | Default | Purpose |
 | --- | --- | --- |
-| `DIGMYNAME_API_BASE` | DigMyName public API | Point at a self-hosted API instance. |
+| `DIGMYNAME_API_BASE` | `https://api.digmyname.com/functions/v1/public-api` | Override the API base. Set this to the direct Supabase URL to bypass the edge cache. |
 
 ## Releasing (maintainers)
 

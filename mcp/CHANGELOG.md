@@ -5,6 +5,11 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] — 2026-08-05
+
+### Changed
+- Default API endpoint moved to `https://api.digmyname.com` — a Cloudflare edge cache (60s TTL) in front of the domain API. Repeat lookups are now served from the edge in ~10ms with no cold-start tail. The direct Supabase endpoint still works and can be forced via `DIGMYNAME_API_BASE`.
+
 ## [1.1.9] — 2026-08-05
 
 ### Changed
