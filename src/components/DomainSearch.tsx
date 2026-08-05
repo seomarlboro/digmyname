@@ -387,12 +387,6 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 <span className="text-muted-foreground"><span className="text-xl font-extrabold text-amber-500 sm:text-2xl">{uncertainCount}</span> unverified</span>
               )}
 
-              {stillChecking && (
-                <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  Checking…
-                </span>
-              )}
               {(liveMs !== null || firstAnswerMs !== null) && (
                 <Link
                   to="/speed"
