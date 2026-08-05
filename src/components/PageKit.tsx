@@ -245,60 +245,50 @@ export const Eyebrow = ({
 
 /* ── Feature card ───────────────────────────────────────
  * The single card primitive for numbered/feature grids on
- * How it works · Speed · MCP. Same geometry everywhere:
- * icon top-left · index top-right · eyebrow · title · body · footer.
+ * How it works · Speed · MCP. Horizontal geometry everywhere:
+ * icon left · title + body right · index top-right · footer.
  */
 
 export const FeatureCard = ({
   icon: Icon,
   index,
-  eyebrow,
   title,
   children,
   footer,
   className,
   as: As = "div",
-  plain = false,
   ...rest
 }: {
   icon: any;
   index?: ReactNode;
-  eyebrow?: ReactNode;
   title: ReactNode;
   children?: ReactNode;
   footer?: ReactNode;
   className?: string;
   as?: any;
-  plain?: boolean;
   [key: string]: any;
 }) => (
   <As
     className={cn(
-      "group relative flex flex-col overflow-hidden p-5 transition-colors sm:p-6",
+      "group relative flex items-start gap-5 overflow-hidden p-5 transition-colors sm:p-6",
       "surface-card card-hover hover:border-primary/40",
       className,
     )}
     {...rest}
   >
-    <div className="mb-5 flex items-start justify-between gap-4">
-      <div className="icon-frame">
-        <Icon />
-      </div>
-      {index && (
-        <span className="font-mono text-xs text-muted-foreground/60">{index}</span>
-      )}
+    <div className="icon-frame h-12 w-12 [&>svg]:h-6 [&>svg]:w-6">
+      <Icon />
     </div>
-    {eyebrow && (
-      <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-        {eyebrow}
-      </div>
-    )}
-    <h3 className="text-lg font-semibold tracking-tight text-foreground">{title}</h3>
-    {children && (
-      <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-        {children}
-      </p>
-    )}
-    {footer && <div className="mt-5 flex items-center justify-between">{footer}</div>}
+    <div className="min-w-0 flex-1">
+      {index && (
+        <span className="absolute right-5 top-5 font-mono text-xs text-muted-foreground/50">
+          {index}
+        </span>
+      )}
+      <h3 className="card-title-lg pr-8">{title}</h3>
+      {children && <p className="card-body-lg">{children}</p>}
+      {footer && <div className="mt-5 flex items-center justify-between">{footer}</div>}
+    </div>
   </As>
 );
+
