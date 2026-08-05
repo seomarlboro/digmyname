@@ -1,26 +1,36 @@
-# Welcome to your Lovable project
+# DigMyName
 
-## Project info
+**The fastest domain search — or the second. Dispute it.** Free, honest domain availability checks across 52 TLDs with 7-registrar price comparison.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Links
 
-## How can I edit this code?
+- Website: https://digmyname.com
+- Free API: https://digmyname.com/api
+- MCP server: https://digmyname.com/mcp (npm: [`domain-check-skills-mcp`](https://www.npmjs.com/package/domain-check-skills-mcp))
+- Speed benchmark: https://digmyname.com/speed
 
-There are several ways of editing your application.
+## What it does
 
-**Use Lovable**
+DigMyName checks domain availability in real time across 52 TLDs. Every answer is cross-checked against four independent sources — Domainr, the IANA RDAP bootstrap registry, Cloudflare DNS-over-HTTPS, and Porkbun pricing — and when those sources disagree we show an honest **Unverified** state instead of guessing.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+On top of availability you get side-by-side registrar pricing for 7 registrars, including the renewal traps that first-year promo prices hide (a $1 registration that renews at $61 is not a deal). Everything is also exposed through a free, no-auth JSON API for agents, plus an MCP server so any LLM — Claude, Cursor, Windsurf, Continue, Zed — can check domains directly.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Speed
 
-**Use your preferred IDE**
+Typical first answer lands in **~170 ms**, with a **~0.5 s median** for the full pipeline (availability + premium detection + pricing). Your numbers will differ by network, TLD, and cache state — the method and raw benchmarks are published at [digmyname.com/speed](https://digmyname.com/speed).
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Tech stack
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Vite
+- React
+- TypeScript
+- shadcn/ui
+- Tailwind CSS
+- Supabase edge functions (Deno)
 
-Follow these steps:
+## Development
+
+The only requirement is having Node.js & npm installed — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
@@ -36,38 +46,24 @@ npm i
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Editing via Lovable
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+This project is built and maintained with Lovable. Open the [DigMyName project in Lovable](https://lovable.dev/projects/3705f2e7-ed58-4590-993e-64df5ef13df4) and start prompting — changes made there are committed automatically to this repo.
 
-**Use GitHub Codespaces**
+You can also edit files directly in GitHub, or in a GitHub Codespace, and pushed changes will be reflected back in Lovable.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Deploy
 
-## What technologies are used for this project?
+Open the [project in Lovable](https://lovable.dev/projects/3705f2e7-ed58-4590-993e-64df5ef13df4) and click Share → Publish.
 
-This project is built with:
+To connect a custom domain, go to Project > Settings > Domains and click Connect Domain ([docs](https://docs.lovable.dev/features/custom-domain#custom-domain)).
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## License
 
-## How can I deploy this project?
+MIT. The `mcp/` package is published under MIT as well.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## Built with Lovable
 
-## Can I connect a custom domain to my Lovable project?
+DigMyName is built and shipped with [Lovable](https://lovable.dev). If you want to try it, this is a **referral link** — signing up through it gives *you* free Lovable credits and supports DigMyName's development at no cost to you: **https://lovable.dev/invite/8W3RM72**
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+(Prefer no referral? Just go to [lovable.dev](https://lovable.dev) directly.)
