@@ -147,6 +147,20 @@ async function invokeCheck(domains: string[]) {
   }
 }
 
+// Registrar pricing is a nice-to-have: never let a cold DB call drag the
+// availability answer. Resolves to the fallback instead of rejecting.
+const PRICE_LOOKUP_BUDGET_MS = 800;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  let timer: number | undefined;
+  const budget = new Promise<T>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), ms) as unknown as number;
+  });
+  return Promise.race([promise, budget]).finally(() => {
+    if (timer !== undefined) clearTimeout(timer);
+  });
+}
+
 // ---------- shaped response cache (in-isolate, per endpoint+query) ----------
 const RESPONSE_TTL_MS = 60_000;
 const RESPONSE_CACHE_MAX = 2000;
@@ -401,12 +415,18 @@ Deno.serve(async (req) => {
       if (!domain) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400, rlHeaders);
 
       const tld = domain.split(".").slice(1).join(".");
-      const [results, cheap] = await Promise.all([invokeCheck([domain]), cheapestForTlds([tld])]);
+      const [results, cheap] = await Promise.all([
+        invokeCheck([domain]),
+        withTimeout(cheapestForTlds([tld]), PRICE_LOOKUP_BUDGET_MS, new Map()),
+      ]);
       const r = results[0];
       if (!r) return json({ error: "upstream_error" }, 502, rlHeaders);
       const shaped = shapeResult(r, cheap.get(tld) || null);
       const body = { result: shaped };
-      if (!shaped.uncertain) writeResponseCache(key, body);
+      // Don't cache an available result whose price lookup timed out — it would
+      // pin an incomplete shape for the whole TTL.
+      const priceOk = !shaped.available || cheap.has(tld);
+      if (!shaped.uncertain && priceOk) writeResponseCache(key, body);
       return json(body, 200, missHeaders);
     }
 
@@ -420,7 +440,10 @@ Deno.serve(async (req) => {
       if (!tlds.length) return json({ error: "invalid_tlds" }, 400, rlHeaders);
 
       const domains = tlds.map((t) => `${sld}.${t}`);
-      const [results, cheapest] = await Promise.all([invokeCheck(domains), cheapestForTlds(tlds)]);
+      const [results, cheapest] = await Promise.all([
+        invokeCheck(domains),
+        withTimeout(cheapestForTlds(tlds), PRICE_LOOKUP_BUDGET_MS, new Map()),
+      ]);
       const byDomain = new Map<string, any>(results.map((r: any) => [r.domain, r]));
       const shaped = domains.map((d) => {
         const r = byDomain.get(d) || { domain: d, available: false, uncertain: true };
@@ -428,7 +451,8 @@ Deno.serve(async (req) => {
         return shapeResult(r, cheapest.get(tld) || null);
       });
       const body = { query: sld, count: shaped.length, results: shaped };
-      if (!shaped.some((s) => s.uncertain)) writeResponseCache(key, body);
+      const pricesOk = shaped.every((s) => !s.available || cheapest.has(s.domain.split(".").slice(1).join(".")));
+      if (!shaped.some((s) => s.uncertain) && pricesOk) writeResponseCache(key, body);
       return json(body, 200, missHeaders);
     }
 

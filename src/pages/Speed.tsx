@@ -58,9 +58,9 @@ const benchmark = [
   },
   {
     name: "DigMyName full check",
-    note: "Availability + premium detection + registrar pricing",
-    ms: "~0.4–1.6 s",
-    bar: 55,
+    note: "Availability + premium detection + registrar pricing · p95 < 1s",
+    ms: "~370 ms",
+    bar: 78,
     us: true,
     tag: "Ours",
   },
@@ -102,7 +102,7 @@ const Speed = () => {
           <StatGrid cols={3}>
             <Stat value="~170" label="ms · first answer" accent="mint" icon={StopwatchIcon} />
             <Stat value="80" label="ms · debounce (ours)" accent="violet" icon={KeyboardIcon} />
-            <Stat value="<1s" label="Full pipeline" icon={Zap} />
+            <Stat value="~370" label="ms · full pipeline (median)" icon={Zap} />
           </StatGrid>
 
         </PageHeader>
@@ -116,6 +116,10 @@ const Speed = () => {
               <h2 className="text-xl font-bold tracking-tight sm:text-[28px]">Beat our number, take the crown</h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-lg">
                 Show us a faster public lookup and we'll feature your time here with full credit and a link back.
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                As of August 2026: ~370 ms median full check, 94% of lookups under one second. Measured, not
+                marketed — and the timer on your screen keeps us honest.
               </p>
             </div>
           </div>
