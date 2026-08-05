@@ -43,6 +43,7 @@ Base URL: `https://api.digmyname.com/functions/v1/public-api`
 OpenAPI: `https://api.digmyname.com/functions/v1/public-api/openapi.json`
 Plugin manifest: `https://digmyname.com/.well-known/ai-plugin.json`
 No auth required. Rate limit: 60 requests / 60 seconds / IP.
+Served behind a Cloudflare edge cache: repeat lookups within 60 seconds return in ~70 ms; first-time lookups run the full live check (~170 ms first answer, ~370 ms median full pipeline).
 
 Endpoints:
 - `GET /check?domain=myname.com` — single-domain availability. Returns `available`, `uncertain`, `premium`, `for_sale`, `price_usd`, `cheapest_registrar`, `search_url`, `buy_url`, `register_url`.
