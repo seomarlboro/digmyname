@@ -57,6 +57,14 @@ const benchmark = [
     tag: "Theoretical floor",
   },
   {
+    name: "DigMyName cached (repeat)",
+    note: "Repeat lookup within 60s — served from the Cloudflare edge cache, not a first-time check",
+    ms: "~70 ms",
+    bar: 88,
+    us: true,
+    tag: "Ours · cached",
+  },
+  {
     name: "DigMyName full check",
     note: "Availability + premium detection + registrar pricing · p95 < 1s",
     ms: "~370 ms",
