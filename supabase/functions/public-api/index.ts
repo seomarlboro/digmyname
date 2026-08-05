@@ -14,6 +14,7 @@
 //  - Returns minimal, stable JSON. No internal cache/source-chain details exposed.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkDomains, isValidDomain } from "../_shared/pipeline.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,7 +31,6 @@ const DEFAULT_TLDS = ["com", "io", "ai", "app", "dev", "co", "net", "org", "xyz"
 const MAX_SLD_LEN = 63;
 const SLD_RE = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const TLD_RE = /^[a-z]{2,24}(?:\.[a-z]{2,24})?$/;
-const DOMAIN_RE = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,24}(?:\.[a-z]{2,24})?$/;
 
 // ---------- rate limiting (in-memory, per edge instance) ----------
 const WINDOW_MS = 60_000;
@@ -102,11 +102,12 @@ function normalize(input: string): string {
   return input.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
 }
 
+// Uses the SAME validator as the core pipeline (punycode xn-- labels allowed),
+// after normalizing away protocol/path, so the API can never reject a domain
+// the web UI accepts.
 function validateDomain(raw: string): string | null {
   const d = normalize(raw);
-  if (!DOMAIN_RE.test(d)) return null;
-  if (d.length > 253) return null;
-  return d;
+  return isValidDomain(d) ? d : null;
 }
 
 function validateSld(raw: string): string | null {
@@ -122,13 +123,10 @@ function validateTld(raw: string): string | null {
   return t;
 }
 
+// Runs the pipeline IN-PROCESS — no edge→edge invoke — so repeated checks are
+// served from the shared warm L1 cache inside this isolate.
 async function invokeCheck(domains: string[]) {
-  const supa = createClient(SUPABASE_URL, SERVICE_KEY);
-  const { data, error } = await supa.functions.invoke("check-domains", {
-    body: { domains },
-  });
-  if (error) throw error;
-  return data?.results ?? [];
+  return await checkDomains(domains);
 }
 
 async function invokeAge(domains: string[]) {
