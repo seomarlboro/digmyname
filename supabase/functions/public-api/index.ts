@@ -440,7 +440,10 @@ Deno.serve(async (req) => {
       if (!tlds.length) return json({ error: "invalid_tlds" }, 400, rlHeaders);
 
       const domains = tlds.map((t) => `${sld}.${t}`);
-      const [results, cheapest] = await Promise.all([invokeCheck(domains), cheapestForTlds(tlds)]);
+      const [results, cheapest] = await Promise.all([
+        invokeCheck(domains),
+        withTimeout(cheapestForTlds(tlds), PRICE_LOOKUP_BUDGET_MS, new Map()),
+      ]);
       const byDomain = new Map<string, any>(results.map((r: any) => [r.domain, r]));
       const shaped = domains.map((d) => {
         const r = byDomain.get(d) || { domain: d, available: false, uncertain: true };
@@ -448,7 +451,8 @@ Deno.serve(async (req) => {
         return shapeResult(r, cheapest.get(tld) || null);
       });
       const body = { query: sld, count: shaped.length, results: shaped };
-      if (!shaped.some((s) => s.uncertain)) writeResponseCache(key, body);
+      const pricesOk = shaped.every((s) => !s.available || cheapest.has(s.domain.split(".").slice(1).join(".")));
+      if (!shaped.some((s) => s.uncertain) && pricesOk) writeResponseCache(key, body);
       return json(body, 200, missHeaders);
     }
 
