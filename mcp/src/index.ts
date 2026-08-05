@@ -14,11 +14,13 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
+// Cloudflare edge cache (60s TTL) in front of the same Supabase functions.
+// Set DIGMYNAME_API_BASE to the direct supabase.co URL to bypass the cache.
 const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
-  "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api";
+  "https://api.digmyname.com/functions/v1/public-api";
 
-const VERSION = "1.1.7";
+const VERSION = "1.2.0";
 const USER_AGENT = `domain-check-skills-mcp/${VERSION} (+https://digmyname.com/mcp)`;
 const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
 const PRICING_TTL_MS = 6 * 60 * 60 * 1000;

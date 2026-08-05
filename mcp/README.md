@@ -101,13 +101,13 @@ Pricing comes from DigMyName's registrar price cache across 7 registrars and 52 
 
 Domain age is read from registry RDAP endpoints.
 
-Rate limit: 60 requests / minute / IP.
+Rate limit: 60 requests / minute / IP. Repeat lookups are served from the Cloudflare edge cache in ~10ms.
 
 ## Configuration
 
 | Env var | Default | Purpose |
 | --- | --- | --- |
-| `DIGMYNAME_API_BASE` | DigMyName public API | Point at a self-hosted API instance. |
+| `DIGMYNAME_API_BASE` | `https://api.digmyname.com/functions/v1/public-api` | Override the API base. Set this to the direct Supabase URL to bypass the edge cache. |
 
 ## Releasing (maintainers)
 
@@ -115,7 +115,7 @@ Releases are published from CI with npm provenance:
 
 ```bash
 # after bumping the version in mcp/package.json
-git tag mcp-v1.1.6 && git push origin mcp-v1.1.6
+git tag mcp-v1.2.0 && git push origin mcp-v1.2.0
 ```
 
 The `Publish MCP to npm` workflow builds, smoke-tests and publishes with `--provenance`. It needs an `NPM_TOKEN` (automation token) repo secret.
@@ -126,7 +126,7 @@ Node.js 18+
 
 ## Changelog
 
-See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.8**.
+See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.2.0**.
 
 ## License
 
