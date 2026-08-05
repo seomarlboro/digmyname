@@ -24,28 +24,24 @@ const sources = [
   {
     icon: Search,
     name: "Domainr (RapidAPI)",
-    role: "Primary signal",
     detail:
       "Aggregated registry status across hundreds of TLDs. Fastest and broadest first pass, with batch lookups for top extensions.",
   },
   {
     icon: ShieldCheck,
     name: "IANA RDAP bootstrap",
-    role: "Authoritative re-check",
     detail:
       "Instead of relying on a single public RDAP proxy, we resolve the official IANA bootstrap file to talk directly to each TLD's authoritative registry server — far more reliable for .io, .ai, .co, .gg.",
   },
   {
     icon: Network,
     name: "DNS (Cloudflare DoH)",
-    role: "Sanity check",
     detail:
       "A and NS lookups via DNS-over-HTTPS confirm whether a domain has live infrastructure. Catches parked but resolving names that RDAP alone can miss.",
   },
   {
     icon: Tag,
     name: "Porkbun verify pass",
-    role: "Premium pricing",
     detail:
       "For likely-premium results we hit Porkbun's pricing API to surface the real listed price — no guessing, no fake markup.",
   },
@@ -185,10 +181,10 @@ const HowItWorks = () => {
 
         {/* Sources */}
         <section className="py-12">
-          <h2 className="mb-2 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+          <h2 className="section-title">
             Four sources, one truth
           </h2>
-          <p className="mb-8 text-muted-foreground">
+          <p className="section-lede mb-8 max-w-2xl">
             Every search runs through this chain in parallel. We only commit to
             an answer when the signals agree.
           </p>
@@ -198,7 +194,6 @@ const HowItWorks = () => {
                 key={s.name}
                 icon={s.icon}
                 index={String(i + 1).padStart(2, "0")}
-                eyebrow={`Step ${i + 1} · ${s.role}`}
                 title={s.name}
               >
                 {s.detail}
