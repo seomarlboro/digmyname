@@ -162,16 +162,16 @@ const Speed = () => {
 
         {/* Benchmarks */}
         <section className="mt-16">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">Reference numbers</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="max-w-2xl">
+              <h2 className="section-title">Reference numbers</h2>
+              <p className="section-lede">
                 Single datacenter connection, August 2026. Lower is better. Repeat lookups within a
                 60-second window are served from a global edge cache in ~70 ms — first-time lookups
                 run the full live pipeline (~370 ms median).
               </p>
             </div>
-            <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            <span className="shrink-0 whitespace-nowrap font-mono text-xs uppercase tracking-widest text-muted-foreground sm:mt-1">
               Measured, not marketed
             </span>
           </div>
@@ -206,12 +206,12 @@ const Speed = () => {
                   {row.ms}
                 </div>
                 <div className="col-span-2 flex min-w-0 items-center gap-3 sm:col-span-1">
-                  <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-muted/50 sm:w-64 sm:flex-none">
+                  <div className="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-foreground/10 sm:w-64 sm:flex-none">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         row.us
-                          ? "bg-gradient-to-r from-aurora-mint to-aurora-violet shadow-[0_0_12px_hsl(var(--aurora-violet)/0.40)]"
-                          : "bg-gradient-to-r from-muted-foreground/60 to-muted-foreground/30"
+                          ? "bg-gradient-to-r from-aurora-mint to-aurora-violet"
+                          : "bg-muted-foreground/40"
                       }`}
                       style={{ width: `${row.bar}%` }}
                     />
