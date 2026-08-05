@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
-  "name": "io.github.Seomarlboro/domain-check-skills-mcp",
+  "name": "io.github.seomarlboro/domain-check-skills-mcp",
   "description": "World's fastest domain check. Or the second — dispute it. 52 TLDs, 7 registrars, no API key.",
   "status": "active",
   "repository": {
