@@ -16,7 +16,6 @@ import {
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CodeBlock } from "@/components/CodeBlock";
 import { SearchIcon, ShieldIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
 
@@ -57,57 +56,50 @@ const comparison = [
     feature: "Verification sources disclosed",
     us: true,
     instant: false,
-    domainr: false,
-    namechk: false,
-    lean: false,
+    aggregator: false,
+    basic: false,
   },
   {
     feature: "Honest \"Unverified\" state (never lies)",
     us: true,
     instant: false,
-    domainr: false,
-    namechk: false,
-    lean: false,
+    aggregator: false,
+    basic: false,
   },
   {
     feature: "Real premium prices from registrars",
     us: true,
     instant: true,
-    domainr: true,
-    namechk: false,
-    lean: false,
+    aggregator: true,
+    basic: false,
   },
   {
     feature: "7-registrar 3-year cost comparison",
     us: true,
     instant: false,
-    domainr: false,
-    namechk: false,
-    lean: false,
+    aggregator: false,
+    basic: false,
   },
   {
     feature: "Smart TLD prioritisation",
     us: true,
     instant: true,
-    domainr: true,
-    namechk: false,
-    lean: false,
+    aggregator: true,
+    basic: false,
   },
   {
     feature: "Save favourites (free account)",
     us: true,
     instant: false,
-    domainr: false,
-    namechk: true,
-    lean: false,
+    aggregator: false,
+    basic: true,
   },
   {
     feature: "No registrar lock-in / unbiased buy links",
     us: true,
     instant: false,
-    domainr: true,
-    namechk: false,
-    lean: false,
+    aggregator: true,
+    basic: false,
   },
 ];
 
@@ -262,16 +254,13 @@ const HowItWorks = () => {
                       DigMyName
                     </th>
                     <th className="px-3 py-3 text-center font-medium text-muted-foreground">
-                      Instant
+                      Typical instant checker
                     </th>
                     <th className="px-3 py-3 text-center font-medium text-muted-foreground">
-                      Domainr
+                      Aggregator
                     </th>
                     <th className="px-3 py-3 text-center font-medium text-muted-foreground">
-                      Namechk
-                    </th>
-                    <th className="px-3 py-3 text-center font-medium text-muted-foreground">
-                      Lean
+                      Basic checker
                     </th>
                   </tr>
                 </thead>
@@ -284,7 +273,7 @@ const HowItWorks = () => {
                       <td className="px-4 py-3 text-foreground">
                         {row.feature}
                       </td>
-                      {[row.us, row.instant, row.domainr, row.namechk, row.lean].map(
+                      {[row.us, row.instant, row.aggregator, row.basic].map(
                         (v, i) => (
                           <td key={i} className="px-3 py-3 text-center">
                             {v ? (
@@ -373,91 +362,22 @@ const HowItWorks = () => {
           </dl>
         </section>
 
-        {/* Public API for agents */}
+        {/* Developers */}
         <section className="py-12">
-          <h2 className="mb-3 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-            For AI agents & developers
-          </h2>
-          <p className="mb-6 max-w-2xl text-muted-foreground">
-            Free, no-auth JSON API. ChatGPT, Claude, Perplexity and your own
-            scripts can ask "is this domain available?" without scraping. 60
-            requests / 60 s / IP.
-          </p>
-
-          <CodeBlock
-            tabs={[
-              {
-                label: "cURL",
-                language: "bash",
-                code: `curl "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/check?domain=acme.io"`,
-              },
-              {
-                label: "JavaScript",
-                language: "javascript",
-                code: `const res = await fetch(
-  "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/check?domain=acme.io"
-);
-const data = await res.json();
-console.log(data.available, data.price);`,
-              },
-              {
-                label: "Python",
-                language: "python",
-                code: `import requests
-
-url = "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/check"
-res = requests.get(url, params={"domain": "acme.io"})
-print(res.json()["available"])`,
-              },
-              {
-                label: "Response",
-                language: "json",
-                code: `{
-  "domain": "acme.io",
-  "available": true,
-  "premium": false,
-  "price": 34.56,
-  "currency": "USD",
-  "registrar": "porkbun"
-}`,
-              },
-            ]}
-          />
-
-          <div className="surface-card mt-6 p-5">
-            <h3 className="text-sm font-semibold text-foreground">Endpoints</h3>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li>
-                <code className="rounded bg-muted/10 px-1.5 py-0.5 text-foreground">GET /check?domain=</code>
-                <span className="ml-2">Single domain availability + price</span>
-              </li>
-              <li>
-                <code className="rounded bg-muted/10 px-1.5 py-0.5 text-foreground">GET /search?q=&amp;tlds=</code>
-                <span className="ml-2">Multi-TLD lookup in one call</span>
-              </li>
-              <li>
-                <code className="rounded bg-muted/10 px-1.5 py-0.5 text-foreground">GET /registrars?tld=</code>
-                <span className="ml-2">Cheapest registrars for a TLD</span>
-              </li>
-              <li>
-                <code className="rounded bg-muted/10 px-1.5 py-0.5 text-foreground">GET /openapi.json</code>
-                <span className="ml-2">Full OpenAPI schema</span>
-              </li>
-            </ul>
-            <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
-              <a
-                href="/.well-known/ai-plugin.json"
-                className="underline hover:text-foreground"
-              >
-                /.well-known/ai-plugin.json
-              </a>
-              <a href="/llms.txt" className="underline hover:text-foreground">
-                /llms.txt
-              </a>
+          <div className="surface-card flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">
+                For developers & AI agents
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Free, no-auth JSON API — 60 requests / 60 s per IP, 5,000 per day.
+              </p>
             </div>
+            <Button asChild variant="outline" className="shrink-0">
+              <Link to="/api">Read the API docs →</Link>
+            </Button>
           </div>
         </section>
-
 
         {/* CTA */}
         <section className="py-16 text-center">
