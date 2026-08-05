@@ -18,8 +18,11 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api";
 
-const USER_AGENT = "domain-check-skills-mcp/1.1.6 (+https://digmyname.com/mcp)";
+const VERSION = "1.1.7";
+const USER_AGENT = `domain-check-skills-mcp/${VERSION} (+https://digmyname.com/mcp)`;
 const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
+const PRICING_TTL_MS = 6 * 60 * 60 * 1000;
+const AGE_TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_RETRIES = Number(process.env.DIGMYNAME_MAX_RETRIES || "2");
 
 const RegistrarSchema = z.object({
