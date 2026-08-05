@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.Seomarlboro/domain-check-skills-mcp",
-  "description": "Fast domain availability + registrar pricing across 52 TLDs. Compare 7 registrars. No API key.",
+  "description": "World's fastest domain check. Or the second — dispute it. 52 TLDs, 7 registrars, no API key.",
   "status": "active",
   "repository": {
     "url": "https://github.com/Seomarlboro/digmyname",
