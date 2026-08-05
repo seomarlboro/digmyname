@@ -30,7 +30,7 @@ import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supa
 const CACHE_VERSION = 1;
 
 
-interface DomainCheckResult {
+export interface DomainCheckResult {
   domain: string;
   available: boolean;
   checkedVia: string;
@@ -775,4 +775,272 @@ function porkbunBudgetReady(): boolean {
 }
 function consumePorkbunBudget(): void {
   porkbunLastCallMs = Date.now();
+}
+
+// ---------------------------------------------------------------------------
+// Lazily-created service-role client, reused across requests in this isolate.
+// ---------------------------------------------------------------------------
+let sharedClient: SupabaseClient | null = null;
+export function getServiceClient(): SupabaseClient {
+  if (!sharedClient) {
+    sharedClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+  }
+  return sharedClient;
+}
+
+/**
+ * Core pipeline. Accepts raw domain strings, filters invalid ones, resolves
+ * availability/pricing and returns results in the same order as the (valid)
+ * input. Contains no rate limiting — that belongs to the HTTP wrappers.
+ */
+export async function checkDomains(
+  domains: string[],
+  deps: { supabase?: SupabaseClient } = {}
+): Promise<DomainCheckResult[]> {
+  const supabase = deps.supabase ?? getServiceClient();
+
+  const batch = domains.slice(0, 50).filter(isValidDomain);
+  if (batch.length === 0) return [];
+
+  const porkbunKey = Deno.env.get("PORKBUN_API_KEY");
+  const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
+  const porkbun = porkbunKey && porkbunSecret ? { key: porkbunKey, secret: porkbunSecret } : null;
+
+  const rapidKey = Deno.env.get("RAPIDAPI_DOMAINR_KEY");
+
+  // ---- L1: in-isolate hot cache (zero network, zero DB) ----------------
+  const cachedMap = new Map<string, DomainCheckResult>();
+  const nowMs = Date.now();
+  const missAfterL1: string[] = [];
+  for (const d of batch) {
+    const hot = hotCache.get(d);
+    if (hot && hot.expiresAt > nowMs) cachedMap.set(d, { ...hot.result });
+    else missAfterL1.push(d);
+  }
+
+  // ---- L2: shared DB cache --------------------------------------------
+  if (missAfterL1.length > 0) {
+    const { data: cached } = await supabase
+      .from("domain_cache")
+      .select("domain, available, checked_via, rdap_data")
+      .in("domain", missAfterL1)
+      .gt("expires_at", new Date().toISOString());
+
+    for (const c of cached ?? []) {
+      const meta = (c.rdap_data ?? {}) as Record<string, unknown>;
+      // Ignore rows written by older logic versions — they may encode stale
+      // availability/premium interpretations.
+      if ((meta.cache_version as number | undefined) !== CACHE_VERSION) continue;
+      const result: DomainCheckResult = {
+        domain: c.domain,
+        available: c.available,
+        checkedVia: c.checked_via,
+        price: meta.godaddy_price as number | undefined,
+        premium: meta.premium as boolean | undefined,
+        likelyPremium: meta.likely_premium as boolean | undefined,
+        forSale: meta.for_sale as boolean | undefined,
+        forSaleVia: meta.for_sale_via as string | undefined,
+        listingUrl: meta.listing_url as string | undefined,
+      };
+      cachedMap.set(c.domain, result);
+      hotCache.set(c.domain, { result, expiresAt: nowMs + HOT_CACHE_TTL_MS });
+    }
+  }
+
+  const uncached = batch.filter((d) => !cachedMap.has(d));
+
+  // ---- Pass 1: free authoritative sources (RDAP + DNS) -----------------
+  const baseResults = await pMap(uncached, 25, (d) => resolveDomain(d));
+
+  // ---- Pass 2: Domainr, only where it adds value -----------------------
+  const needsDomainr = baseResults
+    .filter((r) => r.uncertain || (r.available && (r.likelyPremium || isLikelyPremium(r.domain))))
+    .map((r) => r.domain);
+
+  const domainrResults = rapidKey && needsDomainr.length > 0
+    ? await checkDomainrBatch(needsDomainr, rapidKey)
+    : null;
+  if (rapidKey) {
+    console.log(
+      `domainr consulted for ${needsDomainr.length}/${uncached.length} domains, returned=${domainrResults?.size ?? "null"}`
+    );
+  } else if (needsDomainr.length > 0) {
+    console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — RDAP/DNS only");
+  }
+
+  const fresh: DomainCheckResult[] = [];
+  for (const base of baseResults) {
+    const verdict = interpretDomainr(domainrResults?.get(base.domain.toLowerCase()));
+    const likelyPremium = base.likelyPremium ?? isLikelyPremium(base.domain);
+
+    if (verdict.kind === "available") {
+      // Registry-premium names ARE registerable — available:true + premium flag.
+      fresh.push({
+        domain: base.domain,
+        available: true,
+        checkedVia: "domainr",
+        premium: verdict.premium || undefined,
+        likelyPremium: verdict.premium || likelyPremium || undefined,
+      });
+    } else if (verdict.kind === "taken") {
+      fresh.push({
+        domain: base.domain,
+        available: false,
+        checkedVia: "domainr",
+        likelyPremium,
+        forSale: verdict.forSale || undefined,
+        forSaleVia: verdict.forSale ? "Aftermarket" : undefined,
+        listingUrl: verdict.forSale ? `https://www.afternic.com/domain/${base.domain}` : undefined,
+      });
+    } else {
+      // No Domainr signal — keep the RDAP/DNS verdict as-is.
+      fresh.push(base);
+    }
+  }
+
+  // ---- Aftermarket NS detection ---------------------------------------
+  const aftermarketTargets = fresh.filter((r) => !r.available && !r.uncertain && !r.forSale);
+  if (aftermarketTargets.length > 0) {
+    const hits = await pMap(aftermarketTargets, 20, async (r) => ({
+      domain: r.domain,
+      hit: await detectAftermarket(r.domain),
+    }));
+    for (const { domain, hit } of hits) {
+      if (!hit) continue;
+      const idx = fresh.findIndex((r) => r.domain === domain);
+      if (idx >= 0) {
+        fresh[idx] = {
+          ...fresh[idx],
+          forSale: true,
+          forSaleVia: hit.marketplace,
+          listingUrl: hit.listingUrl,
+        };
+      }
+    }
+  }
+
+  // ---- Standard price enrichment (free Porkbun pricing catalog) --------
+  const pricing = getTldPricing();
+
+  const neededTlds = [...new Set(
+    fresh.filter((r) => r.available && r.price == null).map((r) => r.domain.split(".").slice(1).join("."))
+  )];
+  const dbPrice = new Map<string, number>();
+  if (neededTlds.length > 0) {
+    const { data: priceRows } = await supabase
+      .from("registrar_prices")
+      .select("tld, reg_price")
+      .in("tld", neededTlds);
+    for (const row of priceRows ?? []) {
+      const v = Number(row.reg_price);
+      if (!Number.isFinite(v)) continue;
+      const cur = dbPrice.get(row.tld);
+      if (cur == null || v < cur) dbPrice.set(row.tld, v);
+    }
+  }
+
+  for (let i = 0; i < fresh.length; i++) {
+    const r = fresh[i];
+    // Don't attach a standard retail price to likely-premium names until a
+    // registrar has verified the real price.
+    if (!r.available || r.price != null || r.likelyPremium) continue;
+    const tld = r.domain.split(".").slice(1).join(".");
+    const p = dbPrice.get(tld) ?? pricing.get(tld)?.registration;
+    if (p != null) fresh[i] = { ...r, price: p };
+  }
+
+  // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
+  if (porkbun && porkbunBudgetReady()) {
+    const candidates = fresh
+      .filter((r) => r.available && (r.premium || r.likelyPremium) && r.checkedVia !== "porkbun")
+      // Prefer shortest SLD (most likely premium).
+      .sort((a, b) => a.domain.split(".")[0].length - b.domain.split(".")[0].length);
+    const target = candidates[0];
+    if (target) {
+      consumePorkbunBudget();
+      const pb = await checkPorkbun(target.domain, porkbun.key, porkbun.secret);
+      if (pb) {
+        const idx = fresh.findIndex((r) => r.domain === target.domain);
+        if (idx >= 0) {
+          const standard = pricing.get(target.domain.split(".").slice(1).join("."))?.registration;
+          const isPremium =
+            pb.premium ||
+            (pb.price != null && standard != null && pb.price > standard * 2) ||
+            (pb.price != null && standard == null && pb.price >= 50);
+          const price = pb.available
+            ? (isPremium ? pb.price : (pb.price ?? standard ?? fresh[idx].price))
+            : undefined;
+          fresh[idx] = {
+            ...fresh[idx],
+            available: pb.available,
+            checkedVia: "porkbun",
+            price,
+            premium: pb.available ? (isPremium || undefined) : undefined,
+            likelyPremium: isPremium || undefined,
+            uncertain: undefined,
+          };
+        }
+      }
+    }
+  }
+
+  // Telemetry (visible in edge logs).
+  if (fresh.length > 0) {
+    const dist: Record<string, number> = {};
+    for (const r of fresh) dist[r.checkedVia] = (dist[r.checkedVia] ?? 0) + 1;
+    console.log(`check-domains via=${JSON.stringify(dist)} n=${fresh.length}`);
+  }
+
+  // Cache only trustworthy results, with tiered TTL.
+  const cacheable = fresh
+    .map((r) => {
+      let ttl = ttlSecondsFor(r.checkedVia, r.uncertain === true);
+      // Don't lock in a price-less "available" result for hours just because
+      // the pricing catalog was still warming up — re-check it soon.
+      if (ttl > 600 && r.available && r.price == null) ttl = 600;
+      return { r, ttl };
+    })
+    .filter(({ ttl }) => ttl > 0);
+
+  if (cacheable.length > 0) {
+    const rows = cacheable.map(({ r, ttl }) => {
+      // L1: keep it in this isolate too, so a repeat search is instant.
+      pruneHotCache();
+      hotCache.set(r.domain, {
+        result: r,
+        expiresAt: Date.now() + Math.min(ttl * 1000, HOT_CACHE_TTL_MS),
+      });
+      return {
+        domain: r.domain,
+        available: r.available,
+        checked_via: r.checkedVia,
+        rdap_data: {
+          cache_version: CACHE_VERSION,
+          godaddy_price: r.price ?? null,
+          premium: r.premium ?? false,
+          likely_premium: r.likelyPremium ?? false,
+          for_sale: r.forSale ?? false,
+          for_sale_via: r.forSaleVia ?? null,
+          listing_url: r.listingUrl ?? null,
+        },
+        expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
+      };
+    });
+    // Persist in the background — the user's response doesn't wait for the write.
+    const write = supabase.from("domain_cache").upsert(rows, { onConflict: "domain" });
+    const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+    if (rt?.waitUntil) rt.waitUntil(Promise.resolve(write).catch(() => {}));
+    else await write;
+  }
+
+  const all = new Map<string, DomainCheckResult>();
+  for (const c of cachedMap.values()) all.set(c.domain, c);
+  for (const r of fresh) all.set(r.domain, r);
+
+  return batch.map(
+    (d) => all.get(d) ?? { domain: d, available: false, checkedVia: "error", uncertain: true }
+  );
 }
