@@ -140,10 +140,10 @@ const Speed = () => {
         {/* What the timer includes */}
         <section className="mt-16">
           <div className="flex items-center gap-4">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">What the timer includes</h2>
+            <h2 className="section-title">What the timer includes</h2>
             <div className="hidden h-px flex-1 bg-gradient-to-r from-border to-transparent sm:block" />
           </div>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
+          <p className="section-lede max-w-2xl">
             The stopwatch starts at your final keystroke and stops when the first card paints.
           </p>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
