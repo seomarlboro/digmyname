@@ -17,7 +17,7 @@ On top of availability you get side-by-side registrar pricing for 7 registrars, 
 
 ## Speed
 
-Typical first answer lands in **~170 ms**, with a **~0.5 s median** for the full pipeline (availability + premium detection + pricing). Your numbers will differ by network, TLD, and cache state — the method and raw benchmarks are published at [digmyname.com/speed](https://digmyname.com/speed).
+**~170 ms** typical first answer · **~370 ms median** full pipeline (availability + premium + pricing), **p95 under 1 second**. Measured Aug 2026, single datacenter; your numbers vary by network/TLD/cache — see [digmyname.com/speed](https://digmyname.com/speed).
 
 ## Tech stack
 
