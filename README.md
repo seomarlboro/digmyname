@@ -11,7 +11,7 @@
 
 ## What it does
 
-DigMyName checks domain availability in real time across 52 TLDs. Every answer is cross-checked against four independent sources — Domainr, the IANA RDAP bootstrap registry, Cloudflare DNS-over-HTTPS, and Porkbun pricing — and when those sources disagree we show an honest **Unverified** state instead of guessing.
+DigMyName checks domain availability in real time across 52 TLDs. Availability is cross-checked against three independent signals — RDAP (resolved via the IANA bootstrap registry), DNS-over-HTTPS (Cloudflare, hedged with Google), and Domainr — and when they disagree we show an honest **Unverified** state instead of guessing. Pricing comes from Porkbun's live catalog.
 
 On top of availability you get side-by-side registrar pricing for 7 registrars, including the renewal traps that first-year promo prices hide (a $1 registration that renews at $61 is not a deal). Everything is also exposed through a free, no-auth JSON API for agents, plus an MCP server so any LLM — Claude, Cursor, Windsurf, Continue, Zed — can check domains directly.
 
@@ -33,11 +33,11 @@ On top of availability you get side-by-side registrar pricing for 7 registrars, 
 The only requirement is having Node.js & npm installed — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Step 1: Clone the repository.
+git clone https://github.com/Seomarlboro/digmyname.git
 
 # Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+cd digmyname
 
 # Step 3: Install the necessary dependencies.
 npm i
@@ -46,9 +46,6 @@ npm i
 npm run dev
 ```
 
-## Editing via Lovable
-
-This project is built and maintained with [Lovable](https://lovable.dev). Changes made in the Lovable editor are committed automatically to this repo, and you can also edit files directly in GitHub or a Codespace — pushed changes sync back to Lovable.
 
 
 ## License
