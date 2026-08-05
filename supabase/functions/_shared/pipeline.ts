@@ -549,7 +549,7 @@ export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: "{}",
-        signal: AbortSignal.timeout(PRICING_ATTEMPT_TIMEOUT_MS),
+        signal: AbortSignal.timeout(attempt === 1 ? PRICING_FIRST_TIMEOUT_MS : PRICING_RETRY_TIMEOUT_MS),
       });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
