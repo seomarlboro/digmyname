@@ -1,14 +1,10 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import {
   Github,
   Puzzle,
   Sparkles,
   Bot,
-  Check,
-  Copy,
   ArrowUpRight,
   Terminal,
   Zap,
@@ -16,14 +12,16 @@ import {
   ShieldCheck,
   Cpu,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trackMcpEvent } from "@/lib/trackMcpEvent";
 import WaitlistForm from "@/components/WaitlistForm";
+import { CodeBlock } from "@/components/CodeBlock";
 import { NetworkIcon, StoreIcon, StopwatchIcon, LicenseIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
+
 
 
 const GITHUB_URL = "https://github.com/seomarlboro/domain-check-skills";
