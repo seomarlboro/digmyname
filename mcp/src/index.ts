@@ -75,20 +75,46 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+class ApiError extends Error {
+  status?: number;
+  retryable: boolean;
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.retryable = status === undefined || status === 429 || status >= 500;
+  }
+}
+
 async function fetchApi(path: string): Promise<unknown> {
   const url = `${API_BASE}${path}`;
-  const res = await fetch(url, {
-    headers: { accept: "application/json", "user-agent": USER_AGENT },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: { accept: "application/json", "user-agent": USER_AGENT },
+    });
+  } catch (err) {
+    // Transport-level failure — no HTTP status, always retryable.
+    throw new ApiError(err instanceof Error ? err.message : String(err));
+  }
 
   if (res.status === 429) {
-    throw new Error("Rate limited by DigMyName API (60 req/min). Try again in a minute.");
+    throw new ApiError(
+      "Rate limited by DigMyName API (60 req/min). Try again in a minute.",
+      429
+    );
   }
   if (!res.ok) {
     const body = await res.text().catch(() => "unknown");
-    throw new Error(`DigMyName API error ${res.status}: ${body}`);
+    throw new ApiError(`DigMyName API error ${res.status}: ${body}`, res.status);
   }
   return res.json();
+}
+
+function ttlForPath(path: string): number {
+  if (path.startsWith("/registrars")) return PRICING_TTL_MS;
+  if (path.startsWith("/age")) return AGE_TTL_MS;
+  return CACHE_TTL_MS;
 }
 
 async function api<T>(path: string): Promise<T> {
@@ -100,17 +126,12 @@ async function api<T>(path: string): Promise<T> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const data = await fetchApi(path);
-      cacheSet(path, data);
+      cacheSet(path, data, ttlForPath(path));
       return data as T;
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
-      const isNetwork =
-        lastError.message.includes("fetch") ||
-        lastError.message.includes("network") ||
-        lastError.message.includes("ECONNREFUSED") ||
-        lastError.message.includes("ETIMEDOUT");
-      const isRateLimit = lastError.message.includes("Rate limited");
-      if ((isNetwork || isRateLimit) && attempt < MAX_RETRIES) {
+      const retryable = err instanceof ApiError ? err.retryable : true;
+      if (retryable && attempt < MAX_RETRIES) {
         await sleep(500 * 2 ** attempt);
         continue;
       }
