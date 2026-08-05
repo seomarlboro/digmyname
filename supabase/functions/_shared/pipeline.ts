@@ -528,10 +528,14 @@ export function getTldPricing(): Map<string, TldPrice> {
   return pricingCache?.map ?? new Map();
 }
 
-// Each attempt is hard-capped at 4s so a cold catalog can never add a long
-// tail anywhere; the loader is background-only, so we simply retry a couple of
-// times instead of waiting out one very long request.
-const PRICING_ATTEMPT_TIMEOUT_MS = 4000;
+// The first attempt is hard-capped at 4s so nothing that could ever end up on
+// a request path pays a long tail. Porkbun's catalog endpoint measurably takes
+// ~14s to serve its ~80KB payload, so the retries (which only ever run in the
+// background via getTldPricing()/waitUntil) get a realistic budget — otherwise
+// pricing would never load at all and every available domain would lose its
+// price.
+const PRICING_FIRST_TIMEOUT_MS = 4000;
+const PRICING_RETRY_TIMEOUT_MS = 20000;
 const PRICING_ATTEMPTS = 3;
 
 export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
