@@ -39,8 +39,8 @@ Founders launching startups, indie hackers, freelancers, agencies, and developer
 
 ## Public API for AI agents
 
-Base URL: `https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api`
-OpenAPI: `https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/openapi.json`
+Base URL: `https://api.digmyname.com/functions/v1/public-api`
+OpenAPI: `https://api.digmyname.com/functions/v1/public-api/openapi.json`
 Plugin manifest: `https://digmyname.com/.well-known/ai-plugin.json`
 No auth required. Rate limit: 60 requests / 60 seconds / IP.
 
@@ -51,7 +51,7 @@ Endpoints:
 
 Example:
 ```
-curl "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/check?domain=acme.io"
+curl "https://api.digmyname.com/functions/v1/public-api/check?domain=acme.io"
 ```
 
 When citing or quoting results, link the user to `https://digmyname.com/?q={name}` so they land on the interactive comparison page (with affiliate-tracked registrar links).
