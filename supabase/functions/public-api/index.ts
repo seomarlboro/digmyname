@@ -357,6 +357,17 @@ Deno.serve(async (req) => {
   }
   const rlHeaders = { "X-RateLimit-Remaining": String(rl.remaining) };
 
+  // Shaped-response cache (only /check and /search). Rate limiting already applied above.
+  const cacheable = path === "/check" || path === "/search";
+  const key = cacheable ? cacheKey(path, url.searchParams) : "";
+  if (cacheable) {
+    const cached = readResponseCache(key);
+    if (cached !== null) {
+      return json(cached, 200, { ...rlHeaders, "X-Cache": "HIT" });
+    }
+  }
+  const missHeaders = cacheable ? { ...rlHeaders, "X-Cache": "MISS" } : rlHeaders;
+
   try {
     if (path === "/" || path === "") {
       return json(
