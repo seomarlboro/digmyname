@@ -347,7 +347,7 @@ registerTool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("domain-check-skills-mcp v1.1.6 ready (stdio)");
+  console.error(`domain-check-skills-mcp v${VERSION} ready (stdio)`);
 }
 
 main().catch((err) => {
