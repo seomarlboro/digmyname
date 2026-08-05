@@ -125,8 +125,58 @@ function validateTld(raw: string): string | null {
 
 // Runs the pipeline IN-PROCESS — no edge→edge invoke — so repeated checks are
 // served from the shared warm L1 cache inside this isolate.
+// Hard ceiling: no single request can hang beyond HARD_BUDGET_MS. On timeout we
+// resolve (never reject) with uncertain placeholders so the UI shows Retry.
+const HARD_BUDGET_MS = 1500;
+
 async function invokeCheck(domains: string[]) {
-  return await checkDomains(domains);
+  const fallback = domains.map((domain) => ({
+    domain,
+    available: false,
+    uncertain: true,
+    checkedVia: "timeout",
+  }));
+  let timer: number | undefined;
+  const budget = new Promise<any[]>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), HARD_BUDGET_MS) as unknown as number;
+  });
+  try {
+    return await Promise.race([checkDomains(domains), budget]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
+// ---------- shaped response cache (in-isolate, per endpoint+query) ----------
+const RESPONSE_TTL_MS = 60_000;
+const RESPONSE_CACHE_MAX = 2000;
+const responseCache = new Map<string, { body: unknown; expires: number }>();
+
+function cacheKey(path: string, params: URLSearchParams): string {
+  const parts = [...params.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  return `${path.replace(/^\//, "")}?${parts.map(([k, v]) => `${k}=${v}`).join("&")}`;
+}
+
+function readResponseCache(key: string): unknown | null {
+  const hit = responseCache.get(key);
+  if (!hit) return null;
+  if (hit.expires < Date.now()) {
+    responseCache.delete(key);
+    return null;
+  }
+  // LRU touch
+  responseCache.delete(key);
+  responseCache.set(key, hit);
+  return hit.body;
+}
+
+function writeResponseCache(key: string, body: unknown) {
+  responseCache.set(key, { body, expires: Date.now() + RESPONSE_TTL_MS });
+  while (responseCache.size > RESPONSE_CACHE_MAX) {
+    const oldest = responseCache.keys().next().value;
+    if (oldest === undefined) break;
+    responseCache.delete(oldest);
+  }
 }
 
 async function invokeAge(domains: string[]) {
