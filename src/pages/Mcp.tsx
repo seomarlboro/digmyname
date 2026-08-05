@@ -96,26 +96,11 @@ const configSnippet = `{
 const oneLineCommand = `claude mcp add domain-check -- npx -y domain-check-skills-mcp`;
 
 const Mcp = () => {
-  const [copied, setCopied] = useState(false);
-  const [copiedCli, setCopiedCli] = useState(false);
-
   useEffect(() => {
     trackMcpEvent("page_view", "mcp");
   }, []);
 
-  const copyConfig = async () => {
-    await navigator.clipboard.writeText(configSnippet);
-    setCopied(true);
-    trackMcpEvent("copy_config", "claude_desktop");
-    setTimeout(() => setCopied(false), 2000);
-  };
 
-  const copyCli = async () => {
-    await navigator.clipboard.writeText(oneLineCommand);
-    setCopiedCli(true);
-    trackMcpEvent("copy_config", "claude_cli");
-    setTimeout(() => setCopiedCli(false), 2000);
-  };
 
   return (
     <>
