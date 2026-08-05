@@ -117,6 +117,10 @@ const Speed = () => {
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-lg">
                 Show us a faster public lookup and we'll feature your time here with full credit and a link back.
               </p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                As of August 2026: ~370 ms median full check, 94% of lookups under one second. Measured, not
+                marketed — and the timer on your screen keeps us honest.
+              </p>
             </div>
           </div>
           <Button asChild variant="gradient" size="lg" className="w-full shrink-0 text-lg font-bold text-black md:w-auto [&_*]:text-black">
