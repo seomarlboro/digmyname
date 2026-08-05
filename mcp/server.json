@@ -1,0 +1,32 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.Seomarlboro/domain-check-skills-mcp",
+  "description": "Fast domain availability + registrar pricing across 52 TLDs for any LLM. Check availability, compare 7 registrars, get domain age. Free, no API key.",
+  "status": "active",
+  "repository": {
+    "url": "https://github.com/Seomarlboro/digmyname",
+    "source": "github",
+    "subfolder": "mcp"
+  },
+  "version": "1.2.1",
+  "websiteUrl": "https://digmyname.com/mcp",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "domain-check-skills-mcp",
+      "version": "1.2.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "DIGMYNAME_API_BASE",
+          "description": "Override the API base URL (defaults to https://api.digmyname.com/functions/v1/public-api).",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

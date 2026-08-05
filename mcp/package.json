@@ -1,6 +1,7 @@
 {
   "name": "domain-check-skills-mcp",
-  "version": "1.2.0",
+  "mcpName": "io.github.Seomarlboro/domain-check-skills-mcp",
+  "version": "1.2.1",
   "description": "The fastest domain availability MCP server — ~170 ms first answer from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Think something is faster? Dispute it. By DigMyName.",
   "license": "MIT",
   "type": "module",
@@ -12,7 +13,9 @@
     "dist",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE",
+    "server.json",
+    "llms-install.md"
   ],
   "engines": {
     "node": ">=18"

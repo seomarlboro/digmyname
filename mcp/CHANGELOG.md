@@ -5,6 +5,11 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] — 2026-08-05
+
+### Added
+- Official MCP Registry manifest (`server.json`), `mcpName` namespace (`io.github.Seomarlboro/domain-check-skills-mcp`), and `llms-install.md` for directory submissions.
+
 ## [1.2.0] — 2026-08-05
 
 ### Changed
