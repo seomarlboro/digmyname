@@ -276,90 +276,24 @@ const Mcp = () => {
             </p>
 
             {/* One-line CLI install */}
-            <div className="surface-card-lg mb-4 overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40">
-                <div className="flex items-center gap-3">
-                  <Terminal className="w-3.5 h-3.5 text-primary" />
-
-                  <span className="text-xs text-muted-foreground font-mono">
-                    Claude Code · one command
-                  </span>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={copyCli}
-                  className="gap-1.5 h-7 text-xs"
-                >
-                  {copiedCli ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedCli ? "Copied" : "Copy"}
-                </Button>
-              </div>
-              <div className="p-6 overflow-x-auto text-[13px] leading-relaxed">
-                <SyntaxHighlighter
-                  language="bash"
-                  style={vscDarkPlus}
-                  customStyle={{
-                    margin: 0,
-                    padding: 0,
-                    background: "transparent",
-                    fontSize: "13px",
-                    lineHeight: "1.6",
-                  }}
-                  codeTagProps={{
-                    style: {
-                      fontFamily:
-                        'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-                    },
-                  }}
-                >
-                  {`$ ${oneLineCommand}`}
-                </SyntaxHighlighter>
-              </div>
+            <div className="mb-4">
+              <CodeBlock
+                label="Claude Code · one command"
+                language="bash"
+                code={`$ ${oneLineCommand}`}
+                copyText={oneLineCommand}
+                onCopy={() => trackMcpEvent("copy_config", "claude_cli")}
+              />
             </div>
 
             {/* JSON config */}
-            <div className="surface-card-lg overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40">
-                <div className="flex items-center gap-3">
-                  <Terminal className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-xs text-muted-foreground font-mono">
-                    claude_desktop_config.json
-                  </span>
-                </div>
+            <CodeBlock
+              label="claude_desktop_config.json"
+              language="json"
+              code={configSnippet}
+              onCopy={() => trackMcpEvent("copy_config", "claude_desktop")}
+            />
 
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={copyConfig}
-                  className="gap-1.5 h-7 text-xs"
-                >
-                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? "Copied" : "Copy"}
-                </Button>
-              </div>
-              <div className="p-6 overflow-x-auto text-[13px] leading-relaxed">
-                <SyntaxHighlighter
-                  language="json"
-                  style={vscDarkPlus}
-                  customStyle={{
-                    margin: 0,
-                    padding: 0,
-                    background: "transparent",
-                    fontSize: "13px",
-                    lineHeight: "1.6",
-                  }}
-                  codeTagProps={{
-                    style: {
-                      fontFamily:
-                        'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-                    },
-                  }}
-                >
-                  {configSnippet}
-                </SyntaxHighlighter>
-              </div>
-            </div>
             <p className="text-sm text-muted-foreground mt-4 flex items-center gap-2">
               <Terminal className="w-4 h-4 text-primary" />
               Then ask:{" "}
