@@ -147,6 +147,20 @@ async function invokeCheck(domains: string[]) {
   }
 }
 
+// Registrar pricing is a nice-to-have: never let a cold DB call drag the
+// availability answer. Resolves to the fallback instead of rejecting.
+const PRICE_LOOKUP_BUDGET_MS = 800;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  let timer: number | undefined;
+  const budget = new Promise<T>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), ms) as unknown as number;
+  });
+  return Promise.race([promise, budget]).finally(() => {
+    if (timer !== undefined) clearTimeout(timer);
+  });
+}
+
 // ---------- shaped response cache (in-isolate, per endpoint+query) ----------
 const RESPONSE_TTL_MS = 60_000;
 const RESPONSE_CACHE_MAX = 2000;
