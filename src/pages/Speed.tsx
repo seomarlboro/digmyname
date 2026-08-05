@@ -102,7 +102,7 @@ const Speed = () => {
           <StatGrid cols={3}>
             <Stat value="~170" label="ms · first answer" accent="mint" icon={StopwatchIcon} />
             <Stat value="80" label="ms · debounce (ours)" accent="violet" icon={KeyboardIcon} />
-            <Stat value="<1s" label="Full pipeline" icon={Zap} />
+            <Stat value="~370" label="ms · full pipeline (median)" icon={Zap} />
           </StatGrid>
 
         </PageHeader>
