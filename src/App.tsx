@@ -33,20 +33,23 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <div className="relative min-h-screen bg-background">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/favorites" element={<Favorites />} />
-                <Route path="/how-it-works" element={<HowItWorks />} />
-                <Route path="/about" element={<HowItWorks />} />
-                <Route path="/mcp" element={<Mcp />} />
-                <Route path="/skill" element={<Mcp />} />
-                <Route path="/gpt" element={<Mcp />} />
-                <Route path="/speed" element={<Speed />} />
-                <Route path="/api" element={<Api />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <Suspense fallback={<RouteFallback />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/how-it-works" element={<HowItWorks />} />
+                  <Route path="/about" element={<HowItWorks />} />
+                  <Route path="/mcp" element={<Mcp />} />
+                  <Route path="/skill" element={<Mcp />} />
+                  <Route path="/gpt" element={<Mcp />} />
+                  <Route path="/speed" element={<Speed />} />
+                  <Route path="/api" element={<Api />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+
               <Footer />
             </div>
 
