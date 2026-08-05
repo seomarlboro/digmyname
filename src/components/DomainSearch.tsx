@@ -333,8 +333,15 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
               className="mt-5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground sm:text-sm"
             >
               <Zap className="h-3.5 w-3.5 shrink-0 text-aurora-mint" />
-              <span className="whitespace-nowrap">First answer in ~100 ms<span className="hidden sm:inline"> — timed live, no asterisks</span></span>
+              <span className="whitespace-nowrap">First answer in ~170 ms<span className="hidden sm:inline"> — timed live, no asterisks</span></span>
             </Link>
+
+            <div className="mt-3">
+              <Link to="/speed" className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline sm:text-sm">
+                see the live benchmark →
+              </Link>
+            </div>
+
 
 
 
