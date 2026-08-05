@@ -1,13 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
-import { Loader2, Shield, ShieldOff, Award, Trophy } from "lucide-react";
+import { Loader2, Shield, ShieldOff, Award, Search, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getRegistrarColor } from "@/lib/registrarColors";
 import { NetworkIcon, StoreIcon, CertificateIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
+import { cn } from "@/lib/utils";
 
 interface RegistrarPrice {
   id: string;
@@ -29,9 +32,37 @@ interface TldSummary {
   cheapestRenew: RegistrarPrice;
   cheapestTransfer: RegistrarPrice | null;
   best3Year: RegistrarPrice;
+  isEnterprise: boolean;
+  trapMultiplier: number | null;
 }
 
+type PriceMode = "reg" | "renew" | "transfer";
+
+const MODE_LABEL: Record<PriceMode, string> = {
+  reg: "Register",
+  renew: "Renew",
+  transfer: "Transfer",
+};
+
+const ENTERPRISE_THRESHOLD = 500;
+
+const formatUpdated = (iso: string | undefined) => {
+  if (!iso) return "—";
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "—";
+  const mins = Math.round((Date.now() - then) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} h ago`;
+  const days = Math.round(hours / 24);
+  return `${days} d ago`;
+};
+
 const Pricing = () => {
+  const [query, setQuery] = useState("");
+  const [mode, setMode] = useState<PriceMode>("reg");
+
   const { data: prices, isLoading } = useQuery({
     queryKey: ["registrar-prices"],
     queryFn: async () => {
@@ -45,7 +76,12 @@ const Pricing = () => {
     },
   });
 
-  const tldSummaries = useMemo(() => {
+  const lastUpdated = useMemo(() => {
+    if (!prices?.length) return undefined;
+    return prices.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at;
+  }, [prices]);
+
+  const allSummaries = useMemo(() => {
     if (!prices) return [];
     const grouped = new Map<string, RegistrarPrice[]>();
     for (const p of prices) {
@@ -68,7 +104,21 @@ const Pricing = () => {
         const costB = b.reg_price + b.renew_price * 2;
         return costA < costB ? a : b;
       });
-      summaries.push({ tld, prices: list, cheapestReg, cheapestRenew, cheapestTransfer, best3Year });
+      const isEnterprise = cheapestReg.reg_price > ENTERPRISE_THRESHOLD;
+      const trapMultiplier =
+        cheapestReg.reg_price > 0 && cheapestReg.renew_price / cheapestReg.reg_price >= 2
+          ? cheapestReg.renew_price / cheapestReg.reg_price
+          : null;
+      summaries.push({
+        tld,
+        prices: list,
+        cheapestReg,
+        cheapestRenew,
+        cheapestTransfer,
+        best3Year,
+        isEnterprise,
+        trapMultiplier,
+      });
     }
 
     summaries.sort((a, b) => {
@@ -80,6 +130,15 @@ const Pricing = () => {
     return summaries;
   }, [prices]);
 
+  const filtered = useMemo(() => {
+    const q = query.trim().replace(/^\./, "").toLowerCase();
+    if (!q) return allSummaries;
+    return allSummaries.filter((s) => s.tld.includes(q));
+  }, [allSummaries, query]);
+
+  const standard = filtered.filter((s) => !s.isEnterprise);
+  const enterprise = filtered.filter((s) => s.isEnterprise);
+
   const registrars = useMemo(() => {
     if (!prices) return [];
     return [...new Set(prices.map((p) => p.registrar))].sort();
@@ -89,7 +148,7 @@ const Pricing = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>Domain Pricing Comparison — DigMyName</title>
-        <meta name="description" content="Compare domain registration, renewal, and transfer prices side-by-side across major registrars." />
+        <meta name="description" content="Compare domain registration, renewal, and transfer prices side-by-side across major registrars — including the renewal traps everyone else hides." />
         <link rel="canonical" href="https://digmyname.com/pricing" />
         <meta property="og:title" content="Domain Pricing Comparison — DigMyName" />
         <meta property="og:description" content="Side-by-side domain prices across major registrars." />
@@ -110,6 +169,29 @@ const Pricing = () => {
             { "@type": "ListItem", "position": 2, "name": "Pricing", "item": "https://digmyname.com/pricing" }
           ]
         })}</script>
+        {allSummaries.length > 0 && (
+          <script type="application/ld+json">{JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: "Cheapest domain registration prices by extension",
+            itemListElement: allSummaries.slice(0, 20).map((s, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              item: {
+                "@type": "Product",
+                name: `.${s.tld} domain registration`,
+                category: "Domain name registration",
+                offers: {
+                  "@type": "Offer",
+                  price: s.cheapestReg.reg_price.toFixed(2),
+                  priceCurrency: "USD",
+                  availability: "https://schema.org/InStock",
+                  seller: { "@type": "Organization", name: s.cheapestReg.registrar },
+                },
+              },
+            })),
+          })}</script>
+        )}
       </Helmet>
       <Header />
       <PageMain>
@@ -121,10 +203,10 @@ const Pricing = () => {
               <span className="text-aurora-gradient">side by side.</span>
             </>
           }
-          lede={`Registration, renewal and transfer prices compared across ${registrars.length} registrars and ${tldSummaries.length} extensions — including the renewal traps everyone else hides.`}
+          lede={`Registration, renewal and transfer prices compared across ${registrars.length} registrars and ${allSummaries.length} extensions — including the renewal traps everyone else hides.`}
         >
           <StatGrid cols={3}>
-            <Stat value={tldSummaries.length || "—"} label="TLDs tracked" accent="mint" icon={NetworkIcon} />
+            <Stat value={allSummaries.length || "—"} label="TLDs tracked" accent="mint" icon={NetworkIcon} />
             <Stat value={registrars.length || "—"} label="Registrars" accent="violet" icon={StoreIcon} />
             <Stat value="3yr" label="True cost basis" icon={CertificateIcon} />
           </StatGrid>
@@ -138,22 +220,66 @@ const Pricing = () => {
           </div>
         ) : (
           <>
+            {/* Sticky filter bar */}
+            <div className="sticky top-[68px] z-30 -mx-4 mb-6 border-y border-border/60 bg-background/85 px-4 py-3 backdrop-blur-xl sm:mx-0 sm:rounded-2xl sm:border">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative w-full sm:max-w-xs">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Filter extensions — try io, ai, shop"
+                    aria-label="Filter TLDs"
+                    className="h-10 pl-9"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1 rounded-xl border border-border/60 bg-muted/20 p-1">
+                  {(Object.keys(MODE_LABEL) as PriceMode[]).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMode(m)}
+                      aria-pressed={mode === m}
+                      className={cn(
+                        "rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors",
+                        mode === m
+                          ? "bg-foreground text-background"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {MODE_LABEL[m]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Summary table */}
-            <Section title="Cheapest per extension" lede="One row per TLD — the best price we found for each action." aside="Updated daily">
+            <Section
+              title="Cheapest per extension"
+              lede="One row per TLD — the best price we found for each action."
+              aside={`Prices updated ${formatUpdated(lastUpdated)}`}
+            >
+              {standard.length === 0 ? (
+                <p className="surface-card p-6 text-sm text-muted-foreground">
+                  No extensions match “{query}”.
+                </p>
+              ) : (
               <div className="surface-card-lg overflow-x-auto">
               <table className="min-w-[900px] text-left">
                 <thead>
                   <tr className="border-b border-border">
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Domain</th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest Registration</th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest Renewal</th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest Transfer</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest {MODE_LABEL[mode]}</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Renewal reality</th>
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Best 3-Year Value</th>
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">WHOIS Privacy</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Updated</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tldSummaries.map((s) => {
+                  {standard.map((s) => {
                     const best3Cost = s.best3Year.reg_price + s.best3Year.renew_price * 2;
                     return (
                       <tr key={s.tld} className="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/10">
@@ -161,26 +287,28 @@ const Pricing = () => {
                           <span className="font-display text-3xl font-extrabold tracking-tight text-[hsl(var(--aurora-mint))]">.{s.tld}</span>
                         </td>
                         <td className="px-5 py-5">
-                          <SummaryPriceCell registrar={s.cheapestReg.registrar} price={s.cheapestReg.reg_price} promo={s.cheapestReg.promo_code} />
-                        </td>
-                        <td className="px-5 py-5">
-                          <SummaryPriceCell
-                            registrar={s.cheapestRenew.registrar}
-                            price={s.cheapestRenew.renew_price}
-                          />
-                        </td>
-                        <td className="px-5 py-5">
-                          {s.cheapestTransfer ? (
-                            <SummaryPriceCell registrar={s.cheapestTransfer.registrar} price={s.cheapestTransfer.transfer_price!} />
-                          ) : (
-                            <span className="text-sm text-muted-foreground">—</span>
+                          {mode === "reg" && (
+                            <SummaryPriceCell registrar={s.cheapestReg.registrar} price={s.cheapestReg.reg_price} promo={s.cheapestReg.promo_code} />
                           )}
+                          {mode === "renew" && (
+                            <SummaryPriceCell registrar={s.cheapestRenew.registrar} price={s.cheapestRenew.renew_price} />
+                          )}
+                          {mode === "transfer" && (
+                            s.cheapestTransfer ? (
+                              <SummaryPriceCell registrar={s.cheapestTransfer.registrar} price={s.cheapestTransfer.transfer_price!} />
+                            ) : (
+                              <span className="text-sm text-muted-foreground">—</span>
+                            )
+                          )}
+                        </td>
+                        <td className="px-5 py-5">
+                          <RenewalTrap summary={s} />
                         </td>
                         <td className="px-5 py-5">
                           <div>
                             <span className={`text-sm font-medium ${getRegistrarColor(s.best3Year.registrar).text}`}>{s.best3Year.registrar}</span>
                             <p className="mt-0.5">
-                              <span className="font-mono font-mono text-base font-extrabold tabular-nums text-foreground">${best3Cost.toFixed(2)}</span>
+                              <span className="font-mono text-base font-extrabold tabular-nums text-foreground">${best3Cost.toFixed(2)}</span>
                               <span className="text-sm text-muted-foreground"> /3yr</span>
                             </p>
                           </div>
@@ -192,18 +320,51 @@ const Pricing = () => {
                             <ShieldOff className="h-5 w-5 text-muted-foreground" />
                           )}
                         </td>
+                        <td className="px-5 py-5">
+                          <span className="text-sm text-muted-foreground">
+                            {formatUpdated(
+                              s.prices.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at,
+                            )}
+                          </span>
+                        </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
               </div>
+              )}
             </Section>
+
+            {/* Premium / enterprise TLDs */}
+            {enterprise.length > 0 && (
+              <Section
+                title="Premium / enterprise extensions"
+                lede="Extensions above $500/yr. Collapsed by default so they don't distort the normal prices."
+              >
+                <Collapsible>
+                  <CollapsibleTrigger className="surface-card group flex w-full items-center justify-between p-5 text-left">
+                    <span className="text-base font-bold text-foreground">
+                      {enterprise.length} enterprise-priced {enterprise.length === 1 ? "extension" : "extensions"}
+                      <span className="ml-2 font-normal text-muted-foreground">
+                        ({enterprise.map((s) => `.${s.tld}`).join(", ")})
+                      </span>
+                    </span>
+                    <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-4 space-y-4">
+                    {enterprise.map((s) => (
+                      <DetailedTldTable key={s.tld} summary={s} />
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+              </Section>
+            )}
 
             {/* Full comparison by TLD */}
             <Section title="Detailed price comparison" lede="Every registrar we track, per extension. Cheapest first." aside="Lower is better">
               <div className="space-y-4">
-                {tldSummaries.map((s) => (
+                {standard.map((s) => (
                   <DetailedTldTable key={s.tld} summary={s} />
                 ))}
               </div>
@@ -212,6 +373,43 @@ const Pricing = () => {
         )}
       </PageMain>
       
+    </div>
+  );
+};
+
+/* ─── Renewal trap ─────────────────────────────────────── */
+
+const RenewalTrap = ({ summary: s }: { summary: TldSummary }) => {
+  if (!s.trapMultiplier) {
+    return (
+      <div>
+        <Badge variant="secondary" className="text-[11px]">Fair renewal</Badge>
+        <p className="mt-1 font-mono text-sm tabular-nums text-muted-foreground">
+          ${s.cheapestReg.reg_price.toFixed(2)} → ${s.cheapestReg.renew_price.toFixed(2)}
+        </p>
+      </div>
+    );
+  }
+
+  const pct = Math.round((s.cheapestReg.renew_price / s.cheapestReg.reg_price - 1) * 100);
+  const severe = pct >= 500;
+
+  return (
+    <div>
+      <Badge
+        className={cn(
+          "text-[11px] font-bold",
+          severe
+            ? "border-destructive/40 bg-destructive/15 text-destructive"
+            : "border-warning/40 bg-warning/15 text-warning",
+        )}
+        variant="outline"
+      >
+        +{pct.toLocaleString()}% at renewal
+      </Badge>
+      <p className="mt-1 font-mono text-sm tabular-nums text-muted-foreground">
+        ${s.cheapestReg.reg_price.toFixed(2)} → ${s.cheapestReg.renew_price.toFixed(2)}
+      </p>
     </div>
   );
 };
@@ -250,15 +448,15 @@ const SummaryPriceCell = ({
 
 const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
   const sorted = [...s.prices].sort((a, b) => a.reg_price - b.reg_price);
-  const cheapestRegPrice = s.cheapestReg.reg_price;
-  const maxRegPrice = Math.max(...s.prices.map((p) => p.reg_price));
-  const range = maxRegPrice - cheapestRegPrice || 1;
 
   return (
     <div className="surface-card-lg overflow-x-auto">
-      <div className="flex items-center gap-3 border-b border-border px-5 py-4">
+      <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4">
         <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
         <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>
+        <span className="ml-auto text-xs text-muted-foreground">
+          Updated {formatUpdated(sorted.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at)}
+        </span>
       </div>
       <table className="min-w-[820px] text-left">
         <thead>
@@ -277,7 +475,6 @@ const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
             const c = getRegistrarColor(p.registrar);
             const isCheapest = i === 0;
             const renewHigher = p.renew_price > p.reg_price * 1.8;
-            const barWidth = range > 0 ? ((p.reg_price - cheapestRegPrice) / range) * 100 : 0;
 
             return (
               <tr key={p.id} className="border-b border-border transition-colors hover:bg-muted/10">
