@@ -1,0 +1,112 @@
+import { Link } from "react-router-dom";
+import ShovelLogo from "@/components/ShovelLogo";
+
+const GITHUB_URL = "https://github.com/seomarlboro/domain-check-skills";
+const API_BASE = "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api";
+
+const product = [
+  { to: "/", label: "Domains" },
+  { to: "/pricing", label: "Pricing" },
+  { to: "/how-it-works", label: "How it works" },
+  { to: "/speed", label: "Speed" },
+  { to: "/mcp", label: "MCP" },
+  { to: "/api", label: "API" },
+];
+
+const Footer = () => (
+  <footer className="mt-8 border-t border-border/60">
+    <div className="content-wrap py-12">
+      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <Link to="/" className="flex items-center gap-2.5">
+            <ShovelLogo className="h-7 w-7" />
+            <span className="logo-text text-foreground">DigMyName</span>
+          </Link>
+          <p className="mt-3 max-w-xs text-sm text-muted-foreground">
+            Honest domain search. Four verification sources, real registrar prices,
+            no guesses shown as facts.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+            Product
+          </h2>
+          <ul className="mt-4 space-y-2 text-sm">
+            {product.map((item) => (
+              <li key={item.label}>
+                <Link
+                  to={item.to}
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+            Developers
+          </h2>
+          <ul className="mt-4 space-y-2 text-sm">
+            <li>
+              <Link to="/api" className="text-muted-foreground transition-colors hover:text-foreground">
+                API docs
+              </Link>
+            </li>
+            <li>
+              <a href="/llms.txt" className="text-muted-foreground transition-colors hover:text-foreground">
+                /llms.txt
+              </a>
+            </li>
+            <li>
+              <a
+                href={`${API_BASE}/openapi.json`}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                /openapi.json
+              </a>
+            </li>
+            <li>
+              <a
+                href="/.well-known/ai-plugin.json"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                /.well-known/ai-plugin.json
+              </a>
+            </li>
+            <li>
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                GitHub
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+            About
+          </h2>
+          <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+            <li>Not a registrar</li>
+            <li>No hidden markup</li>
+            <li>Helping you find the right name and buy it wherever it's cheapest.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="mt-10 border-t border-border/60 pt-6 text-xs text-muted-foreground">
+        Built in Ukraine 🇺🇦 · MIT licensed · © 2026 DigMyName
+      </div>
+    </div>
+  </footer>
+);
+
+export default Footer;

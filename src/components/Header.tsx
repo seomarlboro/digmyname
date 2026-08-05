@@ -14,6 +14,8 @@ const navItems = [
   { to: "/how-it-works", label: "How it works" },
   { to: "/speed", label: "Speed" },
   { to: "/mcp", label: "MCP" },
+  { to: "/api", label: "API" },
+
 ];
 
 const Header = () => {

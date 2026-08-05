@@ -82,7 +82,7 @@ const tools = [
 const stats = [
   { icon: Globe, value: "52", label: "TLDs covered" },
   { icon: ShieldCheck, value: "7", label: "Registrars compared" },
-  { icon: Zap, value: "<100ms", label: "Typical response" },
+  { icon: Zap, value: "~170ms", label: "Typical response" },
   { icon: Cpu, value: "MIT", label: "Open source" },
 ];
 
@@ -125,11 +125,11 @@ const Mcp = () => {
         <title>MCP Server, Claude Skill & Custom GPT — DigMyName</title>
         <meta
           name="description"
-          content="The world's fastest domain availability MCP server — ~100 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName."
+          content="The world's fastest domain availability MCP server — ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName."
         />
         <link rel="canonical" href="https://digmyname.com/mcp" />
         <meta property="og:title" content="Domain Check Skills — MCP / Claude Skill / Custom GPT" />
-        <meta property="og:description" content="The world's fastest domain availability MCP server — ~100 ms checks from any LLM. 7 registrars, 52 TLDs." />
+        <meta property="og:description" content="The world's fastest domain availability MCP server — ~170 ms checks from any LLM. 7 registrars, 52 TLDs." />
         <meta property="og:url" content="https://digmyname.com/mcp" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -144,7 +144,7 @@ const Mcp = () => {
           downloadUrl: NPM_URL,
           codeRepository: GITHUB_URL,
           license: "https://opensource.org/licenses/MIT",
-          description: "The world's fastest domain availability MCP server — ~100 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName.",
+          description: "The world's fastest domain availability MCP server — ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName.",
         })}</script>
       </Helmet>
 
@@ -154,31 +154,20 @@ const Mcp = () => {
         <PageMain>
           <PageHeader
             eyebrow={
-              <div className="flex flex-wrap gap-2">
-                <a
-                  href={NPM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackMcpEvent("click", "npm_pill")}
-                  className="eyebrow transition-colors hover:bg-aurora/20"
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-aurora opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-aurora" />
-                  </span>
-                  Live on npm · v1.1.6
-                  <ArrowUpRight className="h-3 w-3" />
-                </a>
-                <Link
-                  to="/speed"
-                  onClick={() => trackMcpEvent("click", "speed_pill")}
-                  className="eyebrow transition-colors hover:bg-aurora/20"
-                >
-                  <Zap className="h-3 w-3" />
-                  Fastest on the internet · dispute it
-                  <ArrowUpRight className="h-3 w-3" />
-                </Link>
-              </div>
+              <a
+                href={NPM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackMcpEvent("click", "npm_pill")}
+                className="eyebrow transition-colors hover:bg-aurora/20"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-aurora opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-aurora" />
+                </span>
+                Live on npm · v1.1.6
+                <ArrowUpRight className="h-3 w-3" />
+              </a>
             }
             title={
               <>
@@ -188,9 +177,9 @@ const Mcp = () => {
             }
             lede={
               <>
-                One install. Live answers in ~100 ms from DNS → RDAP → registrar APIs — straight into
-                Claude, Cursor, ChatGPT and any MCP-compatible client. If you find a faster domain
-                checker, <Link to="/speed" className="text-aurora hover:underline">we want to know</Link>.
+                One install. Live answers in ~170 ms from DNS → RDAP → registrar APIs — straight into
+                Claude, Cursor, ChatGPT and any MCP-compatible client. Fastest on the internet —{" "}
+                <Link to="/speed" className="text-aurora hover:underline">dispute it</Link>.
               </>
             }
             actions={
@@ -217,7 +206,7 @@ const Mcp = () => {
             <StatGrid>
               <Stat value="52" label="TLDs covered" accent="mint" icon={NetworkIcon} />
               <Stat value="7" label="Registrars compared" accent="violet" icon={StoreIcon} />
-              <Stat value="<100ms" label="Typical response" icon={StopwatchIcon} />
+              <Stat value="~170ms" label="Typical response" icon={StopwatchIcon} />
               <Stat value="MIT" label="Open source" icon={LicenseIcon} />
             </StatGrid>
 
