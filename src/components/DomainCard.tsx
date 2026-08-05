@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
 import { useDomainAge, formatRegisteredSince } from "@/hooks/useDomainAge";
-import AuthDialog from "@/components/AuthDialog";
+import AuthDialog from "@/components/LazyAuthDialog";
 import { getRegistrarColor, getRegistrarUrl } from "@/lib/registrarColors";
 
 import type { DomainResult } from "@/lib/domainData";
