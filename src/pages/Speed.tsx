@@ -166,7 +166,9 @@ const Speed = () => {
             <div>
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">Reference numbers</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Single datacenter connection, August 2026. Lower is better.
+                Single datacenter connection, August 2026. Lower is better. Repeat lookups within a
+                60-second window are served from a global edge cache in ~70 ms — first-time lookups
+                run the full live pipeline (~370 ms median).
               </p>
             </div>
             <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
