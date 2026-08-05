@@ -415,12 +415,18 @@ Deno.serve(async (req) => {
       if (!domain) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400, rlHeaders);
 
       const tld = domain.split(".").slice(1).join(".");
-      const [results, cheap] = await Promise.all([invokeCheck([domain]), cheapestForTlds([tld])]);
+      const [results, cheap] = await Promise.all([
+        invokeCheck([domain]),
+        withTimeout(cheapestForTlds([tld]), PRICE_LOOKUP_BUDGET_MS, new Map()),
+      ]);
       const r = results[0];
       if (!r) return json({ error: "upstream_error" }, 502, rlHeaders);
       const shaped = shapeResult(r, cheap.get(tld) || null);
       const body = { result: shaped };
-      if (!shaped.uncertain) writeResponseCache(key, body);
+      // Don't cache an available result whose price lookup timed out — it would
+      // pin an incomplete shape for the whole TTL.
+      const priceOk = !shaped.available || cheap.has(tld);
+      if (!shaped.uncertain && priceOk) writeResponseCache(key, body);
       return json(body, 200, missHeaders);
     }
 
