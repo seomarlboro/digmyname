@@ -125,8 +125,58 @@ function validateTld(raw: string): string | null {
 
 // Runs the pipeline IN-PROCESS — no edge→edge invoke — so repeated checks are
 // served from the shared warm L1 cache inside this isolate.
+// Hard ceiling: no single request can hang beyond HARD_BUDGET_MS. On timeout we
+// resolve (never reject) with uncertain placeholders so the UI shows Retry.
+const HARD_BUDGET_MS = 1500;
+
 async function invokeCheck(domains: string[]) {
-  return await checkDomains(domains);
+  const fallback = domains.map((domain) => ({
+    domain,
+    available: false,
+    uncertain: true,
+    checkedVia: "timeout",
+  }));
+  let timer: number | undefined;
+  const budget = new Promise<any[]>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), HARD_BUDGET_MS) as unknown as number;
+  });
+  try {
+    return await Promise.race([checkDomains(domains), budget]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
+// ---------- shaped response cache (in-isolate, per endpoint+query) ----------
+const RESPONSE_TTL_MS = 60_000;
+const RESPONSE_CACHE_MAX = 2000;
+const responseCache = new Map<string, { body: unknown; expires: number }>();
+
+function cacheKey(path: string, params: URLSearchParams): string {
+  const parts = [...params.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  return `${path.replace(/^\//, "")}?${parts.map(([k, v]) => `${k}=${v}`).join("&")}`;
+}
+
+function readResponseCache(key: string): unknown | null {
+  const hit = responseCache.get(key);
+  if (!hit) return null;
+  if (hit.expires < Date.now()) {
+    responseCache.delete(key);
+    return null;
+  }
+  // LRU touch
+  responseCache.delete(key);
+  responseCache.set(key, hit);
+  return hit.body;
+}
+
+function writeResponseCache(key: string, body: unknown) {
+  responseCache.set(key, { body, expires: Date.now() + RESPONSE_TTL_MS });
+  while (responseCache.size > RESPONSE_CACHE_MAX) {
+    const oldest = responseCache.keys().next().value;
+    if (oldest === undefined) break;
+    responseCache.delete(oldest);
+  }
 }
 
 async function invokeAge(domains: string[]) {
@@ -307,6 +357,17 @@ Deno.serve(async (req) => {
   }
   const rlHeaders = { "X-RateLimit-Remaining": String(rl.remaining) };
 
+  // Shaped-response cache (only /check and /search). Rate limiting already applied above.
+  const cacheable = path === "/check" || path === "/search";
+  const key = cacheable ? cacheKey(path, url.searchParams) : "";
+  if (cacheable) {
+    const cached = readResponseCache(key);
+    if (cached !== null) {
+      return json(cached, 200, { ...rlHeaders, "X-Cache": "HIT" });
+    }
+  }
+  const missHeaders = cacheable ? { ...rlHeaders, "X-Cache": "MISS" } : rlHeaders;
+
   try {
     if (path === "/" || path === "") {
       return json(
@@ -339,12 +400,14 @@ Deno.serve(async (req) => {
       const domain = validateDomain(raw);
       if (!domain) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400, rlHeaders);
 
-      const results = await invokeCheck([domain]);
       const tld = domain.split(".").slice(1).join(".");
-      const cheap = await cheapestForTlds([tld]);
+      const [results, cheap] = await Promise.all([invokeCheck([domain]), cheapestForTlds([tld])]);
       const r = results[0];
       if (!r) return json({ error: "upstream_error" }, 502, rlHeaders);
-      return json({ result: shapeResult(r, cheap.get(tld) || null) }, 200, rlHeaders);
+      const shaped = shapeResult(r, cheap.get(tld) || null);
+      const body = { result: shaped };
+      if (!shaped.uncertain) writeResponseCache(key, body);
+      return json(body, 200, missHeaders);
     }
 
     if (path === "/search") {
@@ -364,8 +427,11 @@ Deno.serve(async (req) => {
         const tld = d.split(".").slice(1).join(".");
         return shapeResult(r, cheapest.get(tld) || null);
       });
-      return json({ query: sld, count: shaped.length, results: shaped }, 200, rlHeaders);
+      const body = { query: sld, count: shaped.length, results: shaped };
+      if (!shaped.some((s) => s.uncertain)) writeResponseCache(key, body);
+      return json(body, 200, missHeaders);
     }
+
 
     if (path === "/registrars") {
       const tld = validateTld(url.searchParams.get("tld") || "");
