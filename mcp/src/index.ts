@@ -215,14 +215,20 @@ registerTool(
   { domain: z.string().describe("Fully-qualified domain, e.g. acme.io") },
   async ({ domain }) => {
     const clean = normalizeDomain(domain);
-    const [check, age] = await Promise.all([
-      api<{ result: DomainResult }>(`/check?domain=${encodeURIComponent(clean)}`),
-      api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => ({
+    const check = await api<{ result: DomainResult }>(
+      `/check?domain=${encodeURIComponent(clean)}`
+    );
+
+    // Registration year only exists for taken domains — skip the round-trip otherwise.
+    let created: string | null = null;
+    if (check.result.available === false && !check.result.uncertain) {
+      const age = await api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => ({
         count: 1,
         results: [{ domain: clean, created: null, expires: null }],
-      })),
-    ]);
-    const created = age.results.find((a) => a.domain === clean)?.created ?? null;
+      }));
+      created = age.results.find((a) => a.domain === clean)?.created ?? null;
+    }
+
     const result = { ...check.result, since_year: yearFromIso(created) };
     return { content: [{ type: "text" as const, text: formatResult(result) }] };
   }
