@@ -16,7 +16,7 @@ import {
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SearchIcon, ShieldIcon } from "@/components/StatIcons";
+import { SearchIcon, ShieldIcon, ScaleIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
 
 
@@ -177,7 +177,7 @@ const HowItWorks = () => {
           <StatGrid cols={3}>
             <Stat value="4" label="Verification sources" accent="mint" icon={SearchIcon} />
             <Stat value="100%" label="Honest uncertainty" accent="warning" icon={ShieldIcon} />
-            <Stat value="0%" label="Hidden markup" accent="violet" icon={Scale} />
+            <Stat value="0%" label="Hidden markup" accent="violet" icon={ScaleIcon} />
           </StatGrid>
 
         </PageHeader>
