@@ -127,7 +127,7 @@ function validateTld(raw: string): string | null {
 // served from the shared warm L1 cache inside this isolate.
 // Hard ceiling: no single request can hang beyond HARD_BUDGET_MS. On timeout we
 // resolve (never reject) with uncertain placeholders so the UI shows Retry.
-const HARD_BUDGET_MS = 1500;
+const HARD_BUDGET_MS = 900;
 
 async function invokeCheck(domains: string[]) {
   const fallback = domains.map((domain) => ({
@@ -355,6 +355,12 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   // strip the supabase functions prefix: /functions/v1/public-api/<path>
   const path = url.pathname.replace(/^.*\/public-api/, "") || "/";
+
+  // Keep-warm probe. Rate-limit exempt, zero network/DB work — a pg_cron job
+  // hits this every minute so the isolate never cold-starts on a real check.
+  if (path === "/ping") {
+    return json({ ok: true, ts: Date.now() }, 200, { "Cache-Control": "no-store" });
+  }
 
   if (path === "/openapi.json" || path === "/openapi") {
     return json(OPENAPI);
