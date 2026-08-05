@@ -29,9 +29,10 @@ import { generateDomainList, checkDomainsAvailability, checkDomainsFast, type Do
 
 interface DomainSearchProps {
   selectedTlds: Set<string>;
+  onHasResultsChange?: (hasResults: boolean) => void;
 }
 
-const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
+const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const stickySearchRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
@@ -228,6 +229,10 @@ const DomainSearch = ({ selectedTlds }: DomainSearchProps) => {
     return () => { cancelled = true; };
   }, [debouncedQuery, aiSuggestions, selectedTlds, markFirstAnswer]);
 
+
+  useEffect(() => {
+    onHasResultsChange?.(results.length > 0);
+  }, [results.length, onHasResultsChange]);
 
   const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
   const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
