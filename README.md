@@ -50,11 +50,6 @@ npm run dev
 
 This project is built and maintained with [Lovable](https://lovable.dev). Changes made in the Lovable editor are committed automatically to this repo, and you can also edit files directly in GitHub or a Codespace — pushed changes sync back to Lovable.
 
-## Deploy
-
-Publish from the Lovable editor via Share → Publish.
-
-To connect a custom domain, go to Project > Settings > Domains and click Connect Domain ([docs](https://docs.lovable.dev/features/custom-domain#custom-domain)).
 
 ## License
 
