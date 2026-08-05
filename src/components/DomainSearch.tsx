@@ -44,6 +44,19 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
   const [scrolled, setScrolled] = useState(false);
   const isMobile = useIsMobile();
 
+  // Warm the TLS connection to the edge API once on mount so the first real
+  // lookup doesn't pay for the handshake. Never throws, never blocks render.
+  useEffect(() => {
+    try {
+      void fetch("https://api.digmyname.com/functions/v1/public-api/ping", {
+        mode: "no-cors",
+        keepalive: true,
+      }).catch(() => {});
+    } catch {
+      /* noop */
+    }
+  }, []);
+
   // Activate the shared header/search backdrop only when the search bar is pinned.
   useEffect(() => {
     const onScroll = () => {
