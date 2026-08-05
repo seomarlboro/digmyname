@@ -5,6 +5,14 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.7] — 2026-08-05
+
+### Changed
+- perf: `check_domain` skips the `/age` lookup for available or uncertain domains (one less round-trip on the common path).
+- Robust retries: typed `ApiError` carrying the HTTP status — retry only on transport errors, 429 and 5xx.
+- Tiered client cache: availability 30s, registrar pricing 6h, domain age 24h.
+- Single `VERSION` constant used for the user agent, server version and startup log.
+
 ## [1.1.6] — 2026-08-04
 
 ### Added

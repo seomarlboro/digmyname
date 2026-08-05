@@ -18,8 +18,11 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api";
 
-const USER_AGENT = "domain-check-skills-mcp/1.1.6 (+https://digmyname.com/mcp)";
+const VERSION = "1.1.7";
+const USER_AGENT = `domain-check-skills-mcp/${VERSION} (+https://digmyname.com/mcp)`;
 const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
+const PRICING_TTL_MS = 6 * 60 * 60 * 1000;
+const AGE_TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_RETRIES = Number(process.env.DIGMYNAME_MAX_RETRIES || "2");
 
 const RegistrarSchema = z.object({
@@ -72,20 +75,46 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+class ApiError extends Error {
+  status?: number;
+  retryable: boolean;
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.retryable = status === undefined || status === 429 || status >= 500;
+  }
+}
+
 async function fetchApi(path: string): Promise<unknown> {
   const url = `${API_BASE}${path}`;
-  const res = await fetch(url, {
-    headers: { accept: "application/json", "user-agent": USER_AGENT },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: { accept: "application/json", "user-agent": USER_AGENT },
+    });
+  } catch (err) {
+    // Transport-level failure — no HTTP status, always retryable.
+    throw new ApiError(err instanceof Error ? err.message : String(err));
+  }
 
   if (res.status === 429) {
-    throw new Error("Rate limited by DigMyName API (60 req/min). Try again in a minute.");
+    throw new ApiError(
+      "Rate limited by DigMyName API (60 req/min). Try again in a minute.",
+      429
+    );
   }
   if (!res.ok) {
     const body = await res.text().catch(() => "unknown");
-    throw new Error(`DigMyName API error ${res.status}: ${body}`);
+    throw new ApiError(`DigMyName API error ${res.status}: ${body}`, res.status);
   }
   return res.json();
+}
+
+function ttlForPath(path: string): number {
+  if (path.startsWith("/registrars")) return PRICING_TTL_MS;
+  if (path.startsWith("/age")) return AGE_TTL_MS;
+  return CACHE_TTL_MS;
 }
 
 async function api<T>(path: string): Promise<T> {
@@ -97,17 +126,12 @@ async function api<T>(path: string): Promise<T> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const data = await fetchApi(path);
-      cacheSet(path, data);
+      cacheSet(path, data, ttlForPath(path));
       return data as T;
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
-      const isNetwork =
-        lastError.message.includes("fetch") ||
-        lastError.message.includes("network") ||
-        lastError.message.includes("ECONNREFUSED") ||
-        lastError.message.includes("ETIMEDOUT");
-      const isRateLimit = lastError.message.includes("Rate limited");
-      if ((isNetwork || isRateLimit) && attempt < MAX_RETRIES) {
+      const retryable = err instanceof ApiError ? err.retryable : true;
+      if (retryable && attempt < MAX_RETRIES) {
         await sleep(500 * 2 ** attempt);
         continue;
       }
@@ -172,7 +196,7 @@ function formatResult(r: DomainResult): string {
 
 const server = new McpServer({
   name: "domain-check-skills",
-  version: "1.1.6",
+  version: VERSION,
 });
 
 // Work around MCP SDK's deep type inference by registering tools via an any-typed wrapper.
@@ -191,14 +215,20 @@ registerTool(
   { domain: z.string().describe("Fully-qualified domain, e.g. acme.io") },
   async ({ domain }) => {
     const clean = normalizeDomain(domain);
-    const [check, age] = await Promise.all([
-      api<{ result: DomainResult }>(`/check?domain=${encodeURIComponent(clean)}`),
-      api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => ({
+    const check = await api<{ result: DomainResult }>(
+      `/check?domain=${encodeURIComponent(clean)}`
+    );
+
+    // Registration year only exists for taken domains — skip the round-trip otherwise.
+    let created: string | null = null;
+    if (check.result.available === false && !check.result.uncertain) {
+      const age = await api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => ({
         count: 1,
         results: [{ domain: clean, created: null, expires: null }],
-      })),
-    ]);
-    const created = age.results.find((a) => a.domain === clean)?.created ?? null;
+      }));
+      created = age.results.find((a) => a.domain === clean)?.created ?? null;
+    }
+
     const result = { ...check.result, since_year: yearFromIso(created) };
     return { content: [{ type: "text" as const, text: formatResult(result) }] };
   }
@@ -317,7 +347,7 @@ registerTool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("domain-check-skills-mcp v1.1.6 ready (stdio)");
+  console.error(`domain-check-skills-mcp v${VERSION} ready (stdio)`);
 }
 
 main().catch((err) => {
