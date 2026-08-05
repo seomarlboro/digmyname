@@ -298,6 +298,12 @@
   .card-body {
     @apply text-sm leading-relaxed text-muted-foreground;
   }
+  .card-title-lg {
+    @apply text-xl font-semibold tracking-tight text-foreground sm:text-2xl;
+  }
+  .card-body-lg {
+    @apply mt-2 text-[15px] leading-relaxed text-muted-foreground sm:text-base;
+  }
   .stat-value {
     @apply font-mono text-3xl font-bold tabular-nums tracking-tight text-foreground sm:text-4xl;
   }
