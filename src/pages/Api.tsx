@@ -170,7 +170,7 @@ print(res.json()["available"])`,
               <div className="font-mono text-sm font-semibold text-foreground">
                 /.well-known/ai-plugin.json
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="card-body-lg">
                 Plugin manifest for ChatGPT-style tool discovery.
               </p>
             </a>
@@ -180,7 +180,7 @@ print(res.json()["available"])`,
             >
               <KeyRound className="mb-3 h-5 w-5 text-violet" />
               <div className="font-mono text-sm font-semibold text-foreground">/openapi.json</div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="card-body-lg">
                 Full OpenAPI 3 schema for client and agent generation.
               </p>
             </a>
@@ -190,16 +190,19 @@ print(res.json()["available"])`,
             >
               <Zap className="mb-3 h-5 w-5 text-warning" />
               <div className="font-mono text-sm font-semibold text-foreground">/llms.txt</div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="card-body-lg">
                 Plain-text summary of what this site knows, for LLM crawlers.
               </p>
             </a>
           </div>
         </Section>
 
-        <Section title="Limits & fair use">
+        <Section
+          title="Limits & fair use"
+          lede="No key, no account — just fair limits so the free tier stays fast for everyone."
+        >
           <div className="surface-card p-6">
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <ul className="list-body">
               <li>60 requests per 60 seconds per IP.</li>
               <li>5,000 requests per day per IP.</li>
               <li>No key, no account, no tracking beyond rate-limit counters.</li>
@@ -228,10 +231,10 @@ print(res.json()["available"])`,
               <Badge variant="secondary" className="mb-3">
                 Coming soon
               </Badge>
-              <h2 className="mb-3 text-2xl font-bold tracking-tight md:text-3xl">
+              <h2 className="section-title mb-3">
                 Paid tier waitlist
               </h2>
-              <p className="leading-relaxed text-muted-foreground">
+              <p className="section-lede max-w-2xl">
                 Free tier is generous (60 req/min · 5,000/day). Need more? Get API keys, 100k
                 req/day, webhooks and an SLA.
               </p>

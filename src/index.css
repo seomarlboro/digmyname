@@ -304,6 +304,17 @@
   .card-body-lg {
     @apply mt-2 text-[15px] leading-relaxed text-muted-foreground sm:text-base;
   }
+  .list-body {
+    @apply space-y-2.5 text-[15px] leading-relaxed text-muted-foreground sm:text-base;
+  }
+  .list-body > li {
+    @apply relative pl-5;
+  }
+  .list-body > li::before {
+    content: "";
+    @apply absolute left-0 top-[0.7em] h-1.5 w-1.5 -translate-y-1/2 rounded-full;
+    background-color: hsl(var(--aurora-mint) / 0.7);
+  }
   .stat-value {
     @apply font-mono text-3xl font-bold tabular-nums tracking-tight text-foreground sm:text-4xl;
   }
