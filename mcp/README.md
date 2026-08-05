@@ -13,7 +13,7 @@ MCP server to check domain availability from any LLM — Claude, Cursor, Windsur
 
 | | |
 | --- | --- |
-| Typical latency | **~170 ms first answer** (cache-warm) · 0.4–1.6 s full pipeline (availability + premium + pricing) |
+| Typical latency | **~170 ms first answer** (cache-warm) · **~370 ms median** full pipeline (availability + premium + pricing), p95 < 1s |
 | Method | Published at [digmyname.com/speed](https://digmyname.com/speed) |
 | Coverage | 7 registrars · 52 TLDs |
 | Cost | Free — no API key, no account |
