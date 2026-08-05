@@ -9,7 +9,7 @@ import WaitlistForm from "@/components/WaitlistForm";
 import { NetworkIcon, StopwatchIcon, LicenseIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
 
-const API_BASE = "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api";
+const API_BASE = "https://api.digmyname.com/functions/v1/public-api";
 
 const endpoints = [
   {
@@ -98,7 +98,7 @@ const Api = () => {
 
         <Section
           title="Quick start"
-          lede="Copy, paste, ship. Same endpoint from a terminal, a browser or an agent."
+          lede="Copy, paste, ship. Same endpoint from a terminal, a browser or an agent. Requests go through a global Cloudflare edge cache — a repeat lookup for the same domain within 60 seconds comes back in ~70 ms, while a first-time lookup runs the full live check."
         >
           <CodeBlock
             tabs={[
@@ -203,6 +203,11 @@ print(res.json()["available"])`,
               <li>60 requests per 60 seconds per IP.</li>
               <li>5,000 requests per day per IP.</li>
               <li>No key, no account, no tracking beyond rate-limit counters.</li>
+              <li>
+                Repeat lookups within 60 seconds are served from a Cloudflare edge cache (~70 ms);
+                first-time lookups run the full live check (~170 ms first answer, ~370 ms median
+                full pipeline).
+              </li>
               <li>
                 Please link back to{" "}
                 <a href="https://digmyname.com/" className="text-aurora hover:underline">
