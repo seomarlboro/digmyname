@@ -92,19 +92,28 @@ const DOH_ENDPOINTS = [
   "https://dns.google/resolve",
 ];
 
+/**
+ * Combine an optional caller signal with a per-probe timeout so a losing
+ * hedged request is cancelled the moment a decisive answer wins the race.
+ */
+function probeSignal(timeoutMs: number, parent?: AbortSignal): AbortSignal {
+  const timeout = AbortSignal.timeout(timeoutMs);
+  return parent ? AbortSignal.any([parent, timeout]) : timeout;
+}
+
 const sleep = (ms: number) =>
   new Promise<void>((res) => {
     const id = setTimeout(res, ms);
     Deno.unrefTimer?.(id);
   });
 
-async function dohProbe(endpoint: string, domain: string, timeoutMs: number): Promise<DnsState> {
+async function dohProbe(endpoint: string, domain: string, timeoutMs: number, signal?: AbortSignal): Promise<DnsState> {
   try {
     const responses = await Promise.all(
       ["A", "NS"].map((t) =>
         fetch(`${endpoint}?name=${encodeURIComponent(domain)}&type=${t}`, {
           headers: { Accept: "application/dns-json" },
-          signal: AbortSignal.timeout(timeoutMs),
+          signal: probeSignal(timeoutMs, signal),
         }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
       )
     );
@@ -128,18 +137,27 @@ async function dohProbe(endpoint: string, domain: string, timeoutMs: number): Pr
   }
 }
 
-async function checkDnsDoH(domain: string): Promise<DnsState> {
-  const primary = dohProbe(DOH_ENDPOINTS[0], domain, 2000);
-  const hedge = sleep(400).then(() => dohProbe(DOH_ENDPOINTS[1], domain, 2000));
+async function checkDnsDoH(domain: string, signal?: AbortSignal): Promise<DnsState> {
+  // Own controller: once one resolver answers decisively the other fetch is
+  // cancelled instead of holding the isolate open for its full timeout.
+  const ctl = new AbortController();
+  const sig = signal ? AbortSignal.any([signal, ctl.signal]) : ctl.signal;
+
+  const primary = dohProbe(DOH_ENDPOINTS[0], domain, 2000, sig);
+  const hedge = sleep(400).then(() => dohProbe(DOH_ENDPOINTS[1], domain, 2000, sig));
 
   const decisive = (p: Promise<DnsState>) =>
     p.then((s) => (s === "error" ? PENDING_FOREVER<DnsState>() : s));
 
-  return await Promise.race([
-    decisive(primary),
-    decisive(hedge),
-    Promise.all([primary, hedge]).then(([a, b]) => (a !== "error" ? a : b)),
-  ]);
+  try {
+    return await Promise.race([
+      decisive(primary),
+      decisive(hedge),
+      Promise.all([primary, hedge]).then(([a, b]) => (a !== "error" ? a : b)),
+    ]);
+  } finally {
+    ctl.abort();
+  }
 }
 
 
@@ -181,11 +199,11 @@ export function classifyAftermarket(nsHosts: string[]): AftermarketHit | null {
   return null;
 }
 
-async function fetchNsRecords(domain: string): Promise<string[]> {
+async function fetchNsRecords(domain: string, signal?: AbortSignal): Promise<string[]> {
   try {
     const r = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=NS`, {
       headers: { Accept: "application/dns-json" },
-      signal: AbortSignal.timeout(2000),
+      signal: probeSignal(2000, signal),
     });
     if (!r.ok) return [];
     const data = await r.json();
@@ -263,9 +281,9 @@ export async function loadRdapBootstrap(): Promise<Map<string, string[]>> {
   }
 }
 
-async function rdapQueryOnce(url: string, timeoutMs: number): Promise<RdapState> {
+async function rdapQueryOnce(url: string, timeoutMs: number, signal?: AbortSignal): Promise<RdapState> {
   try {
-    const resp = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+    const resp = await fetch(url, { signal: probeSignal(timeoutMs, signal) });
     if (resp.status === 404) {
       await resp.text().catch(() => {});
       return "available";
@@ -370,7 +388,7 @@ export const FAST_RDAP_EXCEPTIONS = new Set(["io", "us"]);
  */
 const AGGREGATOR_UNRELIABLE_TLDS = new Set(["co", "me"]);
 
-async function checkRdap(domain: string): Promise<RdapState> {
+async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapState> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
 
   // Fast lane: popular TLD → known registry endpoint, zero lookup latency.
@@ -398,21 +416,29 @@ async function checkRdap(domain: string): Promise<RdapState> {
   const decisive = (p: Promise<RdapState>) =>
     p.then((s) => (s === "unknown" ? PENDING_FOREVER<RdapState>() : s));
 
-  const probes = bases.map((base) => rdapQueryOnce(`${base}/domain/${domain}`, 3000));
+  // Cancel the losing RDAP probes as soon as one is decisive.
+  const ctl = new AbortController();
+  const sig = signal ? AbortSignal.any([signal, ctl.signal]) : ctl.signal;
+
+  const probes = bases.map((base) => rdapQueryOnce(`${base}/domain/${domain}`, 3000, sig));
 
   // On zones with no trustworthy RDAP server, the aggregator may only *confirm*
   // a registration — its 404s are downgraded to "unknown".
   const trustAggregator404 = bases.length > 0 || !AGGREGATOR_UNRELIABLE_TLDS.has(tld);
   const aggregator = sleep(probes.length ? 700 : 0)
-    .then(() => rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000))
+    .then(() => rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000, sig))
     .then((s) => (s === "available" && !trustAggregator404 ? "unknown" as RdapState : s));
 
   const all = [...probes, aggregator];
 
-  return await Promise.race([
-    ...all.map(decisive),
-    Promise.all(all).then((states) => states.find((s) => s !== "unknown") ?? "unknown"),
-  ]);
+  try {
+    return await Promise.race([
+      ...all.map(decisive),
+      Promise.all(all).then((states) => states.find((s) => s !== "unknown") ?? "unknown"),
+    ]);
+  } finally {
+    ctl.abort();
+  }
 }
 
 
@@ -502,37 +528,53 @@ export function getTldPricing(): Map<string, TldPrice> {
   return pricingCache?.map ?? new Map();
 }
 
+// The first attempt is hard-capped at 4s so nothing that could ever end up on
+// a request path pays a long tail. Porkbun's catalog endpoint measurably takes
+// ~14s to serve its ~80KB payload, so the retries (which only ever run in the
+// background via getTldPricing()/waitUntil) get a realistic budget — otherwise
+// pricing would never load at all and every available domain would lose its
+// price.
+const PRICING_FIRST_TIMEOUT_MS = 4000;
+const PRICING_RETRY_TIMEOUT_MS = 20000;
+const PRICING_ATTEMPTS = 3;
+
 export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
   const now = Date.now();
   if (pricingCache && pricingCache.expiresAt > now) return pricingCache.map;
-  try {
-    const resp = await fetch("https://api.porkbun.com/api/json/v3/pricing/get", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: "{}",
-      signal: AbortSignal.timeout(25000),
-    });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-    if (data?.status !== "SUCCESS" || !data.pricing) throw new Error("non-success");
-    const map = new Map<string, TldPrice>();
-    for (const [tld, v] of Object.entries(data.pricing as Record<string, Record<string, string>>)) {
-      const reg = Number(v?.registration);
-      const ren = Number(v?.renewal);
-      map.set(tld.toLowerCase(), {
-        registration: Number.isFinite(reg) ? reg : undefined,
-        renewal: Number.isFinite(ren) ? ren : undefined,
+
+  let lastError = "unknown";
+  for (let attempt = 1; attempt <= PRICING_ATTEMPTS; attempt++) {
+    try {
+      const resp = await fetch("https://api.porkbun.com/api/json/v3/pricing/get", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+        signal: AbortSignal.timeout(attempt === 1 ? PRICING_FIRST_TIMEOUT_MS : PRICING_RETRY_TIMEOUT_MS),
       });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      if (data?.status !== "SUCCESS" || !data.pricing) throw new Error("non-success");
+      const map = new Map<string, TldPrice>();
+      for (const [tld, v] of Object.entries(data.pricing as Record<string, Record<string, string>>)) {
+        const reg = Number(v?.registration);
+        const ren = Number(v?.renewal);
+        map.set(tld.toLowerCase(), {
+          registration: Number.isFinite(reg) ? reg : undefined,
+          renewal: Number.isFinite(ren) ? ren : undefined,
+        });
+      }
+      pricingCache = { map, expiresAt: Date.now() + 12 * 60 * 60 * 1000 };
+      console.log(`porkbun pricing catalog loaded: ${map.size} TLDs (attempt ${attempt})`);
+      return map;
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : String(e);
+      console.warn(`porkbun pricing catalog attempt ${attempt} failed: ${lastError}`);
     }
-    pricingCache = { map, expiresAt: now + 12 * 60 * 60 * 1000 };
-    console.log(`porkbun pricing catalog loaded: ${map.size} TLDs`);
-    return map;
-  } catch (e) {
-    console.warn(`porkbun pricing catalog failed: ${e instanceof Error ? e.message : String(e)}`);
-    const empty = new Map<string, TldPrice>();
-    pricingCache = { map: empty, expiresAt: now + 5 * 60 * 1000 };
-    return empty;
   }
+
+  const empty = new Map<string, TldPrice>();
+  pricingCache = { map: empty, expiresAt: Date.now() + 5 * 60 * 1000 };
+  return empty;
 }
 
 
@@ -556,11 +598,12 @@ interface DomainrStatusEntry {
 // stop calling it for the lifetime of this isolate instead of burning a
 // round-trip on every request. A 429 (quota) triggers a temporary cooldown.
 let domainrDisabledReason: string | null = null;
+let domainrDisabledUntil = 0;
 let domainrCooldownUntil = 0;
 
 async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<Map<string, DomainrStatusEntry> | null> {
   if (domains.length === 0) return new Map();
-  if (domainrDisabledReason) return null;
+  if (Date.now() < domainrDisabledUntil) return null;
   if (Date.now() < domainrCooldownUntil) return null;
   try {
     const out = new Map<string, DomainrStatusEntry>();
@@ -579,7 +622,10 @@ async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<M
         const txt = await resp.text().catch(() => "");
         if (resp.status === 401 || resp.status === 403) {
           domainrDisabledReason = `HTTP ${resp.status}: ${txt.slice(0, 120)}`;
-          console.error(`domainr DISABLED for this isolate — ${domainrDisabledReason}. Check the RapidAPI subscription for domainr.p.rapidapi.com.`);
+          // Cooldown instead of a permanent kill switch: a transient auth blip
+          // must not disable Domainr for the whole life of the isolate.
+          domainrDisabledUntil = Date.now() + 5 * 60 * 1000;
+          console.error(`domainr disabled for 5 min — ${domainrDisabledReason}. Check the RapidAPI subscription for domainr.p.rapidapi.com.`);
         } else if (resp.status === 429) {
           domainrCooldownUntil = Date.now() + 60_000;
           console.warn("domainr 429 — cooling down for 60s, RDAP/DNS results stand");
@@ -697,7 +743,7 @@ function pruneHotCache(): void {
   if (hotCache.size < HOT_CACHE_MAX) return;
   const now = Date.now();
   for (const [k, v] of hotCache) if (v.expiresAt <= now) hotCache.delete(k);
-  // Still oversized → drop oldest insertions.
+  // Still oversized → drop least-recently-used (front of the Map).
   while (hotCache.size > HOT_CACHE_MAX) hotCache.delete(hotCache.keys().next().value as string);
 }
 
@@ -714,8 +760,12 @@ const PENDING_FOREVER = <T,>(): Promise<T> => new Promise<T>(() => {});
 
 async function resolveDomain(domain: string): Promise<DomainCheckResult> {
   const likelyPremium = isLikelyPremium(domain);
-  const dnsP = checkDnsDoH(domain);
-  const rdapP = checkRdap(domain);
+  // One controller per domain: the moment a decisive answer wins, every
+  // still-running DNS/RDAP probe for this domain is cancelled. An aborted
+  // probe is caught inside its own helper and simply reads as "lost".
+  const ctl = new AbortController();
+  const dnsP = checkDnsDoH(domain, ctl.signal);
+  const rdapP = checkRdap(domain, ctl.signal);
 
   // Fast path: the first decisive "taken" signal ends the check.
   const winner = await Promise.race([
@@ -724,10 +774,12 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
     Promise.all([dnsP, rdapP]).then(() => "settled"),
   ]);
   if (winner === "rdap" || winner === "dns") {
+    ctl.abort();
     return { domain, available: false, checkedVia: winner, likelyPremium };
   }
 
   const [dns, rdap] = await Promise.all([dnsP, rdapP]);
+  ctl.abort();
 
   // RDAP 404 is authoritative for "not registered" only when DNS also answers
   // NXDOMAIN. A DNS lookup error or ambiguous answer must not be treated as
@@ -817,8 +869,12 @@ export async function checkDomains(
   const missAfterL1: string[] = [];
   for (const d of batch) {
     const hot = hotCache.get(d);
-    if (hot && hot.expiresAt > nowMs) cachedMap.set(d, { ...hot.result });
-    else missAfterL1.push(d);
+    if (hot && hot.expiresAt > nowMs) {
+      // LRU touch: re-insert so the most recently used key moves to the end.
+      hotCache.delete(d);
+      hotCache.set(d, hot);
+      cachedMap.set(d, { ...hot.result });
+    } else missAfterL1.push(d);
   }
 
   // ---- L2: shared DB cache --------------------------------------------
@@ -838,7 +894,8 @@ export async function checkDomains(
         domain: c.domain,
         available: c.available,
         checkedVia: c.checked_via,
-        price: meta.godaddy_price as number | undefined,
+        // Accept the legacy key so rows cached before the rename still resolve.
+        price: (meta.reg_price ?? meta.godaddy_price) as number | undefined,
         premium: meta.premium as boolean | undefined,
         likelyPremium: meta.likely_premium as boolean | undefined,
         forSale: meta.for_sale as boolean | undefined,
@@ -846,6 +903,8 @@ export async function checkDomains(
         listingUrl: meta.listing_url as string | undefined,
       };
       cachedMap.set(c.domain, result);
+      pruneHotCache();
+      hotCache.delete(c.domain);
       hotCache.set(c.domain, { result, expiresAt: nowMs + HOT_CACHE_TTL_MS });
     }
   }
@@ -1009,6 +1068,7 @@ export async function checkDomains(
     const rows = cacheable.map(({ r, ttl }) => {
       // L1: keep it in this isolate too, so a repeat search is instant.
       pruneHotCache();
+      hotCache.delete(r.domain);
       hotCache.set(r.domain, {
         result: r,
         expiresAt: Date.now() + Math.min(ttl * 1000, HOT_CACHE_TTL_MS),
@@ -1019,7 +1079,7 @@ export async function checkDomains(
         checked_via: r.checkedVia,
         rdap_data: {
           cache_version: CACHE_VERSION,
-          godaddy_price: r.price ?? null,
+          reg_price: r.price ?? null,
           premium: r.premium ?? false,
           likely_premium: r.likelyPremium ?? false,
           for_sale: r.forSale ?? false,

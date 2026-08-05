@@ -251,29 +251,32 @@ const OPENAPI = {
 };
 
 // Fast DNS-only status. Returns quickly so the UI can flip cards before the
-// authoritative RDAP/pricing check finishes. A domain with any DNS records
-// (NS/A/MX) is treated as taken; NXDOMAIN means likely available; everything
-// else is uncertain.
+// authoritative RDAP/pricing check finishes. Uses DNS-over-HTTPS (Cloudflare)
+// — the same transport as the main pipeline, which abandoned Deno.resolveDns
+// because it hangs on some resolvers. Deliberately a single-resolver probe,
+// not the full hedged pipeline.
 async function fastStatus(domain: string): Promise<{ available: boolean; uncertain: boolean }> {
   try {
-    for (const recordType of ["NS", "A", "MX"] as const) {
-      try {
-        const records = await Deno.resolveDns(domain, recordType);
-        if (records.length > 0) {
-          return { available: false, uncertain: false };
-        }
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
-        if (
-          msg.includes("NXDOMAIN") ||
-          msg.toLowerCase().includes("not found") ||
-          msg.toLowerCase().includes("no records found")
-        ) {
-          return { available: true, uncertain: true };
-        }
-        // Try next record type
+    const answers = await Promise.all(
+      ["NS", "A"].map((type) =>
+        fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${type}`, {
+          headers: { Accept: "application/dns-json" },
+          signal: AbortSignal.timeout(2000),
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null)
+      ),
+    );
+
+    let nxdomain = false;
+    for (const data of answers) {
+      if (!data) continue;
+      if (Array.isArray(data.Answer) && data.Answer.length > 0) {
+        return { available: false, uncertain: false };
       }
+      if (data.Status === 3) nxdomain = true; // NXDOMAIN
     }
+    if (nxdomain) return { available: true, uncertain: true };
     return { available: false, uncertain: true };
   } catch {
     return { available: false, uncertain: true };
