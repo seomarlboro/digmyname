@@ -37,10 +37,13 @@ const App = () => (
                 <Route path="/skill" element={<Mcp />} />
                 <Route path="/gpt" element={<Mcp />} />
                 <Route path="/speed" element={<Speed />} />
+                <Route path="/api" element={<Api />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <Footer />
             </div>
+
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
