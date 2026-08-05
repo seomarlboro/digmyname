@@ -1,7 +1,7 @@
 {
   "name": "domain-check-skills-mcp",
-  "version": "1.1.7",
-  "description": "The world's fastest domain availability MCP server — ~100 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Think something is faster? Dispute it. By DigMyName.",
+  "version": "1.1.8",
+  "description": "The fastest domain availability MCP server — ~170 ms first answer from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Think something is faster? Dispute it. By DigMyName.",
   "license": "MIT",
   "type": "module",
   "bin": {

@@ -5,15 +5,15 @@
 [![provenance](https://img.shields.io/badge/npm-provenance-145DFB?style=flat-square)](https://www.npmjs.com/package/domain-check-skills-mcp)
 [![license](https://img.shields.io/npm/l/domain-check-skills-mcp?style=flat-square)](./LICENSE)
 
-## ⚡ The world's fastest domain availability MCP server
+## ⚡ The fastest domain availability MCP server — or the second
 
-Not "one of the fastest". **The fastest.** Typical answer lands in **~100 ms**, and the whole pipeline is published openly — debounce → parallel authoritative DNS → RDAP → hot cache. Found something faster? [Dispute it](https://digmyname.com/speed) and we'll put it on the page ourselves.
+The fastest domain availability MCP — or the second. Typical first answer in **~170 ms**; the whole pipeline (debounce → parallel authoritative DNS → RDAP → hot cache) is published openly. Found something faster? [Dispute it](https://digmyname.com/speed) and we'll put it on the page ourselves.
 
 MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue, Zed. 7 registrars, 52 TLDs. Powered by [DigMyName](https://digmyname.com).
 
 | | |
 | --- | --- |
-| Typical latency | **~100 ms** (cache-warm), ~200–400 ms cold |
+| Typical latency | **~170 ms first answer** (cache-warm) · 0.4–1.6 s full pipeline (availability + premium + pricing) |
 | Method | Published at [digmyname.com/speed](https://digmyname.com/speed) |
 | Coverage | 7 registrars · 52 TLDs |
 | Cost | Free — no API key, no account |
@@ -126,7 +126,7 @@ Node.js 18+
 
 ## Changelog
 
-See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.6**.
+See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.1.8**.
 
 ## License
 
