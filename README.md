@@ -48,13 +48,11 @@ npm run dev
 
 ## Editing via Lovable
 
-This project is built and maintained with Lovable. Open the [DigMyName project in Lovable](https://lovable.dev/projects/3705f2e7-ed58-4590-993e-64df5ef13df4) and start prompting — changes made there are committed automatically to this repo.
-
-You can also edit files directly in GitHub, or in a GitHub Codespace, and pushed changes will be reflected back in Lovable.
+This project is built and maintained with [Lovable](https://lovable.dev). Changes made in the Lovable editor are committed automatically to this repo, and you can also edit files directly in GitHub or a Codespace — pushed changes sync back to Lovable.
 
 ## Deploy
 
-Open the [project in Lovable](https://lovable.dev/projects/3705f2e7-ed58-4590-993e-64df5ef13df4) and click Share → Publish.
+Publish from the Lovable editor via Share → Publish.
 
 To connect a custom domain, go to Project > Settings > Domains and click Connect Domain ([docs](https://docs.lovable.dev/features/custom-domain#custom-domain)).
 
