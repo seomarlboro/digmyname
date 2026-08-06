@@ -89,10 +89,19 @@ export interface DomainResult {
   premium?: boolean;
   /** Heuristic: likely registered or aftermarket even if APIs say otherwise */
   likelyPremium?: boolean;
+  /** Backend split-state: registerable (RDAP-404 + NXDOMAIN agree) but premium-tier
+   *  price was not confirmed this request. available:true with NO price; UI shows
+   *  "premium — Check price", never a $ figure. */
+  premiumUnverified?: boolean;
   /** APIs disagreed or failed — treat with caution */
   uncertain?: boolean;
   /** Deterministic cause of uncertainty (brand/trademark protected), not a probe failure. */
   uncertainReason?: "brand_protected";
+  /** Client-only: the batch that owned this row never reached the backend (503 /
+   *  network error). Distinct from `uncertain` (backend reached, verdict
+   *  inconclusive). Renders "couldn't reach — Retry"; cleared on retry. Never
+   *  persisted or returned by the backend. */
+  reachFailed?: boolean;
   /** Label only: SLD matches a known trademark/registry-reserved brand. Set on
    *  every card in a brand class (available/taken/uncertain) so the UI can tag
    *  them consistently. Never affects the verdict shown. */
