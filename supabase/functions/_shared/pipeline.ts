@@ -13,7 +13,7 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   interpretDomainr,
-  isLikelyBlocked,
+  
   shouldEscalateToDomainr,
   type DomainrStatusEntry,
 } from "./availability-rules.ts";
