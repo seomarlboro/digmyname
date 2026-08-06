@@ -622,7 +622,7 @@ async function checkDomainrBatch(domains: string[], apiKey: string, deadlineMs =
   if (Date.now() < domainrDisabledUntil) return null;
   if (Date.now() < domainrCooldownUntil) return null;
 
-  const deadlineAt = Date.now() + Math.min(deadlineMs, 6000);
+  const deadlineAt = Date.now() + deadlineMs;
   const out = new Map<string, DomainrStatusEntry>();
 
   await pMap(domains, 8, async (domain) => {
@@ -965,9 +965,15 @@ export async function checkDomains(
         // statement holds regardless of why the probes were inconclusive.
         fresh.push({ ...base, uncertainReason: "brand_protected" as const });
       } else if (THIRD_SIGNAL_ENABLED && fastlyKey && base.available && likelyPremium) {
-        // Premium-suspect name escalated but got no third-signal verdict within
-        // the deadline: never sell on absence of evidence — honest uncertain.
-        fresh.push({ domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true });
+        // The third signal was supposed to answer for this premium-suspect and
+        // did not (deadline / breaker). A likely-premium name whose registry
+        // price is unverified must never be sold at the standard price on
+        // absence of evidence → generic uncertain, UI shows Retry.
+        // Ordinary rdap/dns-available names (not blocked, not likelyPremium)
+        // still fall through to base: that is the pre-Fastly two-signal answer,
+        // not a fabrication. The gate is inert when the signal is disabled or
+        // unkeyed, so flipping the flag off restores the prior behavior exactly.
+        fresh.push({ domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true, likelyPremium: true });
       } else {
         fresh.push(base);
       }
