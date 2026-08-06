@@ -25,7 +25,17 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
 );
 import DomainCard from "@/components/DomainCard";
 
-import { generateDomainList, checkDomainsAvailability, checkDomainsFast, type DomainResult } from "@/lib/domainData";
+import { generateDomainList, checkDomainsAvailability, checkDomainsFast, TLD_RANK, type DomainResult } from "@/lib/domainData";
+
+/** Stable ordering key: TLD authority only. Never sort on available/uncertain/
+ *  provisional/price — those mutate over a row's lifecycle and would reorder
+ *  rows mid-search (layout jump). */
+const byTldAuthority = (a: DomainResult, b: DomainResult) => {
+  const ra = TLD_RANK[a.tld.extension] ?? Number.MAX_SAFE_INTEGER;
+  const rb = TLD_RANK[b.tld.extension] ?? Number.MAX_SAFE_INTEGER;
+  if (ra !== rb) return ra - rb;
+  return a.tld.extension.localeCompare(b.tld.extension);
+};
 
 interface DomainSearchProps {
   selectedTlds: Set<string>;
@@ -462,6 +472,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
             <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
               {results
                 .filter((r) => !r.checking && r.available && !r.uncertain)
+                .sort(byTldAuthority)
                 .map((r) => (
                   <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
                 ))}
@@ -494,6 +505,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && r.uncertain && !r.sldBlocked && !r.provisional)
+                    .sort(byTldAuthority)
                     .slice(0, 10)
                     .map((r) => (
                       <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
@@ -512,7 +524,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && !r.available && (!r.uncertain || r.sldBlocked || r.provisional))
-                    .sort((a, b) => Number((b.sldBlocked && b.uncertain) ?? false) - Number((a.sldBlocked && a.uncertain) ?? false))
+                    .sort(byTldAuthority)
                     .slice(0, 10)
                     .map((r) => (
                       <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
