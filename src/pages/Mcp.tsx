@@ -201,16 +201,9 @@ const Mcp = () => {
 
           {/* Three formats */}
           <section className="mb-20">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">
-                  Pick your stack
-                </p>
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-                  Three drop-in formats
-                </h2>
-              </div>
-            </div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-8">
+              Three drop-in formats
+            </h2>
             <div className="grid md:grid-cols-3 gap-4">
               {formats.map((f) => (
                 <FeatureCard
@@ -244,9 +237,6 @@ const Mcp = () => {
 
           {/* Quick start */}
           <section className="mb-20">
-            <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">
-              Quick start
-            </p>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-6">
               Up & running in 30 seconds
             </h2>
@@ -279,9 +269,6 @@ const Mcp = () => {
 
           {/* Tools */}
           <section className="mb-20">
-            <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">
-              API surface
-            </p>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-8">Tools exposed</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {tools.map((t, i) => (
