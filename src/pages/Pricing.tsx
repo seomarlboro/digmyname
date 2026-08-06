@@ -312,7 +312,7 @@ const Pricing = () => {
                   />
                 </div>
 
-                <div role="group" aria-label="Price mode" className="flex items-center gap-1 rounded-xl border border-border/60 bg-muted/20 p-1">
+                <div role="group" aria-label="Price type" className="flex items-center gap-1 rounded-xl border border-border/60 bg-muted/20 p-1">
                   {(Object.keys(MODE_LABEL) as PriceMode[]).map((m) => (
                     <button
                       key={m}
@@ -377,7 +377,7 @@ const Pricing = () => {
                           )}
                         </td>
                         <td className="px-5 py-5 align-middle">
-                          {v.primary ? <RenewalTrap row={v.primary} /> : <NaCell />}
+                          {v.primary ? <RenewalTrap row={v.primary} mode={mode} /> : <NaCell />}
                         </td>
                         <td className="px-5 py-5 align-middle">
                           {v.best3 ? (
@@ -472,44 +472,53 @@ const Pricing = () => {
 
 /** Consistent, height-stable placeholder so rows don't shrink when a mode has no data. */
 const NaCell = () => (
-  <div className="flex min-h-[46px] items-center text-sm text-muted-foreground">n/a</div>
+  <div className="flex min-h-[46px] items-center text-sm text-muted-foreground">—</div>
 );
 
 /* ─── Renewal trap ─────────────────────────────────────── */
 
-const RenewalTrap = ({ row }: { row: RegistrarPrice }) => {
-  const ratio = row.reg_price > 0 ? row.renew_price / row.reg_price : null;
-  const isTrap = ratio != null && ratio >= 2;
-
-  if (!isTrap) {
+const RenewalTrap = ({ row, mode }: { row: RegistrarPrice; mode: PriceMode }) => {
+  // Renew mode has no trap by construction — the displayed price IS the renewal.
+  if (mode === "renew") {
     return (
-      <div className="min-h-[46px]">
-        <Badge variant="secondary" className="text-[11px]">Fair renewal</Badge>
-        <p className="mt-1 font-mono text-sm tabular-nums text-muted-foreground">
-          ${row.reg_price.toFixed(2)} → ${row.renew_price.toFixed(2)}
+      <div className="flex min-h-[46px] items-center">
+        <p className="font-mono text-sm tabular-nums text-muted-foreground">
+          renews at ${row.renew_price.toFixed(2)}/yr
         </p>
       </div>
     );
   }
 
-  const pct = Math.round((ratio! - 1) * 100);
+  // Year-1 basis depends on the mode: registration price, or transfer price.
+  const yearOne = mode === "reg" ? row.reg_price : row.transfer_price;
+  if (yearOne == null) return <NaCell />;
+
+  const ratio = yearOne > 0 ? row.renew_price / yearOne : null;
+  const isTrap = ratio != null && ratio >= 2;
+  const pct = isTrap ? Math.round((ratio! - 1) * 100) : 0;
   const severe = pct >= 500;
 
   return (
     <div className="min-h-[46px]">
-      <Badge
-        className={cn(
-          "text-[11px] font-bold",
-          severe
-            ? "border-destructive/40 bg-destructive/15 text-destructive"
-            : "border-warning/40 bg-warning/15 text-warning",
+      <div className="flex min-h-[22px] items-center">
+        {isTrap ? (
+          <Badge
+            className={cn(
+              "text-[11px] font-bold",
+              severe
+                ? "border-destructive/40 bg-destructive/15 text-destructive"
+                : "border-warning/40 bg-warning/15 text-warning",
+            )}
+            variant="outline"
+          >
+            +{pct.toLocaleString()}% at renewal
+          </Badge>
+        ) : (
+          <Badge variant="secondary" className="text-[11px]">Fair renewal</Badge>
         )}
-        variant="outline"
-      >
-        +{pct.toLocaleString()}% at renewal
-      </Badge>
-      <p className="mt-1 font-mono text-sm tabular-nums text-muted-foreground">
-        ${row.reg_price.toFixed(2)} → ${row.renew_price.toFixed(2)}
+      </div>
+      <p className="mt-0.5 font-mono text-sm tabular-nums text-muted-foreground">
+        ${yearOne.toFixed(2)} → ${row.renew_price.toFixed(2)}
       </p>
     </div>
   );
@@ -627,7 +636,7 @@ const DetailedTldTable = ({ summary: s, mode }: { summary: TldSummary; mode: Pri
                       <span className="text-sm text-muted-foreground">/yr</span>
                     </>
                   ) : (
-                    <span className="text-sm text-muted-foreground">n/a</span>
+                    <span className="text-sm text-muted-foreground">—</span>
                   )}
 
                 </td>
