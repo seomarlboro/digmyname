@@ -8,10 +8,6 @@ import {
   Bot,
   ArrowUpRight,
   Terminal,
-  Zap,
-  Globe,
-  ShieldCheck,
-  Cpu,
 } from "lucide-react";
 import { useEffect } from "react";
 import Header from "@/components/Header";
@@ -21,7 +17,7 @@ import { trackMcpEvent } from "@/lib/trackMcpEvent";
 import WaitlistForm from "@/components/WaitlistForm";
 import { CodeBlock } from "@/components/CodeBlock";
 import { NetworkIcon, StoreIcon, StopwatchIcon, LicenseIcon } from "@/components/StatIcons";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
 
 
 
@@ -76,13 +72,6 @@ const tools = [
     sig: "(domain: string)",
     desc: "Registration year and expiration date for a taken domain via RDAP.",
   },
-];
-
-const stats = [
-  { icon: Globe, value: "52", label: "TLDs covered" },
-  { icon: ShieldCheck, value: "7", label: "Registrars compared" },
-  { icon: Zap, value: "~170ms", label: "Typical response" },
-  { icon: Cpu, value: "MIT", label: "Open source" },
 ];
 
 const configSnippet = `{
@@ -201,10 +190,7 @@ const Mcp = () => {
 
 
           {/* Three formats */}
-          <section className="mb-20">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-8">
-              Three drop-in formats
-            </h2>
+          <Section title="Three drop-in formats">
             <div className="grid md:grid-cols-3 gap-4">
               {formats.map((f) => (
                 <FeatureCard
@@ -234,21 +220,21 @@ const Mcp = () => {
                 </FeatureCard>
               ))}
             </div>
-          </section>
+          </Section>
 
           {/* Quick start */}
-          <section className="mb-20">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-6">
-              Up & running in 30 seconds
-            </h2>
-            <p className="text-muted-foreground mb-6 max-w-2xl">
-              Using Claude Code? One command and you're done. Otherwise, drop the JSON below into your{" "}
-              <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">
-                claude_desktop_config.json
-              </code>{" "}
-              and restart the client.
-            </p>
-
+          <Section
+            title="Up & running in 30 seconds"
+            lede={
+              <>
+                Using Claude Code? One command and you're done. Otherwise, drop the JSON below into your{" "}
+                <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">
+                  claude_desktop_config.json
+                </code>{" "}
+                and restart the client.
+              </>
+            }
+          >
             {/* Install snippets */}
             <CodeBlock
               tabs={[
@@ -266,11 +252,10 @@ const Mcp = () => {
                 "Check if myidea.com and myidea.io are available."
               </em>
             </p>
-          </section>
+          </Section>
 
           {/* Tools */}
-          <section className="mb-20">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-8">Tools exposed</h2>
+          <Section title="Tools exposed">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {tools.map((t, i) => (
                 <div
@@ -292,21 +277,20 @@ const Mcp = () => {
                 </div>
               ))}
             </div>
-          </section>
+          </Section>
 
 
           {/* Waitlist */}
           <section
             id="waitlist"
-            className="surface-card mb-20 relative scroll-mt-24 overflow-hidden p-8 md:p-10"
+            className="surface-card mt-14 relative scroll-mt-24 overflow-hidden p-8 md:p-10"
           >
             <div className="relative grid md:grid-cols-2 gap-8 md:gap-10 items-center">
               <div>
                 <Badge variant="secondary" className="mb-3">
                   Coming soon
                 </Badge>
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">
-
+                <h2 className="section-title">
                   Paid tier waitlist
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
@@ -322,11 +306,11 @@ const Mcp = () => {
           </section>
 
           {/* Footer CTA */}
-          <section className="surface-card p-10 text-center">
+          <section className="surface-card mt-14 p-10 text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-border text-xs">
               MIT licensed · Built in Ukraine 🇺🇦
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">
+            <h2 className="section-title">
               PRs welcome. Stars appreciated.
             </h2>
             <p className="text-muted-foreground mb-7 max-w-md mx-auto">
