@@ -24,6 +24,10 @@ Deno.test("interpretDomainr: marketed → taken + forSale", () => {
   assertEquals(interpretDomainr({ domain: "x.com", status: "marketed" }), { kind: "taken", forSale: true });
 });
 
+Deno.test("interpretDomainr: bare undelegated → unknown (never confirms a sale)", () => {
+  assertEquals(interpretDomainr({ domain: "x.com", status: "undelegated" }), { kind: "unknown" });
+});
+
 Deno.test("interpretDomainr: undelegated inactive → available", () => {
   assertEquals(
     interpretDomainr({ domain: "x.com", status: "undelegated inactive" }),
