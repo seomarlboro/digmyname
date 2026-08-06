@@ -1,68 +1,82 @@
 // Pure unit tests for the availability safeguards — NO network.
-import { describe, it, expect } from "vitest";
+// Run with: deno test supabase/functions/_shared/pipeline_test.ts
+import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { interpretDomainr } from "./availability-rules.ts";
 import { isLikelyBrandBlocked } from "./pipeline.ts";
 
-describe("interpretDomainr", () => {
-  it("dpml token wins over free tokens → taken", () => {
-    expect(interpretDomainr({ domain: "x.software", status: "undelegated inactive dpml" }))
-      .toEqual({ kind: "taken", forSale: false });
-  });
-  it("reserved → taken", () => {
-    expect(interpretDomainr({ domain: "x.com", status: "reserved" }))
-      .toEqual({ kind: "taken", forSale: false });
-  });
-  it("disallowed → taken", () => {
-    expect(interpretDomainr({ domain: "x.com", status: "disallowed" }))
-      .toEqual({ kind: "taken", forSale: false });
-  });
-  it("marketed → taken + forSale", () => {
-    expect(interpretDomainr({ domain: "x.com", status: "marketed" }))
-      .toEqual({ kind: "taken", forSale: true });
-  });
-  it("undelegated inactive → available", () => {
-    expect(interpretDomainr({ domain: "x.com", status: "undelegated inactive" }))
-      .toEqual({ kind: "available", premium: false });
-  });
-  it("undelegated inactive premium → available + premium", () => {
-    expect(interpretDomainr({ domain: "x.io", status: "undelegated inactive premium" }))
-      .toEqual({ kind: "available", premium: true });
-  });
-  it("empty / undefined → unknown", () => {
-    expect(interpretDomainr(undefined)).toEqual({ kind: "unknown" });
-    expect(interpretDomainr({ domain: "x.com", status: "" })).toEqual({ kind: "unknown" });
-  });
+// ---- interpretDomainr -------------------------------------------------------
+
+Deno.test("interpretDomainr: dpml token wins over free tokens → taken", () => {
+  assertEquals(
+    interpretDomainr({ domain: "x.software", status: "undelegated inactive dpml" }),
+    { kind: "taken", forSale: false },
+  );
 });
 
-describe("isLikelyBrandBlocked", () => {
-  it("flags famous DPML brands", () => {
-    expect(isLikelyBrandBlocked("microsoft.software")).toBe(true);
-    expect(isLikelyBrandBlocked("google.digital")).toBe(true);
-  });
-  it("is case-insensitive", () => {
-    expect(isLikelyBrandBlocked("MICROSOFT.software")).toBe(true);
-  });
-  it("does not substring-match or flag coined names", () => {
-    expect(isLikelyBrandBlocked("kvarturbo2748.digital")).toBe(false);
-    expect(isLikelyBrandBlocked("notmicrosoftatall.com")).toBe(false);
-  });
+Deno.test("interpretDomainr: reserved → taken", () => {
+  assertEquals(interpretDomainr({ domain: "x.com", status: "reserved" }), { kind: "taken", forSale: false });
 });
 
-describe("brand-block downgrade shape", () => {
-  const downgrade = (base: { domain: string; available: boolean; checkedVia: string; uncertain?: boolean }) => {
-    const brandBlockRisk = base.available && !base.uncertain && isLikelyBrandBlocked(base.domain);
-    return brandBlockRisk
-      ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
-      : base;
-  };
+Deno.test("interpretDomainr: disallowed → taken", () => {
+  assertEquals(interpretDomainr({ domain: "x.com", status: "disallowed" }), { kind: "taken", forSale: false });
+});
 
-  it("brand-blocked available → available:false + uncertain:true", () => {
-    expect(downgrade({ domain: "google.digital", available: true, checkedVia: "rdap" }))
-      .toEqual({ domain: "google.digital", available: false, checkedVia: "rdap", uncertain: true });
-  });
+Deno.test("interpretDomainr: marketed → taken + forSale", () => {
+  assertEquals(interpretDomainr({ domain: "x.com", status: "marketed" }), { kind: "taken", forSale: true });
+});
 
-  it("ordinary coined name keeps its base verdict", () => {
-    const base = { domain: "kvarturbo2748.digital", available: true, checkedVia: "rdap" };
-    expect(downgrade(base)).toBe(base);
-  });
+Deno.test("interpretDomainr: undelegated inactive → available", () => {
+  assertEquals(
+    interpretDomainr({ domain: "x.com", status: "undelegated inactive" }),
+    { kind: "available", premium: false },
+  );
+});
+
+Deno.test("interpretDomainr: undelegated inactive premium → available + premium", () => {
+  assertEquals(
+    interpretDomainr({ domain: "x.io", status: "undelegated inactive premium" }),
+    { kind: "available", premium: true },
+  );
+});
+
+Deno.test("interpretDomainr: empty / undefined → unknown", () => {
+  assertEquals(interpretDomainr(undefined), { kind: "unknown" });
+  assertEquals(interpretDomainr({ domain: "x.com", status: "" }), { kind: "unknown" });
+});
+
+// ---- isLikelyBrandBlocked ---------------------------------------------------
+
+Deno.test("isLikelyBrandBlocked: famous DPML brands are flagged", () => {
+  assert(isLikelyBrandBlocked("microsoft.software"));
+  assert(isLikelyBrandBlocked("google.digital"));
+});
+
+Deno.test("isLikelyBrandBlocked: case-insensitive", () => {
+  assert(isLikelyBrandBlocked("MICROSOFT.software"));
+});
+
+Deno.test("isLikelyBrandBlocked: no substring matching, coined names pass", () => {
+  assertEquals(isLikelyBrandBlocked("kvarturbo2748.digital"), false);
+  assertEquals(isLikelyBrandBlocked("notmicrosoftatall.com"), false);
+});
+
+// ---- downgrade shape (predicate + object, no network) -----------------------
+
+function downgrade(base: { domain: string; available: boolean; checkedVia: string; uncertain?: boolean }) {
+  const brandBlockRisk = base.available && !base.uncertain && isLikelyBrandBlocked(base.domain);
+  return brandBlockRisk
+    ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
+    : base;
+}
+
+Deno.test("downgrade: brand-blocked available → available:false + uncertain:true", () => {
+  assertEquals(
+    downgrade({ domain: "google.digital", available: true, checkedVia: "rdap" }),
+    { domain: "google.digital", available: false, checkedVia: "rdap", uncertain: true },
+  );
+});
+
+Deno.test("downgrade: ordinary coined name keeps its base verdict", () => {
+  const base = { domain: "kvarturbo2748.digital", available: true, checkedVia: "rdap" };
+  assertEquals(downgrade(base), base);
 });
