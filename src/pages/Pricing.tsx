@@ -620,16 +620,16 @@ const DetailedTldTable = ({ summary: s, mode }: { summary: TldSummary; mode: Pri
                   </span>
                   <span className="text-sm text-muted-foreground">/yr</span>
                 </td>
-
                 <td className="px-5 py-4">
                   {p.transfer_price != null ? (
                     <>
-                      <span className="font-mono text-base font-extrabold tabular-nums text-foreground">${p.transfer_price.toFixed(2)}</span>
+                      <span className={`font-mono text-base font-extrabold tabular-nums ${isCheapest && mode === "transfer" ? "text-mint" : "text-foreground"}`}>${p.transfer_price.toFixed(2)}</span>
                       <span className="text-sm text-muted-foreground">/yr</span>
                     </>
                   ) : (
-                    <span className="text-sm text-muted-foreground">—</span>
+                    <span className="text-sm text-muted-foreground">n/a</span>
                   )}
+
                 </td>
                 <td className="px-5 py-4">
                   <span className="text-sm font-medium tabular-nums text-muted-foreground">${p.icann_fee.toFixed(2)}</span>
