@@ -964,6 +964,10 @@ export async function checkDomains(
         // Probe error / disagreement on a brand-blocked SLD: the trademark
         // statement holds regardless of why the probes were inconclusive.
         fresh.push({ ...base, uncertainReason: "brand_protected" as const });
+      } else if (THIRD_SIGNAL_ENABLED && fastlyKey && base.available && likelyPremium) {
+        // Premium-suspect name escalated but got no third-signal verdict within
+        // the deadline: never sell on absence of evidence — honest uncertain.
+        fresh.push({ domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true });
       } else {
         fresh.push(base);
       }
