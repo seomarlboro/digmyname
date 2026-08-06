@@ -661,35 +661,8 @@ async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<M
 // The old implementation treated priced/transferable as premium/free, which wrongly
 // marked aftermarket domains as available. Per the docs, priced/transferable are
 // explicitly aftermarket (for-sale) statuses.
-export type DomainrVerdict =
-  | { kind: "available"; premium: boolean }
-  | { kind: "taken"; forSale: boolean }
-  | { kind: "unknown" };
-
-const DOMAINR_TAKEN = new Set([
-  "active", "parked", "claimed", "dpml", "deleting", "pending", "expiring",
-  "reserved", "disallowed", "invalid", "suffix", "tld", "zone",
-]);
-const DOMAINR_FREE = new Set(["undelegated", "inactive", "unregistered"]);
-const DOMAINR_PREMIUM = new Set(["premium"]);
-const DOMAINR_AFTERMARKET = new Set(["marketed", "priced", "transferable"]);
-
-export function interpretDomainr(entry: DomainrStatusEntry | undefined): DomainrVerdict {
-  if (!entry?.status) return { kind: "unknown" };
-  const tokens = entry.status.toLowerCase().split(/\s+/).filter(Boolean);
-  if (tokens.length === 0) return { kind: "unknown" };
-
-  const taken = tokens.some((t) => DOMAINR_TAKEN.has(t));
-  const free = tokens.some((t) => DOMAINR_FREE.has(t));
-  const premium = tokens.some((t) => DOMAINR_PREMIUM.has(t));
-  const aftermarket = tokens.some((t) => DOMAINR_AFTERMARKET.has(t));
-
-  // Aftermarket tokens (marketed/priced/transferable) mean the domain is already
-  // registered and listed for sale — they take precedence over free/inactive.
-  if (taken || aftermarket) return { kind: "taken", forSale: aftermarket };
-  if (free) return { kind: "available", premium };
-  return { kind: "unknown" };
-}
+export type { DomainrVerdict } from "./availability-rules.ts";
+export { interpretDomainr } from "./availability-rules.ts";
 
 
 // Concurrency limiter (no extra deps).
