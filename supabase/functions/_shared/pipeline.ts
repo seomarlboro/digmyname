@@ -889,7 +889,7 @@ export async function checkDomains(
 
   // ---- Pass 2: Domainr, only where it adds value -----------------------
   const needsDomainr = baseResults
-    .filter((r) => r.uncertain || (r.available && (r.likelyPremium || isLikelyPremium(r.domain))))
+    .filter((r) => shouldEscalateToDomainr({ ...r, likelyPremium: r.likelyPremium ?? isLikelyPremium(r.domain) }))
     .map((r) => r.domain);
 
   const domainrResults = rapidKey && needsDomainr.length > 0
@@ -928,8 +928,20 @@ export async function checkDomains(
         listingUrl: verdict.forSale ? `https://www.afternic.com/domain/${base.domain}` : undefined,
       });
     } else {
-      // No Domainr signal — keep the RDAP/DNS verdict as-is.
-      fresh.push(base);
+      // No Domainr verdict. An absence-only "available" (RDAP 404 + NXDOMAIN)
+      // cannot be distinguished from a registry-reserved / DPML-blocked name.
+      // Downgrade to honest uncertain (never shown available, never priced,
+      // never cached) when either:
+      //   • Domainr was reachable but had no signal for this name, OR
+      //   • the SLD trips the brand-block list — even with Domainr down
+      //     (degraded-mode rider: this is what stops google.* from being sold).
+      const absenceOnly =
+        base.available && base.uncertain !== true &&
+        (base.checkedVia === "rdap" || base.checkedVia === "dns");
+      const downgrade = absenceOnly && (domainrResults !== null || isLikelyBlocked(base.domain));
+      fresh.push(downgrade
+        ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
+        : base);
     }
   }
 
