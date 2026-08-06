@@ -11,6 +11,12 @@
 // the HTTP wrappers. Availability/pricing logic is unchanged.
 // ============================================================================
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  interpretDomainr,
+  isLikelyBlocked,
+  shouldEscalateToDomainr,
+  type DomainrStatusEntry,
+} from "./availability-rules.ts";
 
 // ============================================================================
 // Trust hierarchy (P0):
@@ -587,12 +593,6 @@ export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
 //   suffix                    → not registerable (it's a TLD itself)
 // Docs: https://domainr.com/docs/api/v2/status
 // ---------------------------------------------------------------------------
-interface DomainrStatusEntry {
-  domain: string;
-  zone?: string;
-  status: string;
-  summary?: string;
-}
 
 // Circuit breaker: if RapidAPI answers 401/403 (key invalid / not subscribed)
 // stop calling it for the lifetime of this isolate instead of burning a
@@ -662,7 +662,7 @@ async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<M
 // marked aftermarket domains as available. Per the docs, priced/transferable are
 // explicitly aftermarket (for-sale) statuses.
 export type { DomainrVerdict } from "./availability-rules.ts";
-export { interpretDomainr } from "./availability-rules.ts";
+export { interpretDomainr };
 
 
 // Concurrency limiter (no extra deps).
