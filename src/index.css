@@ -56,6 +56,16 @@
     --aurora-violet: 258 75% 58%;
     --aurora: 258 75% 58%;
 
+    /* Registrar brand colors (HSL equivalents of official brand hexes) */
+    --registrar-cloudflare: 28 92% 54%;
+    --registrar-godaddy: 143 100% 33%;
+    --registrar-ovhcloud: 234 100% 71%;
+    --registrar-ovhcloud-surface: 235 100% 31%;
+    --registrar-porkbun: 341 81% 72%;
+    --registrar-spaceship: 247 81% 68%;
+    --registrar-namecheap: 13 72% 54%;
+
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;

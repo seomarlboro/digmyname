@@ -7,7 +7,7 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
   <svg
     viewBox="0 0 512 512"
     className={className}
-    fill={active ? "url(#starsGradient)" : "#475569"}
+    fill={active ? "url(#starsGradient)" : "hsl(var(--muted-foreground))"}
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >

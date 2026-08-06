@@ -367,7 +367,7 @@ const Pricing = () => {
                     return (
                       <tr key={s.tld} className="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/10">
                         <td className="px-5 py-5">
-                          <span className="font-display text-3xl font-extrabold tracking-tight text-[hsl(var(--aurora-mint))]">.{s.tld}</span>
+                          <span className="font-display text-3xl font-extrabold tracking-tight text-mint">.{s.tld}</span>
                         </td>
                         <td className="px-5 py-5 align-middle">
                           {v.primary && v.primaryPrice != null ? (
@@ -575,7 +575,7 @@ const DetailedTldTable = ({ summary: s, mode }: { summary: TldSummary; mode: Pri
   return (
     <div className="surface-card-lg overflow-x-auto">
       <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4">
-        <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
+        <span className="font-display text-2xl font-extrabold tracking-tight text-mint">.{s.tld}</span>
         <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>
         <span className={cn("ml-auto text-xs", isStale(newestUpdated) ? "text-warning" : "text-muted-foreground")}>
           Updated {formatUpdated(newestUpdated)}
@@ -603,7 +603,7 @@ const DetailedTldTable = ({ summary: s, mode }: { summary: TldSummary; mode: Pri
             return (
               <tr key={p.id} className="border-b border-border transition-colors hover:bg-muted/10">
                 <td className="px-5 py-4">
-                  <span className={`text-base font-bold ${isCheapest ? "text-mint" : c.text}`}>
+                  <span className={`text-base font-bold ${c.text}`}>
                     {p.registrar}
                   </span>
                   {isCheapest && <Award className="ml-1.5 inline h-4 w-4 text-mint" />}

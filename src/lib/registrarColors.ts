@@ -21,12 +21,12 @@ export const getRegistrarUrl = (registrar: string, domain?: string): string => {
 };
 
 const REGISTRAR_COLORS: Record<string, RegistrarColor> = {
-  Cloudflare: { bg: "bg-[#f6821f]/15", text: "text-[#f6821f]", border: "border-[#f6821f]/30", dot: "bg-[#f6821f]" },
-  GoDaddy: { bg: "bg-[#00a63f]/15", text: "text-[#00a63f]", border: "border-[#00a63f]/30", dot: "bg-[#00a63f]" },
-  OVHcloud: { bg: "bg-[#000e9c]/15", text: "text-[#6b7aff]", border: "border-[#6b7aff]/30", dot: "bg-[#6b7aff]" },
-  Porkbun: { bg: "bg-[#f17ca2]/15", text: "text-[#f17ca2]", border: "border-[#f17ca2]/30", dot: "bg-[#f17ca2]" },
-  Spaceship: { bg: "bg-[#7c6cf0]/15", text: "text-[#7c6cf0]", border: "border-[#7c6cf0]/30", dot: "bg-[#7c6cf0]" },
-  Namecheap: { bg: "bg-[#de5833]/15", text: "text-[#de5833]", border: "border-[#de5833]/30", dot: "bg-[#de5833]" },
+  Cloudflare: { bg: "bg-registrar-cloudflare/15", text: "text-registrar-cloudflare", border: "border-registrar-cloudflare/30", dot: "bg-registrar-cloudflare" },
+  GoDaddy: { bg: "bg-registrar-godaddy/15", text: "text-registrar-godaddy", border: "border-registrar-godaddy/30", dot: "bg-registrar-godaddy" },
+  OVHcloud: { bg: "bg-registrar-ovhcloud-surface/15", text: "text-registrar-ovhcloud", border: "border-registrar-ovhcloud/30", dot: "bg-registrar-ovhcloud" },
+  Porkbun: { bg: "bg-registrar-porkbun/15", text: "text-registrar-porkbun", border: "border-registrar-porkbun/30", dot: "bg-registrar-porkbun" },
+  Spaceship: { bg: "bg-registrar-spaceship/15", text: "text-registrar-spaceship", border: "border-registrar-spaceship/30", dot: "bg-registrar-spaceship" },
+  Namecheap: { bg: "bg-registrar-namecheap/15", text: "text-registrar-namecheap", border: "border-registrar-namecheap/30", dot: "bg-registrar-namecheap" },
 };
 
 const DEFAULT_COLOR: RegistrarColor = {
