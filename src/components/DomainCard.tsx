@@ -29,7 +29,8 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const ext = domain.split(".").pop() ?? "";
   const cheapest = cheapestByTld.get(ext);
   const isPremium = result.premium === true;
-  const isLikelyPremium = !isPremium && result.likelyPremium === true;
+  const isPremiumUnverified = result.premiumUnverified === true;
+  const isLikelyPremium = !isPremium && (result.likelyPremium === true || isPremiumUnverified);
   const displayPrice = cheapest?.regPrice ?? tld.regPrice;
   const displayRenew = cheapest?.renewPrice ?? tld.renewPrice;
   const hasHighRenewal = !isPremium && !isLikelyPremium && displayRenew > displayPrice * 1.8;
@@ -154,7 +155,9 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               </>
             ) : (
               <p className="text-xs text-muted-foreground mt-1.5">
-                Couldn't verify availability — registry didn't respond. Try again.
+                {result.reachFailed
+                  ? "Couldn't reach the registry — try again."
+                  : "Couldn't verify availability — registry didn't respond. Try again."}
               </p>
             )}
           </div>
