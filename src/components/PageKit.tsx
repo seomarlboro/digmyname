@@ -285,7 +285,16 @@ export const FeatureCard = ({
           {index}
         </span>
       )}
-      <h3 className="card-title-lg pr-8">{title}</h3>
+      <h3
+        className={cn(
+          "pr-8",
+          mono
+            ? "font-mono text-base font-semibold tracking-tight text-foreground sm:text-lg"
+            : "card-title-lg",
+        )}
+      >
+        {title}
+      </h3>
       {children && <p className="card-body-lg">{children}</p>}
       {footer && <div className="mt-5 flex items-center justify-between">{footer}</div>}
     </div>
