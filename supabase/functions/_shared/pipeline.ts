@@ -617,12 +617,15 @@ let domainrDisabledReason: string | null = null;
 let domainrDisabledUntil = 0;
 let domainrCooldownUntil = 0;
 
-async function checkDomainrBatch(domains: string[], apiKey: string, deadlineMs = 6000): Promise<Map<string, DomainrStatusEntry> | null> {
+// `deadlineAt` is an ABSOLUTE epoch-ms deadline for the whole request, not a
+// relative window: Fastly gets only whatever genuinely remains after Pass-1
+// (RDAP/DNS). A slow registry pass therefore shrinks — or entirely skips — the
+// Fastly window instead of stacking on top of it and blowing the caller's race.
+async function checkDomainrBatch(domains: string[], apiKey: string, deadlineAt: number): Promise<Map<string, DomainrStatusEntry> | null> {
   if (domains.length === 0) return new Map();
   if (Date.now() < domainrDisabledUntil) return null;
   if (Date.now() < domainrCooldownUntil) return null;
 
-  const deadlineAt = Date.now() + deadlineMs;
   const out = new Map<string, DomainrStatusEntry>();
 
   await pMap(domains, 8, async (domain) => {
@@ -840,10 +843,14 @@ export function getServiceClient(): SupabaseClient {
  */
 export async function checkDomains(
   domains: string[],
-  deps: { supabase?: SupabaseClient; thirdSignalDeadlineMs?: number } = {}
+  // `thirdSignalDeadlineAt`: absolute epoch-ms deadline for the third signal,
+  // captured by the caller when its own budget starts. Default = now + 6000ms
+  // (site search), so callers that pass nothing keep the full window.
+  deps: { supabase?: SupabaseClient; thirdSignalDeadlineAt?: number } = {}
 ): Promise<DomainCheckResult[]> {
   const supabase = deps.supabase ?? getServiceClient();
-  const thirdSignalDeadlineMs = deps.thirdSignalDeadlineMs ?? 6000;
+  const thirdSignalDeadlineAt = deps.thirdSignalDeadlineAt ?? (Date.now() + 6000);
+
 
   const batch = domains.slice(0, 50).filter(isValidDomain);
   if (batch.length === 0) return [];
