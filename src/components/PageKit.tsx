@@ -284,7 +284,7 @@ export const FeatureCard = ({
     </div>
     <div className="min-w-0 flex-1">
       {index && (
-        <span className="absolute right-5 top-5 font-mono text-xs text-muted-foreground/50">
+        <span className="absolute right-5 top-5 font-mono text-xs text-muted-foreground/70">
           {index}
         </span>
       )}
