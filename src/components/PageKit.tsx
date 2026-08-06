@@ -82,19 +82,32 @@ export const Section = ({
   aside,
   children,
   className,
+  align,
 }: {
   title?: ReactNode;
   lede?: ReactNode;
   aside?: ReactNode;
   children: ReactNode;
   className?: string;
+  align?: "center";
 }) => (
   <section className={cn("mt-14", className)}>
     {title && (
-      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div
+        className={cn(
+          "mb-6 flex flex-col gap-2",
+          align === "center"
+            ? "items-center"
+            : "sm:flex-row sm:items-end sm:justify-between",
+        )}
+      >
         <div>
           <h2 className="section-title">{title}</h2>
-          {lede && <p className="section-lede max-w-2xl">{lede}</p>}
+          {lede && (
+            <p className={cn("section-lede max-w-2xl", align === "center" && "mx-auto")}>
+              {lede}
+            </p>
+          )}
         </div>
         {aside && (
           <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -103,6 +116,7 @@ export const Section = ({
         )}
       </div>
     )}
+
     {children}
   </section>
 );
