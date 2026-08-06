@@ -253,8 +253,8 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
   const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
   const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
   const availableCount = useMemo(() => checkedResults.filter((r) => r.available && !r.uncertain).length, [checkedResults]);
-  const uncertainCount = useMemo(() => checkedResults.filter((r) => r.uncertain && !r.sldBlocked).length, [checkedResults]);
-  const takenCount = useMemo(() => checkedResults.filter((r) => !r.available && (!r.uncertain || r.sldBlocked)).length, [checkedResults]);
+  const uncertainCount = useMemo(() => checkedResults.filter((r) => r.uncertain && !r.sldBlocked && !r.provisional).length, [checkedResults]);
+  const takenCount = useMemo(() => checkedResults.filter((r) => !r.available && (!r.uncertain || r.sldBlocked || r.provisional)).length, [checkedResults]);
   const stillChecking = checkingResults.length > 0;
 
   const retryDomain = useCallback(async (domain: string) => {
@@ -481,7 +481,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 </div>
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
-                    .filter((r) => !r.checking && r.uncertain && !r.sldBlocked)
+                    .filter((r) => !r.checking && r.uncertain && !r.sldBlocked && !r.provisional)
                     .slice(0, 10)
                     .map((r) => (
                       <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
@@ -499,7 +499,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 </div>
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
-                    .filter((r) => !r.checking && !r.available && (!r.uncertain || r.sldBlocked))
+                    .filter((r) => !r.checking && !r.available && (!r.uncertain || r.sldBlocked || r.provisional))
                     .sort((a, b) => Number((b.sldBlocked && b.uncertain) ?? false) - Number((a.sldBlocked && a.uncertain) ?? false))
                     .slice(0, 10)
                     .map((r) => (
