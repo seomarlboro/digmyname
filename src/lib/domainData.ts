@@ -76,6 +76,8 @@ export interface DomainResult {
   tld: TLD;
   available: boolean;
   checking?: boolean;
+  /** True while only the fast DNS pre-check has answered; an authoritative verdict is still pending. Distinct from `uncertain` (which means "we tried hard and failed"). Client-side only — never returned by the backend. */
+  provisional?: boolean;
   /** GoDaddy real price in dollars, if available */
   gdPrice?: number;
   /** Confirmed premium / aftermarket via GoDaddy pricing */
