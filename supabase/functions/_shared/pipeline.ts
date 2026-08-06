@@ -33,7 +33,7 @@ import {
 
 // Bump this whenever availability/premium logic changes so old cached rows are
 // treated as misses instead of returning stale interpretations.
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 
 
 export interface DomainCheckResult {
@@ -46,6 +46,13 @@ export interface DomainCheckResult {
   /** Why the result is uncertain, when the cause is deterministic (not a probe failure). */
   uncertainReason?: "brand_protected";
   likelyPremium?: boolean;
+  /** RDAP-404 + NXDOMAIN agree the name is registerable, but it is a premium-tier
+   *  suspect whose real registry price the third signal did NOT confirm this
+   *  request (deadline/breaker). available:true, price MUST stay undefined; the UI
+   *  shows "premium — Check price" with NO $ figure. Distinct from `uncertain`
+   *  (probe failure/disagreement) and `premium` (confirmed premium w/ real price).
+   *  Never cached with a price. */
+  premiumUnverified?: boolean;
   /** Registered but parked on an aftermarket marketplace (Sedo, Dan, Afternic, …). */
   forSale?: boolean;
   forSaleVia?: string;
@@ -901,6 +908,7 @@ export async function checkDomains(
         price: (meta.reg_price ?? meta.godaddy_price) as number | undefined,
         premium: meta.premium as boolean | undefined,
         likelyPremium: meta.likely_premium as boolean | undefined,
+        premiumUnverified: meta.premium_unverified as boolean | undefined,
         forSale: meta.for_sale as boolean | undefined,
         forSaleVia: meta.for_sale_via as string | undefined,
         listingUrl: meta.listing_url as string | undefined,
@@ -977,15 +985,26 @@ export async function checkDomains(
         // statement holds regardless of why the probes were inconclusive.
         fresh.push({ ...base, uncertainReason: "brand_protected" as const });
       } else if (THIRD_SIGNAL_ENABLED && fastlyKey && base.available && likelyPremium) {
-        // The third signal was supposed to answer for this premium-suspect and
-        // did not (deadline / breaker). A likely-premium name whose registry
-        // price is unverified must never be sold at the standard price on
-        // absence of evidence → generic uncertain, UI shows Retry.
-        // Ordinary rdap/dns-available names (not blocked, not likelyPremium)
-        // still fall through to base: that is the pre-Fastly two-signal answer,
-        // not a fabrication. The gate is inert when the signal is disabled or
-        // unkeyed, so flipping the flag off restores the prior behavior exactly.
-        fresh.push({ domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true, likelyPremium: true });
+        // GUARDRAIL: reached only when base.available === true — i.e. RDAP-404 AND
+        // DNS-NXDOMAIN agreed in resolveDomain. Brand-blocked names are caught by
+        // the two branches ABOVE (brandBlockRisk / base.uncertain && blocked) and
+        // never arrive here; RDAP-vs-DNS conflicts never set base.available and so
+        // never arrive here either.
+        //
+        // Two authoritative sources agree the name is REGISTERABLE. The third
+        // signal only failed to confirm the PRICE, not the availability.
+        // Downgrading availability here was the amplifier that turned any partial
+        // Fastly loss into a wall (33/50 TLDs for a 4-char name). Split the two
+        // concerns: keep available:true, withhold the price, flag premiumUnverified
+        // so the card shows "premium — Check price" with NO $ figure. Never priced,
+        // never cached with a price (ttl clamp below + likelyPremium price gate).
+        fresh.push({
+          domain: base.domain,
+          available: true,
+          checkedVia: base.checkedVia,
+          likelyPremium: true,
+          premiumUnverified: true,
+        });
       } else {
         fresh.push(base);
       }
