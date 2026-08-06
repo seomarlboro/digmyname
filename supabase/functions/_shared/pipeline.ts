@@ -92,59 +92,7 @@ export function isLikelyPremium(domain: string): boolean {
 // downgraded to `uncertain` — never shown available, never priced, never cached.
 const THIRD_SIGNAL_ENABLED = false;
 
-/** Exact lowercase SLD matches only — no substring matching. */
-const BRAND_BLOCKED_SLDS = new Set<string>([
-  // --- Tech / internet -----------------------------------------------------
-  "adobe", "airbnb", "alexa", "alibaba", "aliexpress", "amazon", "amd",
-  "android", "anthropic", "apple", "arm", "atlassian", "aws", "azure",
-  "baidu", "bing", "broadcom", "chatgpt", "chrome", "cisco", "cloudflare",
-  "coinbase", "dell", "discord", "dropbox", "ebay", "epicgames", "ericsson",
-  "facebook", "figma", "firefox", "github", "gitlab", "gmail", "google",
-  "hp", "huawei", "ibm", "icloud", "instagram", "intel", "iphone", "ipad",
-  "linkedin", "linux", "meta", "messenger", "microsoft", "mozilla",
-  "netflix", "nintendo", "nokia", "notion", "nvidia", "office", "openai",
-  "oracle", "palantir", "paypal", "pinterest", "playstation", "qualcomm",
-  "reddit", "salesforce", "samsung", "sap", "shopify", "siemens", "skype",
-  "slack", "snapchat", "sony", "spacex", "spotify", "stripe", "telegram",
-  "tencent", "tesla", "tiktok", "twitch", "twitter", "uber", "vmware",
-  "whatsapp", "windows", "xbox", "xiaomi", "yahoo", "youtube", "zoom",
-  // --- Finance -------------------------------------------------------------
-  "amex", "barclays", "bbva", "blackrock", "citibank", "citigroup",
-  "goldmansachs", "hsbc", "jpmorgan", "mastercard", "morganstanley",
-  "nasdaq", "santander", "visa", "wellsfargo",
-  // --- Retail / consumer ---------------------------------------------------
-  "adidas", "burgerking", "cocacola", "colgate", "costco", "danone",
-  "gillette", "heineken", "ikea", "kfc", "kelloggs", "lidl", "loreal",
-  "mcdonalds", "nescafe", "nestle", "nike", "pepsi", "pepsico", "puma",
-  "reebok", "starbucks", "subway", "target", "unilever", "walmart",
-  // --- Luxury --------------------------------------------------------------
-  "balenciaga", "bulgari", "burberry", "cartier", "chanel", "dior",
-  "fendi", "gucci", "hermes", "louisvuitton", "omega", "prada", "rolex",
-  "tiffany", "versace",
-  // --- Automotive ----------------------------------------------------------
-  "audi", "bentley", "bmw", "bugatti", "chevrolet", "ferrari", "ford",
-  "honda", "hyundai", "jaguar", "kia", "lamborghini", "landrover", "lexus",
-  "maserati", "mazda", "mercedes", "mercedesbenz", "nissan", "peugeot",
-  "porsche", "renault", "subaru", "toyota", "volkswagen", "volvo",
-  // --- Media / entertainment ----------------------------------------------
-  "cnn", "disney", "espn", "hbo", "hulu", "marvel", "nbc", "netflixoriginals",
-  "pixar", "spotifypremium", "warnerbros",
-  // --- Pharma / health -----------------------------------------------------
-  "astrazeneca", "bayer", "gsk", "johnsonandjohnson", "merck", "moderna",
-  "novartis", "pfizer", "roche", "sanofi",
-  // --- Logistics / travel --------------------------------------------------
-  "aramex", "dhl", "emirates", "fedex", "lufthansa", "maersk", "ups", "usps",
-  // --- Energy / industrial -------------------------------------------------
-  "boeing", "bosch", "chevron", "exxonmobil", "ge", "shell", "siemensenergy",
-  "totalenergies",
-  // --- Registry / ICANN reserved labels ------------------------------------
-  "iana", "icann", "internic", "nic", "rdds", "whois", "www",
-]);
-
-export function isLikelyBrandBlocked(domain: string): boolean {
-  const sld = domain.split(".")[0]?.toLowerCase();
-  return !!sld && BRAND_BLOCKED_SLDS.has(sld);
-}
+// Brand/registry-block rules live in ./availability-rules.ts (isLikelyBlocked).
 
 // ---------------------------------------------------------------------------
 // DNS via DoH (P2) — fast, no Deno.resolveDns hangs.
