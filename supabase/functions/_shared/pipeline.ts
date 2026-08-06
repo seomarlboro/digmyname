@@ -13,7 +13,7 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   interpretDomainr,
-  isLikelyBlocked,
+  
   shouldEscalateToDomainr,
   type DomainrStatusEntry,
 } from "./availability-rules.ts";
@@ -82,6 +82,68 @@ export function isLikelyPremium(domain: string): boolean {
   if (tld === "com" && sld.length <= 4 && COMMON_WORDS_RE.test(sld)) return true;
 
   return false;
+}
+
+// Domainr's RapidAPI endpoint was delisted (Fastly acquisition, 2026-08), so
+// there is currently NO third-party registerability signal. RDAP-404 + NXDOMAIN
+// cannot distinguish a genuinely free name from a registry-reserved / DPML
+// trademark-blocked one. Until the Fastly Domain Research API is wired in
+// (separate ticket), SLDs matching well-known DPML-protected trademarks are
+// downgraded to `uncertain` — never shown available, never priced, never cached.
+const THIRD_SIGNAL_ENABLED = false;
+
+/** Exact lowercase SLD matches only — no substring matching. */
+const BRAND_BLOCKED_SLDS = new Set<string>([
+  // --- Tech / internet -----------------------------------------------------
+  "adobe", "airbnb", "alexa", "alibaba", "aliexpress", "amazon", "amd",
+  "android", "anthropic", "apple", "arm", "atlassian", "aws", "azure",
+  "baidu", "bing", "broadcom", "chatgpt", "chrome", "cisco", "cloudflare",
+  "coinbase", "dell", "discord", "dropbox", "ebay", "epicgames", "ericsson",
+  "facebook", "figma", "firefox", "github", "gitlab", "gmail", "google",
+  "hp", "huawei", "ibm", "icloud", "instagram", "intel", "iphone", "ipad",
+  "linkedin", "linux", "meta", "messenger", "microsoft", "mozilla",
+  "netflix", "nintendo", "nokia", "notion", "nvidia", "office", "openai",
+  "oracle", "palantir", "paypal", "pinterest", "playstation", "qualcomm",
+  "reddit", "salesforce", "samsung", "sap", "shopify", "siemens", "skype",
+  "slack", "snapchat", "sony", "spacex", "spotify", "stripe", "telegram",
+  "tencent", "tesla", "tiktok", "twitch", "twitter", "uber", "vmware",
+  "whatsapp", "windows", "xbox", "xiaomi", "yahoo", "youtube", "zoom",
+  // --- Finance -------------------------------------------------------------
+  "amex", "barclays", "bbva", "blackrock", "citibank", "citigroup",
+  "goldmansachs", "hsbc", "jpmorgan", "mastercard", "morganstanley",
+  "nasdaq", "santander", "visa", "wellsfargo",
+  // --- Retail / consumer ---------------------------------------------------
+  "adidas", "burgerking", "cocacola", "colgate", "costco", "danone",
+  "gillette", "heineken", "ikea", "kfc", "kelloggs", "lidl", "loreal",
+  "mcdonalds", "nescafe", "nestle", "nike", "pepsi", "pepsico", "puma",
+  "reebok", "starbucks", "subway", "target", "unilever", "walmart",
+  // --- Luxury --------------------------------------------------------------
+  "balenciaga", "bulgari", "burberry", "cartier", "chanel", "dior",
+  "fendi", "gucci", "hermes", "louisvuitton", "omega", "prada", "rolex",
+  "tiffany", "versace",
+  // --- Automotive ----------------------------------------------------------
+  "audi", "bentley", "bmw", "bugatti", "chevrolet", "ferrari", "ford",
+  "honda", "hyundai", "jaguar", "kia", "lamborghini", "landrover", "lexus",
+  "maserati", "mazda", "mercedes", "mercedesbenz", "nissan", "peugeot",
+  "porsche", "renault", "subaru", "toyota", "volkswagen", "volvo",
+  // --- Media / entertainment ----------------------------------------------
+  "cnn", "disney", "espn", "hbo", "hulu", "marvel", "nbc", "netflixoriginals",
+  "pixar", "spotifypremium", "warnerbros",
+  // --- Pharma / health -----------------------------------------------------
+  "astrazeneca", "bayer", "gsk", "johnsonandjohnson", "merck", "moderna",
+  "novartis", "pfizer", "roche", "sanofi",
+  // --- Logistics / travel --------------------------------------------------
+  "aramex", "dhl", "emirates", "fedex", "lufthansa", "maersk", "ups", "usps",
+  // --- Energy / industrial -------------------------------------------------
+  "boeing", "bosch", "chevron", "exxonmobil", "ge", "shell", "siemensenergy",
+  "totalenergies",
+  // --- Registry / ICANN reserved labels ------------------------------------
+  "iana", "icann", "internic", "nic", "rdds", "whois", "www",
+]);
+
+export function isLikelyBrandBlocked(domain: string): boolean {
+  const sld = domain.split(".")[0]?.toLowerCase();
+  return !!sld && BRAND_BLOCKED_SLDS.has(sld);
 }
 
 // ---------------------------------------------------------------------------
@@ -887,20 +949,21 @@ export async function checkDomains(
   // ---- Pass 1: free authoritative sources (RDAP + DNS) -----------------
   const baseResults = await pMap(uncached, 25, (d) => resolveDomain(d));
 
-  // ---- Pass 2: Domainr, only where it adds value -----------------------
-  const needsDomainr = baseResults
-    .filter((r) => shouldEscalateToDomainr({ ...r, likelyPremium: r.likelyPremium ?? isLikelyPremium(r.domain) }))
+  // ---- Pass 2: third signal, only where it adds value ------------------
+  const needsThirdSignal = baseResults
+    .filter((r) =>
+      shouldEscalateToDomainr({ ...r, likelyPremium: r.likelyPremium ?? isLikelyPremium(r.domain) }) ||
+      (r.available && isLikelyBrandBlocked(r.domain))
+    )
     .map((r) => r.domain);
 
-  const domainrResults = rapidKey && needsDomainr.length > 0
-    ? await checkDomainrBatch(needsDomainr, rapidKey)
+  const domainrResults = THIRD_SIGNAL_ENABLED && rapidKey && needsThirdSignal.length > 0
+    ? await checkDomainrBatch(needsThirdSignal, rapidKey)
     : null;
-  if (rapidKey) {
+  if (!THIRD_SIGNAL_ENABLED && needsThirdSignal.length > 0) {
     console.log(
-      `domainr consulted for ${needsDomainr.length}/${uncached.length} domains, returned=${domainrResults?.size ?? "null"}`
+      `third-signal offline (Domainr/RapidAPI delisted) — ${needsThirdSignal.length} flagged name(s); brand-block matches downgraded to uncertain`
     );
-  } else if (needsDomainr.length > 0) {
-    console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — RDAP/DNS only");
   }
 
   const fresh: DomainCheckResult[] = [];
@@ -928,20 +991,18 @@ export async function checkDomains(
         listingUrl: verdict.forSale ? `https://www.afternic.com/domain/${base.domain}` : undefined,
       });
     } else {
-      // No Domainr verdict. An absence-only "available" (RDAP 404 + NXDOMAIN)
-      // cannot be distinguished from a registry-reserved / DPML-blocked name.
-      // Downgrade to honest uncertain (never shown available, never priced,
-      // never cached) when either:
-      //   • Domainr was reachable but had no signal for this name, OR
-      //   • the SLD trips the brand-block list — even with Domainr down
-      //     (degraded-mode rider: this is what stops google.* from being sold).
-      const absenceOnly =
-        base.available && base.uncertain !== true &&
-        (base.checkedVia === "rdap" || base.checkedVia === "dns");
-      const downgrade = absenceOnly && (domainrResults !== null || isLikelyBlocked(base.domain));
-      fresh.push(downgrade
-        ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
-        : base);
+      // No third-signal verdict. An absence-only "available" (RDAP 404 +
+      // NXDOMAIN) cannot be distinguished from a registry-reserved / DPML
+      // trademark-blocked name. Standing safeguard: brand-blocked SLDs are
+      // downgraded to honest uncertain (never available, never priced,
+      // never cached), regardless of third-signal availability.
+      const brandBlockRisk =
+        base.available && !base.uncertain && isLikelyBrandBlocked(base.domain);
+      fresh.push(
+        brandBlockRisk
+          ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
+          : base
+      );
     }
   }
 
