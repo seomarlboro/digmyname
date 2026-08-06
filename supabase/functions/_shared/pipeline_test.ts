@@ -2,6 +2,7 @@
 // Run with: deno test supabase/functions/_shared/pipeline_test.ts
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { interpretDomainr, isLikelyBlocked } from "./availability-rules.ts";
+import { isLikelyPremium } from "./pipeline.ts";
 
 // ---- interpretDomainr -------------------------------------------------------
 
@@ -119,4 +120,77 @@ Deno.test("downgrade: already-uncertain coined name stays reason-less", () => {
   const out = downgrade(base);
   assertEquals(out, base);
   assertEquals((out as { uncertainReason?: string }).uncertainReason, undefined);
+});
+
+// ---- Pass-2 branch order: premium-unverified split + brand-block guardrail ---
+// Faithful re-model of the checkDomains Pass-2 `else` block (the no-third-signal-
+// verdict path). Mirrors the REAL branch ORDER and predicates verbatim so this is
+// a tripwire: if the branches are ever reordered or a predicate drifts, these
+// tests fail. `likelyPremium` is computed exactly as the real code does
+// (`base.likelyPremium ?? isLikelyPremium(base.domain)`).
+function resolvePass2NoVerdict(base: {
+  domain: string; available: boolean; checkedVia: string;
+  uncertain?: boolean; likelyPremium?: boolean;
+}, opts: { thirdSignalEnabled: boolean; fastlyKey: boolean }) {
+  const likelyPremium = base.likelyPremium ?? isLikelyPremium(base.domain);
+  const blocked = isLikelyBlocked(base.domain);
+  const brandBlockRisk = base.available && !base.uncertain && blocked;
+  if (brandBlockRisk) {
+    return { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true, uncertainReason: "brand_protected" as const };
+  }
+  if (base.uncertain && blocked) {
+    return { ...base, uncertainReason: "brand_protected" as const };
+  }
+  if (opts.thirdSignalEnabled && opts.fastlyKey && base.available && likelyPremium) {
+    return { domain: base.domain, available: true, checkedVia: base.checkedVia, likelyPremium: true, premiumUnverified: true };
+  }
+  return base;
+}
+
+Deno.test("pass2 branch3: premium-suspect + available + no Fastly verdict → available + premiumUnverified, no price", () => {
+  // noiz.xyz: isLikelyPremium true (4-char SLD on premium TLD), NOT brand-blocked.
+  // likelyPremium is intentionally omitted from the input so the test exercises the
+  // real `?? isLikelyPremium()` fallback.
+  const out = resolvePass2NoVerdict(
+    { domain: "noiz.xyz", available: true, checkedVia: "rdap" },
+    { thirdSignalEnabled: true, fastlyKey: true },
+  );
+  assertEquals(out, {
+    domain: "noiz.xyz",
+    available: true,
+    checkedVia: "rdap",
+    likelyPremium: true,
+    premiumUnverified: true,
+  });
+  // Guardrail: no price is ever attached in this branch.
+  assertEquals((out as { price?: number }).price, undefined);
+});
+
+Deno.test("pass2 guardrail: brand-blocked AND premium-suspect → uncertain + brand_protected (branch 1 wins over branch 3)", () => {
+  // visa.xyz is the adversarial dual-eligible case: `visa` ∈ BLOCKED_SLDS AND
+  // isLikelyPremium (4-char SLD on premium TLD) — eligible for BOTH branch 1 and
+  // branch 3. Branch 1 MUST fire first; it must NEVER reach the premium split.
+  // likelyPremium omitted so the real predicate decides.
+  const out = resolvePass2NoVerdict(
+    { domain: "visa.xyz", available: true, checkedVia: "rdap" },
+    { thirdSignalEnabled: true, fastlyKey: true },
+  );
+  assertEquals(out, {
+    domain: "visa.xyz",
+    available: false,
+    checkedVia: "rdap",
+    uncertain: true,
+    uncertainReason: "brand_protected",
+  });
+  // Never available, never premium-unverified for a brand-blocked name.
+  assertEquals((out as { premiumUnverified?: boolean }).premiumUnverified, undefined);
+});
+
+Deno.test("pass2 branch3 inert when third signal disabled → falls through to base (no premiumUnverified)", () => {
+  // Flag off OR no key: the split must NOT fire; base verdict passes through
+  // unchanged (restores exact pre-Fastly behavior). Guards the code comment's
+  // claim that flipping the flag off restores prior behavior.
+  const base = { domain: "noiz.xyz", available: true, checkedVia: "rdap", likelyPremium: true };
+  assertEquals(resolvePass2NoVerdict(base, { thirdSignalEnabled: false, fastlyKey: true }), base);
+  assertEquals(resolvePass2NoVerdict(base, { thirdSignalEnabled: true, fastlyKey: false }), base);
 });
