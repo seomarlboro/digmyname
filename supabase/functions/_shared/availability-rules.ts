@@ -14,7 +14,11 @@ export interface DomainrStatusEntry {
 // Domainr status tokens are a SET ordered by increasing precedence. The docs say
 // the right-most token is the most important, but in practice the tokens fall into
 // three buckets:
-//   • FREE:    inactive | undelegated | unregistered  → available for registration
+//   • FREE:    inactive | unregistered                 → available for registration
+//     A bare `undelegated` token is NOT free: Fastly returns a best-effort bare
+//     `undelegated` when a registry backend times out, which is the same
+//     absence-of-evidence as RDAP-404 + NXDOMAIN and must never confirm a sale.
+//     A normal registrable answer is `undelegated inactive` → available via `inactive`.
 //   • PREMIUM: premium                                  → available, registry-premium price
 //   • TAKEN:   active | parked | claimed | reserved | dpml | pending | disallowed |
 //              invalid | suffix | tld | zone | deleting | expiring
@@ -28,7 +32,7 @@ const DOMAINR_TAKEN = new Set([
   "active", "parked", "claimed", "dpml", "deleting", "pending", "expiring",
   "reserved", "disallowed", "invalid", "suffix", "tld", "zone",
 ]);
-const DOMAINR_FREE = new Set(["undelegated", "inactive", "unregistered"]);
+const DOMAINR_FREE = new Set(["inactive", "unregistered"]);
 const DOMAINR_PREMIUM = new Set(["premium"]);
 const DOMAINR_AFTERMARKET = new Set(["marketed", "priced", "transferable"]);
 
