@@ -92,7 +92,7 @@ export function isLikelyPremium(domain: string): boolean {
 // / DPML trademark-blocked one. When the flag below is off, SLDs matching
 // well-known DPML-protected trademarks are downgraded to `uncertain` — never shown
 // available, never priced, never cached.
-const THIRD_SIGNAL_ENABLED = true;
+const THIRD_SIGNAL_ENABLED = false;
 
 // Brand/registry-block rules live in ./availability-rules.ts (isLikelyBlocked).
 
