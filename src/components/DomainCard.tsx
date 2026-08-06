@@ -29,7 +29,8 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const ext = domain.split(".").pop() ?? "";
   const cheapest = cheapestByTld.get(ext);
   const isPremium = result.premium === true;
-  const isLikelyPremium = !isPremium && result.likelyPremium === true;
+  const isPremiumUnverified = result.premiumUnverified === true;
+  const isLikelyPremium = !isPremium && (result.likelyPremium === true || isPremiumUnverified);
   const displayPrice = cheapest?.regPrice ?? tld.regPrice;
   const displayRenew = cheapest?.renewPrice ?? tld.renewPrice;
   const hasHighRenewal = !isPremium && !isLikelyPremium && displayRenew > displayPrice * 1.8;
@@ -154,7 +155,9 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               </>
             ) : (
               <p className="text-xs text-muted-foreground mt-1.5">
-                Couldn't verify availability — registry didn't respond. Try again.
+                {result.reachFailed
+                  ? "Couldn't reach the registry — try again."
+                  : "Couldn't verify availability — registry didn't respond. Try again."}
               </p>
             )}
           </div>
@@ -198,7 +201,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                 {isPremium ? (
                   <span className="text-lg font-bold text-foreground">Premium</span>
                 ) : isLikelyPremium ? (
-                  <span className="text-sm font-semibold text-amber-500">Likely premium</span>
+                  <span className="text-sm font-semibold text-amber-500">{isPremiumUnverified ? "Premium" : "Likely premium"}</span>
                 ) : (
                   <span className="text-lg font-bold text-foreground">${displayPrice}</span>
                 )}
@@ -206,7 +209,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               <Button size="sm" className="h-9 gap-1.5 rounded-3xl btn-gradient text-sm border-0 px-4" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-3.5 w-3.5" />
-                  Buy
+                  {isPremiumUnverified ? "Check price" : "Buy"}
                 </a>
               </Button>
             </>
@@ -309,9 +312,9 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   </>
                 ) : isLikelyPremium ? (
                   <>
-                    <p className="text-base font-semibold whitespace-nowrap text-amber-500">Likely premium</p>
+                    <p className="text-base font-semibold whitespace-nowrap text-amber-500">{isPremiumUnverified ? "Premium" : "Likely premium"}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Verify on registrar
+                      {isPremiumUnverified ? "price confirmed at checkout" : "Verify on registrar"}
                     </p>
                   </>
                 ) : (
@@ -351,7 +354,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4" />
-                  Buy Now
+                  {isPremiumUnverified ? "Check price" : "Buy Now"}
                 </a>
               </Button>
             ) : result.forSale && result.listingUrl ? (

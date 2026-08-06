@@ -89,10 +89,19 @@ export interface DomainResult {
   premium?: boolean;
   /** Heuristic: likely registered or aftermarket even if APIs say otherwise */
   likelyPremium?: boolean;
+  /** Backend split-state: registerable (RDAP-404 + NXDOMAIN agree) but premium-tier
+   *  price was not confirmed this request. available:true with NO price; UI shows
+   *  "premium — Check price", never a $ figure. */
+  premiumUnverified?: boolean;
   /** APIs disagreed or failed — treat with caution */
   uncertain?: boolean;
   /** Deterministic cause of uncertainty (brand/trademark protected), not a probe failure. */
   uncertainReason?: "brand_protected";
+  /** Client-only: the batch that owned this row never reached the backend (503 /
+   *  network error). Distinct from `uncertain` (backend reached, verdict
+   *  inconclusive). Renders "couldn't reach — Retry"; cleared on retry. Never
+   *  persisted or returned by the backend. */
+  reachFailed?: boolean;
   /** Label only: SLD matches a known trademark/registry-reserved brand. Set on
    *  every card in a brand class (available/taken/uncertain) so the UI can tag
    *  them consistently. Never affects the verdict shown. */
@@ -184,11 +193,36 @@ export async function checkDomainsFast(
   return resultMap;
 }
 
-/** Check real availability via edge function */
+export interface AvailabilityInfo {
+  available: boolean;
+  price?: number;
+  premium?: boolean;
+  likelyPremium?: boolean;
+  premiumUnverified?: boolean;
+  uncertain?: boolean;
+  uncertainReason?: "brand_protected";
+  sldBlocked?: boolean;
+  forSale?: boolean;
+  forSaleVia?: string;
+  listingUrl?: string;
+}
+
+/** Discriminated availability response. `ok:false` means the batch never reached
+ *  the backend (edge error / 503 / thrown) — distinct from a reached response that
+ *  simply lacks a given domain. The frontend uses `ok` to decide between "retry"
+ *  (unreachable) and leaving a row's state untouched. */
+export interface AvailabilityResponse {
+  ok: boolean;
+  results: Map<string, AvailabilityInfo>;
+}
+
+/** Check real availability via edge function. Returns { ok, results }: ok=false
+ *  when the batch failed to reach the backend, so callers can show Retry instead
+ *  of an eternal spinner. */
 export async function checkDomainsAvailability(
   domains: string[]
-): Promise<Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; sldBlocked?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>> {
-  const resultMap = new Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; sldBlocked?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>();
+): Promise<AvailabilityResponse> {
+  const results = new Map<string, AvailabilityInfo>();
 
   try {
     const { data, error } = await supabase.functions.invoke("check-domains", {
@@ -197,16 +231,17 @@ export async function checkDomainsAvailability(
 
     if (error) {
       if (import.meta.env.DEV) console.error("Edge function error:", error);
-      return resultMap;
+      return { ok: false, results };
     }
 
     if (data?.results) {
       for (const r of data.results) {
-        resultMap.set(r.domain, {
+        results.set(r.domain, {
           available: r.available,
           price: r.price,
           premium: r.premium,
           likelyPremium: r.likelyPremium,
+          premiumUnverified: r.premiumUnverified,
           uncertain: r.uncertain,
           uncertainReason: r.uncertainReason,
           sldBlocked: r.sldBlocked,
@@ -216,11 +251,12 @@ export async function checkDomainsAvailability(
         });
       }
     }
+
+    return { ok: true, results };
   } catch (err) {
     if (import.meta.env.DEV) console.error("Failed to check domains:", err);
+    return { ok: false, results };
   }
-
-  return resultMap;
 }
 
 // Keep old function for backwards compat but deprecated
