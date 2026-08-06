@@ -840,9 +840,10 @@ export function getServiceClient(): SupabaseClient {
  */
 export async function checkDomains(
   domains: string[],
-  deps: { supabase?: SupabaseClient } = {}
+  deps: { supabase?: SupabaseClient; thirdSignalDeadlineMs?: number } = {}
 ): Promise<DomainCheckResult[]> {
   const supabase = deps.supabase ?? getServiceClient();
+  const thirdSignalDeadlineMs = deps.thirdSignalDeadlineMs ?? 6000;
 
   const batch = domains.slice(0, 50).filter(isValidDomain);
   if (batch.length === 0) return [];
