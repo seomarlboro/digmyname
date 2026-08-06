@@ -921,7 +921,7 @@ export async function checkDomains(
     .map((r) => r.domain);
 
   const domainrResults = THIRD_SIGNAL_ENABLED && fastlyKey && needsThirdSignal.length > 0
-    ? await checkDomainrBatch(needsThirdSignal, fastlyKey, thirdSignalDeadlineMs)
+    ? await checkDomainrBatch(needsThirdSignal, fastlyKey, thirdSignalDeadlineAt)
     : null;
   if (!THIRD_SIGNAL_ENABLED) {
     // Only brand-block matches are acted on while the third signal is offline.

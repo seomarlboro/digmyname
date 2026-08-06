@@ -130,6 +130,12 @@ function validateTld(raw: string): string | null {
 const HARD_BUDGET_MS = 900;
 
 async function invokeCheck(domains: string[]) {
+  // Absolute deadline for the Fastly third signal, captured where the hard-budget
+  // race conceptually starts: 900ms budget minus ~250ms margin for aftermarket
+  // detection, price enrichment and shaping. Because it is absolute, a slow
+  // Pass-1 (registry RDAP) shrinks or skips the Fastly window rather than
+  // stacking a fresh relative window on top of it and losing the race.
+  const thirdSignalDeadlineAt = Date.now() + 650;
   const fallback = domains.map((domain) => ({
     domain,
     available: false,
@@ -142,7 +148,7 @@ async function invokeCheck(domains: string[]) {
     timer = setTimeout(() => resolve(fallback), HARD_BUDGET_MS) as unknown as number;
   });
   try {
-    return await Promise.race([checkDomains(domains, { thirdSignalDeadlineMs: 600 }), budget]);
+    return await Promise.race([checkDomains(domains, { thirdSignalDeadlineAt }), budget]);
   } finally {
     if (timer !== undefined) clearTimeout(timer);
   }
