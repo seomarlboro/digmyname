@@ -87,12 +87,12 @@ export function isLikelyPremium(domain: string): boolean {
 }
 
 // Domainr's RapidAPI endpoint was delisted (Fastly acquisition, 2026-08), so
-// there is currently NO third-party registerability signal. RDAP-404 + NXDOMAIN
-// cannot distinguish a genuinely free name from a registry-reserved / DPML
-// trademark-blocked one. Until the Fastly Domain Research API is wired in
-// (separate ticket), SLDs matching well-known DPML-protected trademarks are
-// downgraded to `uncertain` — never shown available, never priced, never cached.
-const THIRD_SIGNAL_ENABLED = false;
+// the third registerability signal is the Fastly Domain Research API. RDAP-404 +
+// NXDOMAIN alone cannot distinguish a genuinely free name from a registry-reserved
+// / DPML trademark-blocked one. When the flag below is off, SLDs matching
+// well-known DPML-protected trademarks are downgraded to `uncertain` — never shown
+// available, never priced, never cached.
+const THIRD_SIGNAL_ENABLED = true;
 
 // Brand/registry-block rules live in ./availability-rules.ts (isLikelyBlocked).
 
