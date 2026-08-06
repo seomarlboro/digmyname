@@ -25,7 +25,17 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
 );
 import DomainCard from "@/components/DomainCard";
 
-import { generateDomainList, checkDomainsAvailability, checkDomainsFast, type DomainResult } from "@/lib/domainData";
+import { generateDomainList, checkDomainsAvailability, checkDomainsFast, TLD_RANK, type DomainResult } from "@/lib/domainData";
+
+/** Stable ordering key: TLD authority only. Never sort on available/uncertain/
+ *  provisional/price — those mutate over a row's lifecycle and would reorder
+ *  rows mid-search (layout jump). */
+const byTldAuthority = (a: DomainResult, b: DomainResult) => {
+  const ra = TLD_RANK[a.tld.extension] ?? Number.MAX_SAFE_INTEGER;
+  const rb = TLD_RANK[b.tld.extension] ?? Number.MAX_SAFE_INTEGER;
+  if (ra !== rb) return ra - rb;
+  return a.tld.extension.localeCompare(b.tld.extension);
+};
 
 interface DomainSearchProps {
   selectedTlds: Set<string>;
