@@ -46,7 +46,6 @@ const REGISTRAR_LINKS: Record<string, (d: string) => string> = {
   Cloudflare: () => `https://www.cloudflare.com/products/registrar/`,
   OVHcloud: (d) =>
     `https://order.ca.ovhcloud.com/us/order/webcloud/?#/webCloud/domain/select?selection=~()&domain=${encodeURIComponent(d)}`,
-  "Google Domains": (d) => `https://domains.google/registrar/?searchTerm=${encodeURIComponent(d)}`,
 };
 
 function registerUrl(registrar: string, domain?: string | null): string {

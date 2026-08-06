@@ -53,7 +53,6 @@ const REGISTRAR_SOURCES: Record<string, { url: string; parseMode: "tldspy" | "po
   Cloudflare: { url: "https://tldspy.com/registrar/cloudflare", parseMode: "tldspy" },
   GoDaddy: { url: "https://tldspy.com/registrar/godaddy", parseMode: "tldspy" },
   OVHcloud: { url: "https://tldspy.com/registrar/ovhcloud", parseMode: "tldspy" },
-  "Google Domains": { url: "https://tldspy.com/registrar/google-domains", parseMode: "tldspy" },
   Porkbun: { url: "https://tldspy.com/registrar/porkbun", parseMode: "tldspy" },
   Spaceship: { url: "https://tldspy.com/registrar/spaceship", parseMode: "tldspy" },
   Namecheap: { url: "https://tldspy.com/registrar/namecheap", parseMode: "tldspy" },
