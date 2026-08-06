@@ -159,18 +159,13 @@ const Speed = () => {
 
         {/* Benchmarks */}
         <section className="mt-16">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="max-w-2xl">
-              <h2 className="section-title">Reference numbers</h2>
-              <p className="section-lede">
-                Single datacenter connection, August 2026. Lower is better. Repeat lookups within a
-                60-second window are served from a global edge cache in ~70 ms — first-time lookups
-                run the full live pipeline (~370 ms median).
-              </p>
-            </div>
-            <span className="shrink-0 whitespace-nowrap font-mono text-xs uppercase tracking-widest text-muted-foreground sm:mt-1">
-              Measured, not marketed
-            </span>
+          <div className="max-w-2xl">
+            <h2 className="section-title">Reference numbers</h2>
+            <p className="section-lede">
+              Single datacenter connection, August 2026. Lower is better. Repeat lookups within a
+              60-second window are served from a global edge cache in ~70 ms — first-time lookups
+              run the full live pipeline (~370 ms median).
+            </p>
           </div>
 
           <div className="surface-card-lg mt-6 overflow-hidden">
