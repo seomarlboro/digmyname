@@ -159,7 +159,19 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
         setResults((prev) =>
           prev.map((r) => {
             const info = fastMap.get(r.domain);
-            return info ? { ...r, available: info.available, uncertain: info.uncertain, checking: false, provisional: true } : r;
+            if (!info) return r;
+            const confident = !info.uncertain;
+            return {
+              ...r,
+              available: info.available,
+              uncertain: info.uncertain,
+              // Only graduate out of the spinner on a confident fast verdict. An
+              // uncertain fast answer (e.g. NXDOMAIN -> available:true + uncertain:true)
+              // stays in Checking until the authoritative batch confirms, so we never
+              // flash a priced "available" card or an amber card off a DNS-only probe.
+              checking: confident ? false : r.checking,
+              provisional: confident ? true : r.provisional,
+            };
           })
         );
         markFirstAnswer();
