@@ -201,6 +201,9 @@ const HowItWorks = () => {
         {/* Unverified state */}
         <Section title={'The "Unverified" state'}>
           <div className="surface-card p-8">
+            <div className="icon-frame icon-frame-warning mb-4">
+              <AlertCircle />
+            </div>
             <p className="mb-4 text-muted-foreground leading-relaxed">
               When our sources disagree, or a registry server times out, every
               other tool we tested defaults to either{" "}
