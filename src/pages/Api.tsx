@@ -5,9 +5,9 @@ import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
-import WaitlistForm from "@/components/WaitlistForm";
+import WaitlistSection from "@/components/WaitlistSection";
 import { NetworkIcon, StopwatchIcon, LicenseIcon } from "@/components/StatIcons";
-import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
+import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
 
 const API_BASE = "https://api.digmyname.com/functions/v1/public-api";
 
