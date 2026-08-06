@@ -901,17 +901,21 @@ export async function checkDomains(
   const needsThirdSignal = baseResults
     .filter((r) =>
       shouldEscalateToDomainr({ ...r, likelyPremium: r.likelyPremium ?? isLikelyPremium(r.domain) }) ||
-      (r.available && isLikelyBrandBlocked(r.domain))
+      (r.available && isLikelyBlocked(r.domain))
     )
     .map((r) => r.domain);
 
   const domainrResults = THIRD_SIGNAL_ENABLED && rapidKey && needsThirdSignal.length > 0
     ? await checkDomainrBatch(needsThirdSignal, rapidKey)
     : null;
-  if (!THIRD_SIGNAL_ENABLED && needsThirdSignal.length > 0) {
-    console.log(
-      `third-signal offline (Domainr/RapidAPI delisted) — ${needsThirdSignal.length} flagged name(s); brand-block matches downgraded to uncertain`
-    );
+  if (!THIRD_SIGNAL_ENABLED) {
+    // Only brand-block matches are acted on while the third signal is offline.
+    const brandFlagged = baseResults.filter((r) => r.available && !r.uncertain && isLikelyBlocked(r.domain)).length;
+    if (brandFlagged > 0) {
+      console.log(
+        `third-signal offline (Domainr/RapidAPI delisted) — ${brandFlagged} brand-blocked name(s) downgraded to uncertain`
+      );
+    }
   }
 
   const fresh: DomainCheckResult[] = [];
