@@ -617,22 +617,26 @@ let domainrDisabledReason: string | null = null;
 let domainrDisabledUntil = 0;
 let domainrCooldownUntil = 0;
 
-async function checkDomainrBatch(domains: string[], apiKey: string): Promise<Map<string, DomainrStatusEntry> | null> {
+async function checkDomainrBatch(domains: string[], apiKey: string, deadlineMs = 6000): Promise<Map<string, DomainrStatusEntry> | null> {
   if (domains.length === 0) return new Map();
   if (Date.now() < domainrDisabledUntil) return null;
   if (Date.now() < domainrCooldownUntil) return null;
 
+  const deadlineAt = Date.now() + Math.min(deadlineMs, 6000);
   const out = new Map<string, DomainrStatusEntry>();
 
   await pMap(domains, 8, async (domain) => {
     // Breaker check before every request so the fan-out stops issuing calls as
     // soon as the first 401/403/429 trips it.
     if (Date.now() < domainrDisabledUntil || Date.now() < domainrCooldownUntil) return;
+    // Deadline-aware: never start a call that cannot plausibly finish in time.
+    const remaining = deadlineAt - Date.now();
+    if (remaining < 150) return;
     try {
       const url = `https://api.fastly.com/domain-management/v1/tools/status?domain=${encodeURIComponent(domain)}`;
       const resp = await fetch(url, {
         headers: { "Fastly-Key": apiKey, "Accept": "application/json" },
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(Math.min(remaining, 6000)),
       });
       if (!resp.ok) {
         const txt = await resp.text().catch(() => "");
