@@ -16,6 +16,11 @@ describe("interpretDomainr", () => {
       .toEqual({ kind: "taken", forSale: true });
   });
 
+  it("bare undelegated → unknown (absence of evidence, never a sale)", () => {
+    expect(interpretDomainr({ domain: "x.com", status: "undelegated" }))
+      .toEqual({ kind: "unknown" });
+  });
+
   it("undelegated inactive → available", () => {
     expect(interpretDomainr({ domain: "x.com", status: "undelegated inactive" }))
       .toEqual({ kind: "available", premium: false });
