@@ -1,3 +1,5 @@
+import { Section } from "@/components/PageKit";
+
 const faqs = [
   {
     q: "Is DigMyName free to use?",
@@ -42,7 +44,7 @@ const FAQ = () => {
           }),
         }}
       />
-      <h2 className="mb-8 text-2xl md:text-3xl font-bold tracking-tight text-foreground">Frequently asked questions</h2>
+      <Section title="Frequently asked questions">
       <dl className="space-y-6">
         {faqs.map((f) => (
           <div key={f.q} className="rounded-xl border border-border p-5">
@@ -51,6 +53,7 @@ const FAQ = () => {
           </div>
         ))}
       </dl>
+      </Section>
     </section>
   );
 };

@@ -4,7 +4,7 @@ import { Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
 import { LottieAward } from "@/components/LottieAward";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
 import { StopwatchIcon, KeyboardIcon, BoltIcon } from "@/components/StatIcons";
 
 
@@ -121,7 +121,7 @@ const Speed = () => {
           <div className="flex flex-1 items-center gap-4 sm:gap-5 min-w-0">
             <LottieAward className="h-16 w-16 shrink-0 sm:h-20 sm:w-20" />
             <div className="min-w-0 flex-1">
-              <h2 className="text-xl font-bold tracking-tight sm:text-[28px]">Beat our number, take the crown</h2>
+              <h2 className="section-title">Beat our number, take the crown</h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-lg">
                 Show us a faster public lookup and we'll feature your time here with full credit and a link back.
               </p>
@@ -138,12 +138,11 @@ const Speed = () => {
 
 
         {/* What the timer includes */}
-        <section className="mt-16">
-          <h2 className="section-title">What the timer includes</h2>
-          <p className="section-lede max-w-2xl">
-            The stopwatch starts at your final keystroke and stops when the first card paints.
-          </p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <Section
+          title="What the timer includes"
+          lede="The stopwatch starts at your final keystroke and stops when the first card paints."
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
             {pipeline.map((step) => (
               <FeatureCard
                 key={step.title}
@@ -155,20 +154,14 @@ const Speed = () => {
               </FeatureCard>
             ))}
           </div>
-        </section>
+        </Section>
 
         {/* Benchmarks */}
-        <section className="mt-16">
-          <div className="max-w-2xl">
-            <h2 className="section-title">Reference numbers</h2>
-            <p className="section-lede">
-              Single datacenter connection, August 2026. Lower is better. Repeat lookups within a
-              60-second window are served from a global edge cache in ~70 ms — first-time lookups
-              run the full live pipeline (~370 ms median).
-            </p>
-          </div>
-
-          <div className="surface-card-lg mt-6 overflow-hidden">
+        <Section
+          title="Reference numbers"
+          lede="Single datacenter connection, August 2026. Lower is better. Repeat lookups within a 60-second window are served from a global edge cache in ~70 ms — first-time lookups run the full live pipeline (~370 ms median)."
+        >
+          <div className="surface-card-lg overflow-hidden">
             <div className="hidden grid-cols-[1fr_140px_320px] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid">
               <div>Target</div>
               <div className="hidden sm:block">Latency</div>
@@ -220,18 +213,17 @@ const Speed = () => {
             Your own numbers will differ with distance, network and TLD — which is exactly why the timer in the
             app measures your session, not ours.
           </p>
-        </section>
+        </Section>
 
         {/* Honesty */}
-        <section className="mt-16 border-t border-border/60 pt-8">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">The small print on “fastest”</h2>
-          <p className="mt-3 max-w-none text-muted-foreground">
+        <Section title="The small print on “fastest”">
+          <p className="max-w-none text-muted-foreground">
             Nobody can prove a universal latency record, and anybody who states one flat-out is selling you
             something. Latency depends on where you are, which TLD you query and whether the answer was cached.
             So we make the loud claim and then hand you the stopwatch to check it. If we are second, the number
             on your screen will say so — and we will keep shaving it down until we are not.
           </p>
-        </section>
+        </Section>
 
         <div className="mt-12 flex flex-wrap gap-3">
           <Button asChild size="lg">

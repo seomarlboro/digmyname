@@ -180,14 +180,10 @@ const HowItWorks = () => {
 
 
         {/* Sources */}
-        <section className="py-12">
-          <h2 className="section-title">
-            Four sources, one truth
-          </h2>
-          <p className="section-lede mb-8 max-w-2xl">
-            Every search runs through this chain in parallel. We only commit to
-            an answer when the signals agree.
-          </p>
+        <Section
+          title="Four sources, one truth"
+          lede="Every search runs through this chain in parallel. We only commit to an answer when the signals agree."
+        >
           <div className="grid gap-4 sm:grid-cols-2">
             {sources.map((s, i) => (
               <FeatureCard
@@ -200,19 +196,11 @@ const HowItWorks = () => {
               </FeatureCard>
             ))}
           </div>
-        </section>
+        </Section>
 
         {/* Unverified state */}
-        <section className="py-12">
+        <Section title={'The "Unverified" state'}>
           <div className="surface-card p-8">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="icon-frame icon-frame-warning">
-                <AlertCircle />
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                The "Unverified" state
-              </h2>
-            </div>
             <p className="mb-4 text-muted-foreground leading-relaxed">
               When our sources disagree, or a registry server times out, every
               other tool we tested defaults to either{" "}
@@ -227,16 +215,13 @@ const HowItWorks = () => {
               sells confidence and one that earns it.
             </p>
           </div>
-        </section>
+        </Section>
 
         {/* Comparison */}
-        <section className="py-12">
-          <h2 className="mb-2 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-            How we compare
-          </h2>
-          <p className="mb-8 text-muted-foreground">
-            Honest take after using each tool ourselves.
-          </p>
+        <Section
+          title="How we compare"
+          lede="Honest take after using each tool ourselves."
+        >
           <div className="surface-card-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -293,13 +278,12 @@ const HowItWorks = () => {
             Based on public testing in 2026. Features change — let us know if
             something here is out of date.
           </p>
-        </section>
+        </Section>
 
         {/* What we don't claim */}
-        <section className="py-12">
-          <h2 className="mb-6 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-            What we're <span className="text-muted-foreground">not</span>
-          </h2>
+        <Section
+          title={<>What we're <span className="text-muted-foreground">not</span></>}
+        >
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="surface-card p-5">
               <Globe className="mb-3 h-5 w-5 text-muted-foreground" />
@@ -335,13 +319,10 @@ const HowItWorks = () => {
               </p>
             </div>
           </div>
-        </section>
+        </Section>
 
         {/* FAQ */}
-        <section className="py-12">
-          <h2 className="mb-8 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-            Frequently asked
-          </h2>
+        <Section title="Frequently asked">
           <dl className="space-y-4">
             {faqs.map((f) => (
               <div
@@ -355,10 +336,10 @@ const HowItWorks = () => {
               </div>
             ))}
           </dl>
-        </section>
+        </Section>
 
         {/* Developers */}
-        <section className="py-12">
+        <section className="mt-14">
           <div className="surface-card flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-bold tracking-tight text-foreground">
@@ -375,17 +356,15 @@ const HowItWorks = () => {
         </section>
 
         {/* CTA */}
-        <section className="py-16 text-center">
-          <h2 className="mb-4 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-            Try an honest search.
-          </h2>
-          <p className="mx-auto mb-8 max-w-xl text-muted-foreground">
+        <Section className="text-center">
+          <h2 className="section-title">Try an honest search.</h2>
+          <p className="mx-auto mb-8 mt-2 max-w-xl text-muted-foreground">
             Type any name and see four-source verification in action.
           </p>
           <Button asChild size="lg" className="btn-gradient h-12 px-8 text-base">
             <Link to="/">Start searching</Link>
           </Button>
-        </section>
+        </Section>
       </PageMain>
     </div>
   );
