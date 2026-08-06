@@ -69,6 +69,11 @@ export const TLD_LIST: TLD[] = [
   { extension: "lol", regPrice: 24.99, renewPrice: 29.99, features: ["Free SSL"] },
 ];
 
+/** Authority rank per TLD = its index in the curated TLD_LIST (lower = more
+ *  authoritative). Immutable for a given extension, so sorting on it never
+ *  reorders rows as availability/pricing data arrives. */
+export const TLD_RANK: Record<string, number> = Object.fromEntries(TLD_LIST.map((t, i) => [t.extension, i]));
+
 export const VARIATION_PREFIXES = ["get", "my", "the", "app", "pro", "hub", "lab", "try", "go", "use"];
 
 export interface DomainResult {
