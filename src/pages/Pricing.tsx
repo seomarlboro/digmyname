@@ -575,7 +575,7 @@ const DetailedTldTable = ({ summary: s, mode }: { summary: TldSummary; mode: Pri
   return (
     <div className="surface-card-lg overflow-x-auto">
       <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4">
-        <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
+        <span className="font-display text-2xl font-extrabold tracking-tight text-mint">.{s.tld}</span>
         <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>
         <span className={cn("ml-auto text-xs", isStale(newestUpdated) ? "text-warning" : "text-muted-foreground")}>
           Updated {formatUpdated(newestUpdated)}
