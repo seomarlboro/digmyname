@@ -991,20 +991,18 @@ export async function checkDomains(
         listingUrl: verdict.forSale ? `https://www.afternic.com/domain/${base.domain}` : undefined,
       });
     } else {
-      // No Domainr verdict. An absence-only "available" (RDAP 404 + NXDOMAIN)
-      // cannot be distinguished from a registry-reserved / DPML-blocked name.
-      // Downgrade to honest uncertain (never shown available, never priced,
-      // never cached) when either:
-      //   • Domainr was reachable but had no signal for this name, OR
-      //   • the SLD trips the brand-block list — even with Domainr down
-      //     (degraded-mode rider: this is what stops google.* from being sold).
-      const absenceOnly =
-        base.available && base.uncertain !== true &&
-        (base.checkedVia === "rdap" || base.checkedVia === "dns");
-      const downgrade = absenceOnly && (domainrResults !== null || isLikelyBlocked(base.domain));
-      fresh.push(downgrade
-        ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
-        : base);
+      // No third-signal verdict. An absence-only "available" (RDAP 404 +
+      // NXDOMAIN) cannot be distinguished from a registry-reserved / DPML
+      // trademark-blocked name. Standing safeguard: brand-blocked SLDs are
+      // downgraded to honest uncertain (never available, never priced,
+      // never cached), regardless of third-signal availability.
+      const brandBlockRisk =
+        base.available && !base.uncertain && isLikelyBrandBlocked(base.domain);
+      fresh.push(
+        brandBlockRisk
+          ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
+          : base
+      );
     }
   }
 
