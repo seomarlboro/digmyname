@@ -603,7 +603,7 @@ const DetailedTldTable = ({ summary: s, mode }: { summary: TldSummary; mode: Pri
             return (
               <tr key={p.id} className="border-b border-border transition-colors hover:bg-muted/10">
                 <td className="px-5 py-4">
-                  <span className={`text-base font-bold ${isCheapest ? "text-mint" : c.text}`}>
+                  <span className={`text-base font-bold ${c.text}`}>
                     {p.registrar}
                   </span>
                   {isCheapest && <Award className="ml-1.5 inline h-4 w-4 text-mint" />}
