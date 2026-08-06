@@ -622,7 +622,7 @@ async function checkDomainrBatch(domains: string[], apiKey: string, deadlineMs =
   if (Date.now() < domainrDisabledUntil) return null;
   if (Date.now() < domainrCooldownUntil) return null;
 
-  const deadlineAt = Date.now() + Math.min(deadlineMs, 6000);
+  const deadlineAt = Date.now() + deadlineMs;
   const out = new Map<string, DomainrStatusEntry>();
 
   await pMap(domains, 8, async (domain) => {
