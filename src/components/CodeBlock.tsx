@@ -80,7 +80,7 @@ export function CodeBlock({
           {copied ? "Copied" : "Copy"}
         </Button>
       </div>
-      <div className="overflow-x-auto p-4 text-[13px] leading-relaxed">
+      <div className="overflow-x-auto p-4 text-sm leading-relaxed">
         <SyntaxHighlighter
           language={current.language}
           style={vscDarkPlus}
@@ -88,8 +88,9 @@ export function CodeBlock({
             margin: 0,
             padding: 0,
             background: "transparent",
-            fontSize: "13px",
+            fontSize: "14px",
             lineHeight: "1.6",
+
           }}
           codeTagProps={{
             style: {

@@ -258,24 +258,15 @@ const Mcp = () => {
               and restart the client.
             </p>
 
-            {/* One-line CLI install */}
-            <div className="mb-4">
-              <CodeBlock
-                label="Claude Code · one command"
-                language="bash"
-                code={`$ ${oneLineCommand}`}
-                copyText={oneLineCommand}
-                onCopy={() => trackMcpEvent("copy_config", "claude_cli")}
-              />
-            </div>
-
-            {/* JSON config */}
+            {/* Install snippets */}
             <CodeBlock
-              label="claude_desktop_config.json"
-              language="json"
-              code={configSnippet}
-              onCopy={() => trackMcpEvent("copy_config", "claude_desktop")}
+              tabs={[
+                { label: "Claude Code", language: "bash", code: oneLineCommand },
+                { label: "claude_desktop_config.json", language: "json", code: configSnippet },
+              ]}
+              onCopy={() => trackMcpEvent("copy_config", "mcp_quickstart")}
             />
+
 
             <p className="text-sm text-muted-foreground mt-4 flex items-center gap-2">
               <Terminal className="w-4 h-4 text-primary" />
