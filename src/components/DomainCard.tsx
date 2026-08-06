@@ -127,7 +127,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-              {name}.<span className="text-primary">{ext}</span>
+              <span>{name}.<span className="text-primary">{ext}</span></span>
               <AlertCircle className="h-4 w-4 text-amber-500" />
             </h3>
             {brandProtected ? (
