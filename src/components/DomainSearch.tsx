@@ -159,7 +159,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
         setResults((prev) =>
           prev.map((r) => {
             const info = fastMap.get(r.domain);
-            return info ? { ...r, available: info.available, uncertain: info.uncertain } : r;
+            return info ? { ...r, available: info.available, uncertain: info.uncertain, checking: false, provisional: true } : r;
           })
         );
         markFirstAnswer();
