@@ -128,7 +128,7 @@ export function CodeBlock({
           codeTagProps={{
             style: {
               fontFamily:
-                'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+                '"Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
             },
           }}
         >
