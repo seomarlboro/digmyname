@@ -587,7 +587,8 @@ const DetailedTldTable = ({ summary: s, mode }: { summary: TldSummary; mode: Pri
         <tbody>
           {sorted.map((p, i) => {
             const c = getRegistrarColor(p.registrar);
-            const isCheapest = i === 0;
+            // Award the cheapest by the CURRENT mode's price.
+            const isCheapest = i === 0 && modePrice(p, mode) != null;
             const renewHigher = p.renew_price > p.reg_price * 1.8;
 
             return (
@@ -599,17 +600,27 @@ const DetailedTldTable = ({ summary: s, mode }: { summary: TldSummary; mode: Pri
                   {isCheapest && <Award className="ml-1.5 inline h-4 w-4 text-mint" />}
                 </td>
                 <td className="px-5 py-4">
-                  <span className={`font-mono text-base font-extrabold tabular-nums ${isCheapest ? "text-mint" : "text-foreground"}`}>
+                  <span className={`font-mono text-base font-extrabold tabular-nums ${isCheapest && mode === "reg" ? "text-mint" : "text-foreground"}`}>
                     ${p.reg_price.toFixed(2)}
                   </span>
                   <span className="text-sm text-muted-foreground">/yr</span>
                 </td>
                 <td className="px-5 py-4">
-                  <span className={`font-mono text-base font-extrabold tabular-nums ${renewHigher ? "text-warning" : "text-foreground"}`}>
+                  <span
+                    className={cn(
+                      "font-mono text-base font-extrabold tabular-nums",
+                      isCheapest && mode === "renew"
+                        ? "text-mint"
+                        : renewHigher
+                          ? "text-warning"
+                          : "text-foreground",
+                    )}
+                  >
                     ${p.renew_price.toFixed(2)}
                   </span>
                   <span className="text-sm text-muted-foreground">/yr</span>
                 </td>
+
                 <td className="px-5 py-4">
                   {p.transfer_price != null ? (
                     <>
