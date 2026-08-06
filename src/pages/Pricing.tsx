@@ -468,25 +468,35 @@ const Pricing = () => {
   );
 };
 
+/* ─── n/a cell ─────────────────────────────────────────── */
+
+/** Consistent, height-stable placeholder so rows don't shrink when a mode has no data. */
+const NaCell = () => (
+  <div className="flex min-h-[46px] items-center text-sm text-muted-foreground">n/a</div>
+);
+
 /* ─── Renewal trap ─────────────────────────────────────── */
 
-const RenewalTrap = ({ summary: s }: { summary: TldSummary }) => {
-  if (!s.trapMultiplier) {
+const RenewalTrap = ({ row }: { row: RegistrarPrice }) => {
+  const ratio = row.reg_price > 0 ? row.renew_price / row.reg_price : null;
+  const isTrap = ratio != null && ratio >= 2;
+
+  if (!isTrap) {
     return (
-      <div>
+      <div className="min-h-[46px]">
         <Badge variant="secondary" className="text-[11px]">Fair renewal</Badge>
         <p className="mt-1 font-mono text-sm tabular-nums text-muted-foreground">
-          ${s.cheapestReg.reg_price.toFixed(2)} → ${s.cheapestReg.renew_price.toFixed(2)}
+          ${row.reg_price.toFixed(2)} → ${row.renew_price.toFixed(2)}
         </p>
       </div>
     );
   }
 
-  const pct = Math.round((s.cheapestReg.renew_price / s.cheapestReg.reg_price - 1) * 100);
+  const pct = Math.round((ratio! - 1) * 100);
   const severe = pct >= 500;
 
   return (
-    <div>
+    <div className="min-h-[46px]">
       <Badge
         className={cn(
           "text-[11px] font-bold",
@@ -499,7 +509,7 @@ const RenewalTrap = ({ summary: s }: { summary: TldSummary }) => {
         +{pct.toLocaleString()}% at renewal
       </Badge>
       <p className="mt-1 font-mono text-sm tabular-nums text-muted-foreground">
-        ${s.cheapestReg.reg_price.toFixed(2)} → ${s.cheapestReg.renew_price.toFixed(2)}
+        ${row.reg_price.toFixed(2)} → ${row.renew_price.toFixed(2)}
       </p>
     </div>
   );
@@ -520,13 +530,16 @@ const SummaryPriceCell = ({
 }) => {
   const c = getRegistrarColor(registrar);
   return (
-    <div>
-      <span className={`text-sm font-medium ${c.text}`}>{registrar}</span>
-      {promo && (
-        <Badge variant="secondary" className="ml-1.5 text-[10px] font-mono px-1.5 py-0">
-          {promo}
-        </Badge>
-      )}
+    <div className="min-h-[46px]">
+      {/* Fixed-height line so the promo badge never changes row height between modes. */}
+      <div className="flex min-h-[22px] items-center gap-1.5">
+        <span className={`text-sm font-medium ${c.text}`}>{registrar}</span>
+        {promo && (
+          <Badge variant="secondary" className="text-[10px] font-mono px-1.5 py-0">
+            {promo}
+          </Badge>
+        )}
+      </div>
       <p className="mt-0.5">
         <span className={`text-base font-extrabold ${isWarning ? "text-warning" : "text-foreground"}`}>${price.toFixed(2)}</span>
         <span className="text-sm text-muted-foreground">/yr</span>
@@ -537,9 +550,18 @@ const SummaryPriceCell = ({
 
 /* ─── Detailed TLD Table ───────────────────────────────── */
 
-const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
-  const sorted = [...s.prices].sort((a, b) => a.reg_price - b.reg_price);
+const DetailedTldTable = ({ summary: s, mode }: { summary: TldSummary; mode: PriceMode }) => {
+  // Sort by the current mode's price; rows lacking that price sort last.
+  const sorted = [...s.prices].sort((a, b) => {
+    const pa = modePrice(a, mode);
+    const pb = modePrice(b, mode);
+    if (pa == null && pb == null) return 0;
+    if (pa == null) return 1;
+    if (pb == null) return -1;
+    return pa - pb;
+  });
   const newestUpdated = sorted.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at;
+
 
   return (
     <div className="surface-card-lg overflow-x-auto">
