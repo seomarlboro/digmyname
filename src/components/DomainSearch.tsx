@@ -207,6 +207,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 ...r,
                 available: info.available,
                 checking: false,
+                provisional: false,
                 gdPrice: info.price,
                 premium: info.premium,
                 likelyPremium: info.likelyPremium,
@@ -263,10 +264,11 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
       prev.map((r) => {
         if (r.domain !== domain) return r;
         const info = availMap.get(domain);
-        if (!info) return { ...r, checking: false, uncertain: true };
+        if (!info) return { ...r, checking: false, provisional: false, uncertain: true };
         return {
           ...r,
           checking: false,
+          provisional: false,
           available: info.available,
           gdPrice: info.price,
           premium: info.premium,
