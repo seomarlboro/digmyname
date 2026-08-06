@@ -558,6 +558,29 @@ export function getTldPricing(): Map<string, TldPrice> {
   return pricingCache?.map ?? new Map();
 }
 
+/** Fire-and-forget prewarm: kick the catalog load into the background if it's
+ *  cold, never awaited. Called once at the top of checkDomains so the catalog is
+ *  usually warm before enrichment WITHOUT ever sitting on the request path. */
+export function warmTldPricing(): void {
+  const fresh = pricingCache && pricingCache.expiresAt > Date.now();
+  if (fresh || pricingInflight) return;
+  pricingInflight = loadTldPricing().finally(() => {
+    pricingInflight = null;
+  });
+  const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+  rt?.waitUntil?.(pricingInflight.catch(() => {}));
+}
+
+/** Warm-only accessor: returns whatever pricing is already cached (possibly
+ *  empty) and triggers a background refresh if cold — but NEVER awaits it. The
+ *  availability path uses this so a cold catalog yields price-less available rows
+ *  (TTL-clamped to 600s, so they re-price on a warmer isolate) instead of stalling
+ *  the whole search for the 4–14s catalog download. */
+export function getWarmTldPricingOnly(): Map<string, TldPrice> {
+  warmTldPricing();
+  return pricingCache?.map ?? new Map();
+}
+
 // The first attempt is hard-capped at 4s so nothing that could ever end up on
 // a request path pays a long tail. Porkbun's catalog endpoint measurably takes
 // ~14s to serve its ~80KB payload, so the retries (which only ever run in the
