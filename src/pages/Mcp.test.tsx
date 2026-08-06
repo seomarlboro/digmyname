@@ -38,11 +38,12 @@ describe("Mcp page", () => {
     expect(screen.getAllByText(/domain-check-skills-mcp/).length).toBeGreaterThan(0);
   });
 
-  it("shows all three tools", () => {
+  it("shows all four tools", () => {
     renderPage();
     expect(screen.getByText("check_domain")).toBeInTheDocument();
     expect(screen.getByText("search_domains")).toBeInTheDocument();
-    expect(screen.getByText("get_registrars")).toBeInTheDocument();
+    expect(screen.getByText("compare_registrars")).toBeInTheDocument();
+    expect(screen.getByText("get_domain_age")).toBeInTheDocument();
   });
 });
 
