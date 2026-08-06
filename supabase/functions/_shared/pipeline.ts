@@ -1108,6 +1108,9 @@ export async function checkDomains(
   const cacheable = fresh
     .map((r) => {
       let ttl = ttlSecondsFor(r.checkedVia, r.uncertain === true);
+      // premium-unverified "available" has no confirmed price — don't lock it in
+      // for hours; re-check soon so a real price can attach on a warmer isolate.
+      if (r.premiumUnverified) ttl = Math.min(ttl, 600);
       // Don't lock in a price-less "available" result for hours just because
       // the pricing catalog was still warming up — re-check it soon.
       if (ttl > 600 && r.available && r.price == null) ttl = 600;
@@ -1133,6 +1136,7 @@ export async function checkDomains(
           reg_price: r.price ?? null,
           premium: r.premium ?? false,
           likely_premium: r.likelyPremium ?? false,
+          premium_unverified: r.premiumUnverified ?? false,
           for_sale: r.forSale ?? false,
           for_sale_via: r.forSaleVia ?? null,
           listing_url: r.listingUrl ?? null,
