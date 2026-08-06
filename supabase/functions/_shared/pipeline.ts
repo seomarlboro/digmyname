@@ -664,7 +664,8 @@ async function checkDomainrBatch(domains: string[], apiKey: string): Promise<Map
 // Domainr status tokens are a SET ordered by increasing precedence. The docs say
 // the right-most token is the most important, but in practice the tokens fall into
 // three buckets:
-//   • FREE:    inactive | undelegated | unregistered  → available for registration
+//   • FREE:    inactive | unregistered                 → available for registration
+//     (bare `undelegated` is absence-of-evidence, NOT free — see availability-rules.ts)
 //   • PREMIUM: premium                                  → available, registry-premium price
 //   • TAKEN:   active | parked | claimed | reserved | dpml | pending | disallowed |
 //              invalid | suffix | tld | zone | deleting | expiring
@@ -846,7 +847,7 @@ export async function checkDomains(
   const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
   const porkbun = porkbunKey && porkbunSecret ? { key: porkbunKey, secret: porkbunSecret } : null;
 
-  const rapidKey = Deno.env.get("RAPIDAPI_DOMAINR_KEY");
+  const fastlyKey = Deno.env.get("FASTLY_API_TOKEN");
 
   // ---- L1: in-isolate hot cache (zero network, zero DB) ----------------
   const cachedMap = new Map<string, DomainCheckResult>();
@@ -907,15 +908,15 @@ export async function checkDomains(
     )
     .map((r) => r.domain);
 
-  const domainrResults = THIRD_SIGNAL_ENABLED && rapidKey && needsThirdSignal.length > 0
-    ? await checkDomainrBatch(needsThirdSignal, rapidKey)
+  const domainrResults = THIRD_SIGNAL_ENABLED && fastlyKey && needsThirdSignal.length > 0
+    ? await checkDomainrBatch(needsThirdSignal, fastlyKey)
     : null;
   if (!THIRD_SIGNAL_ENABLED) {
     // Only brand-block matches are acted on while the third signal is offline.
     const brandFlagged = baseResults.filter((r) => r.available && !r.uncertain && isLikelyBlocked(r.domain)).length;
     if (brandFlagged > 0) {
       console.log(
-        `third-signal offline (Domainr/RapidAPI delisted) — ${brandFlagged} brand-blocked name(s) downgraded to uncertain`
+        `third-signal disabled by flag — ${brandFlagged} brand-blocked name(s) downgraded to uncertain`
       );
     }
   }
