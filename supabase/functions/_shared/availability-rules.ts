@@ -53,23 +53,54 @@ export function interpretDomainr(entry: DomainrStatusEntry | undefined): Domainr
  *  SLD match only (no substring matching — "googleplex.com" must NOT match).
  *  False positives here cost us an honest "Unverified" on a name we could have
  *  sold; false negatives sell an unregisterable name. Curated, not exhaustive. */
-const BLOCKED_SLDS = new Set([
-  // ICANN / registry-reserved labels
-  "nic", "whois", "www", "rdds", "internic", "icann", "iana",
-  // DPML-tier brands
-  "google", "youtube", "gmail", "android", "chrome",
-  "microsoft", "windows", "xbox", "office", "skype", "bing",
-  "apple", "iphone", "ipad", "icloud", "itunes",
-  "amazon", "aws", "kindle", "alexa",
-  "facebook", "meta", "instagram", "whatsapp", "messenger",
-  "netflix", "disney", "tesla", "nike", "adidas",
-  "samsung", "sony", "playstation", "nintendo",
-  "oracle", "intel", "nvidia", "cisco", "ibm", "adobe",
-  "paypal", "visa", "mastercard", "amex",
-  "twitter", "tiktok", "spotify", "uber", "airbnb",
-  "salesforce", "walmart", "cocacola", "coca-cola",
-  "mcdonalds", "starbucks", "lego", "rolex", "gucci", "chanel",
-  "ferrari", "bmw", "toyota", "mercedes", "porsche", "audi",
+const BLOCKED_SLDS = new Set<string>([
+  // --- Tech / internet -----------------------------------------------------
+  "adobe", "airbnb", "alexa", "alibaba", "aliexpress", "amazon", "amd",
+  "android", "anthropic", "apple", "arm", "atlassian", "aws", "azure",
+  "baidu", "bing", "broadcom", "chatgpt", "chrome", "cisco", "cloudflare",
+  "coinbase", "dell", "discord", "dropbox", "ebay", "epicgames", "ericsson",
+  "facebook", "figma", "firefox", "github", "gitlab", "gmail", "google",
+  "hp", "huawei", "ibm", "icloud", "instagram", "intel", "ipad", "iphone",
+  "itunes", "kindle", "linkedin", "linux", "messenger", "meta", "microsoft",
+  "mozilla", "netflix", "nintendo", "nokia", "notion", "nvidia", "office",
+  "openai", "oracle", "palantir", "paypal", "pinterest", "playstation",
+  "qualcomm", "reddit", "salesforce", "samsung", "sap", "shopify", "siemens",
+  "skype", "slack", "snapchat", "sony", "spacex", "spotify", "stripe",
+  "telegram", "tencent", "tesla", "tiktok", "twitch", "twitter", "uber",
+  "vmware", "whatsapp", "windows", "xbox", "xiaomi", "yahoo", "youtube",
+  "zoom",
+  // --- Finance -------------------------------------------------------------
+  "amex", "barclays", "bbva", "blackrock", "citibank", "citigroup",
+  "goldmansachs", "hsbc", "jpmorgan", "mastercard", "morganstanley",
+  "nasdaq", "santander", "visa", "wellsfargo",
+  // --- Retail / consumer ---------------------------------------------------
+  "adidas", "burgerking", "coca-cola", "cocacola", "colgate", "costco",
+  "danone", "gillette", "heineken", "ikea", "kelloggs", "kfc", "lego",
+  "lidl", "loreal", "mcdonalds", "nescafe", "nestle", "nike", "pepsi",
+  "pepsico", "puma", "reebok", "starbucks", "subway", "target", "unilever",
+  "walmart",
+  // --- Luxury --------------------------------------------------------------
+  "balenciaga", "bulgari", "burberry", "cartier", "chanel", "dior",
+  "fendi", "gucci", "hermes", "louisvuitton", "omega", "prada", "rolex",
+  "tiffany", "versace",
+  // --- Automotive ----------------------------------------------------------
+  "audi", "bentley", "bmw", "bugatti", "chevrolet", "ferrari", "ford",
+  "honda", "hyundai", "jaguar", "kia", "lamborghini", "landrover", "lexus",
+  "maserati", "mazda", "mercedes", "mercedesbenz", "nissan", "peugeot",
+  "porsche", "renault", "subaru", "toyota", "volkswagen", "volvo",
+  // --- Media / entertainment ----------------------------------------------
+  "cnn", "disney", "espn", "hbo", "hulu", "marvel", "nbc",
+  "netflixoriginals", "pixar", "spotifypremium", "warnerbros",
+  // --- Pharma / health -----------------------------------------------------
+  "astrazeneca", "bayer", "gsk", "johnsonandjohnson", "merck", "moderna",
+  "novartis", "pfizer", "roche", "sanofi",
+  // --- Logistics / travel --------------------------------------------------
+  "aramex", "dhl", "emirates", "fedex", "lufthansa", "maersk", "ups", "usps",
+  // --- Energy / industrial -------------------------------------------------
+  "boeing", "bosch", "chevron", "exxonmobil", "ge", "shell", "siemensenergy",
+  "totalenergies",
+  // --- Registry / ICANN reserved labels ------------------------------------
+  "iana", "icann", "internic", "nic", "rdds", "whois", "www",
 ]);
 
 export function isLikelyBlocked(domain: string): boolean {
