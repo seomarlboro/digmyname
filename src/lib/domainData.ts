@@ -193,11 +193,36 @@ export async function checkDomainsFast(
   return resultMap;
 }
 
-/** Check real availability via edge function */
+export interface AvailabilityInfo {
+  available: boolean;
+  price?: number;
+  premium?: boolean;
+  likelyPremium?: boolean;
+  premiumUnverified?: boolean;
+  uncertain?: boolean;
+  uncertainReason?: "brand_protected";
+  sldBlocked?: boolean;
+  forSale?: boolean;
+  forSaleVia?: string;
+  listingUrl?: string;
+}
+
+/** Discriminated availability response. `ok:false` means the batch never reached
+ *  the backend (edge error / 503 / thrown) — distinct from a reached response that
+ *  simply lacks a given domain. The frontend uses `ok` to decide between "retry"
+ *  (unreachable) and leaving a row's state untouched. */
+export interface AvailabilityResponse {
+  ok: boolean;
+  results: Map<string, AvailabilityInfo>;
+}
+
+/** Check real availability via edge function. Returns { ok, results }: ok=false
+ *  when the batch failed to reach the backend, so callers can show Retry instead
+ *  of an eternal spinner. */
 export async function checkDomainsAvailability(
   domains: string[]
-): Promise<Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; sldBlocked?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>> {
-  const resultMap = new Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; sldBlocked?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>();
+): Promise<AvailabilityResponse> {
+  const results = new Map<string, AvailabilityInfo>();
 
   try {
     const { data, error } = await supabase.functions.invoke("check-domains", {
@@ -206,16 +231,17 @@ export async function checkDomainsAvailability(
 
     if (error) {
       if (import.meta.env.DEV) console.error("Edge function error:", error);
-      return resultMap;
+      return { ok: false, results };
     }
 
     if (data?.results) {
       for (const r of data.results) {
-        resultMap.set(r.domain, {
+        results.set(r.domain, {
           available: r.available,
           price: r.price,
           premium: r.premium,
           likelyPremium: r.likelyPremium,
+          premiumUnverified: r.premiumUnverified,
           uncertain: r.uncertain,
           uncertainReason: r.uncertainReason,
           sldBlocked: r.sldBlocked,
@@ -225,11 +251,12 @@ export async function checkDomainsAvailability(
         });
       }
     }
+
+    return { ok: true, results };
   } catch (err) {
     if (import.meta.env.DEV) console.error("Failed to check domains:", err);
+    return { ok: false, results };
   }
-
-  return resultMap;
 }
 
 // Keep old function for backwards compat but deprecated
