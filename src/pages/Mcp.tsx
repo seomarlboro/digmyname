@@ -55,21 +55,25 @@ const tools = [
   {
     name: "check_domain",
     sig: "(domain: string)",
+    icon: Sparkles,
     desc: "Live availability, premium flags, cheapest registrar and buy link for one domain. Shows registration year when taken.",
   },
   {
     name: "search_domains",
     sig: "(query: string, tlds?: string[])",
+    icon: Puzzle,
     desc: "Check one name across 12 popular TLDs in parallel. Returns availability + price + registration year for taken results.",
   },
   {
     name: "compare_registrars",
     sig: "(tld: string)",
+    icon: StoreIcon,
     desc: "Side-by-side pricing across 7 registrars including registration, renewal and 3-year value.",
   },
   {
     name: "get_domain_age",
     sig: "(domain: string)",
+    icon: StopwatchIcon,
     desc: "Registration year and expiration date for a taken domain via RDAP.",
   },
 ];
