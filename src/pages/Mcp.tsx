@@ -305,7 +305,7 @@ const Mcp = () => {
                       </code>
                       <code className="text-muted-foreground/70 font-mono text-sm">{t.sig}</code>
                     </div>
-                    <span className="shrink-0 text-xs font-mono font-bold text-foreground/90 bg-foreground/10 px-2 py-1 rounded-md">
+                    <span className="shrink-0 font-mono text-xs text-muted-foreground/50">
                       0{i + 1}
                     </span>
                   </div>
