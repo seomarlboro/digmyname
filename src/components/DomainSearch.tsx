@@ -159,7 +159,19 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
         setResults((prev) =>
           prev.map((r) => {
             const info = fastMap.get(r.domain);
-            return info ? { ...r, available: info.available, uncertain: info.uncertain, checking: false, provisional: true } : r;
+            if (!info) return r;
+            const confident = !info.uncertain;
+            return {
+              ...r,
+              available: info.available,
+              uncertain: info.uncertain,
+              // Only graduate out of the spinner on a confident fast verdict. An
+              // uncertain fast answer (e.g. NXDOMAIN -> available:true + uncertain:true)
+              // stays in Checking until the authoritative batch confirms, so we never
+              // flash a priced "available" card or an amber card off a DNS-only probe.
+              checking: confident ? false : r.checking,
+              provisional: confident ? true : r.provisional,
+            };
           })
         );
         markFirstAnswer();
@@ -252,7 +264,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
 
   const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
   const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
-  const availableCount = useMemo(() => checkedResults.filter((r) => r.available && (!r.uncertain || r.provisional)).length, [checkedResults]);
+  const availableCount = useMemo(() => checkedResults.filter((r) => r.available && !r.uncertain).length, [checkedResults]);
   const uncertainCount = useMemo(() => checkedResults.filter((r) => r.uncertain && !r.sldBlocked && !r.provisional).length, [checkedResults]);
   const takenCount = useMemo(() => checkedResults.filter((r) => !r.available && (!r.uncertain || r.sldBlocked || r.provisional)).length, [checkedResults]);
   const stillChecking = checkingResults.length > 0;
@@ -449,7 +461,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
             )}
             <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
               {results
-                .filter((r) => !r.checking && r.available && (!r.uncertain || r.provisional))
+                .filter((r) => !r.checking && r.available && !r.uncertain)
                 .map((r) => (
                   <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
                 ))}
