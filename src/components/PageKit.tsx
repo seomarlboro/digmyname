@@ -253,6 +253,7 @@ export const FeatureCard = ({
   icon: Icon,
   index,
   title,
+  mono = false,
   children,
   footer,
   className,
@@ -262,6 +263,8 @@ export const FeatureCard = ({
   icon: any;
   index?: ReactNode;
   title: ReactNode;
+  /** Render the title in monospace — for file paths and function signatures. */
+  mono?: boolean;
   children?: ReactNode;
   footer?: ReactNode;
   className?: string;
