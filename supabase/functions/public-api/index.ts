@@ -215,6 +215,7 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
   // Don't expose a standard retail price for likely-premium names: the real
   // registry price can be 10-1000x higher and must be verified first.
   const priceOk = available && !likelyPremium && typeof r.price === "number";
+  const premiumUnverified = !!r.premiumUnverified;
   const registrarOk = priceOk && cheapest;
   return {
     domain: r.domain,
@@ -226,6 +227,7 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
     sld_blocked: isLikelyBlocked(r.domain),
     premium: !!r.premium,
     likely_premium: likelyPremium,
+    premium_unverified: premiumUnverified,
     // Price only makes sense when the domain is actually available and not
     // a heuristic premium candidate.
     price_usd: priceOk ? r.price : null,
