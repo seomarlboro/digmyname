@@ -20,6 +20,7 @@ interface DomainCardProps {
 const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const { domain, tld, available, checking } = result;
   const isUncertain = result.uncertain === true;
+  const isBrand = result.sldBlocked === true;
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const cheapestByTld = useCheapestRegistrars();
@@ -52,6 +53,18 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
 
   const parts = domain.split(".");
   const name = parts.slice(0, -1).join(".");
+
+  // One consistent brand marker across every section (available/taken/uncertain).
+  // Same amber tone as the uncertain "brand_protected" box so the whole
+  // brand class reads as a single class, not three different things.
+  const brandChip = (
+    <Badge
+      variant="outline"
+      className="border-amber-500/40 bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400"
+    >
+      Trademark
+    </Badge>
+  );
 
   if (checking) {
     if (compact) {
@@ -98,7 +111,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
           </div>
           {brandProtected ? (
             <Badge variant="outline" className="w-fit border-amber-500/40 bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400">
-              Protected brand
+              Trademark
             </Badge>
           ) : (
             <span className="text-xs text-muted-foreground min-w-[80px]">Couldn't verify</span>
@@ -133,7 +146,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
             {brandProtected ? (
               <>
                 <Badge variant="outline" className="mt-1.5 border-amber-500/40 bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400">
-                  Protected brand
+                  Trademark
                 </Badge>
                 <p className="text-xs text-muted-foreground mt-1.5">
                   This name matches a protected trademark — registries typically reserve or block it. Unlikely to be registerable.
@@ -171,6 +184,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
             <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
             </h3>
+            {isBrand && brandChip}
           </div>
           {available && registrarName ? (
             <span className={`text-xs font-medium min-w-[80px] ${getRegistrarColor(registrarName).text}`}>{registrarName}</span>
@@ -263,6 +277,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               {name}.<span className="text-primary">{ext}</span>
             </h3>
             <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+              {isBrand && brandChip}
               {available && registrarName && (() => {
                 const rc = getRegistrarColor(registrarName);
                 return (
