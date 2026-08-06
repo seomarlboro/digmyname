@@ -447,12 +447,19 @@ const Pricing = () => {
 
             {/* Full comparison by TLD */}
             <Section title="Detailed price comparison" lede="Every registrar we track, per extension. Cheapest first." aside="Lower is better">
-              <div className="space-y-4">
-                {standard.map((s) => (
-                  <DetailedTldTable key={s.tld} summary={s} />
-                ))}
-              </div>
+              {standard.length === 0 ? (
+                <p className="surface-card p-6 text-sm text-muted-foreground">
+                  No extensions match “{query}”.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {standard.map((s) => (
+                    <DetailedTldTable key={s.tld} summary={s} mode={mode} />
+                  ))}
+                </div>
+              )}
             </Section>
+
           </>
         )}
       </PageMain>
