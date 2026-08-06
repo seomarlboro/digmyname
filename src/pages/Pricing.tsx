@@ -312,7 +312,7 @@ const Pricing = () => {
                   />
                 </div>
 
-                <div className="flex items-center gap-1 rounded-xl border border-border/60 bg-muted/20 p-1">
+                <div role="group" aria-label="Price mode" className="flex items-center gap-1 rounded-xl border border-border/60 bg-muted/20 p-1">
                   {(Object.keys(MODE_LABEL) as PriceMode[]).map((m) => (
                     <button
                       key={m}
