@@ -25,7 +25,7 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
 );
 import DomainCard from "@/components/DomainCard";
 
-import { generateDomainList, checkDomainsAvailability, checkDomainsFast, TLD_RANK, type DomainResult } from "@/lib/domainData";
+import { generateDomainList, checkDomainsAvailability, checkDomainsFast, TLD_RANK, type DomainResult, type AvailabilityResponse } from "@/lib/domainData";
 
 /** Stable ordering key: TLD authority only. Never sort on available/uncertain/
  *  provisional/price — those mutate over a row's lifecycle and would reorder
@@ -218,12 +218,13 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
         }
       }
 
-      const applyBatch = (availMap: Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; sldBlocked?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>) => {
+      const applyBatch = (slice: string[], resp: AvailabilityResponse) => {
         if (cancelled) return;
         markFirstAnswer();
+        const sliceSet = new Set(slice);
         setResults((prev) =>
           prev.map((r) => {
-            const info = availMap.get(r.domain);
+            const info = resp.results.get(r.domain);
             if (info) {
               return {
                 ...r,
@@ -233,13 +234,20 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 gdPrice: info.price,
                 premium: info.premium,
                 likelyPremium: info.likelyPremium,
+                premiumUnverified: info.premiumUnverified,
                 uncertain: info.uncertain,
                 uncertainReason: info.uncertainReason,
                 sldBlocked: info.sldBlocked,
                 forSale: info.forSale,
                 forSaleVia: info.forSaleVia,
                 listingUrl: info.listingUrl,
+                reachFailed: false,
               };
+            }
+            // Whole batch failed to reach the backend → stop the spinner and offer
+            // Retry instead of leaving the row checking forever (503 case).
+            if (!resp.ok && sliceSet.has(r.domain)) {
+              return { ...r, checking: false, provisional: false, uncertain: true, reachFailed: true };
             }
             return r;
           })
@@ -247,8 +255,8 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
       };
 
       const runBatch = async (slice: string[]) => {
-        const availMap = await checkDomainsAvailability(slice);
-        applyBatch(availMap);
+        const resp = await checkDomainsAvailability(slice);
+        applyBatch(slice, resp);
       };
 
       const restBatches: string[][] = [];
@@ -280,13 +288,13 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
   const stillChecking = checkingResults.length > 0;
 
   const retryDomain = useCallback(async (domain: string) => {
-    setResults((prev) => prev.map((r) => (r.domain === domain ? { ...r, checking: true } : r)));
-    const availMap = await checkDomainsAvailability([domain]);
+    setResults((prev) => prev.map((r) => (r.domain === domain ? { ...r, checking: true, reachFailed: false } : r)));
+    const { ok, results } = await checkDomainsAvailability([domain]);
     setResults((prev) =>
       prev.map((r) => {
         if (r.domain !== domain) return r;
-        const info = availMap.get(domain);
-        if (!info) return { ...r, checking: false, provisional: false, uncertain: true };
+        const info = results.get(domain);
+        if (!info) return { ...r, checking: false, provisional: false, uncertain: true, reachFailed: !ok };
         return {
           ...r,
           checking: false,
@@ -295,12 +303,14 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
           gdPrice: info.price,
           premium: info.premium,
           likelyPremium: info.likelyPremium,
+          premiumUnverified: info.premiumUnverified,
           uncertain: info.uncertain,
           uncertainReason: info.uncertainReason,
           sldBlocked: info.sldBlocked,
           forSale: info.forSale,
           forSaleVia: info.forSaleVia,
           listingUrl: info.listingUrl,
+          reachFailed: false,
         };
       })
     );
