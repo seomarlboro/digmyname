@@ -1061,7 +1061,7 @@ export async function checkDomains(
   }
 
   // ---- Standard price enrichment (free Porkbun pricing catalog) --------
-  const pricing = getTldPricing();
+  const pricing = getWarmTldPricingOnly();
 
   const neededTlds = [...new Set(
     fresh.filter((r) => r.available && r.price == null).map((r) => r.domain.split(".").slice(1).join("."))
