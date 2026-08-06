@@ -221,6 +221,9 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
     available,
     uncertain: !!r.uncertain,
     uncertain_reason: r.uncertainReason ?? null,
+    // Label only (additive): SLD matches a known trademark/registry-reserved
+    // brand. Never affects the verdict, price or caching above.
+    sldBlocked: isLikelyBlocked(r.domain),
     premium: !!r.premium,
     likely_premium: likelyPremium,
     // Price only makes sense when the domain is actually available and not
