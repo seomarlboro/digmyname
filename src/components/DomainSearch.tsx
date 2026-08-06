@@ -252,7 +252,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
 
   const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
   const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
-  const availableCount = useMemo(() => checkedResults.filter((r) => r.available && !r.uncertain).length, [checkedResults]);
+  const availableCount = useMemo(() => checkedResults.filter((r) => r.available && (!r.uncertain || r.provisional)).length, [checkedResults]);
   const uncertainCount = useMemo(() => checkedResults.filter((r) => r.uncertain && !r.sldBlocked && !r.provisional).length, [checkedResults]);
   const takenCount = useMemo(() => checkedResults.filter((r) => !r.available && (!r.uncertain || r.sldBlocked || r.provisional)).length, [checkedResults]);
   const stillChecking = checkingResults.length > 0;
@@ -449,7 +449,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
             )}
             <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
               {results
-                .filter((r) => !r.checking && r.available && !r.uncertain)
+                .filter((r) => !r.checking && r.available && (!r.uncertain || r.provisional))
                 .map((r) => (
                   <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
                 ))}
