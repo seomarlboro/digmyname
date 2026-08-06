@@ -1,0 +1,72 @@
+import { describe, it, expect } from "vitest";
+import {
+  interpretDomainr,
+  isLikelyBlocked,
+  shouldEscalateToDomainr,
+} from "../../supabase/functions/_shared/availability-rules.ts";
+
+describe("interpretDomainr", () => {
+  it("dpml takes precedence over free tokens", () => {
+    expect(interpretDomainr({ domain: "x.software", status: "undelegated inactive dpml" }))
+      .toEqual({ kind: "taken", forSale: false });
+  });
+
+  it("marketed priced → taken + forSale", () => {
+    expect(interpretDomainr({ domain: "x.com", status: "marketed priced" }))
+      .toEqual({ kind: "taken", forSale: true });
+  });
+
+  it("undelegated inactive → available", () => {
+    expect(interpretDomainr({ domain: "x.com", status: "undelegated inactive" }))
+      .toEqual({ kind: "available", premium: false });
+  });
+
+  it("undelegated inactive premium → available + premium", () => {
+    expect(interpretDomainr({ domain: "x.io", status: "undelegated inactive premium" }))
+      .toEqual({ kind: "available", premium: true });
+  });
+
+  it("reserved → taken", () => {
+    expect(interpretDomainr({ domain: "x.com", status: "reserved" }))
+      .toEqual({ kind: "taken", forSale: false });
+  });
+
+  it("missing / empty status → unknown", () => {
+    expect(interpretDomainr(undefined)).toEqual({ kind: "unknown" });
+    expect(interpretDomainr({ domain: "x.com", status: "" })).toEqual({ kind: "unknown" });
+  });
+});
+
+describe("shouldEscalateToDomainr", () => {
+  it("rdap-available escalates", () => {
+    expect(shouldEscalateToDomainr({ available: true, checkedVia: "rdap" })).toBe(true);
+  });
+  it("dns-available escalates", () => {
+    expect(shouldEscalateToDomainr({ available: true, checkedVia: "dns" })).toBe(true);
+  });
+  it("likelyPremium available escalates", () => {
+    expect(shouldEscalateToDomainr({ available: true, checkedVia: "domainr", likelyPremium: true })).toBe(true);
+  });
+  it("uncertain escalates", () => {
+    expect(shouldEscalateToDomainr({ available: false, uncertain: true, checkedVia: "rdap" })).toBe(true);
+  });
+  it("domainr-confirmed available does not escalate", () => {
+    expect(shouldEscalateToDomainr({ available: true, checkedVia: "domainr" })).toBe(false);
+  });
+  it("taken non-uncertain does not escalate", () => {
+    expect(shouldEscalateToDomainr({ available: false, checkedVia: "rdap" })).toBe(false);
+  });
+});
+
+describe("isLikelyBlocked", () => {
+  it("flags reserved / DPML brand SLDs", () => {
+    expect(isLikelyBlocked("google.digital")).toBe(true);
+    expect(isLikelyBlocked("microsoft.software")).toBe(true);
+    expect(isLikelyBlocked("nic.dev")).toBe(true);
+  });
+  it("does not flag ordinary or substring-similar names", () => {
+    expect(isLikelyBlocked("kvarturbo2748.digital")).toBe(false);
+    expect(isLikelyBlocked("acmecoffee.shop")).toBe(false);
+    expect(isLikelyBlocked("googleplex.com")).toBe(false);
+  });
+});
