@@ -92,7 +92,7 @@ export function isLikelyPremium(domain: string): boolean {
 // / DPML trademark-blocked one. When the flag below is off, SLDs matching
 // well-known DPML-protected trademarks are downgraded to `uncertain` — never shown
 // available, never priced, never cached.
-const THIRD_SIGNAL_ENABLED = false;
+const THIRD_SIGNAL_ENABLED = true;
 
 // Brand/registry-block rules live in ./availability-rules.ts (isLikelyBlocked).
 
@@ -617,22 +617,26 @@ let domainrDisabledReason: string | null = null;
 let domainrDisabledUntil = 0;
 let domainrCooldownUntil = 0;
 
-async function checkDomainrBatch(domains: string[], apiKey: string): Promise<Map<string, DomainrStatusEntry> | null> {
+async function checkDomainrBatch(domains: string[], apiKey: string, deadlineMs = 6000): Promise<Map<string, DomainrStatusEntry> | null> {
   if (domains.length === 0) return new Map();
   if (Date.now() < domainrDisabledUntil) return null;
   if (Date.now() < domainrCooldownUntil) return null;
 
+  const deadlineAt = Date.now() + Math.min(deadlineMs, 6000);
   const out = new Map<string, DomainrStatusEntry>();
 
   await pMap(domains, 8, async (domain) => {
     // Breaker check before every request so the fan-out stops issuing calls as
     // soon as the first 401/403/429 trips it.
     if (Date.now() < domainrDisabledUntil || Date.now() < domainrCooldownUntil) return;
+    // Deadline-aware: never start a call that cannot plausibly finish in time.
+    const remaining = deadlineAt - Date.now();
+    if (remaining < 150) return;
     try {
       const url = `https://api.fastly.com/domain-management/v1/tools/status?domain=${encodeURIComponent(domain)}`;
       const resp = await fetch(url, {
         headers: { "Fastly-Key": apiKey, "Accept": "application/json" },
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(Math.min(remaining, 6000)),
       });
       if (!resp.ok) {
         const txt = await resp.text().catch(() => "");
@@ -836,9 +840,10 @@ export function getServiceClient(): SupabaseClient {
  */
 export async function checkDomains(
   domains: string[],
-  deps: { supabase?: SupabaseClient } = {}
+  deps: { supabase?: SupabaseClient; thirdSignalDeadlineMs?: number } = {}
 ): Promise<DomainCheckResult[]> {
   const supabase = deps.supabase ?? getServiceClient();
+  const thirdSignalDeadlineMs = deps.thirdSignalDeadlineMs ?? 6000;
 
   const batch = domains.slice(0, 50).filter(isValidDomain);
   if (batch.length === 0) return [];
@@ -909,7 +914,7 @@ export async function checkDomains(
     .map((r) => r.domain);
 
   const domainrResults = THIRD_SIGNAL_ENABLED && fastlyKey && needsThirdSignal.length > 0
-    ? await checkDomainrBatch(needsThirdSignal, fastlyKey)
+    ? await checkDomainrBatch(needsThirdSignal, fastlyKey, thirdSignalDeadlineMs)
     : null;
   if (!THIRD_SIGNAL_ENABLED) {
     // Only brand-block matches are acted on while the third signal is offline.
@@ -959,6 +964,10 @@ export async function checkDomains(
         // Probe error / disagreement on a brand-blocked SLD: the trademark
         // statement holds regardless of why the probes were inconclusive.
         fresh.push({ ...base, uncertainReason: "brand_protected" as const });
+      } else if (THIRD_SIGNAL_ENABLED && fastlyKey && base.available && likelyPremium) {
+        // Premium-suspect name escalated but got no third-signal verdict within
+        // the deadline: never sell on absence of evidence — honest uncertain.
+        fresh.push({ domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true });
       } else {
         fresh.push(base);
       }

@@ -142,7 +142,7 @@ async function invokeCheck(domains: string[]) {
     timer = setTimeout(() => resolve(fallback), HARD_BUDGET_MS) as unknown as number;
   });
   try {
-    return await Promise.race([checkDomains(domains), budget]);
+    return await Promise.race([checkDomains(domains, { thirdSignalDeadlineMs: 600 }), budget]);
   } finally {
     if (timer !== undefined) clearTimeout(timer);
   }
