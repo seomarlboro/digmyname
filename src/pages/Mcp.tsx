@@ -14,7 +14,7 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trackMcpEvent } from "@/lib/trackMcpEvent";
-import WaitlistForm from "@/components/WaitlistForm";
+import WaitlistSection from "@/components/WaitlistSection";
 import { CodeBlock } from "@/components/CodeBlock";
 import { NetworkIcon, StoreIcon, StopwatchIcon, LicenseIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
@@ -55,21 +55,25 @@ const tools = [
   {
     name: "check_domain",
     sig: "(domain: string)",
+    icon: Sparkles,
     desc: "Live availability, premium flags, cheapest registrar and buy link for one domain. Shows registration year when taken.",
   },
   {
     name: "search_domains",
     sig: "(query: string, tlds?: string[])",
+    icon: Puzzle,
     desc: "Check one name across 12 popular TLDs in parallel. Returns availability + price + registration year for taken results.",
   },
   {
     name: "compare_registrars",
     sig: "(tld: string)",
+    icon: StoreIcon,
     desc: "Side-by-side pricing across 7 registrars including registration, renewal and 3-year value.",
   },
   {
     name: "get_domain_age",
     sig: "(domain: string)",
+    icon: StopwatchIcon,
     desc: "Registration year and expiration date for a taken domain via RDAP.",
   },
 ];
@@ -258,52 +262,26 @@ const Mcp = () => {
           <Section title="Tools exposed">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {tools.map((t, i) => (
-                <div
+                <FeatureCard
                   key={t.name}
-                  className="surface-card group relative p-5 transition-colors hover:border-foreground/20 md:p-6"
-                >
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex items-baseline gap-2 flex-wrap">
-                      <code className="text-foreground font-mono font-semibold text-lg">
-                        {t.name}
-                      </code>
-                      <code className="text-muted-foreground/70 font-mono text-sm">{t.sig}</code>
-                    </div>
-                    <span className="shrink-0 font-mono text-xs text-muted-foreground/50">
-                      0{i + 1}
+                  icon={t.icon}
+                  index={`0${i + 1}`}
+                  mono
+                  title={
+                    <span className="flex flex-wrap items-baseline gap-2">
+                      {t.name}
+                      <span className="text-sm font-normal text-muted-foreground/70">{t.sig}</span>
                     </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{t.desc}</p>
-                </div>
+                  }
+                >
+                  {t.desc}
+                </FeatureCard>
               ))}
             </div>
           </Section>
 
-
           {/* Waitlist */}
-          <section
-            id="waitlist"
-            className="surface-card mt-14 relative scroll-mt-24 overflow-hidden p-8 md:p-10"
-          >
-            <div className="relative grid md:grid-cols-2 gap-8 md:gap-10 items-center">
-              <div>
-                <Badge variant="secondary" className="mb-3">
-                  Coming soon
-                </Badge>
-                <h2 className="section-title">
-                  Paid tier waitlist
-                </h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  Free tier is generous (60 req/min · 5,000/day). Need more? Get API keys, 100k
-                  req/day, webhooks and an SLA.
-                </p>
-              </div>
-              <div>
-                <WaitlistForm />
-              </div>
-            </div>
-
-          </section>
+          <WaitlistSection />
 
           {/* Footer CTA */}
           <section className="surface-card mt-14 p-10 text-center">

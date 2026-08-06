@@ -5,9 +5,9 @@ import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
-import WaitlistForm from "@/components/WaitlistForm";
+import WaitlistSection from "@/components/WaitlistSection";
 import { NetworkIcon, StopwatchIcon, LicenseIcon } from "@/components/StatIcons";
-import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
+import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid, FeatureCard } from "@/components/PageKit";
 
 const API_BASE = "https://api.digmyname.com/functions/v1/public-api";
 
@@ -175,38 +175,33 @@ print(res.json()["result"]["available"])`,
           lede="Machine-readable entry points, so an agent never has to scrape the site."
         >
           <div className="grid gap-4 sm:grid-cols-3">
-            <a
+            <FeatureCard
+              as="a"
               href="/.well-known/ai-plugin.json"
-              className="surface-card card-hover p-5 transition-colors hover:border-primary/40"
+              icon={() => <Bot className="text-mint" />}
+              mono
+              title="/.well-known/ai-plugin.json"
             >
-              <Bot className="mb-3 h-5 w-5 text-mint" />
-              <div className="font-mono text-sm font-semibold text-foreground">
-                /.well-known/ai-plugin.json
-              </div>
-              <p className="card-body-lg">
-                Plugin manifest for ChatGPT-style tool discovery.
-              </p>
-            </a>
-            <a
+              Plugin manifest for ChatGPT-style tool discovery.
+            </FeatureCard>
+            <FeatureCard
+              as="a"
               href={`${API_BASE}/openapi.json`}
-              className="surface-card card-hover p-5 transition-colors hover:border-primary/40"
+              icon={() => <KeyRound className="text-violet" />}
+              mono
+              title="/openapi.json"
             >
-              <KeyRound className="mb-3 h-5 w-5 text-violet" />
-              <div className="font-mono text-sm font-semibold text-foreground">/openapi.json</div>
-              <p className="card-body-lg">
-                Full OpenAPI 3 schema for client and agent generation.
-              </p>
-            </a>
-            <a
+              Full OpenAPI 3 schema for client and agent generation.
+            </FeatureCard>
+            <FeatureCard
+              as="a"
               href="/llms.txt"
-              className="surface-card card-hover p-5 transition-colors hover:border-primary/40"
+              icon={() => <Zap className="text-warning" />}
+              mono
+              title="/llms.txt"
             >
-              <Zap className="mb-3 h-5 w-5 text-warning" />
-              <div className="font-mono text-sm font-semibold text-foreground">/llms.txt</div>
-              <p className="card-body-lg">
-                Plain-text summary of what this site knows, for LLM crawlers.
-              </p>
-            </a>
+              Plain-text summary of what this site knows, for LLM crawlers.
+            </FeatureCard>
           </div>
         </Section>
 
@@ -235,28 +230,7 @@ print(res.json()["result"]["available"])`,
           </div>
         </Section>
 
-        <section
-          id="waitlist"
-          className="surface-card relative mt-14 scroll-mt-24 overflow-hidden p-8 md:p-10"
-        >
-          <div className="relative grid items-center gap-8 md:grid-cols-2 md:gap-10">
-            <div>
-              <Badge variant="secondary" className="mb-3">
-                Coming soon
-              </Badge>
-              <h2 className="section-title mb-3">
-                Paid tier waitlist
-              </h2>
-              <p className="section-lede max-w-2xl">
-                Free tier is generous (60 req/min · 5,000/day). Need more? Get API keys, 100k
-                req/day, webhooks and an SLA.
-              </p>
-            </div>
-            <div>
-              <WaitlistForm />
-            </div>
-          </div>
-        </section>
+        <WaitlistSection />
       </PageMain>
     </div>
   );
