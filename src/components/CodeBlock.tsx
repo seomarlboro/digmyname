@@ -34,6 +34,7 @@ export function CodeBlock({
 }: CodeBlockProps) {
   const [active, setActive] = useState(defaultTab);
   const [copied, setCopied] = useState(false);
+  const uid = useId().replace(/:/g, "");
 
   const current = tabs?.length
     ? tabs[Math.min(active, tabs.length - 1)]
@@ -46,14 +47,36 @@ export function CodeBlock({
     setTimeout(() => setCopied(false), 1500);
   };
 
+  const tabId = (idx: number) => `${uid}-tab-${idx}`;
+  const panelId = `${uid}-panel`;
+
+  const onTabKeyDown = (e: React.KeyboardEvent) => {
+    if (!tabs?.length) return;
+    const last = tabs.length - 1;
+    let next: number | null = null;
+    if (e.key === "ArrowRight") next = active === last ? 0 : active + 1;
+    else if (e.key === "ArrowLeft") next = active === 0 ? last : active - 1;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = last;
+    if (next === null) return;
+    e.preventDefault();
+    setActive(next);
+    document.getElementById(tabId(next))?.focus();
+  };
+
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border/60 px-4 py-2.5">
         {tabs?.length ? (
-          <div className="flex gap-1">
+          <div className="flex gap-1" role="tablist" onKeyDown={onTabKeyDown}>
             {tabs.map((tab, idx) => (
               <button
                 key={tab.label}
+                id={tabId(idx)}
+                role="tab"
+                aria-selected={idx === active}
+                aria-controls={panelId}
+                tabIndex={idx === active ? 0 : -1}
                 onClick={() => setActive(idx)}
                 className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
                   idx === active
@@ -80,7 +103,17 @@ export function CodeBlock({
           {copied ? "Copied" : "Copy"}
         </Button>
       </div>
-      <div className="overflow-x-auto p-4 text-sm leading-relaxed">
+      <div
+        className="overflow-x-auto p-4 text-sm leading-relaxed"
+        {...(tabs?.length
+          ? {
+              id: panelId,
+              role: "tabpanel",
+              "aria-labelledby": tabId(Math.min(active, tabs.length - 1)),
+              tabIndex: 0,
+            }
+          : {})}
+      >
         <SyntaxHighlighter
           language={current.language}
           style={vscDarkPlus}
@@ -105,3 +138,4 @@ export function CodeBlock({
     </div>
   );
 }
+
