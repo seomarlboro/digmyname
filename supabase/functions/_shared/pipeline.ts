@@ -597,68 +597,68 @@ export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
 
 
 // ---------------------------------------------------------------------------
-// Domainr (via RapidAPI) — batch authoritative status for up to 32 domains.
-// Statuses we care about (space-separated string per domain):
-//   undelegated / inactive    → available for standard registration
+// Third signal — Fastly Domain Research API (Domainr joined Fastly; the data
+// source is unchanged, which is why `checkedVia` stays "domainr").
+// Status endpoint takes a SINGLE domain per request (no comma batching), so we
+// fan out with pMap. Statuses (space-separated token string per domain):
+//   inactive / unregistered   → available for standard registration
 //   active / parked           → taken
 //   marketed / priced / premium → aftermarket / registry-premium tier
 //   suffix                    → not registerable (it's a TLD itself)
-// Docs: https://domainr.com/docs/api/v2/status
+// A bare `undelegated` is a best-effort answer (registry backend timed out) and
+// is NOT treated as free — see availability-rules.ts.
+// Docs: https://www.fastly.com/documentation/reference/api/domain-management/domain-research/
 // ---------------------------------------------------------------------------
 
-// Circuit breaker: if RapidAPI answers 401/403 (key invalid / not subscribed)
-// stop calling it for the lifetime of this isolate instead of burning a
+// Circuit breaker: if Fastly answers 401/403 (token invalid / Domain Research
+// product not enabled) stop calling it for 5 minutes instead of burning a
 // round-trip on every request. A 429 (quota) triggers a temporary cooldown.
 let domainrDisabledReason: string | null = null;
 let domainrDisabledUntil = 0;
 let domainrCooldownUntil = 0;
 
-async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<Map<string, DomainrStatusEntry> | null> {
+async function checkDomainrBatch(domains: string[], apiKey: string): Promise<Map<string, DomainrStatusEntry> | null> {
   if (domains.length === 0) return new Map();
   if (Date.now() < domainrDisabledUntil) return null;
   if (Date.now() < domainrCooldownUntil) return null;
-  try {
-    const out = new Map<string, DomainrStatusEntry>();
-    // Domainr accepts up to 32 domains per call.
-    for (let i = 0; i < domains.length; i += 32) {
-      const slice = domains.slice(i, i + 32);
-      const url = `https://domainr.p.rapidapi.com/v2/status?domain=${encodeURIComponent(slice.join(","))}`;
+
+  const out = new Map<string, DomainrStatusEntry>();
+
+  await pMap(domains, 8, async (domain) => {
+    // Breaker check before every request so the fan-out stops issuing calls as
+    // soon as the first 401/403/429 trips it.
+    if (Date.now() < domainrDisabledUntil || Date.now() < domainrCooldownUntil) return;
+    try {
+      const url = `https://api.fastly.com/domain-management/v1/tools/status?domain=${encodeURIComponent(domain)}`;
       const resp = await fetch(url, {
-        headers: {
-          "X-RapidAPI-Key": rapidKey,
-          "X-RapidAPI-Host": "domainr.p.rapidapi.com",
-        },
+        headers: { "Fastly-Key": apiKey, "Accept": "application/json" },
         signal: AbortSignal.timeout(6000),
       });
       if (!resp.ok) {
         const txt = await resp.text().catch(() => "");
         if (resp.status === 401 || resp.status === 403) {
           domainrDisabledReason = `HTTP ${resp.status}: ${txt.slice(0, 120)}`;
-          // Cooldown instead of a permanent kill switch: a transient auth blip
-          // must not disable Domainr for the whole life of the isolate.
           domainrDisabledUntil = Date.now() + 5 * 60 * 1000;
-          console.error(`domainr disabled for 5 min — ${domainrDisabledReason}. Check the RapidAPI subscription for domainr.p.rapidapi.com.`);
+          console.error(
+            `domainr (fastly) disabled for 5 min — ${domainrDisabledReason}. Check the FASTLY_API_TOKEN and confirm the Domain Research API product is enabled on the Fastly account (disabled by default).`,
+          );
         } else if (resp.status === 429) {
           domainrCooldownUntil = Date.now() + 60_000;
-          console.warn("domainr 429 — cooling down for 60s, RDAP/DNS results stand");
+          console.warn("domainr (fastly) 429 — cooling down for 60s, RDAP/DNS results stand");
         } else {
-          console.warn(`domainr HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+          console.warn(`domainr (fastly) HTTP ${resp.status}: ${txt.slice(0, 200)}`);
         }
-        return out.size > 0 ? out : null;
+        return;
       }
 
-      const data = await resp.json();
-      if (Array.isArray(data?.status)) {
-        for (const entry of data.status as DomainrStatusEntry[]) {
-          if (entry?.domain) out.set(entry.domain.toLowerCase(), entry);
-        }
-      }
+      const entry = await resp.json() as DomainrStatusEntry | null;
+      if (entry?.domain) out.set(entry.domain.toLowerCase(), entry);
+    } catch (e) {
+      console.warn(`domainr (fastly) error for ${domain}: ${e instanceof Error ? e.message : String(e)}`);
     }
-    return out;
-  } catch (e) {
-    console.warn(`domainr error: ${e instanceof Error ? e.message : String(e)}`);
-    return null;
-  }
+  });
+
+  return out.size > 0 ? out : null;
 }
 
 // Domainr status tokens are a SET ordered by increasing precedence. The docs say
