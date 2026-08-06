@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { MCP_VERSION } from "@/generated/mcp-version";
 import { Link } from "react-router-dom";
 import {
   Github,
@@ -108,11 +109,11 @@ const Mcp = () => {
         <title>MCP Server, Claude Skill & Custom GPT — DigMyName</title>
         <meta
           name="description"
-          content="The world's fastest domain availability MCP server — ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName."
+          content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs."
         />
         <link rel="canonical" href="https://digmyname.com/mcp" />
         <meta property="og:title" content="Domain Check Skills — MCP / Claude Skill / Custom GPT" />
-        <meta property="og:description" content="The world's fastest domain availability MCP server — ~170 ms checks from any LLM. 7 registrars, 52 TLDs." />
+        <meta property="og:description" content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs." />
         <meta property="og:url" content="https://digmyname.com/mcp" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -123,11 +124,11 @@ const Mcp = () => {
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Cross-platform",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-          softwareVersion: "1.1.6",
+          softwareVersion: MCP_VERSION,
           downloadUrl: NPM_URL,
           codeRepository: GITHUB_URL,
           license: "https://opensource.org/licenses/MIT",
-          description: "The world's fastest domain availability MCP server — ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs. Powered by DigMyName.",
+          description: "The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs.",
         })}</script>
       </Helmet>
 
@@ -148,7 +149,7 @@ const Mcp = () => {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-aurora opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-aurora" />
                 </span>
-                Live on npm · v1.1.6
+                Live on npm · v{MCP_VERSION}
                 <ArrowUpRight className="h-3 w-3" />
               </a>
             }

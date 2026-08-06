@@ -1,11 +1,11 @@
 {
   "name": "vite_react_shadcn_ts",
   "private": true,
-  "version": "0.0.91",
+  "version": "0.0.92",
   "type": "module",
   "scripts": {
-    "predev": "bunx tsx scripts/generate-sitemap.ts",
-    "prebuild": "bunx tsx scripts/generate-sitemap.ts",
+    "predev": "bunx tsx scripts/generate-sitemap.ts && bunx tsx scripts/generate-mcp-version.ts",
+    "prebuild": "bunx tsx scripts/generate-sitemap.ts && bunx tsx scripts/generate-mcp-version.ts",
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",

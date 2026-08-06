@@ -18,10 +18,10 @@ const Index = () => {
     <div className="relative min-h-screen bg-transparent pb-20">
       <HeroBackground />
       <Helmet>
-        <title>Fast Domain Search — World's Fastest Domain Checker | DigMyName</title>
+        <title>Fast Domain Search — Fastest We've Measured | DigMyName</title>
         <meta name="description" content="The world's fastest domain search. Check availability in milliseconds. If you find a faster checker, come dispute it." />
         <link rel="canonical" href="https://digmyname.com/" />
-        <meta property="og:title" content="Fast Domain Search — World's Fastest Domain Checker | DigMyName" />
+        <meta property="og:title" content="Fast Domain Search — Fastest We've Measured | DigMyName" />
         <meta property="og:description" content="The world's fastest domain search. Check availability in milliseconds." />
         <meta property="og:url" content="https://digmyname.com/" />
         <meta property="og:image" content="https://digmyname.com/og-image.jpg" />
