@@ -367,7 +367,7 @@ const Pricing = () => {
                     return (
                       <tr key={s.tld} className="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/10">
                         <td className="px-5 py-5">
-                          <span className="font-display text-3xl font-extrabold tracking-tight text-[hsl(var(--aurora-mint))]">.{s.tld}</span>
+                          <span className="font-display text-3xl font-extrabold tracking-tight text-mint">.{s.tld}</span>
                         </td>
                         <td className="px-5 py-5 align-middle">
                           {v.primary && v.primaryPrice != null ? (
