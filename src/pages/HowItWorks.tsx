@@ -266,7 +266,7 @@ const HowItWorks = () => {
                                 }`}
                               />
                             ) : (
-                              <X className="mx-auto h-4 w-4 text-muted-foreground/40" />
+                              <X className="mx-auto h-4 w-4 text-muted-foreground" />
                             )}
                           </td>
                         )
@@ -338,11 +338,12 @@ const HowItWorks = () => {
         </section>
 
         {/* CTA */}
-        <Section className="text-center">
-          <h2 className="section-title">Try an honest search.</h2>
-          <p className="mx-auto mb-8 mt-2 max-w-xl text-muted-foreground">
-            Type any name and see four-source verification in action.
-          </p>
+        <Section
+          title="Try an honest search."
+          lede="Type any name and see four-source verification in action."
+          align="center"
+          className="text-center"
+        >
           <Button asChild size="lg" className="btn-gradient h-12 px-8 text-base">
             <Link to="/">Start searching</Link>
           </Button>

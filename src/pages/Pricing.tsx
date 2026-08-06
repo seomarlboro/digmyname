@@ -125,6 +125,13 @@ const formatAbsolute = (iso: string | undefined) => {
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 };
 
+const NoMatches = ({ query }: { query: string }) => (
+  <p className="surface-card p-6 text-sm text-muted-foreground">
+    No extensions match “{query}”.
+  </p>
+);
+
+
 const Pricing = () => {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<PriceMode>("reg");
@@ -340,9 +347,7 @@ const Pricing = () => {
               aside={pricesAreStale ? `Prices last verified ${formatAbsolute(lastUpdated)}` : `Prices updated ${formatUpdated(lastUpdated)}`}
             >
               {standard.length === 0 ? (
-                <p className="surface-card p-6 text-sm text-muted-foreground">
-                  No extensions match “{query}”.
-                </p>
+                <NoMatches query={query} />
               ) : (
               <div className="surface-card-lg overflow-x-auto">
               <table className="min-w-[900px] text-left">
@@ -448,9 +453,7 @@ const Pricing = () => {
             {/* Full comparison by TLD */}
             <Section title="Detailed price comparison" lede="Every registrar we track, per extension. Cheapest first." aside="Lower is better">
               {standard.length === 0 ? (
-                <p className="surface-card p-6 text-sm text-muted-foreground">
-                  No extensions match “{query}”.
-                </p>
+                <NoMatches query={query} />
               ) : (
                 <div className="space-y-4">
                   {standard.map((s) => (
@@ -656,7 +659,7 @@ const DetailedTldTable = ({ summary: s, mode }: { summary: TldSummary; mode: Pri
                   {p.whois_privacy ? (
                     <Shield className="h-5 w-5 text-mint" />
                   ) : (
-                    <ShieldOff className="h-5 w-5 text-muted-foreground/50" />
+                    <ShieldOff className="h-5 w-5 text-muted-foreground/70" />
                   )}
                 </td>
               </tr>
