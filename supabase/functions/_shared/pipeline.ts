@@ -950,13 +950,17 @@ export async function checkDomains(
       // trademark-blocked name. Standing safeguard: brand-blocked SLDs are
       // downgraded to honest uncertain (never available, never priced,
       // never cached), regardless of third-signal availability.
-      const brandBlockRisk =
-        base.available && !base.uncertain && isLikelyBlocked(base.domain);
-      fresh.push(
-        brandBlockRisk
-          ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true, uncertainReason: "brand_protected" as const }
-          : base
-      );
+      const blocked = isLikelyBlocked(base.domain);
+      const brandBlockRisk = base.available && !base.uncertain && blocked;
+      if (brandBlockRisk) {
+        fresh.push({ domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true, uncertainReason: "brand_protected" as const });
+      } else if (base.uncertain && blocked) {
+        // Probe error / disagreement on a brand-blocked SLD: the trademark
+        // statement holds regardless of why the probes were inconclusive.
+        fresh.push({ ...base, uncertainReason: "brand_protected" as const });
+      } else {
+        fresh.push(base);
+      }
     }
   }
 

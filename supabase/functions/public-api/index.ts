@@ -15,6 +15,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkDomains, isValidDomain } from "../_shared/pipeline.ts";
+import { isLikelyBlocked } from "../_shared/availability-rules.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -134,6 +135,7 @@ async function invokeCheck(domains: string[]) {
     available: false,
     uncertain: true,
     checkedVia: "timeout",
+    ...(isLikelyBlocked(domain) ? { uncertainReason: "brand_protected" as const } : {}),
   }));
   let timer: number | undefined;
   const budget = new Promise<any[]>((resolve) => {
