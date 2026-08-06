@@ -288,39 +288,18 @@ const HowItWorks = () => {
           title={<>What we're <span className="text-muted-foreground">not</span></>}
         >
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="surface-card p-5">
-              <Globe className="mb-3 h-5 w-5 text-muted-foreground" />
-              <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
-
-                Not 800+ TLDs
-              </div>
-              <p className="text-sm text-muted-foreground">
-                We curate a focused set of extensions instead of listing every
-                obscure ccTLD. Quality over noise.
-              </p>
-            </div>
-            <div className="surface-card p-5">
-              <Scale className="mb-3 h-5 w-5 text-muted-foreground" />
-              <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
-
-                Not a registrar
-              </div>
-              <p className="text-sm text-muted-foreground">
-                We don't sell domains. We help you find the right one and
-                buy it from whichever registrar you prefer.
-              </p>
-            </div>
-            <div className="surface-card p-5">
-              <Heart className="mb-3 h-5 w-5 text-muted-foreground" />
-              <div className="mb-1 text-lg font-semibold tracking-tight text-foreground">
-                Not an affiliate farm
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Yes, buy links pay us a small commission. But the price
-                comparison is honest — including when our partners aren't
-                the cheapest.
-              </p>
-            </div>
+            <FeatureCard icon={() => <Globe className="text-muted-foreground" />} title="Not 800+ TLDs">
+              We curate a focused set of extensions instead of listing every obscure ccTLD. Quality
+              over noise.
+            </FeatureCard>
+            <FeatureCard icon={() => <Scale className="text-muted-foreground" />} title="Not a registrar">
+              We don't sell domains. We help you find the right one and buy it from whichever
+              registrar you prefer.
+            </FeatureCard>
+            <FeatureCard icon={() => <Heart className="text-muted-foreground" />} title="Not an affiliate farm">
+              Yes, buy links pay us a small commission. But the price comparison is honest —
+              including when our partners aren't the cheapest.
+            </FeatureCard>
           </div>
         </Section>
 
