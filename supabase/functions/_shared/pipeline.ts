@@ -11,6 +11,12 @@
 // the HTTP wrappers. Availability/pricing logic is unchanged.
 // ============================================================================
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  interpretDomainr,
+  isLikelyBlocked,
+  shouldEscalateToDomainr,
+  type DomainrStatusEntry,
+} from "./availability-rules.ts";
 
 // ============================================================================
 // Trust hierarchy (P0):
@@ -587,12 +593,6 @@ export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
 //   suffix                    → not registerable (it's a TLD itself)
 // Docs: https://domainr.com/docs/api/v2/status
 // ---------------------------------------------------------------------------
-interface DomainrStatusEntry {
-  domain: string;
-  zone?: string;
-  status: string;
-  summary?: string;
-}
 
 // Circuit breaker: if RapidAPI answers 401/403 (key invalid / not subscribed)
 // stop calling it for the lifetime of this isolate instead of burning a
@@ -661,35 +661,8 @@ async function checkDomainrBatch(domains: string[], rapidKey: string): Promise<M
 // The old implementation treated priced/transferable as premium/free, which wrongly
 // marked aftermarket domains as available. Per the docs, priced/transferable are
 // explicitly aftermarket (for-sale) statuses.
-export type DomainrVerdict =
-  | { kind: "available"; premium: boolean }
-  | { kind: "taken"; forSale: boolean }
-  | { kind: "unknown" };
-
-const DOMAINR_TAKEN = new Set([
-  "active", "parked", "claimed", "dpml", "deleting", "pending", "expiring",
-  "reserved", "disallowed", "invalid", "suffix", "tld", "zone",
-]);
-const DOMAINR_FREE = new Set(["undelegated", "inactive", "unregistered"]);
-const DOMAINR_PREMIUM = new Set(["premium"]);
-const DOMAINR_AFTERMARKET = new Set(["marketed", "priced", "transferable"]);
-
-export function interpretDomainr(entry: DomainrStatusEntry | undefined): DomainrVerdict {
-  if (!entry?.status) return { kind: "unknown" };
-  const tokens = entry.status.toLowerCase().split(/\s+/).filter(Boolean);
-  if (tokens.length === 0) return { kind: "unknown" };
-
-  const taken = tokens.some((t) => DOMAINR_TAKEN.has(t));
-  const free = tokens.some((t) => DOMAINR_FREE.has(t));
-  const premium = tokens.some((t) => DOMAINR_PREMIUM.has(t));
-  const aftermarket = tokens.some((t) => DOMAINR_AFTERMARKET.has(t));
-
-  // Aftermarket tokens (marketed/priced/transferable) mean the domain is already
-  // registered and listed for sale — they take precedence over free/inactive.
-  if (taken || aftermarket) return { kind: "taken", forSale: aftermarket };
-  if (free) return { kind: "available", premium };
-  return { kind: "unknown" };
-}
+export type { DomainrVerdict } from "./availability-rules.ts";
+export { interpretDomainr };
 
 
 // Concurrency limiter (no extra deps).
@@ -916,7 +889,7 @@ export async function checkDomains(
 
   // ---- Pass 2: Domainr, only where it adds value -----------------------
   const needsDomainr = baseResults
-    .filter((r) => r.uncertain || (r.available && (r.likelyPremium || isLikelyPremium(r.domain))))
+    .filter((r) => shouldEscalateToDomainr({ ...r, likelyPremium: r.likelyPremium ?? isLikelyPremium(r.domain) }))
     .map((r) => r.domain);
 
   const domainrResults = rapidKey && needsDomainr.length > 0
@@ -955,8 +928,20 @@ export async function checkDomains(
         listingUrl: verdict.forSale ? `https://www.afternic.com/domain/${base.domain}` : undefined,
       });
     } else {
-      // No Domainr signal — keep the RDAP/DNS verdict as-is.
-      fresh.push(base);
+      // No Domainr verdict. An absence-only "available" (RDAP 404 + NXDOMAIN)
+      // cannot be distinguished from a registry-reserved / DPML-blocked name.
+      // Downgrade to honest uncertain (never shown available, never priced,
+      // never cached) when either:
+      //   • Domainr was reachable but had no signal for this name, OR
+      //   • the SLD trips the brand-block list — even with Domainr down
+      //     (degraded-mode rider: this is what stops google.* from being sold).
+      const absenceOnly =
+        base.available && base.uncertain !== true &&
+        (base.checkedVia === "rdap" || base.checkedVia === "dns");
+      const downgrade = absenceOnly && (domainrResults !== null || isLikelyBlocked(base.domain));
+      fresh.push(downgrade
+        ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
+        : base);
     }
   }
 
