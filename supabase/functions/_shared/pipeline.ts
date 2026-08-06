@@ -13,6 +13,7 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   interpretDomainr,
+  isLikelyBlocked,
   
   shouldEscalateToDomainr,
   type DomainrStatusEntry,
@@ -949,7 +950,7 @@ export async function checkDomains(
       // downgraded to honest uncertain (never available, never priced,
       // never cached), regardless of third-signal availability.
       const brandBlockRisk =
-        base.available && !base.uncertain && isLikelyBrandBlocked(base.domain);
+        base.available && !base.uncertain && isLikelyBlocked(base.domain);
       fresh.push(
         brandBlockRisk
           ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
