@@ -437,7 +437,8 @@ const Pricing = () => {
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-4 space-y-4">
                     {enterprise.map((s) => (
-                      <DetailedTldTable key={s.tld} summary={s} />
+                      <DetailedTldTable key={s.tld} summary={s} mode={mode} />
+
                     ))}
                   </CollapsibleContent>
                 </Collapsible>
