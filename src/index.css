@@ -343,6 +343,11 @@
     margin-bottom: -0.18em;
   }
 
+  /* Readable mint for inline links — aurora-mint at 42% L fails AA on the light
+     background (2.3:1), so light mode uses a darker mint stop. */
+  .text-aurora-link { color: hsl(165 85% 26%); }
+  .dark .text-aurora-link { color: hsl(var(--aurora-mint)); }
+
   /* Unified icon frames — one icon language across all pages */
   .icon-frame {
     @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-aurora/25 bg-aurora/10 text-aurora;

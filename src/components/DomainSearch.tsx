@@ -371,6 +371,14 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
       {!hasQuery ? (
         <div className="relative z-10 flex min-h-[38vh] items-center justify-center px-4 pb-4 pt-10 sm:h-[calc(50vh-72px)] sm:min-h-0 sm:pb-0 sm:pt-0">
           <div className="mx-auto w-full max-w-5xl text-center">
+            <Link
+              to="/speed"
+              className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-muted/30 px-3.5 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground sm:text-xs"
+            >
+              <Zap className="h-3.5 w-3.5 shrink-0 text-aurora-mint" />
+              <span className="whitespace-nowrap">First answer in ~170 ms<span className="hidden sm:inline"> — timed live, no asterisks</span></span>
+            </Link>
+
             <h1 className="text-gradient mx-auto w-full px-1 text-[clamp(2.25rem,10.5vw,4.75rem)] font-extrabold leading-[1.05] tracking-[-0.04em] sm:leading-[1] sm:tracking-[-0.045em]">
               <span className="block sm:hidden">World's fastest</span>
               <span className="block sm:hidden">domain search.</span>
@@ -380,23 +388,13 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
             </h1>
 
             <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:mt-6 sm:text-lg md:text-xl">
-              Probably the fastest domain search in the universe. Or the second — the timer on screen will
-              tell you which.
+              Probably the fastest domain search in the universe. Or the second — the{" "}
+              <Link to="/speed" className="text-aurora-link underline-offset-4 hover:underline">
+                live benchmark
+              </Link>{" "}
+              will tell you which.
             </p>
 
-            <Link
-              to="/speed"
-              className="mt-5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground sm:text-sm"
-            >
-              <Zap className="h-3.5 w-3.5 shrink-0 text-aurora-mint" />
-              <span className="whitespace-nowrap">First answer in ~170 ms<span className="hidden sm:inline"> — timed live, no asterisks</span></span>
-            </Link>
-
-            <div className="mt-3">
-              <Link to="/speed" className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline sm:text-sm">
-                see the live benchmark →
-              </Link>
-            </div>
 
 
 
