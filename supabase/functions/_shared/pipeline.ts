@@ -896,6 +896,11 @@ export async function checkDomains(
 
   const fastlyKey = Deno.env.get("FASTLY_API_TOKEN");
 
+  // Kick the pricing catalog load into the background now (never awaited) so it's
+  // usually warm by enrichment time. Porkbun's catalog can take 4–14s; it must
+  // never sit on the availability critical path.
+  warmTldPricing();
+
   // ---- L1: in-isolate hot cache (zero network, zero DB) ----------------
   const cachedMap = new Map<string, DomainCheckResult>();
   const nowMs = Date.now();
