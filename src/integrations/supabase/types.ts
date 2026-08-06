@@ -14,6 +14,18 @@ export type Database = {
   }
   public: {
     Tables: {
+      _sync_token: {
+        Row: {
+          token: string
+        }
+        Insert: {
+          token: string
+        }
+        Update: {
+          token?: string
+        }
+        Relationships: []
+      }
       domain_cache: {
         Row: {
           available: boolean
@@ -196,7 +208,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      _sync_cron_secret: {
+        Args: { p_token: string; p_val: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
