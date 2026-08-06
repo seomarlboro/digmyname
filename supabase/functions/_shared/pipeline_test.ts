@@ -2,6 +2,7 @@
 // Run with: deno test supabase/functions/_shared/pipeline_test.ts
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { interpretDomainr, isLikelyBlocked } from "./availability-rules.ts";
+import { isLikelyPremium } from "./pipeline.ts";
 
 // ---- interpretDomainr -------------------------------------------------------
 
