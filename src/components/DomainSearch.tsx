@@ -211,7 +211,6 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 premium: info.premium,
                 likelyPremium: info.likelyPremium,
                 uncertain: info.uncertain,
-          uncertainReason: info.uncertainReason,
                 uncertainReason: info.uncertainReason,
                 forSale: info.forSale,
                 forSaleVia: info.forSaleVia,
