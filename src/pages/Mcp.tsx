@@ -262,52 +262,26 @@ const Mcp = () => {
           <Section title="Tools exposed">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {tools.map((t, i) => (
-                <div
+                <FeatureCard
                   key={t.name}
-                  className="surface-card group relative p-5 transition-colors hover:border-foreground/20 md:p-6"
-                >
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex items-baseline gap-2 flex-wrap">
-                      <code className="text-foreground font-mono font-semibold text-lg">
-                        {t.name}
-                      </code>
-                      <code className="text-muted-foreground/70 font-mono text-sm">{t.sig}</code>
-                    </div>
-                    <span className="shrink-0 font-mono text-xs text-muted-foreground/50">
-                      0{i + 1}
+                  icon={t.icon}
+                  index={`0${i + 1}`}
+                  mono
+                  title={
+                    <span className="flex flex-wrap items-baseline gap-2">
+                      {t.name}
+                      <span className="text-sm font-normal text-muted-foreground/70">{t.sig}</span>
                     </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{t.desc}</p>
-                </div>
+                  }
+                >
+                  {t.desc}
+                </FeatureCard>
               ))}
             </div>
           </Section>
 
-
           {/* Waitlist */}
-          <section
-            id="waitlist"
-            className="surface-card mt-14 relative scroll-mt-24 overflow-hidden p-8 md:p-10"
-          >
-            <div className="relative grid md:grid-cols-2 gap-8 md:gap-10 items-center">
-              <div>
-                <Badge variant="secondary" className="mb-3">
-                  Coming soon
-                </Badge>
-                <h2 className="section-title">
-                  Paid tier waitlist
-                </h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  Free tier is generous (60 req/min · 5,000/day). Need more? Get API keys, 100k
-                  req/day, webhooks and an SLA.
-                </p>
-              </div>
-              <div>
-                <WaitlistForm />
-              </div>
-            </div>
-
-          </section>
+          <WaitlistSection />
 
           {/* Footer CTA */}
           <section className="surface-card mt-14 p-10 text-center">
