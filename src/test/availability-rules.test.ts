@@ -63,6 +63,10 @@ describe("isLikelyBlocked", () => {
     expect(isLikelyBlocked("google.digital")).toBe(true);
     expect(isLikelyBlocked("microsoft.software")).toBe(true);
     expect(isLikelyBlocked("nic.dev")).toBe(true);
+    expect(isLikelyBlocked("microsoft.software")).toBe(true);
+  });
+  it("does not flag coined names", () => {
+    expect(isLikelyBlocked("kvarturbo2748.digital")).toBe(false);
   });
   it("does not flag ordinary or substring-similar names", () => {
     expect(isLikelyBlocked("kvarturbo2748.digital")).toBe(false);
