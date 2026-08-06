@@ -472,6 +472,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
             <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
               {results
                 .filter((r) => !r.checking && r.available && !r.uncertain)
+                .sort(byTldAuthority)
                 .map((r) => (
                   <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
                 ))}
@@ -504,6 +505,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && r.uncertain && !r.sldBlocked && !r.provisional)
+                    .sort(byTldAuthority)
                     .slice(0, 10)
                     .map((r) => (
                       <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
@@ -522,7 +524,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && !r.available && (!r.uncertain || r.sldBlocked || r.provisional))
-                    .sort((a, b) => Number((b.sldBlocked && b.uncertain) ?? false) - Number((a.sldBlocked && a.uncertain) ?? false))
+                    .sort(byTldAuthority)
                     .slice(0, 10)
                     .map((r) => (
                       <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
