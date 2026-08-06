@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
-import { Loader2, Shield, ShieldOff, Award, Search, ChevronDown } from "lucide-react";
+import { Loader2, Shield, ShieldOff, Award, Search, ChevronDown, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -59,6 +59,22 @@ const formatUpdated = (iso: string | undefined) => {
   return `${days} d ago`;
 };
 
+const STALE_AFTER_DAYS = 14;
+
+const isStale = (iso: string | undefined) => {
+  if (!iso) return false;
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return false;
+  return Date.now() - then > STALE_AFTER_DAYS * 24 * 60 * 60 * 1000;
+};
+
+const formatAbsolute = (iso: string | undefined) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+};
+
 const Pricing = () => {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<PriceMode>("reg");
@@ -80,6 +96,8 @@ const Pricing = () => {
     if (!prices?.length) return undefined;
     return prices.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at;
   }, [prices]);
+
+  const pricesAreStale = isStale(lastUpdated);
 
   const allSummaries = useMemo(() => {
     if (!prices) return [];
@@ -213,6 +231,16 @@ const Pricing = () => {
 
         </PageHeader>
 
+        {pricesAreStale && (
+          <div className="surface-card mb-6 flex items-start gap-3 border-warning/40 bg-warning/15 p-4 text-warning">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+            <p className="text-sm font-medium">
+              Prices last verified {formatAbsolute(lastUpdated)} — they may be outdated. We're
+              working on refreshing them.
+            </p>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex flex-col items-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-aurora" />
@@ -259,7 +287,7 @@ const Pricing = () => {
             <Section
               title="Cheapest per extension"
               lede="One row per TLD — the best price we found for each action."
-              aside={`Prices updated ${formatUpdated(lastUpdated)}`}
+              aside={pricesAreStale ? `Prices last verified ${formatAbsolute(lastUpdated)}` : `Prices updated ${formatUpdated(lastUpdated)}`}
             >
               {standard.length === 0 ? (
                 <p className="surface-card p-6 text-sm text-muted-foreground">
@@ -321,11 +349,14 @@ const Pricing = () => {
                           )}
                         </td>
                         <td className="px-5 py-5">
-                          <span className="text-sm text-muted-foreground">
-                            {formatUpdated(
-                              s.prices.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at,
-                            )}
-                          </span>
+                          {(() => {
+                            const rowUpdated = s.prices.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at;
+                            return (
+                              <span className={cn("text-sm", isStale(rowUpdated) ? "text-warning" : "text-muted-foreground")}>
+                                {formatUpdated(rowUpdated)}
+                              </span>
+                            );
+                          })()}
                         </td>
                       </tr>
                     );
@@ -448,14 +479,15 @@ const SummaryPriceCell = ({
 
 const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
   const sorted = [...s.prices].sort((a, b) => a.reg_price - b.reg_price);
+  const newestUpdated = sorted.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at;
 
   return (
     <div className="surface-card-lg overflow-x-auto">
       <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4">
         <span className="font-display text-2xl font-extrabold tracking-tight text-aurora">.{s.tld}</span>
         <span className="text-sm text-muted-foreground">{s.prices.length} registrars</span>
-        <span className="ml-auto text-xs text-muted-foreground">
-          Updated {formatUpdated(sorted.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at)}
+        <span className={cn("ml-auto text-xs", isStale(newestUpdated) ? "text-warning" : "text-muted-foreground")}>
+          Updated {formatUpdated(newestUpdated)}
         </span>
       </div>
       <table className="min-w-[820px] text-left">

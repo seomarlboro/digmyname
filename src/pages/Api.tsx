@@ -14,7 +14,7 @@ const API_BASE = "https://api.digmyname.com/functions/v1/public-api";
 const endpoints = [
   {
     method: "GET",
-    path: "/check?domain=acme.io",
+    path: "/check?domain=acmeforge.io",
     desc: "Single domain availability, premium flag and real price.",
   },
   {
@@ -78,7 +78,7 @@ const Api = () => {
           actions={
             <>
               <Button asChild size="lg" className="h-12 gap-2 px-6">
-                <a href={`${API_BASE}/check?domain=acme.io`} target="_blank" rel="noopener noreferrer">
+                <a href={`${API_BASE}/check?domain=acmeforge.io`} target="_blank" rel="noopener noreferrer">
                   <Terminal className="h-5 w-5" />
                   Try a live request
                 </a>
@@ -105,16 +105,16 @@ const Api = () => {
               {
                 label: "cURL",
                 language: "bash",
-                code: `curl "${API_BASE}/check?domain=acme.io"`,
+                code: `curl "${API_BASE}/check?domain=acmeforge.io"`,
               },
               {
                 label: "JavaScript",
                 language: "javascript",
                 code: `const res = await fetch(
-  "${API_BASE}/check?domain=acme.io"
+  "${API_BASE}/check?domain=acmeforge.io"
 );
-const data = await res.json();
-console.log(data.available, data.price);`,
+const { result } = await res.json();
+console.log(result.available, result.price_usd, result.cheapest_registrar?.name);`,
               },
               {
                 label: "Python",
@@ -122,19 +122,32 @@ console.log(data.available, data.price);`,
                 code: `import requests
 
 url = "${API_BASE}/check"
-res = requests.get(url, params={"domain": "acme.io"})
-print(res.json()["available"])`,
+res = requests.get(url, params={"domain": "acmeforge.io"})
+print(res.json()["result"]["available"])`,
               },
               {
                 label: "Response",
                 language: "json",
                 code: `{
-  "domain": "acme.io",
-  "available": true,
-  "premium": false,
-  "price": 34.56,
-  "currency": "USD",
-  "registrar": "porkbun"
+  "result": {
+    "domain": "acmeforge.io",
+    "available": true,
+    "uncertain": false,
+    "premium": false,
+    "likely_premium": false,
+    "price_usd": 28.12,
+    "for_sale": false,
+    "for_sale_via": null,
+    "listing_url": null,
+    "cheapest_registrar": {
+      "name": "Porkbun",
+      "reg_price_usd": 28.12,
+      "affiliate_url": null,
+      "register_url": "https://porkbun.com/checkout/search?q=acmeforge.io"
+    },
+    "buy_url": "https://porkbun.com/checkout/search?q=acmeforge.io",
+    "search_url": "https://digmyname.com/?q=acmeforge&utm_source=mcp&utm_medium=api&utm_campaign=domain-check-skills"
+  }
 }`,
               },
             ]}
