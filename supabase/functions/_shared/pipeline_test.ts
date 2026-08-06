@@ -2,7 +2,7 @@
 // Run with: deno test supabase/functions/_shared/pipeline_test.ts
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { interpretDomainr } from "./availability-rules.ts";
-import { isLikelyBrandBlocked } from "./pipeline.ts";
+import { isLikelyBlocked } from "./availability-rules.ts";
 
 // ---- interpretDomainr -------------------------------------------------------
 
@@ -44,26 +44,26 @@ Deno.test("interpretDomainr: empty / undefined → unknown", () => {
   assertEquals(interpretDomainr({ domain: "x.com", status: "" }), { kind: "unknown" });
 });
 
-// ---- isLikelyBrandBlocked ---------------------------------------------------
+// ---- isLikelyBlocked ---------------------------------------------------
 
-Deno.test("isLikelyBrandBlocked: famous DPML brands are flagged", () => {
-  assert(isLikelyBrandBlocked("microsoft.software"));
-  assert(isLikelyBrandBlocked("google.digital"));
+Deno.test("isLikelyBlocked: famous DPML brands are flagged", () => {
+  assert(isLikelyBlocked("microsoft.software"));
+  assert(isLikelyBlocked("google.digital"));
 });
 
-Deno.test("isLikelyBrandBlocked: case-insensitive", () => {
-  assert(isLikelyBrandBlocked("MICROSOFT.software"));
+Deno.test("isLikelyBlocked: case-insensitive", () => {
+  assert(isLikelyBlocked("MICROSOFT.software"));
 });
 
-Deno.test("isLikelyBrandBlocked: no substring matching, coined names pass", () => {
-  assertEquals(isLikelyBrandBlocked("kvarturbo2748.digital"), false);
-  assertEquals(isLikelyBrandBlocked("notmicrosoftatall.com"), false);
+Deno.test("isLikelyBlocked: no substring matching, coined names pass", () => {
+  assertEquals(isLikelyBlocked("kvarturbo2748.digital"), false);
+  assertEquals(isLikelyBlocked("notmicrosoftatall.com"), false);
 });
 
 // ---- downgrade shape (predicate + object, no network) -----------------------
 
 function downgrade(base: { domain: string; available: boolean; checkedVia: string; uncertain?: boolean }) {
-  const brandBlockRisk = base.available && !base.uncertain && isLikelyBrandBlocked(base.domain);
+  const brandBlockRisk = base.available && !base.uncertain && isLikelyBlocked(base.domain);
   return brandBlockRisk
     ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
     : base;

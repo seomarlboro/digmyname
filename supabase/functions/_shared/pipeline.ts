@@ -14,7 +14,6 @@ import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supa
 import {
   interpretDomainr,
   isLikelyBlocked,
-  
   shouldEscalateToDomainr,
   type DomainrStatusEntry,
 } from "./availability-rules.ts";
