@@ -949,20 +949,21 @@ export async function checkDomains(
   // ---- Pass 1: free authoritative sources (RDAP + DNS) -----------------
   const baseResults = await pMap(uncached, 25, (d) => resolveDomain(d));
 
-  // ---- Pass 2: Domainr, only where it adds value -----------------------
-  const needsDomainr = baseResults
-    .filter((r) => shouldEscalateToDomainr({ ...r, likelyPremium: r.likelyPremium ?? isLikelyPremium(r.domain) }))
+  // ---- Pass 2: third signal, only where it adds value ------------------
+  const needsThirdSignal = baseResults
+    .filter((r) =>
+      shouldEscalateToDomainr({ ...r, likelyPremium: r.likelyPremium ?? isLikelyPremium(r.domain) }) ||
+      (r.available && isLikelyBrandBlocked(r.domain))
+    )
     .map((r) => r.domain);
 
-  const domainrResults = rapidKey && needsDomainr.length > 0
-    ? await checkDomainrBatch(needsDomainr, rapidKey)
+  const domainrResults = THIRD_SIGNAL_ENABLED && rapidKey && needsThirdSignal.length > 0
+    ? await checkDomainrBatch(needsThirdSignal, rapidKey)
     : null;
-  if (rapidKey) {
+  if (!THIRD_SIGNAL_ENABLED && needsThirdSignal.length > 0) {
     console.log(
-      `domainr consulted for ${needsDomainr.length}/${uncached.length} domains, returned=${domainrResults?.size ?? "null"}`
+      `third-signal offline (Domainr/RapidAPI delisted) — ${needsThirdSignal.length} flagged name(s); brand-block matches downgraded to uncertain`
     );
-  } else if (needsDomainr.length > 0) {
-    console.warn("domainr key NOT set (RAPIDAPI_DOMAINR_KEY missing) — RDAP/DNS only");
   }
 
   const fresh: DomainCheckResult[] = [];
