@@ -343,9 +343,9 @@
     margin-bottom: -0.18em;
   }
 
-  /* Readable mint for inline links — aurora-mint at 42% L fails AA on the light
-     background (2.3:1), so light mode uses a darker mint stop. */
-  .text-aurora-link { color: hsl(165 85% 26%); }
+  /* Inline hero link — violet in light mode (matches other content links) and
+     mint in dark mode so it reads on the dark hero background. */
+  .text-aurora-link { color: hsl(var(--aurora)); }
   .dark .text-aurora-link { color: hsl(var(--aurora-mint)); }
 
   /* Hero eyebrow chip — must read on both the light and dark hero backgrounds. */
