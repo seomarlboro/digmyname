@@ -22,7 +22,7 @@ const Index = () => {
         <meta name="description" content="The world's fastest domain search. Check availability in milliseconds. If you find a faster checker, come dispute it." />
         <link rel="canonical" href="https://digmyname.com/" />
         <meta property="og:title" content="Fast Domain Search — Fastest We've Measured | DigMyName" />
-        <meta property="og:description" content="The world's fastest domain search. Check availability in milliseconds." />
+        <meta property="og:description" content="The fastest domain search we've measured. Check availability in milliseconds — if you find a faster checker, come dispute it." />
         <meta property="og:url" content="https://digmyname.com/" />
         <meta property="og:image" content="https://digmyname.com/og-image.jpg" />
         <script type="application/ld+json">{JSON.stringify({
