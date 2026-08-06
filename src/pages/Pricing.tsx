@@ -44,6 +44,56 @@ const MODE_LABEL: Record<PriceMode, string> = {
   transfer: "Transfer",
 };
 
+const MODE_FORMULA: Record<PriceMode, string> = {
+  reg: "reg + 2 renewals",
+  renew: "3 renewals",
+  transfer: "transfer + 2 renewals",
+};
+
+/** Price of a registrar row for the current mode. `null` when the row has no price for it. */
+const modePrice = (p: RegistrarPrice, mode: PriceMode): number | null =>
+  mode === "reg" ? p.reg_price : mode === "renew" ? p.renew_price : p.transfer_price;
+
+/** Three-year cost of a registrar row for the current mode. `null` when not applicable. */
+const modeThreeYear = (p: RegistrarPrice, mode: PriceMode): number | null =>
+  mode === "reg"
+    ? p.reg_price + p.renew_price * 2
+    : mode === "renew"
+      ? p.renew_price * 3
+      : p.transfer_price != null
+        ? p.transfer_price + p.renew_price * 2
+        : null;
+
+interface ModeView {
+  /** Registrar row that is cheapest for the current mode. */
+  primary: RegistrarPrice | null;
+  primaryPrice: number | null;
+  promo: string | null;
+  best3: { row: RegistrarPrice; cost: number } | null;
+}
+
+/** One derived view per row, consumed by every summary column. */
+const modeView = (s: TldSummary, mode: PriceMode): ModeView => {
+  const primary =
+    mode === "reg" ? s.cheapestReg : mode === "renew" ? s.cheapestRenew : s.cheapestTransfer;
+  const primaryPrice = primary ? modePrice(primary, mode) : null;
+
+  let best3: { row: RegistrarPrice; cost: number } | null = null;
+  for (const p of s.prices) {
+    const cost = modeThreeYear(p, mode);
+    if (cost != null && (!best3 || cost < best3.cost)) best3 = { row: p, cost };
+  }
+
+  return {
+    primary,
+    primaryPrice,
+    // Promo codes apply to the registration price only.
+    promo: mode === "reg" ? (primary?.promo_code ?? null) : null,
+    best3,
+  };
+};
+
+
 const ENTERPRISE_THRESHOLD = 500;
 
 const formatUpdated = (iso: string | undefined) => {
