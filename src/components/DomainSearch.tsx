@@ -196,7 +196,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
         }
       }
 
-      const applyBatch = (availMap: Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>) => {
+      const applyBatch = (availMap: Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>) => {
         if (cancelled) return;
         markFirstAnswer();
         setResults((prev) =>
@@ -211,6 +211,8 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 premium: info.premium,
                 likelyPremium: info.likelyPremium,
                 uncertain: info.uncertain,
+          uncertainReason: info.uncertainReason,
+                uncertainReason: info.uncertainReason,
                 forSale: info.forSale,
                 forSaleVia: info.forSaleVia,
                 listingUrl: info.listingUrl,
@@ -270,6 +272,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
           premium: info.premium,
           likelyPremium: info.likelyPremium,
           uncertain: info.uncertain,
+          uncertainReason: info.uncertainReason,
           forSale: info.forSale,
           forSaleVia: info.forSaleVia,
           listingUrl: info.listingUrl,

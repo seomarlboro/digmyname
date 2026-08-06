@@ -43,6 +43,8 @@ export interface DomainCheckResult {
   price?: number;
   premium?: boolean;
   uncertain?: boolean;
+  /** Why the result is uncertain, when the cause is deterministic (not a probe failure). */
+  uncertainReason?: "brand_protected";
   likelyPremium?: boolean;
   /** Registered but parked on an aftermarket marketplace (Sedo, Dan, Afternic, …). */
   forSale?: boolean;
@@ -952,7 +954,7 @@ export async function checkDomains(
         base.available && !base.uncertain && isLikelyBlocked(base.domain);
       fresh.push(
         brandBlockRisk
-          ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
+          ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true, uncertainReason: "brand_protected" as const }
           : base
       );
     }
