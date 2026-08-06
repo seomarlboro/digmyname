@@ -50,6 +50,11 @@ export interface DomainCheckResult {
   forSale?: boolean;
   forSaleVia?: string;
   listingUrl?: string;
+  /** Label only: the SLD matches a known trademark/registry-reserved brand
+   *  (isLikelyBlocked). ADDITIVE — does not affect available/uncertain/price/
+   *  caching; the frontend uses it to tag every card in a brand class
+   *  consistently. Derived per-response, never persisted. */
+  sldBlocked?: boolean;
 }
 
 // TLDs where registries actively price short names as premium / aftermarket.
@@ -1127,7 +1132,13 @@ export async function checkDomains(
   for (const c of cachedMap.values()) all.set(c.domain, c);
   for (const r of fresh) all.set(r.domain, r);
 
-  return batch.map(
-    (d) => all.get(d) ?? { domain: d, available: false, checkedVia: "error", uncertain: true }
-  );
+  // Label pass (additive, non-verdict): tag every result whose SLD is a known
+  // brand/registry-reserved mark, so the frontend can render one consistent
+  // "brand" treatment across available/taken/uncertain cards. This does NOT
+  // read or change any verdict, price, or cache row — it is a pure derived
+  // label applied uniformly to cached and fresh results alike.
+  return batch.map((d) => {
+    const r = all.get(d) ?? { domain: d, available: false, checkedVia: "error", uncertain: true };
+    return isLikelyBlocked(d) ? { ...r, sldBlocked: true } : r;
+  });
 }

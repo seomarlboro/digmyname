@@ -86,6 +86,10 @@ export interface DomainResult {
   uncertain?: boolean;
   /** Deterministic cause of uncertainty (brand/trademark protected), not a probe failure. */
   uncertainReason?: "brand_protected";
+  /** Label only: SLD matches a known trademark/registry-reserved brand. Set on
+   *  every card in a brand class (available/taken/uncertain) so the UI can tag
+   *  them consistently. Never affects the verdict shown. */
+  sldBlocked?: boolean;
   /** Registered but parked on a marketplace (Sedo, Dan, Afternic, …). */
   forSale?: boolean;
   forSaleVia?: string;
