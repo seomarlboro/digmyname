@@ -180,8 +180,8 @@ export async function checkDomainsFast(
 /** Check real availability via edge function */
 export async function checkDomainsAvailability(
   domains: string[]
-): Promise<Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>> {
-  const resultMap = new Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>();
+): Promise<Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; sldBlocked?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>> {
+  const resultMap = new Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; sldBlocked?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>();
 
   try {
     const { data, error } = await supabase.functions.invoke("check-domains", {
@@ -202,6 +202,7 @@ export async function checkDomainsAvailability(
           likelyPremium: r.likelyPremium,
           uncertain: r.uncertain,
           uncertainReason: r.uncertainReason,
+          sldBlocked: r.sldBlocked,
           forSale: r.forSale,
           forSaleVia: r.forSaleVia,
           listingUrl: r.listingUrl,
