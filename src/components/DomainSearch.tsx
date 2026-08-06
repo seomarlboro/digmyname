@@ -389,7 +389,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
 
             <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:mt-6 sm:text-lg md:text-xl">
               Probably the fastest domain search in the universe. Or the second — the{" "}
-              <Link to="/speed" className="text-aurora-link underline-offset-4 hover:underline">
+              <Link to="/speed" className="text-aurora-link underline underline-offset-4 hover:opacity-90">
                 live benchmark
               </Link>{" "}
               will tell you which.
