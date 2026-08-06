@@ -351,46 +351,48 @@ const Pricing = () => {
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Domain</th>
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest {MODE_LABEL[mode]}</th>
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Renewal reality</th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Best 3-Year Value</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                      Best 3-Year Value
+                      <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-muted-foreground">
+                        {MODE_FORMULA[mode]}
+                      </span>
+                    </th>
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">WHOIS Privacy</th>
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Updated</th>
                   </tr>
                 </thead>
                 <tbody>
                   {standard.map((s) => {
-                    const best3Cost = s.best3Year.reg_price + s.best3Year.renew_price * 2;
+                    const v = modeView(s, mode);
                     return (
                       <tr key={s.tld} className="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/10">
                         <td className="px-5 py-5">
                           <span className="font-display text-3xl font-extrabold tracking-tight text-[hsl(var(--aurora-mint))]">.{s.tld}</span>
                         </td>
-                        <td className="px-5 py-5">
-                          {mode === "reg" && (
-                            <SummaryPriceCell registrar={s.cheapestReg.registrar} price={s.cheapestReg.reg_price} promo={s.cheapestReg.promo_code} />
-                          )}
-                          {mode === "renew" && (
-                            <SummaryPriceCell registrar={s.cheapestRenew.registrar} price={s.cheapestRenew.renew_price} />
-                          )}
-                          {mode === "transfer" && (
-                            s.cheapestTransfer ? (
-                              <SummaryPriceCell registrar={s.cheapestTransfer.registrar} price={s.cheapestTransfer.transfer_price!} />
-                            ) : (
-                              <span className="text-sm text-muted-foreground">—</span>
-                            )
+                        <td className="px-5 py-5 align-middle">
+                          {v.primary && v.primaryPrice != null ? (
+                            <SummaryPriceCell registrar={v.primary.registrar} price={v.primaryPrice} promo={v.promo} />
+                          ) : (
+                            <NaCell />
                           )}
                         </td>
-                        <td className="px-5 py-5">
-                          <RenewalTrap summary={s} />
+                        <td className="px-5 py-5 align-middle">
+                          {v.primary ? <RenewalTrap row={v.primary} /> : <NaCell />}
                         </td>
-                        <td className="px-5 py-5">
-                          <div>
-                            <span className={`text-sm font-medium ${getRegistrarColor(s.best3Year.registrar).text}`}>{s.best3Year.registrar}</span>
-                            <p className="mt-0.5">
-                              <span className="font-mono text-base font-extrabold tabular-nums text-foreground">${best3Cost.toFixed(2)}</span>
-                              <span className="text-sm text-muted-foreground"> /3yr</span>
-                            </p>
-                          </div>
+                        <td className="px-5 py-5 align-middle">
+                          {v.best3 ? (
+                            <div>
+                              <span className={`text-sm font-medium ${getRegistrarColor(v.best3.row.registrar).text}`}>{v.best3.row.registrar}</span>
+                              <p className="mt-0.5">
+                                <span className="font-mono text-base font-extrabold tabular-nums text-foreground">${v.best3.cost.toFixed(2)}</span>
+                                <span className="text-sm text-muted-foreground"> /3yr</span>
+                              </p>
+                            </div>
+                          ) : (
+                            <NaCell />
+                          )}
                         </td>
+
                         <td className="px-5 py-5">
                           {s.prices.some((p) => p.whois_privacy) ? (
                             <Shield className="h-5 w-5 text-mint" />
