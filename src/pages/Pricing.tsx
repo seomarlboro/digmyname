@@ -125,6 +125,13 @@ const formatAbsolute = (iso: string | undefined) => {
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 };
 
+const NoMatches = ({ query }: { query: string }) => (
+  <p className="surface-card p-6 text-sm text-muted-foreground">
+    No extensions match “{query}”.
+  </p>
+);
+
+
 const Pricing = () => {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<PriceMode>("reg");
