@@ -84,6 +84,8 @@ export interface DomainResult {
   likelyPremium?: boolean;
   /** APIs disagreed or failed — treat with caution */
   uncertain?: boolean;
+  /** Deterministic cause of uncertainty (brand/trademark protected), not a probe failure. */
+  uncertainReason?: "brand_protected";
   /** Registered but parked on a marketplace (Sedo, Dan, Afternic, …). */
   forSale?: boolean;
   forSaleVia?: string;
@@ -174,8 +176,8 @@ export async function checkDomainsFast(
 /** Check real availability via edge function */
 export async function checkDomainsAvailability(
   domains: string[]
-): Promise<Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>> {
-  const resultMap = new Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>();
+): Promise<Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>> {
+  const resultMap = new Map<string, { available: boolean; price?: number; premium?: boolean; likelyPremium?: boolean; uncertain?: boolean; uncertainReason?: "brand_protected"; forSale?: boolean; forSaleVia?: string; listingUrl?: string }>();
 
   try {
     const { data, error } = await supabase.functions.invoke("check-domains", {
@@ -195,6 +197,7 @@ export async function checkDomainsAvailability(
           premium: r.premium,
           likelyPremium: r.likelyPremium,
           uncertain: r.uncertain,
+          uncertainReason: r.uncertainReason,
           forSale: r.forSale,
           forSaleVia: r.forSaleVia,
           listingUrl: r.listingUrl,

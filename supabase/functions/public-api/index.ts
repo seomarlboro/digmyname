@@ -212,6 +212,7 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
     domain: r.domain,
     available,
     uncertain: !!r.uncertain,
+    uncertain_reason: r.uncertainReason ?? null,
     premium: !!r.premium,
     likely_premium: likelyPremium,
     // Price only makes sense when the domain is actually available and not

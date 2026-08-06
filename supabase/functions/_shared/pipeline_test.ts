@@ -64,18 +64,32 @@ Deno.test("isLikelyBlocked: no substring matching, coined names pass", () => {
 function downgrade(base: { domain: string; available: boolean; checkedVia: string; uncertain?: boolean }) {
   const brandBlockRisk = base.available && !base.uncertain && isLikelyBlocked(base.domain);
   return brandBlockRisk
-    ? { domain: base.domain, available: false, checkedVia: base.checkedVia, uncertain: true }
+    ? {
+      domain: base.domain,
+      available: false,
+      checkedVia: base.checkedVia,
+      uncertain: true,
+      uncertainReason: "brand_protected" as const,
+    }
     : base;
 }
 
 Deno.test("downgrade: brand-blocked available → available:false + uncertain:true", () => {
   assertEquals(
     downgrade({ domain: "google.digital", available: true, checkedVia: "rdap" }),
-    { domain: "google.digital", available: false, checkedVia: "rdap", uncertain: true },
+    {
+      domain: "google.digital",
+      available: false,
+      checkedVia: "rdap",
+      uncertain: true,
+      uncertainReason: "brand_protected",
+    },
   );
 });
 
 Deno.test("downgrade: ordinary coined name keeps its base verdict", () => {
   const base = { domain: "kvarturbo2748.digital", available: true, checkedVia: "rdap" };
-  assertEquals(downgrade(base), base);
+  const out = downgrade(base);
+  assertEquals(out, base);
+  assertEquals((out as { uncertainReason?: string }).uncertainReason, undefined);
 });

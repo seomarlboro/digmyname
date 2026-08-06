@@ -86,6 +86,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
 
   // Uncertain — APIs failed or disagreed. Show retry instead of misleading "Taken".
   if (isUncertain) {
+    const brandProtected = result.uncertainReason === "brand_protected";
     if (compact) {
       return (
         <div className="grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
@@ -95,19 +96,29 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
             </h3>
             <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
           </div>
-          <span className="text-xs text-muted-foreground min-w-[80px]">Couldn't verify</span>
+          {brandProtected ? (
+            <Badge variant="outline" className="w-fit border-amber-500/40 bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400">
+              Protected brand
+            </Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground min-w-[80px]">Couldn't verify</span>
+          )}
           <span className="min-w-[80px]" />
           <span />
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 gap-1.5 rounded-3xl text-sm text-muted-foreground hover:text-foreground"
-            onClick={() => onRetry?.(domain)}
-            disabled={!onRetry}
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Retry
-          </Button>
+          {brandProtected ? (
+            <span />
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 gap-1.5 rounded-3xl text-sm text-muted-foreground hover:text-foreground"
+              onClick={() => onRetry?.(domain)}
+              disabled={!onRetry}
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Retry
+            </Button>
+          )}
         </div>
       );
     }
@@ -119,23 +130,37 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               {name}.<span className="text-primary">{ext}</span>
               <AlertCircle className="h-4 w-4 text-amber-500" />
             </h3>
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Couldn't verify availability — registry didn't respond. Try again.
-            </p>
+            {brandProtected ? (
+              <>
+                <Badge variant="outline" className="mt-1.5 border-amber-500/40 bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400">
+                  Protected brand
+                </Badge>
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  This name matches a protected trademark — registries typically reserve or block it. Unlikely to be registerable.
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Couldn't verify availability — registry didn't respond. Try again.
+              </p>
+            )}
           </div>
-          <Button
-            variant="outline"
-            className="gap-1.5 rounded-3xl border-amber-500/40 text-amber-600 hover:text-amber-600 dark:text-amber-400"
-            onClick={() => onRetry?.(domain)}
-            disabled={!onRetry}
-          >
-            <RefreshCw className="h-4 w-4" />
-            Retry
-          </Button>
+          {!brandProtected && (
+            <Button
+              variant="outline"
+              className="gap-1.5 rounded-3xl border-amber-500/40 text-amber-600 hover:text-amber-600 dark:text-amber-400"
+              onClick={() => onRetry?.(domain)}
+              disabled={!onRetry}
+            >
+              <RefreshCw className="h-4 w-4" />
+              Retry
+            </Button>
+          )}
         </div>
       </div>
     );
   }
+
 
 
   if (compact) {
