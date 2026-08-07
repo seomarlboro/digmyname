@@ -9,13 +9,13 @@
 
 The fastest domain availability MCP — or the second. Typical first answer in **~170 ms**; the whole pipeline (debounce → parallel authoritative DNS → RDAP → hot cache) is published openly. Found something faster? [Dispute it](https://digmyname.com/speed) and we'll put it on the page ourselves.
 
-MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue, Zed. 7 registrars, 52 TLDs. Powered by [DigMyName](https://digmyname.com).
+MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue, Zed. 6 registrars, 50 TLDs. Powered by [DigMyName](https://digmyname.com).
 
 | | |
 | --- | --- |
-| Typical latency | **~170 ms first answer** (cache-warm) · **~370 ms median** full pipeline (availability + premium + pricing), p95 < 1s |
+| Typical latency | **~170 ms first answer** (cache-warm) · **~370 ms typical** full pipeline (availability + premium + pricing) — everyday numbers, not a lab result; the on-screen timer is the live proof |
 | Method | Published at [digmyname.com/speed](https://digmyname.com/speed) |
-| Coverage | 7 registrars · 52 TLDs |
+| Coverage | 6 registrars · 50 TLDs |
 | Cost | Free — no API key, no account |
 
 ![domain-check-skills-mcp in action](https://digmyname.com/mcp-demo.svg)
@@ -95,9 +95,9 @@ No API key, no account, no config — it works right after install.
 
 ## How it works
 
-Availability is resolved through an **authoritative-first** chain — RDAP (IANA bootstrap), authoritative DNS, Domainr and registrar APIs. Anything unresolved is returned as `UNKNOWN` rather than falsely reported as taken. Premium candidates are flagged separately so agents never quote a standard retail price for a registry-premium name.
+Availability is resolved through an **authoritative-first** chain — RDAP (IANA bootstrap), authoritative DNS-over-HTTPS (Cloudflare, Google and AdGuard, hedged), Fastly Domain Research and registrar APIs. Anything unresolved is returned as `UNKNOWN` rather than falsely reported as taken. Premium candidates are flagged separately so agents never quote a standard retail price for a registry-premium name.
 
-Pricing comes from DigMyName's registrar price cache across 7 registrars and 52 TLDs.
+Pricing comes from DigMyName's registrar price cache across 6 registrars and 50 TLDs.
 
 Domain age is read from registry RDAP endpoints.
 
@@ -126,7 +126,7 @@ Node.js 18+
 
 ## Changelog
 
-See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.2.1**.
+See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.2.4**.
 
 ## License
 
