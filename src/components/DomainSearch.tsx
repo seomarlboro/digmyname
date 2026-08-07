@@ -430,11 +430,11 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
           <>
             {/* Stats */}
             <div className="mb-6 mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm sm:gap-8 sm:text-base">
-              <span className="text-muted-foreground"><span className="text-xl font-extrabold text-foreground sm:text-2xl">{results.length}</span> found</span>
-              <span className="text-muted-foreground"><span className="text-xl font-extrabold text-available sm:text-2xl">{availableCount}</span> available</span>
-              <span className="text-muted-foreground"><span className="text-xl font-extrabold text-muted-foreground/60 sm:text-2xl">{takenCount}</span> taken</span>
+              <span className="text-muted-foreground"><span className="inline-block min-w-[2.5ch] text-right tabular-nums text-xl font-extrabold text-foreground sm:text-2xl">{results.length}</span> found</span>
+              <span className="text-muted-foreground"><span className="inline-block min-w-[2.5ch] text-right tabular-nums text-xl font-extrabold text-available sm:text-2xl">{availableCount}</span> available</span>
+              <span className="text-muted-foreground"><span className="inline-block min-w-[2.5ch] text-right tabular-nums text-xl font-extrabold text-muted-foreground/60 sm:text-2xl">{takenCount}</span> taken</span>
               {uncertainCount > 0 && (
-                <span className="text-muted-foreground"><span className="text-xl font-extrabold text-amber-500 sm:text-2xl">{uncertainCount}</span> unverified</span>
+                <span className="text-muted-foreground"><span className="inline-block min-w-[2.5ch] text-right tabular-nums text-xl font-extrabold text-amber-500 sm:text-2xl">{uncertainCount}</span> unverified</span>
               )}
 
               {(liveMs !== null || firstAnswerMs !== null) && (
