@@ -1,10 +1,10 @@
 # DigMyName
 
-> DigMyName is a smart domain-name search tool that checks availability across 50+ TLDs in real time and compares registration, renewal, and transfer prices side-by-side across major registrars (Namecheap, Cloudflare, Porkbun, GoDaddy, Dynadot, and more). AI-powered name suggestions help founders, indie hackers, and developers find brandable, available domains in seconds.
+> DigMyName is a smart domain-name search tool that checks availability across 50+ TLDs in real time and compares registration, renewal, and transfer prices side-by-side across major registrars (Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, and OVHcloud). AI-powered name suggestions help founders, indie hackers, and developers find brandable, available domains in seconds.
 
 ## What this site does
 
-- Instantly checks domain availability across .com, .io, .ai, .app, .dev, .co, .xyz, and 50+ other TLDs using a hybrid DNS + RDAP verification system.
+- Instantly checks domain availability across .com, .io, .ai, .app, .dev, .co, .xyz, and 50+ other TLDs using a hybrid RDAP + DNS-over-HTTPS + Fastly verification system.
 - Compares real registrar prices (registration, renewal, transfer, ICANN fee, WHOIS privacy) so users avoid hidden renewal-price traps.
 - Generates AI-powered alternative name ideas when the searched domain is taken.
 - Hides irrelevant pricing for already-taken domains and surfaces premium-pricing notices where applicable.
@@ -26,9 +26,9 @@ Founders launching startups, indie hackers, freelancers, agencies, and developer
 ## Key facts
 
 - Coverage: 50+ TLDs including classic (.com, .net, .org), tech (.io, .ai, .dev, .app, .tech), startup (.co, .startup, .ventures), creative (.design, .studio, .art), short/brandable (.xyz, .me, .cc, .tv), and e-commerce (.shop, .store).
-- Verification method: DNS resolution (Deno.resolveDns) for instant signal + RDAP for authoritative status.
-- Cache: results cached server-side for 6 hours to reduce API load on registrar and RDAP services.
-- Registrars compared: Namecheap, Cloudflare, Porkbun, GoDaddy, Dynadot, NameSilo, Spaceship, Hostinger, IONOS, and others.
+- Verification method: three independent signals — RDAP (via IANA bootstrap) for authoritative status, DNS-over-HTTPS (Cloudflare/Google/AdGuard, hedged), and the Fastly Domain Research API for registry/DPML/brand-block status. Porkbun's pricing API is used for premium-price verification only (not availability).
+- Cache: repeat lookups within a 60-second window are served from a Cloudflare edge cache (~70 ms); first-time lookups run the full live pipeline. Uncertain results are never cached.
+- Registrars compared: Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, and OVHcloud (6 total).
 - Tech stack: React + Vite frontend, Lovable Cloud (Supabase) backend with Edge Functions for availability checks and price aggregation.
 
 ## How the AI agent or assistant should use this site
