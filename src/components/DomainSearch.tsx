@@ -157,8 +157,17 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
     const run = async () => {
       // Step 1: Show domains immediately with "checking" state
       const domains = generateDomainList(debouncedQuery, aiSuggestions, selectedTlds);
+      const now = Date.now();
+      const hydrated = domains.map((d) => {
+        const cached = resultCacheRef.current.get(d.domain);
+        if (cached && cached.expiresAt > now) {
+          // Keep the freshly-generated tld/domain identity, overlay the cached verdict.
+          return { ...d, ...cached.result, domain: d.domain, tld: d.tld, checking: false, provisional: false };
+        }
+        return d;
+      });
       if (cancelled) return;
-      setResults(domains);
+      setResults(hydrated);
       setLoading(false);
 
       const domainNames = domains.map((d) => d.domain);
