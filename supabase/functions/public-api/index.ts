@@ -260,6 +260,7 @@ async function cheapestForTlds(tlds: string[]): Promise<Map<string, { registrar:
   const { data, error } = await supa
     .from("registrar_prices")
     .select("tld, registrar, reg_price, affiliate_url")
+    .eq("supported", true)
     .in("tld", tlds);
   if (error || !data) return result;
   for (const row of data as any[]) {
@@ -483,6 +484,7 @@ Deno.serve(async (req) => {
       const { data, error } = await supa
         .from("registrar_prices")
         .select("registrar, reg_price, renew_price, transfer_price, promo_code, affiliate_url, whois_privacy")
+        .eq("supported", true)
         .eq("tld", tld)
         .order("reg_price", { ascending: true });
       if (error) return json({ error: "upstream_error" }, 502, rlHeaders);

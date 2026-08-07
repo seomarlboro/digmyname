@@ -263,3 +263,12 @@ export async function checkDomainsAvailability(
 export function generateResults(query: string): DomainResult[] {
   return generateDomainList(query);
 }
+
+/** Trusted display price, or null when no trusted DB price exists.
+ *  A missing DB price must NOT fall back to the static seed price — that
+ *  fabricates a $ for an (registrar,tld) pair we can't confirm. */
+export function resolveDisplayPrice(
+  dbRegPrice: number | null | undefined
+): number | null {
+  return dbRegPrice ?? null;
+}

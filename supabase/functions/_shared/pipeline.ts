@@ -1071,6 +1071,7 @@ export async function checkDomains(
     const { data: priceRows } = await supabase
       .from("registrar_prices")
       .select("tld, reg_price")
+      .eq("supported", true)
       .in("tld", neededTlds);
     for (const row of priceRows ?? []) {
       const v = Number(row.reg_price);

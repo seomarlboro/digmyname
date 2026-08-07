@@ -129,9 +129,11 @@ export type Database = {
           reg_price: number
           registrar: string
           renew_price: number
+          supported: boolean
           tld: string
           transfer_price: number | null
           updated_at: string
+          verified_at: string | null
           whois_privacy: boolean | null
         }
         Insert: {
@@ -143,9 +145,11 @@ export type Database = {
           reg_price: number
           registrar: string
           renew_price: number
+          supported?: boolean
           tld: string
           transfer_price?: number | null
           updated_at?: string
+          verified_at?: string | null
           whois_privacy?: boolean | null
         }
         Update: {
@@ -157,9 +161,11 @@ export type Database = {
           reg_price?: number
           registrar?: string
           renew_price?: number
+          supported?: boolean
           tld?: string
           transfer_price?: number | null
           updated_at?: string
+          verified_at?: string | null
           whois_privacy?: boolean | null
         }
         Relationships: []
