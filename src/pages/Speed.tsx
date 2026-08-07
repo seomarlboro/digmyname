@@ -6,6 +6,8 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
 import { StopwatchIcon, KeyboardIcon, BoltIcon } from "@/components/StatIcons";
+import LiveBenchmark from "@/components/LiveBenchmark";
+
 
 
 const pipeline = [
@@ -156,8 +158,11 @@ const Speed = () => {
           </div>
         </Section>
 
+        <LiveBenchmark />
+
         {/* Benchmarks */}
         <Section
+
           title="Reference numbers"
           lede="Single datacenter connection, August 2026. Lower is better. Repeat lookups within a 60-second window are served from a global edge cache in ~70 ms — first-time lookups run the full live pipeline (~370 ms typical)."
         >
