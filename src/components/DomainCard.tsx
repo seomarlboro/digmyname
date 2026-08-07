@@ -55,6 +55,11 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const showCheckPrice = available && (isPremiumUnverified || !hasTrustedPrice) && !isPremium;
   const registrarName = hasTrustedPrice ? (cheapest?.registrar ?? null) : null;
   const buyUrl = registrarName ? getRegistrarUrl(registrarName, domain) : null;
+  // When no trusted DB price exists, "Check price" still needs a real
+  // registrar search destination — never "#". Spaceship's URL builder works
+  // for any TLD, so it's a safe universal fallback.
+  const checkPriceUrl = getRegistrarUrl("Spaceship", domain);
+  const actionUrl = buyUrl ?? checkPriceUrl;
   const favorited = isFavorite(domain);
 
   // Registration year for taken domains — fetched lazily in the background,
@@ -244,7 +249,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                 )}
               </div>
               <Button size="sm" className="h-9 gap-1.5 rounded-3xl btn-gradient text-sm border-0 px-4" asChild>
-                <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
+                <a href={actionUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-3.5 w-3.5" />
                   {showCheckPrice ? "Check price" : "Buy"}
                 </a>
@@ -391,7 +396,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
 
             {available ? (
               <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
-                <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
+                <a href={actionUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4" />
                   {showCheckPrice ? "Check price" : "Buy Now"}
                 </a>
