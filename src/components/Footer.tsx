@@ -114,13 +114,13 @@ const Footer = () => (
             src="https://codetrendy.com/api/badge?style=classic"
             alt="CodeTrendy (codetrendy.com)"
             height={27}
-            className="block dark:hidden"
+            className="block dark:hidden h-[27px] w-auto"
           />
           <img
             src="https://codetrendy.com/api/badge?style=dark"
             alt="CodeTrendy (codetrendy.com)"
             height={27}
-            className="hidden dark:block"
+            className="hidden dark:block h-[27px] w-auto"
           />
         </a>
       </div>
