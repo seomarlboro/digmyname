@@ -9,7 +9,7 @@ import { useDomainAge, formatRegisteredSince } from "@/hooks/useDomainAge";
 import AuthDialog from "@/components/LazyAuthDialog";
 import { getRegistrarColor, getRegistrarUrl } from "@/lib/registrarColors";
 
-import type { DomainResult } from "@/lib/domainData";
+import { resolveDisplayPrice, type DomainResult } from "@/lib/domainData";
 
 interface DomainCardProps {
   result: DomainResult;
@@ -363,7 +363,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4" />
-                  {isPremiumUnverified ? "Check price" : "Buy Now"}
+                  {showCheckPrice ? "Check price" : "Buy Now"}
                 </a>
               </Button>
             ) : result.forSale && result.listingUrl ? (

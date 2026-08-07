@@ -142,6 +142,7 @@ const Pricing = () => {
       const { data, error } = await supabase
         .from("registrar_prices")
         .select("*")
+        .eq("supported", true)
         .order("tld")
         .order("reg_price");
       if (error) throw error;

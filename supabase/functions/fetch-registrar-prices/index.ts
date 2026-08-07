@@ -190,6 +190,8 @@ Deno.serve(async (req) => {
             reg_price: p.reg_price,
             renew_price: p.renew_price,
             transfer_price: p.transfer_price,
+            supported: true,
+            verified_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
           { onConflict: "registrar,tld" }
