@@ -1,0 +1,23 @@
+===== auth check: does the key work? =====
+HTTP 500
+----- raw first 1500 bytes -----
+{"message":"Client-ID is missing.","status_code":500}
+===== FULL first item =====
+{
+    "message": "Client-ID is missing.",
+    "status_code": 500
+}
+
+===== per-concept coverage in style=line =====
+  bolt: none
+  balance-scale: none
+  magnifying-glass: none
+  shield: none
+  globe-network: none
+  store: none
+  certificate: none
+  license: none
+  stopwatch: none
+  lock: none
+  server: none
+  price-tag: none
