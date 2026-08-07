@@ -41,13 +41,13 @@ const Api = () => {
         <title>Free Domain Availability API — DigMyName</title>
         <meta
           name="description"
-          content="Free, no-auth JSON API for domain availability, multi-TLD search and registrar prices. 60 requests/60s per IP, 5,000/day. Built for AI agents and developers."
+          content="Free, no-auth JSON API for domain availability, multi-TLD search and registrar prices. 60 requests/60s per IP, no key. Built for AI agents and developers."
         />
         <link rel="canonical" href="https://digmyname.com/api" />
         <meta property="og:title" content="Free Domain Availability API — DigMyName" />
         <meta
           property="og:description"
-          content="No-auth JSON API for domain availability and registrar pricing. 60 req/60s per IP, 5,000/day."
+          content="No-auth JSON API for domain availability and registrar pricing. 60 req/60s per IP, no key."
         />
         <meta property="og:url" content="https://digmyname.com/api" />
         <meta property="og:type" content="website" />
@@ -92,7 +92,7 @@ const Api = () => {
           <StatGrid cols={3}>
             <Stat value="60/min" label="Requests per IP" accent="mint" icon={NetworkIcon} />
             <Stat value="~170ms" label="Typical first answer" icon={StopwatchIcon} />
-            <Stat value="5,000" label="Requests per day" accent="violet" icon={LicenseIcon} />
+            <Stat value="$0" label="No key, no auth" accent="violet" icon={LicenseIcon} />
           </StatGrid>
         </PageHeader>
 
@@ -212,11 +212,10 @@ print(res.json()["result"]["available"])`,
           <div className="surface-card p-6">
             <ul className="list-body">
               <li>60 requests per 60 seconds per IP.</li>
-              <li>5,000 requests per day per IP.</li>
               <li>No key, no account, no tracking beyond rate-limit counters.</li>
               <li>
                 Repeat lookups within 60 seconds are served from a Cloudflare edge cache (~70 ms);
-                first-time lookups run the full live check (~170 ms first answer, ~370 ms median
+                first-time lookups run the full live check (~170 ms first answer, ~370 ms typical
                 full pipeline).
               </li>
               <li>

@@ -18,7 +18,7 @@ export const WaitlistSection = () => (
         </Badge>
         <h2 className="section-title">Paid tier waitlist</h2>
         <p className="section-lede max-w-2xl">
-          Free tier is generous (60 req/min · 5,000/day). Need more? Get API keys, 100k req/day,
+          Free tier is generous (60 req/min, no key). Need more? Get API keys, higher limits,
           webhooks and an SLA.
         </p>
       </div>

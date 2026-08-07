@@ -66,7 +66,7 @@ const benchmark = [
   },
   {
     name: "DigMyName full check",
-    note: "Availability + premium detection + registrar pricing · p95 < 1s",
+    note: "Availability + premium detection + registrar pricing · typically under 1s",
     ms: "~370 ms",
     bar: 78,
     us: true,
@@ -126,8 +126,8 @@ const Speed = () => {
                 Show us a faster public lookup and we'll feature your time here with full credit and a link back.
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                As of August 2026: ~370 ms median full check, 94% of lookups under one second. Measured, not
-                marketed — and the timer on your screen keeps us honest.
+                As of August 2026: ~370 ms typical full check from our single datacenter. These are everyday
+                numbers, not a lab result — the stopwatch on your screen is the real proof, and it keeps us honest.
               </p>
             </div>
           </div>
@@ -159,7 +159,7 @@ const Speed = () => {
         {/* Benchmarks */}
         <Section
           title="Reference numbers"
-          lede="Single datacenter connection, August 2026. Lower is better. Repeat lookups within a 60-second window are served from a global edge cache in ~70 ms — first-time lookups run the full live pipeline (~370 ms median)."
+          lede="Single datacenter connection, August 2026. Lower is better. Repeat lookups within a 60-second window are served from a global edge cache in ~70 ms — first-time lookups run the full live pipeline (~370 ms typical)."
         >
           <div className="surface-card-lg overflow-hidden">
             <div className="hidden grid-cols-[1fr_140px_320px] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid">

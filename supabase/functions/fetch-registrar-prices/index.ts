@@ -204,13 +204,35 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`Done: ${upserted} prices upserted, ${errors.length} errors`);
+    // Auto-quarantine: any row not re-verified in the last 21 days is no longer
+    // trustworthy, so we flip supported=false and it falls through to the honest
+    // "Check price" state. Rows with verified_at IS NULL are the old manually
+    // quarantined seed cohort and are deliberately left alone.
+    let quarantined = 0;
+    const staleCutoff = new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: staleRows, error: quarantineError } = await supabase
+      .from("registrar_prices")
+      .update({ supported: false })
+      .lt("verified_at", staleCutoff)
+      .eq("supported", true)
+      .select("id");
+
+    if (quarantineError) {
+      console.error("Auto-quarantine error:", quarantineError.message);
+      errors.push(`quarantine: ${quarantineError.message}`);
+    } else {
+      quarantined = staleRows?.length ?? 0;
+      console.log(`Auto-quarantined ${quarantined} stale price rows (verified_at < ${staleCutoff})`);
+    }
+
+    console.log(`Done: ${upserted} prices upserted, ${quarantined} quarantined, ${errors.length} errors`);
 
     return new Response(
       JSON.stringify({
         success: true,
         scraped: allPrices.length,
         upserted,
+        quarantined,
         errors,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

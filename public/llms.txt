@@ -18,9 +18,9 @@ Founders launching startups, indie hackers, freelancers, agencies, and developer
 
 - [Home](https://digmyname.com/): Search a name and instantly see availability + cheapest registrar across 50+ TLDs. Toggle AI suggestions for alternative ideas.
 - [Pricing](https://digmyname.com/pricing): Side-by-side comparison of registration, renewal, transfer prices, ICANN fees, promo codes, and WHOIS privacy across major registrars for popular TLDs.
-- [How it works](https://digmyname.com/how-it-works): Explanation of the multi-source availability verification chain (RDAP, DNS, Domainr, registrar APIs) and how DigMyName compares to other domain search tools.
+- [How it works](https://digmyname.com/how-it-works): Explanation of the multi-source availability verification chain (RDAP, DNS, Fastly, registrar APIs) and how DigMyName compares to other domain search tools.
 - [MCP server](https://digmyname.com/mcp): Free Model Context Protocol server (`domain-check-skills-mcp` on npm) that gives AI agents real-time domain availability and registrar price comparison.
-- [Speed](https://digmyname.com/speed): Methodology behind DigMyName's search latency — a live timer starts on the user's last keystroke and stops on the first availability answer (~170 ms typical first answer; ~370 ms median for the full pipeline, p95 under 1 second, measured Aug 2026 from a single datacenter). Positioned as "the fastest domain search in the universe, or the second" — the claim is backed by an on-screen stopwatch and an open invitation to beat the number. Your numbers vary by network, TLD and cache state. Includes reference benchmarks.
+- [Speed](https://digmyname.com/speed): Methodology behind DigMyName's search latency — a live timer starts on the user's last keystroke and stops on the first availability answer (~170 ms typical first answer; ~370 ms typical for the full pipeline, everyday numbers from a single datacenter Aug 2026 (not a lab result)). Positioned as "the fastest domain search in the universe, or the second" — the claim is backed by an on-screen stopwatch and an open invitation to beat the number. Your numbers vary by network, TLD and cache state. Includes reference benchmarks.
 - [Favorites](https://digmyname.com/favorites): Saved-domain shortlist (requires sign-in).
 
 ## Key facts
@@ -43,7 +43,7 @@ Base URL: `https://api.digmyname.com/functions/v1/public-api`
 OpenAPI: `https://api.digmyname.com/functions/v1/public-api/openapi.json`
 Plugin manifest: `https://digmyname.com/.well-known/ai-plugin.json`
 No auth required. Rate limit: 60 requests / 60 seconds / IP.
-Served behind a Cloudflare edge cache: repeat lookups within 60 seconds return in ~70 ms; first-time lookups run the full live check (~170 ms first answer, ~370 ms median full pipeline).
+Served behind a Cloudflare edge cache: repeat lookups within 60 seconds return in ~70 ms; first-time lookups run the full live check (~170 ms first answer, ~370 ms typical full pipeline).
 
 Endpoints:
 - `GET /check?domain=myname.com` — single-domain availability. Returns `available`, `uncertain`, `premium`, `for_sale`, `price_usd`, `cheapest_registrar`, `search_url`, `buy_url`, `register_url`.
