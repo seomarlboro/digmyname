@@ -309,7 +309,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
 
     run();
     return () => { cancelled = true; };
-  }, [debouncedQuery, aiSuggestions, selectedTlds, markFirstAnswer]);
+  }, [debouncedQuery, aiSuggestions, selectedTlds, markFirstAnswer, cacheResult]);
 
 
   useEffect(() => {
