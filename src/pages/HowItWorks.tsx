@@ -110,7 +110,7 @@ const faqs = [
   },
   {
     q: "Are the premium prices real?",
-    a: "Yes. When a domain is flagged as premium we query a registrar pricing API Porkbun's pricing API to return the actual listed price. If we can't verify a price, we label it \"Premium\" without inventing a number.",
+    a: "Yes. When a domain is flagged as premium we query Porkbun's pricing API to return the actual listed price. If we can't verify a price, we label it \"Premium\" without inventing a number.",
   },
   {
     q: "Do you favour a particular registrar?",
@@ -139,7 +139,7 @@ const HowItWorks = () => {
         <meta property="og:title" content="How DigMyName Works — Honest Domain Availability Checks" />
         <meta
           property="og:description"
-          content="Four-source verification, an honest Unverified state, and real registrar prices — here's why DigMyName is more accurate than the alternatives."
+          content="Three-signal verification, an honest Unverified state, and real registrar prices — here's why DigMyName is more accurate than the alternatives."
         />
         <meta property="og:url" content="https://digmyname.com/how-it-works" />
         <script
