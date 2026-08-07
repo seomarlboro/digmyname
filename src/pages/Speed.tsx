@@ -6,6 +6,8 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
 import { StopwatchIcon, KeyboardIcon, BoltIcon } from "@/components/StatIcons";
+import LiveBenchmark from "@/components/LiveBenchmark";
+
 
 
 const pipeline = [
