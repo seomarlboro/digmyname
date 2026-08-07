@@ -78,7 +78,7 @@ const HeroBackground = () => {
       <div className="hero-blob hero-blob-4" />
 
       {/* Floating TLD constellation — parallax wrapper + float inner */}
-      <div className="hero-constellation">
+      <div className="hero-constellation hidden sm:block">
         {TLDS.map((t, i) => (
           <span
             key={i}

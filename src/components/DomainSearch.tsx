@@ -384,7 +384,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
               <span className="whitespace-nowrap">First answer in ~170 ms<span className="hidden sm:inline"> — timed live, no asterisks</span></span>
             </div>
 
-            <h1 className="text-gradient mx-auto w-full px-1 text-[clamp(2.25rem,10.5vw,4.75rem)] font-extrabold leading-[1.05] tracking-[-0.04em] sm:leading-[1] sm:tracking-[-0.045em]">
+            <h1 className="text-gradient mx-auto w-full px-1 text-[clamp(2.25rem,10.5vw,5.7rem)] font-extrabold leading-[1.05] tracking-[-0.04em] sm:leading-[1] sm:tracking-[-0.045em]">
               <span className="block sm:hidden">World's fastest</span>
               <span className="block sm:hidden">domain search.</span>
               <span className="block sm:hidden">Fight us.</span>
