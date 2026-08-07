@@ -75,33 +75,47 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   if (checking) {
     if (compact) {
       return (
-        <div className="grid border-b border-border px-4 py-4 transition-colors" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+        <div className={`grid border-b border-border px-4 py-4 transition-colors ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
             </h3>
             <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
           </div>
-          <span className="min-w-[80px]" />
-          <span className="min-w-[80px]" />
-          <span />
-          <span />
+          {/* Reserved slots: same footprint as the resolved row so nothing reflows. */}
+          <Skeleton className="h-4 w-16 min-w-[80px] max-w-[80px]" />
+          <Skeleton className="h-4 w-14 min-w-[80px] max-w-[80px]" />
+          <Skeleton className="h-5 w-14" />
+          <Skeleton className="h-9 w-20 rounded-3xl" />
         </div>
       );
     }
     return (
       <div className="card-hover rounded-xl border border-border p-4 sm:p-5">
-        <div className="flex items-center gap-3">
-          <div className="flex-1 min-w-0">
+        <div className={`flex flex-col gap-3 sm:flex-row sm:items-center ${CARD_BODY_MIN}`}>
+          {/* Left slot: domain + reserved badge line (matches resolved layout). */}
+          <div className="flex-1 min-w-0 pr-8">
             <h3 className="text-xl font-bold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
             </h3>
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
           </div>
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          {/* Right slot: reserved price + CTA footprint. */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="sm:text-right">
+              <Skeleton className="h-8 w-20" />
+            </div>
+            <Skeleton className="h-10 w-28 rounded-3xl" />
+            <Loader2 className="hidden h-5 w-5 animate-spin text-muted-foreground sm:block" />
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground sm:hidden" />
+          </div>
         </div>
       </div>
     );
   }
+
 
   // Uncertain — APIs failed or disagreed. Show retry instead of misleading "Taken".
   if (isUncertain) {
