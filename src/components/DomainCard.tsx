@@ -122,8 +122,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               <Skeleton className="h-8 w-20" />
             </div>
             <Skeleton className="h-10 w-28 rounded-3xl" />
-            <Loader2 className="hidden h-5 w-5 animate-spin text-muted-foreground sm:block" />
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground sm:hidden" />
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         </div>
       </div>
