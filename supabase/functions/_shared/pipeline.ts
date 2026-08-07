@@ -111,16 +111,29 @@ const THIRD_SIGNAL_ENABLED = true;
 // ---------------------------------------------------------------------------
 // DNS via DoH (P2) — fast, no Deno.resolveDns hangs.
 //
-// Speed: Cloudflare is the primary resolver, Google is a *hedge* fired only if
-// Cloudflare hasn't answered within 400ms. The first decisive answer wins, so a
-// single slow/edge-cold resolver never dictates the latency of the batch.
+// Speed: Cloudflare is the primary resolver; the remaining resolvers are fired
+// as *hedges* 400ms later. The first decisive (non-error) answer wins, so a
+// single slow/down resolver never dictates the latency of the batch.
+//
+// Resolver set: only endpoints verified to speak the DoH JSON API
+// (Accept: application/dns-json → {Status, Answer}). Quad9's JSON API lives on
+// port 5053 (dns.quad9.net:5053), which is not reachable from all egress paths,
+// and OpenDNS (doh.opendns.com) is RFC8484 wire-format only — it returns
+// HTTP 400 "No valid query received" for JSON queries. Both are therefore
+// excluded in favour of three resolvers confirmed to return {Status:3} on
+// NXDOMAIN: Cloudflare, Google and AdGuard.
 // ---------------------------------------------------------------------------
 type DnsState = "has_records" | "no_records" | "error";
 
 const DOH_ENDPOINTS = [
   "https://cloudflare-dns.com/dns-query",
   "https://dns.google/resolve",
+  "https://dns.adguard-dns.com/resolve",
 ];
+
+/** Delay before each non-primary resolver is fired (index-aligned with DOH_ENDPOINTS). */
+const DOH_HEDGE_DELAY_MS = 400;
+
 
 /**
  * Combine an optional caller signal with a per-probe timeout so a losing
@@ -173,18 +186,27 @@ async function checkDnsDoH(domain: string, signal?: AbortSignal): Promise<DnsSta
   const ctl = new AbortController();
   const sig = signal ? AbortSignal.any([signal, ctl.signal]) : ctl.signal;
 
-  const primary = dohProbe(DOH_ENDPOINTS[0], domain, 2000, sig);
-  const hedge = sleep(400).then(() => dohProbe(DOH_ENDPOINTS[1], domain, 2000, sig));
+  // Primary fires immediately; every other resolver is staggered by
+  // DOH_HEDGE_DELAY_MS so the common (fast primary) case costs nothing extra.
+  const probes = DOH_ENDPOINTS.map((endpoint, i) =>
+    i === 0
+      ? dohProbe(endpoint, domain, 2000, sig)
+      : sleep(DOH_HEDGE_DELAY_MS).then(() => dohProbe(endpoint, domain, 2000, sig))
+  );
 
   const decisive = (p: Promise<DnsState>) =>
     p.then((s) => (s === "error" ? PENDING_FOREVER<DnsState>() : s));
 
   try {
     return await Promise.race([
-      decisive(primary),
-      decisive(hedge),
-      Promise.all([primary, hedge]).then(([a, b]) => (a !== "error" ? a : b)),
+      // First decisive (non-error) answer wins — an "error" from one resolver
+      // can never beat a real answer from another.
+      ...probes.map(decisive),
+      // All resolvers errored (or all settled as errors): fall back to the
+      // first non-error state if any, else "error".
+      Promise.all(probes).then((states) => states.find((s) => s !== "error") ?? "error"),
     ]);
+
   } finally {
     ctl.abort();
   }
@@ -821,16 +843,21 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
     };
   }
 
-  // Zones without a trustworthy RDAP server (.co, .me): a hard NXDOMAIN from
-  // two independent resolvers means the name isn't delegated → not registered.
+  // Zones without a trustworthy RDAP server (.co, .me): DNS NXDOMAIN alone is
+  // NOT proof the name is free — registered-but-undelegated domains answer
+  // NXDOMAIN too. Without RDAP agreement we can only be honest about not
+  // knowing, so this is an uncertain result (never available, never priced,
+  // never cached as available) rather than a confident available:true.
   if (rdap === "unknown" && dns === "no_records" && AGGREGATOR_UNRELIABLE_TLDS.has(domain.split(".").pop() ?? "")) {
     return {
       domain,
-      available: true,
+      available: false,
       checkedVia: "dns",
+      uncertain: true,
       likelyPremium: likelyPremium || undefined,
     };
   }
+
 
   // RDAP says available but DNS could not confirm NXDOMAIN → uncertain.
   if (rdap === "available" && dns === "error") {
