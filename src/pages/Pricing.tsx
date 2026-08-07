@@ -34,58 +34,53 @@ interface TldSummary {
   isEnterprise: boolean;
 }
 
-/** Ownership horizon in years. The user picks one; the whole table re-derives
- *  a single final price per TLD for that horizon. */
-type PriceTerm = 1 | 2 | 3;
+/** Total 3-year cost of ownership at a registrar: registration + 2 renewals.
+ *  Used only to pick the "Best 3-year value" winner. */
+const threeYearCost = (p: RegistrarPrice): number => p.reg_price + p.renew_price * 2;
 
-const TERMS: readonly PriceTerm[] = [1, 2, 3];
-
-const TERM_LABEL: Record<PriceTerm, string> = {
-  1: "1 year",
-  2: "2 years",
-  3: "3 years",
-};
-
-/** Formula caption shown under the price column header. */
-const TERM_FORMULA: Record<PriceTerm, string> = {
-  1: "registration",
-  2: "reg + 1 renewal",
-  3: "reg + 2 renewals",
-};
-
-/** Total cost of owning a domain at this registrar for `term` years.
- *  Year 1 is the registration price; every subsequent year is a renewal.
- *  This is the ONLY figure the table shows — one number, one registrar. */
-const termCost = (p: RegistrarPrice, term: PriceTerm): number =>
-  p.reg_price + p.renew_price * (term - 1);
-
-interface TermView {
-  /** The single registrar that owns this row — cheapest total for the term. */
-  primary: RegistrarPrice | null;
-  /** The one final price shown big: total cost over `term` years. */
-  total: number | null;
-  /** Promo code, if the winning registrar has one (applies to registration). */
+/** A winning cell: the registrar with the best price for one action, plus the
+ *  price to show. Each action's winner is independent — the cheapest registrar
+ *  for registration may differ from the cheapest for renewal or transfer. This
+ *  is NOT cross-registrar splicing: every cell names its own registrar. */
+interface Winner {
+  registrar: string;
+  price: number;
   promo: string | null;
 }
 
-/** One derived view per row. Picks the single registrar with the lowest total
- *  cost of ownership for the selected term, and exposes ONE price from it.
- *  INVARIANT: no cross-registrar splicing — price and promo both come from the
- *  same `primary` row. */
-const termView = (s: TldSummary, term: PriceTerm): TermView => {
-  let best: { row: RegistrarPrice; total: number } | null = null;
-  for (const p of s.prices) {
-    const total = termCost(p, term);
-    if (!best || total < best.total) best = { row: p, total };
-  }
-  if (!best) return { primary: null, total: null, promo: null };
+/** Lowest `reg_price` across the TLD's registrars. */
+const cheapestRegister = (list: RegistrarPrice[]): Winner | null => {
+  const best = list.reduce<RegistrarPrice | null>(
+    (a, b) => (a == null || b.reg_price < a.reg_price ? b : a),
+    null,
+  );
+  return best ? { registrar: best.registrar, price: best.reg_price, promo: best.promo_code ?? null } : null;
+};
 
-  const { row, total } = best;
-  return {
-    primary: row,
-    total,
-    promo: row.promo_code ?? null,
-  };
+/** Lowest `renew_price` across the TLD's registrars. */
+const cheapestRenew = (list: RegistrarPrice[]): Winner | null => {
+  const best = list.reduce<RegistrarPrice | null>(
+    (a, b) => (a == null || b.renew_price < a.renew_price ? b : a),
+    null,
+  );
+  return best ? { registrar: best.registrar, price: best.renew_price, promo: null } : null;
+};
+
+/** Lowest `transfer_price` across registrars that publish one. */
+const cheapestTransfer = (list: RegistrarPrice[]): Winner | null => {
+  const withT = list.filter((p) => p.transfer_price != null);
+  if (withT.length === 0) return null;
+  const best = withT.reduce((a, b) => ((b.transfer_price ?? Infinity) < (a.transfer_price ?? Infinity) ? b : a));
+  return { registrar: best.registrar, price: best.transfer_price!, promo: null };
+};
+
+/** Lowest 3-year total (reg + 2 renewals) across registrars. */
+const bestThreeYear = (list: RegistrarPrice[]): Winner | null => {
+  const best = list.reduce<RegistrarPrice | null>(
+    (a, b) => (a == null || threeYearCost(b) < threeYearCost(a) ? b : a),
+    null,
+  );
+  return best ? { registrar: best.registrar, price: threeYearCost(best), promo: best.promo_code ?? null } : null;
 };
 
 
@@ -129,7 +124,6 @@ const NoMatches = ({ query }: { query: string }) => (
 
 const Pricing = () => {
   const [query, setQuery] = useState("");
-  const [term, setTerm] = useState<PriceTerm>(3);
 
   const { data: prices, isLoading } = useQuery({
     queryKey: ["registrar-prices"],
@@ -296,46 +290,30 @@ const Pricing = () => {
                     className="h-10 pl-9"
                   />
                 </div>
-
-                <div role="group" aria-label="Ownership term" className="flex items-center gap-1 rounded-xl border border-border/60 bg-muted/20 p-1">
-                  {TERMS.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setTerm(t)}
-                      aria-pressed={term === t}
-                      className={cn(
-                        "rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors",
-                        term === t
-                          ? "bg-foreground text-background"
-                          : "text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      {TERM_LABEL[t]}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 
-            {/* Summary table */}
+            {/* Summary table — one row per TLD, cheapest registrar for each action */}
             <Section
               title="Cheapest per extension"
-              lede="One row per TLD — the best price we found for each action."
+              lede="One row per TLD — the cheapest registrar we found for each action. Each column can be a different registrar."
               aside={pricesAreStale ? `Prices last verified ${formatAbsolute(lastUpdated)}` : `Prices updated ${formatUpdated(lastUpdated)}`}
             >
               {standard.length === 0 ? (
                 <NoMatches query={query} />
               ) : (
               <div className="surface-card-lg overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left">
+              <table className="w-full min-w-[820px] text-left">
                 <thead>
                   <tr className="border-b border-border">
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Domain</th>
-                    <th className="w-1/3 px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                      Best price · {TERM_LABEL[term]}
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest register</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest renew</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest transfer</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                      Best 3-year value
                       <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-muted-foreground">
-                        {TERM_FORMULA[term]}
+                        reg + 2 renewals
                       </span>
                     </th>
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">WHOIS Privacy</th>
@@ -343,20 +321,27 @@ const Pricing = () => {
                 </thead>
                 <tbody>
                   {standard.map((s) => {
-                    const v = termView(s, term);
+                    const reg = cheapestRegister(s.prices);
+                    const renew = cheapestRenew(s.prices);
+                    const transfer = cheapestTransfer(s.prices);
+                    const best3 = bestThreeYear(s.prices);
                     return (
                       <tr key={s.tld} className="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/10">
                         <td className="px-5 py-5">
                           <span className="font-display text-3xl font-extrabold tracking-tight text-mint">.{s.tld}</span>
                         </td>
                         <td className="px-5 py-5 align-middle">
-                          {v.primary && v.total != null ? (
-                            <FinalPriceCell view={v} term={term} />
-                          ) : (
-                            <NaCell />
-                          )}
+                          {reg ? <PriceTag registrar={reg.registrar} price={reg.price} suffix="/yr" promo={reg.promo} /> : <NaCell />}
                         </td>
-
+                        <td className="px-5 py-5 align-middle">
+                          {renew ? <PriceTag registrar={renew.registrar} price={renew.price} suffix="/yr" /> : <NaCell />}
+                        </td>
+                        <td className="px-5 py-5 align-middle">
+                          {transfer ? <PriceTag registrar={transfer.registrar} price={transfer.price} suffix="/yr" /> : <NaCell />}
+                        </td>
+                        <td className="px-5 py-5 align-middle">
+                          {best3 ? <PriceTag registrar={best3.registrar} price={best3.price} suffix="/3yr" promo={best3.promo} /> : <NaCell />}
+                        </td>
                         <td className="px-5 py-5">
                           {s.prices.some((p) => p.whois_privacy) ? (
                             <Shield className="h-5 w-5 text-mint" />
@@ -391,7 +376,7 @@ const Pricing = () => {
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-4 space-y-4">
                     {enterprise.map((s) => (
-                      <DetailedTldTable key={s.tld} summary={s} term={term} />
+                      <DetailedTldTable key={s.tld} summary={s} />
 
                     ))}
                   </CollapsibleContent>
@@ -406,7 +391,7 @@ const Pricing = () => {
               ) : (
                 <div className="space-y-4">
                   {standard.map((s) => (
-                    <DetailedTldTable key={s.tld} summary={s} term={term} />
+                    <DetailedTldTable key={s.tld} summary={s} />
                   ))}
                 </div>
               )}
@@ -429,25 +414,22 @@ const NaCell = () => (
 
 /* ─── PriceTag ─────────────────────────────────────────── */
 
-/** THE single price primitive, used everywhere a term total is shown (summary
- *  table and detailed table alike). One registrar, one number: total cost of
- *  ownership over `term` years, with an optional promo chip and a per-year
- *  average. No renewal-trap badge, no "$X → $Y" arrows, no cross-registrar
- *  splicing. Keeping this in one component is what guarantees the summary and
- *  detailed views can never drift apart again. */
+/** THE single price primitive: one registrar name, one price, one suffix
+ *  ("/yr" or "/3yr"), and an optional promo chip. Used for every price cell in
+ *  the summary table so all four columns render identically. Each cell names
+ *  its own registrar — this is not cross-registrar splicing. */
 const PriceTag = ({
   registrar,
-  total,
-  term,
+  price,
+  suffix,
   promo,
 }: {
   registrar: string;
-  total: number;
-  term: PriceTerm;
+  price: number;
+  suffix: string;
   promo?: string | null;
 }) => {
   const c = getRegistrarColor(registrar);
-  const perYear = total / term;
 
   return (
     <div className="min-h-[46px]">
@@ -461,37 +443,21 @@ const PriceTag = ({
         )}
       </div>
 
-      <p className="mt-0.5 flex items-baseline gap-1.5">
+      <p className="mt-0.5 flex items-baseline gap-1">
         <span className="font-mono text-base font-extrabold tabular-nums text-foreground">
-          ${total.toFixed(2)}
+          ${price.toFixed(2)}
         </span>
-        <span className="text-sm text-muted-foreground">
-          {term === 1 ? "/yr" : `/${term}yr`}
-        </span>
-        {term > 1 && (
-          <span className="text-xs text-muted-foreground">
-            (${perYear.toFixed(2)}/yr avg)
-          </span>
-        )}
+        <span className="text-sm text-muted-foreground">{suffix}</span>
       </p>
     </div>
   );
 };
 
-/** Summary-row wrapper: resolves the winning registrar from the term view and
- *  renders the shared PriceTag. */
-const FinalPriceCell = ({ view, term }: { view: TermView; term: PriceTerm }) => {
-  const { primary, total, promo } = view;
-  if (!primary || total == null) return <NaCell />;
-  return <PriceTag registrar={primary.registrar} total={total} term={term} promo={promo} />;
-};
-
 /* ─── Detailed TLD Table ───────────────────────────────── */
 
-const DetailedTldTable = ({ summary: s, term }: { summary: TldSummary; term: PriceTerm }) => {
-  // Sort by total cost of ownership over the selected term — same basis as the
-  // headline table, so the Award always lands on the row that wins upstairs.
-  const sorted = [...s.prices].sort((a, b) => termCost(a, term) - termCost(b, term));
+const DetailedTldTable = ({ summary: s }: { summary: TldSummary }) => {
+  // Sort by registration price — cheapest first.
+  const sorted = [...s.prices].sort((a, b) => a.reg_price - b.reg_price);
   const newestUpdated = sorted.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at;
 
 
@@ -519,7 +485,7 @@ const DetailedTldTable = ({ summary: s, term }: { summary: TldSummary; term: Pri
         <tbody>
           {sorted.map((p, i) => {
             const c = getRegistrarColor(p.registrar);
-            // Award the cheapest by total cost of ownership over the term.
+            // Award the cheapest registration (first after the sort).
             const isCheapest = i === 0;
             const renewHigher = p.renew_price > p.reg_price * 1.8;
 
