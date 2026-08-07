@@ -40,6 +40,7 @@ const ms = (n: number) => Math.round(n).toLocaleString();
 
 const LiveBenchmark = () => {
   const [open, setOpen] = useState(true);
+  const [showLog, setShowLog] = useState(false);
   const [running, setRunning] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [cold, setCold] = useState<number[] | null>(null);
@@ -88,96 +89,101 @@ const LiveBenchmark = () => {
   const cachedStats = cached && cached.length ? stats(cached) : null;
 
   return (
-    <section className="surface-card-lg mt-14 overflow-hidden">
+    <section className="surface-card-lg mt-10 overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-muted/10 sm:px-6"
+        className="flex w-full items-center justify-between gap-4 px-5 py-3 text-left transition-colors hover:bg-muted/10"
         aria-expanded={open}
       >
-        <span className="flex items-center gap-3">
-          <Timer className="h-5 w-5 shrink-0 text-mint" />
-          <span className="section-title">Measure from your location</span>
+        <span className="flex items-center gap-2.5">
+          <Timer className="h-4 w-4 shrink-0 text-mint" />
+          <span className="section-title">Measured from YOUR location</span>
         </span>
         {open ? (
-          <ChevronUp className="h-5 w-5 shrink-0 text-muted-foreground" />
+          <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
         ) : (
-          <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" />
+          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
         )}
       </button>
 
       {open && (
-        <div className="border-t border-border/60 px-5 py-6 sm:px-6">
-          <h3 className="text-lg font-bold sm:text-xl">Measured from YOUR location</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Your network, your distance to our single datacenter — not our numbers, yours.
-          </p>
-
-          <div className="mt-5">
-            <Button onClick={run} disabled={running} size="lg" variant="gradient" className="text-black [&_*]:text-black">
+        <div className="border-t border-border/60 px-5 py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Your network, your distance to our single datacenter — not our numbers, yours.
+            </p>
+            <Button
+              onClick={run}
+              disabled={running}
+              variant="gradient"
+              className="shrink-0 text-black [&_*]:text-black"
+            >
               {running ? "Measuring…" : cold || error ? "Run again" : "Run the benchmark"}
             </Button>
           </div>
 
           {error && (
-            <div className="mt-5 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <div className="mt-3 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Results */}
-          <div className="mt-6 grid gap-4">
-            <div className="rounded-2xl border border-border/60 bg-muted/10 p-5 sm:p-6">
-              <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {/* Cold vs cached — side by side */}
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-aurora-mint/30 bg-muted/10 px-4 py-3">
+              <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Cold — first-time lookup
               </div>
-              <div className="mt-2 flex flex-wrap items-baseline gap-3">
-                <span className="font-mono text-4xl font-bold tabular-nums text-mint sm:text-5xl">
+              <div className="mt-1 flex flex-wrap items-baseline gap-2">
+                <span className="font-mono text-3xl font-bold tabular-nums text-mint">
                   {coldStats ? `${ms(coldStats.median)} ms` : "— ms"}
                 </span>
                 {coldStats && (
-                  <span className="font-mono text-sm tabular-nums text-muted-foreground">
+                  <span className="font-mono text-xs tabular-nums text-muted-foreground">
                     ({ms(coldStats.min)}–{ms(coldStats.max)} ms)
                   </span>
                 )}
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Full live pipeline · a domain nobody has looked up before
+              <p className="mt-1 text-xs text-muted-foreground">
+                Full live pipeline · never-seen domain
               </p>
             </div>
 
-            <div className="rounded-2xl border border-border/40 bg-muted/5 p-4 sm:p-5">
-              <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Cached — repeat within 60s
+            <div className="rounded-xl border border-border/50 bg-muted/5 px-4 py-3">
+              <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Cached — repeat
               </div>
-              <div className="mt-1 font-mono text-xl font-bold tabular-nums text-muted-foreground sm:text-2xl">
+              <div className="mt-1 font-mono text-xl font-bold tabular-nums text-muted-foreground">
                 {cachedStats ? `${ms(cachedStats.median)} ms` : "— ms"}
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Served from the Cloudflare edge cache · a repeat lookup, NOT a typical first answer.
+                Repeat within 60s · Cloudflare edge · not a typical first answer
               </p>
             </div>
           </div>
 
-          {/* Live log */}
-          <div className="mt-6">
-            <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Live log
-            </div>
-            {log.length === 0 ? (
-              <p className="mt-2 font-mono text-xs text-muted-foreground/70">
-                {running ? "warming up…" : "no requests yet"}
-              </p>
-            ) : (
-              <ul className="mt-2 space-y-1">
+          {/* Live log — proof, not hero */}
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setShowLog((s) => !s)}
+              className="font-mono text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            >
+              {running && log.length === 0
+                ? "warming up…"
+                : `${showLog ? "hide" : "show"} ${log.length} request${log.length === 1 ? "" : "s"}`}
+            </button>
+            {showLog && log.length > 0 && (
+              <ul className="mt-2 max-h-28 overflow-y-auto rounded-lg border border-border/40 bg-muted/5 px-3 py-1.5">
                 {log.map((entry, i) => (
                   <li
                     key={`${entry.label}-${i}`}
-                    className="flex items-center justify-between gap-4 border-b border-border/30 py-1.5 font-mono text-xs last:border-0"
+                    className="flex items-center justify-between gap-4 py-0.5 font-mono text-[11px] text-muted-foreground"
                   >
-                    <span className="text-muted-foreground">{entry.label}</span>
-                    <span className="tabular-nums text-foreground">{ms(entry.ms)} ms</span>
+                    <span>{entry.label}</span>
+                    <span className="tabular-nums text-foreground/80">{ms(entry.ms)} ms</span>
                   </li>
                 ))}
               </ul>
@@ -190,3 +196,4 @@ const LiveBenchmark = () => {
 };
 
 export default LiveBenchmark;
+
