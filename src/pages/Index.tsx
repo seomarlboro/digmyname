@@ -34,7 +34,7 @@ const Index = () => {
           operatingSystem: "Any (web-based)",
           browserRequirements: "Requires JavaScript and a modern browser",
           description:
-            "Domain availability search verified against four independent sources, with registrar price comparison and a free no-auth JSON API. First answer in ~170 ms.",
+            "Domain availability search verified against three independent signals, with registrar price comparison and a free no-auth JSON API. First answer in ~170 ms.",
           offers: {
             "@type": "Offer",
             price: "0",

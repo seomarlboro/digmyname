@@ -68,7 +68,7 @@ const tools = [
     name: "compare_registrars",
     sig: "(tld: string)",
     icon: StoreIcon,
-    desc: "Side-by-side pricing across 7 registrars including registration, renewal and 3-year value.",
+    desc: "Side-by-side pricing across 6 registrars including registration, renewal and 3-year value.",
   },
   {
     name: "get_domain_age",
@@ -102,11 +102,11 @@ const Mcp = () => {
         <title>MCP Server, Claude Skill & Custom GPT — DigMyName</title>
         <meta
           name="description"
-          content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs."
+          content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50 TLDs."
         />
         <link rel="canonical" href="https://digmyname.com/mcp" />
         <meta property="og:title" content="Domain Check Skills — MCP / Claude Skill / Custom GPT" />
-        <meta property="og:description" content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs." />
+        <meta property="og:description" content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50 TLDs." />
         <meta property="og:url" content="https://digmyname.com/mcp" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -121,7 +121,7 @@ const Mcp = () => {
           downloadUrl: NPM_URL,
           codeRepository: GITHUB_URL,
           license: "https://opensource.org/licenses/MIT",
-          description: "The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 7 registrars, 52 TLDs.",
+          description: "The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50 TLDs.",
         })}</script>
       </Helmet>
 
@@ -159,7 +159,7 @@ const Mcp = () => {
                 <Link to="/speed" className="text-aurora hover:underline">dispute it</Link>. The server
                 now calls <code className="font-mono text-foreground/80">api.digmyname.com</code>, a
                 Cloudflare edge cache: repeat domain lookups return in ~70 ms, first-time lookups run
-                the full live check (~170 ms first answer, ~370 ms median full pipeline).
+                the full live check (~170 ms first answer, ~370 ms typical full pipeline).
               </>
             }
             actions={
@@ -176,16 +176,16 @@ const Mcp = () => {
                   </a>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="h-12 gap-2 px-6">
-                  <Link to="/" onClick={() => trackMcpEvent("click", "try_web")}>
-                    Try the web version
+                  <Link to="/?q=example.com" onClick={() => trackMcpEvent("click", "try_live_search")}>
+                    Try a live search
                   </Link>
                 </Button>
               </>
             }
           >
             <StatGrid>
-              <Stat value="52" label="TLDs covered" accent="mint" icon={NetworkIcon} />
-              <Stat value="7" label="Registrars compared" accent="violet" icon={StoreIcon} />
+              <Stat value="50" label="TLDs covered" accent="mint" icon={NetworkIcon} />
+              <Stat value="6" label="Registrars compared" accent="violet" icon={StoreIcon} />
               <Stat value="~170ms" label="Typical response" icon={StopwatchIcon} />
               <Stat value="MIT" label="Open source" icon={LicenseIcon} />
             </StatGrid>

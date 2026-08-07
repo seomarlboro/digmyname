@@ -23,9 +23,9 @@ import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } f
 const sources = [
   {
     icon: Search,
-    name: "Domainr (RapidAPI)",
+    name: "Fastly Domain Research",
     detail:
-      "Aggregated registry status across hundreds of TLDs. Fastest and broadest first pass, with batch lookups for top extensions.",
+      "Aggregated registry status across hundreds of TLDs, including DPML and brand-block signals plus premium flags. Fastest and broadest first pass.",
   },
   {
     icon: ShieldCheck,
@@ -35,9 +35,9 @@ const sources = [
   },
   {
     icon: Network,
-    name: "DNS (Cloudflare DoH)",
+    name: "DNS-over-HTTPS (3 resolvers)",
     detail:
-      "A and NS lookups via DNS-over-HTTPS confirm whether a domain has live infrastructure. Catches parked but resolving names that RDAP alone can miss.",
+      "A and NS lookups via Cloudflare, Google and AdGuard, hedged, confirm whether a domain has live infrastructure. Catches parked but resolving names that RDAP alone can miss.",
   },
   {
     icon: Tag,
@@ -70,7 +70,7 @@ const comparison = [
     basic: false,
   },
   {
-    feature: "7-registrar 3-year cost comparison",
+    feature: "6-registrar 3-year cost comparison",
     us: true,
     instant: false,
     aggregator: false,
@@ -102,7 +102,7 @@ const comparison = [
 const faqs = [
   {
     q: "Why do other tools sometimes mark domains incorrectly?",
-    a: "Most checkers rely on a single source — usually a public RDAP proxy or a cached zone file. When that source times out (common for .io, .ai, .co) they silently default to either \"Available\" or \"Taken\" instead of admitting uncertainty. We cross-check four independent sources and only report a definitive answer when they agree.",
+    a: "Most checkers rely on a single source — usually a public RDAP proxy or a cached zone file. When that source times out (common for .io, .ai, .co) they silently default to either \"Available\" or \"Taken\" instead of admitting uncertainty. We cross-check three independent availability signals and only report a definitive answer when they agree.",
   },
   {
     q: "What does the \"Unverified\" state mean?",
@@ -110,11 +110,11 @@ const faqs = [
   },
   {
     q: "Are the premium prices real?",
-    a: "Yes. When a domain is flagged as premium we query a registrar pricing API (Porkbun, with GoDaddy as a backup) to return the actual listed price. If we can't verify a price, we label it \"Premium\" without inventing a number.",
+    a: "Yes. When a domain is flagged as premium we query a registrar pricing API Porkbun's pricing API to return the actual listed price. If we can't verify a price, we label it \"Premium\" without inventing a number.",
   },
   {
     q: "Do you favour a particular registrar?",
-    a: "No. The Pricing page compares 7 registrars across 52 TLDs and surfaces the best 3-year total cost — including renewal traps. Buy links go to whichever registrar you choose.",
+    a: "No. The Pricing page compares 6 registrars across 50 TLDs and surfaces the best 3-year total cost — including renewal traps. Buy links go to whichever registrar you choose.",
   },
   {
     q: "Is DigMyName free?",
@@ -122,7 +122,7 @@ const faqs = [
   },
   {
     q: "Is it fast, or accurate?",
-    a: "Both, these days. We prioritise accuracy — and after recent work it's fast too: ~170 ms to the first answer and ~370 ms median for the full check, with 94% of lookups under a second. When sources disagree we still say Unverified rather than guess.",
+    a: "Both, these days. We prioritise accuracy — and after recent work it's fast too: ~170 ms to the first answer and ~370 ms typical for the full check, usually under a second — the on-screen timer proves it live. When sources disagree we still say Unverified rather than guess.",
   },
 ];
 
@@ -133,7 +133,7 @@ const HowItWorks = () => {
         <title>How DigMyName Works — Honest Domain Availability Checks</title>
         <meta
           name="description"
-          content="DigMyName verifies domain availability across four independent sources — Domainr, IANA RDAP, DNS, and Porkbun — and never shows guesses as facts. Here's exactly how it works."
+          content="DigMyName verifies domain availability against three independent availability signals — Fastly Domain Research, IANA RDAP and DNS-over-HTTPS — and never shows guesses as facts. Here's exactly how it works."
         />
         <link rel="canonical" href="https://digmyname.com/how-it-works" />
         <meta property="og:title" content="How DigMyName Works — Honest Domain Availability Checks" />
@@ -168,10 +168,10 @@ const HowItWorks = () => {
               Built for <span className="text-aurora-gradient">honesty,</span> not just speed.
             </>
           }
-          lede="Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks four independent sources and tells you when it isn't sure — so you never buy a domain that turns out to be taken, or skip one that was actually free."
+          lede="Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks three independent availability signals and tells you when it isn't sure — so you never buy a domain that turns out to be taken, or skip one that was actually free."
         >
           <StatGrid cols={3}>
-            <Stat value="4" label="Verification sources" accent="mint" icon={SearchIcon} />
+            <Stat value="3" label="Availability signals" accent="mint" icon={SearchIcon} />
             <Stat value="100%" label="Honest uncertainty" accent="warning" icon={ShieldIcon} />
             <Stat value="0%" label="Hidden markup" accent="violet" icon={ScaleIcon} />
           </StatGrid>
@@ -181,7 +181,7 @@ const HowItWorks = () => {
 
         {/* Sources */}
         <Section
-          title="Four sources, one truth"
+          title="Three signals, one truth"
           lede="Every search runs through this chain in parallel. We only commit to an answer when the signals agree."
         >
           <div className="grid gap-4 sm:grid-cols-2">
@@ -328,7 +328,7 @@ const HowItWorks = () => {
                 For developers & AI agents
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Free, no-auth JSON API — 60 requests / 60 s per IP, 5,000 per day.
+                Free, no-auth JSON API — 60 requests / 60 s per IP, no key.
               </p>
             </div>
             <Button asChild variant="outline" className="shrink-0">
@@ -340,7 +340,7 @@ const HowItWorks = () => {
         {/* CTA */}
         <Section
           title="Try an honest search."
-          lede="Type any name and see four-source verification in action."
+          lede="Type any name and see cross-checked verification in action."
           align="center"
           className="text-center"
         >
