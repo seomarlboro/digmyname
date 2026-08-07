@@ -440,7 +440,7 @@ export const FAST_RDAP_EXCEPTIONS = new Set(["io", "us"]);
  * names (.co, .me have no working public RDAP). A 404 from the aggregator on
  * these zones must never be read as "available".
  */
-const AGGREGATOR_UNRELIABLE_TLDS = new Set(["co", "me"]);
+export const AGGREGATOR_UNRELIABLE_TLDS = new Set(["co", "me"]);
 
 async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapState> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";

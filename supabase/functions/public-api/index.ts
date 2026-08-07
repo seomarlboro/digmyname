@@ -14,7 +14,7 @@
 //  - Returns minimal, stable JSON. No internal cache/source-chain details exposed.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { checkDomains, isValidDomain } from "../_shared/pipeline.ts";
+import { checkDomains, isValidDomain, AGGREGATOR_UNRELIABLE_TLDS } from "../_shared/pipeline.ts";
 import { isLikelyBlocked } from "../_shared/availability-rules.ts";
 
 const corsHeaders = {
@@ -129,17 +129,23 @@ function validateTld(raw: string): string | null {
 
 // Runs the pipeline IN-PROCESS — no edge→edge invoke — so repeated checks are
 // served from the shared warm L1 cache inside this isolate.
-// Hard ceiling: no single request can hang beyond HARD_BUDGET_MS. On timeout we
+// Hard ceiling: no single request can hang beyond hardBudgetMs. On timeout we
 // resolve (never reject) with uncertain placeholders so the UI shows Retry.
-const HARD_BUDGET_MS = 900;
 
 async function invokeCheck(domains: string[]) {
-  // Absolute deadline for the Fastly third signal, captured where the hard-budget
-  // race conceptually starts: 900ms budget minus ~250ms margin for aftermarket
-  // detection, price enrichment and shaping. Because it is absolute, a slow
-  // Pass-1 (registry RDAP) shrinks or skips the Fastly window rather than
-  // stacking a fresh relative window on top of it and losing the race.
-  const thirdSignalDeadlineAt = Date.now() + 650;
+  // .co/.me have no working public RDAP, so resolveDomain always returns
+  // uncertain for them and they ALWAYS escalate to the Fastly third signal —
+  // the only authority that can confirm these zones free. At the default 650ms
+  // Fastly deadline they flap (available <-> "Check price") purely on whether
+  // Fastly beat the clock. Give ONLY these zones a wider window; core TLDs keep
+  // their current 900/650 speed. Both stay within a 1-second hard ceiling.
+  const hasUnreliableZone = domains.some((d) =>
+    AGGREGATOR_UNRELIABLE_TLDS.has(d.split(".").pop()?.toLowerCase() ?? "")
+  );
+  const hardBudgetMs = hasUnreliableZone ? 1000 : 900;
+  // Absolute deadline for the Fastly third signal. Absolute (not relative) so a
+  // slow Pass-1 RDAP shrinks/skips the Fastly window instead of stacking on it.
+  const thirdSignalDeadlineAt = Date.now() + (hasUnreliableZone ? 780 : 650);
 
   // PER-DOMAIN budget outcome. The pipeline publishes each domain's verdict into
   // `partial` as soon as it has one (cache hit, then Pass-1 RDAP/DNS, then final).
@@ -165,7 +171,7 @@ async function invokeCheck(domains: string[]) {
 
   let timer: number | undefined;
   const budget = new Promise<any[]>((resolve) => {
-    timer = setTimeout(() => resolve(fallback()), HARD_BUDGET_MS) as unknown as number;
+    timer = setTimeout(() => resolve(fallback()), hardBudgetMs) as unknown as number;
   });
   try {
     return await Promise.race([
