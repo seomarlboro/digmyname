@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle, Tag, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
@@ -16,6 +17,19 @@ interface DomainCardProps {
   compact?: boolean;
   onRetry?: (domain: string) => void;
 }
+
+// ---------------------------------------------------------------------------
+// Layout stability (CLS): every state of a card — checking, available,
+// uncertain, taken — must occupy the same vertical space so rows never jump
+// when a result resolves. These are floors, not fixed heights: genuinely
+// taller content (wrapped domain, explanatory copy) can still grow.
+//   • COMPACT_ROW_MIN — compact grid row: py-4 (32px) + h-9 action button.
+//   • CARD_BODY_MIN   — full card body row on sm+: h-10 CTA + badge line.
+// ---------------------------------------------------------------------------
+const COMPACT_ROW_MIN = "min-h-[68px]";
+const CARD_BODY_MIN = "sm:min-h-[56px]";
+
+
 
 const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const { domain, tld, available, checking } = result;
@@ -75,40 +89,53 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   if (checking) {
     if (compact) {
       return (
-        <div className="grid border-b border-border px-4 py-4 transition-colors" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+        <div className={`grid border-b border-border px-4 py-4 transition-colors ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
             </h3>
             <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
           </div>
-          <span className="min-w-[80px]" />
-          <span className="min-w-[80px]" />
-          <span />
-          <span />
+          {/* Reserved slots: same footprint as the resolved row so nothing reflows. */}
+          <Skeleton className="h-4 w-16 min-w-[80px] max-w-[80px]" />
+          <Skeleton className="h-4 w-14 min-w-[80px] max-w-[80px]" />
+          <Skeleton className="h-5 w-14" />
+          <Skeleton className="h-9 w-20 rounded-3xl" />
         </div>
       );
     }
     return (
       <div className="card-hover rounded-xl border border-border p-4 sm:p-5">
-        <div className="flex items-center gap-3">
-          <div className="flex-1 min-w-0">
+        <div className={`flex flex-col gap-3 sm:flex-row sm:items-center ${CARD_BODY_MIN}`}>
+          {/* Left slot: domain + reserved badge line (matches resolved layout). */}
+          <div className="flex-1 min-w-0 pr-8">
             <h3 className="text-xl font-bold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
             </h3>
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
           </div>
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          {/* Right slot: reserved price + CTA footprint. */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="sm:text-right">
+              <Skeleton className="h-8 w-20" />
+            </div>
+            <Skeleton className="h-10 w-28 rounded-3xl" />
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
         </div>
       </div>
     );
   }
+
 
   // Uncertain — APIs failed or disagreed. Show retry instead of misleading "Taken".
   if (isUncertain) {
     const brandProtected = result.uncertainReason === "brand_protected";
     if (compact) {
       return (
-        <div className="grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+        <div className={`grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
@@ -143,7 +170,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
     }
     return (
       <div className="card-hover rounded-xl border border-amber-500/30 p-4 sm:p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className={`flex flex-col gap-3 sm:flex-row sm:items-center ${CARD_BODY_MIN}`}>
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
               <span>{name}.<span className="text-primary">{ext}</span></span>
@@ -187,7 +214,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   if (compact) {
     return (
       <>
-        <div className="grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10" style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+        <div className={`grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
               {name}.<span className="text-primary">{ext}</span>
@@ -280,7 +307,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
         </Button>
 
         {/* Mobile: stacked, Desktop: single row */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className={`flex flex-col gap-3 sm:flex-row sm:items-center ${CARD_BODY_MIN}`}>
           {/* Left: domain + badges */}
           <div className="flex-1 min-w-0 pr-8">
             <h3 className="text-xl font-bold text-foreground">
