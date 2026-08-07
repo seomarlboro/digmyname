@@ -348,6 +348,13 @@ const HowItWorks = () => {
               src="https://codetrendy.com/api/badge?style=classic"
               alt="CodeTrendy (codetrendy.com)"
               height={54}
+              className="block dark:hidden"
+            />
+            <img
+              src="https://codetrendy.com/api/badge?style=dark"
+              alt="CodeTrendy (codetrendy.com)"
+              height={54}
+              className="hidden dark:block"
             />
           </a>
         </div>
