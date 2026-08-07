@@ -104,25 +104,46 @@ const Footer = () => (
 
       <div className="mt-10 flex flex-col gap-4 border-t border-border/60 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <span>Built in Ukraine 🇺🇦 · MIT licensed · © 2026 DigMyName</span>
-        <a
-          href="https://codetrendy.com/?utm_source=digmyname.com&utm_medium=badge"
-          target="_blank"
-          rel="nofollow noopener noreferrer"
-          className="shrink-0"
-        >
-          <img
-            src="https://codetrendy.com/api/badge?style=classic"
-            alt="CodeTrendy (codetrendy.com)"
-            height={40}
-            className="block dark:hidden h-[40px] w-auto"
-          />
-          <img
-            src="https://codetrendy.com/api/badge?style=dark"
-            alt="CodeTrendy (codetrendy.com)"
-            height={40}
-            className="hidden dark:block h-[40px] w-auto"
-          />
-        </a>
+        <div className="flex items-center gap-3">
+          <a
+            href="https://codetrendy.com/?utm_source=digmyname.com&utm_medium=badge"
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            className="shrink-0"
+          >
+            <img
+              src="https://codetrendy.com/api/badge?style=classic"
+              alt="CodeTrendy (codetrendy.com)"
+              height={40}
+              className="block dark:hidden h-[40px] w-auto"
+            />
+            <img
+              src="https://codetrendy.com/api/badge?style=dark"
+              alt="CodeTrendy (codetrendy.com)"
+              height={40}
+              className="hidden dark:block h-[40px] w-auto"
+            />
+          </a>
+          <a
+            href="https://sellwithboost.com"
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            className="shrink-0"
+          >
+            <img
+              src="https://sellwithboost.com/badge/listing.svg"
+              alt="Listed on Sell With Boost"
+              height={40}
+              className="block dark:hidden h-[40px] w-auto"
+            />
+            <img
+              src="https://sellwithboost.com/badge/listing-dark.svg"
+              alt="Listed on Sell With Boost"
+              height={40}
+              className="hidden dark:block h-[40px] w-auto"
+            />
+          </a>
+        </div>
       </div>
     </div>
   </footer>
