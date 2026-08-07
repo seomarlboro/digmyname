@@ -1,0 +1,24 @@
+########## style=line price=premium query=bolt ##########
+  name=bolt uuid=76d27ae0-4559-11ee-a46f-0242ac140003 price_field=2
+   DOWNLOAD BLOCKED/ERR: ERR:{"message": "Sorry! We didn't find any subscription under your account. Please subscribe our subscription to avoid this interruption.", "code": 400, "
+
+########## style=colored-outline price=premium query=bolt ##########
+  name=Bolt uuid=66108df0-6254-11ec-b4e0-0242ac140003 price_field=2
+   DOWNLOAD BLOCKED/ERR: ERR:{"message": "Sorry! We didn't find any subscription under your account. Please subscribe our subscription to avoid this interruption.", "code": 400, "
+
+########## style=glyph price=premium query=bolt ##########
+  name=Bolt uuid=58c0db40-6d15-11eb-80ef-0242ac140003 price_field=2
+   DOWNLOAD BLOCKED/ERR: ERR:{"message": "Sorry! We didn't find any subscription under your account. Please subscribe our subscription to avoid this interruption.", "code": 400, "
+
+########## style=rounded price=premium query=bolt ##########
+  name=Bolt uuid=14afbdf0-4d09-11f0-b07f-0242ac140003 price_field=2
+   DOWNLOAD BLOCKED/ERR: ERR:{"message": "Sorry! We didn't find any subscription under your account. Please subscribe our subscription to avoid this interruption.", "code": 400, "
+
+########## style=line price=premium query=shield ##########
+  name=Shield uuid=03e53ab0-7bf2-11ef-8f67-0242ac140003 price_field=2
+   DOWNLOAD BLOCKED/ERR: ERR:{"message": "Sorry! We didn't find any subscription under your account. Please subscribe our subscription to avoid this interruption.", "code": 400, "
+
+########## style=line price=premium query=balance scale ##########
+  name=Balance Scale uuid=615d12f0-b9e5-11ee-8562-0242ac140003 price_field=2
+   DOWNLOAD BLOCKED/ERR: ERR:{"message": "Sorry! We didn't find any subscription under your account. Please subscribe our subscription to avoid this interruption.", "code": 400, "
+
