@@ -992,10 +992,28 @@ export async function checkDomains(
     }
   }
 
+  for (const c of cachedMap.values()) publish(c);
+
   const uncached = batch.filter((d) => !cachedMap.has(d));
 
   // ---- Pass 1: free authoritative sources (RDAP + DNS) -----------------
-  const baseResults = await pMap(uncached, 25, (d) => resolveDomain(d));
+  // Each domain publishes its own base verdict the moment it lands, so a caller
+  // whose budget expires mid-batch can still serve the ones that finished.
+  // The brand-block safeguard is applied here too — a preliminary read must never
+  // be weaker than the final one.
+  const baseResults = await pMap(uncached, 25, (d) =>
+    resolveDomain(d).then((r) => {
+      if (r.available && !r.uncertain && isLikelyBlocked(r.domain)) {
+        publish({ domain: r.domain, available: false, checkedVia: r.checkedVia, uncertain: true, uncertainReason: "brand_protected" });
+      } else if (r.uncertain && isLikelyBlocked(r.domain)) {
+        publish({ ...r, uncertainReason: "brand_protected" });
+      } else {
+        publish(r);
+      }
+      return r;
+    })
+  );
+
 
   // ---- Pass 2: third signal, only where it adds value ------------------
   const needsThirdSignal = baseResults
