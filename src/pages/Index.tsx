@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import DomainSearch from "@/components/DomainSearch";
@@ -8,11 +8,6 @@ import HeroBackground from "@/components/HeroBackground";
 
 const Index = () => {
   const [selectedTlds, setSelectedTlds] = useState<Set<string>>(new Set());
-  const [hasResults, setHasResults] = useState(false);
-
-  const handleHasResultsChange = useCallback((value: boolean) => {
-    setHasResults(value);
-  }, []);
 
   return (
     <div className="relative min-h-screen bg-transparent pb-20">
@@ -54,10 +49,8 @@ const Index = () => {
       <p style={{ position: 'absolute', left: '-9999px', fontSize: '1px', color: 'transparent' }}>Impact-Site-Verification: 0c5c9ad9-2ca3-4d35-a5d5-71f850a02320</p>
       <Header />
       <main>
-        <DomainSearch selectedTlds={selectedTlds} onHasResultsChange={handleHasResultsChange} />
-        {hasResults && (
-          <FilterBar selectedTlds={selectedTlds} onSelectedTldsChange={setSelectedTlds} />
-        )}
+        <DomainSearch selectedTlds={selectedTlds} />
+        <FilterBar selectedTlds={selectedTlds} onSelectedTldsChange={setSelectedTlds} />
       </main>
     </div>
   );
