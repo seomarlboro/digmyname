@@ -45,7 +45,10 @@ interface DomainSearchProps {
 const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const stickySearchRef = useRef<HTMLDivElement>(null);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
+  });
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<DomainResult[]>([]);
