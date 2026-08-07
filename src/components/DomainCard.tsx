@@ -31,10 +31,15 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const isPremium = result.premium === true;
   const isPremiumUnverified = result.premiumUnverified === true;
   const isLikelyPremium = !isPremium && (result.likelyPremium === true || isPremiumUnverified);
-  const displayPrice = cheapest?.regPrice ?? tld.regPrice;
-  const displayRenew = cheapest?.renewPrice ?? tld.renewPrice;
-  const hasHighRenewal = !isPremium && !isLikelyPremium && displayRenew > displayPrice * 1.8;
-  const registrarName = cheapest?.registrar ?? null;
+  // Never fabricate a price: if no trusted DB row exists, fall through to the
+  // price-less "Check price" state instead of the static seed price.
+  const trustedPrice = resolveDisplayPrice(cheapest?.regPrice);
+  const hasTrustedPrice = trustedPrice != null;
+  const displayRenew = hasTrustedPrice ? (cheapest?.renewPrice ?? null) : null;
+  const hasHighRenewal =
+    !isPremium && !isLikelyPremium && hasTrustedPrice && displayRenew != null && displayRenew > trustedPrice * 1.8;
+  const showCheckPrice = available && (isPremiumUnverified || !hasTrustedPrice) && !isPremium;
+  const registrarName = hasTrustedPrice ? (cheapest?.registrar ?? null) : null;
   const buyUrl = registrarName ? getRegistrarUrl(registrarName, domain) : null;
   const favorited = isFavorite(domain);
 
