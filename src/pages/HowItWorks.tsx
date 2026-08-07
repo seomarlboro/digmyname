@@ -337,6 +337,21 @@ const HowItWorks = () => {
           </div>
         </section>
 
+        {/* External verification badge */}
+        <div className="mt-10 flex justify-center">
+          <a
+            href="https://codetrendy.com/?utm_source=digmyname.com&utm_medium=badge"
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+          >
+            <img
+              src="https://codetrendy.com/api/badge?style=classic"
+              alt="CodeTrendy (codetrendy.com)"
+              height={54}
+            />
+          </a>
+        </div>
+
         {/* CTA */}
         <Section
           title="Try an honest search."
