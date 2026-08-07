@@ -41,10 +41,27 @@ interface DomainSearchProps {
   selectedTlds: Set<string>;
   onHasResultsChange?: (hasResults: boolean) => void;
 }
+/** Per-entry lifetime of the session result cache. */
+const RESULT_CACHE_TTL_MS = 5 * 60 * 1000;
 
 const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const stickySearchRef = useRef<HTMLDivElement>(null);
+  // Session-scoped cache of authoritative results, keyed by domain. Lets a user
+  // who returns to an already-checked name (deletes a letter, retypes, re-searches)
+  // see the confirmed verdict instantly instead of re-running the check — which is
+  // what made .co names flap back to "Check price" when a re-check lost the Fastly
+  // race. Only trustworthy results are cached (never uncertain/provisional), each
+  // with a 5-minute TTL so prices can't go stale. In-memory only (no storage).
+  const resultCacheRef = useRef<Map<string, { result: DomainResult; expiresAt: number }>>(new Map());
+  const cacheResult = useCallback((r: DomainResult) => {
+    // Honesty guardrail: only remember confident, authoritative verdicts.
+    if (r.checking || r.uncertain || r.provisional || r.reachFailed) return;
+    resultCacheRef.current.set(r.domain, {
+      result: { ...r, checking: false, provisional: false },
+      expiresAt: Date.now() + RESULT_CACHE_TTL_MS,
+    });
+  }, []);
   const [query, setQuery] = useState(() => {
     if (typeof window === "undefined") return "";
     return new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
@@ -157,8 +174,17 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
     const run = async () => {
       // Step 1: Show domains immediately with "checking" state
       const domains = generateDomainList(debouncedQuery, aiSuggestions, selectedTlds);
+      const now = Date.now();
+      const hydrated = domains.map((d) => {
+        const cached = resultCacheRef.current.get(d.domain);
+        if (cached && cached.expiresAt > now) {
+          // Keep the freshly-generated tld/domain identity, overlay the cached verdict.
+          return { ...d, ...cached.result, domain: d.domain, tld: d.tld, checking: false, provisional: false };
+        }
+        return d;
+      });
       if (cancelled) return;
-      setResults(domains);
+      setResults(hydrated);
       setLoading(false);
 
       const domainNames = domains.map((d) => d.domain);
@@ -234,7 +260,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
           prev.map((r) => {
             const info = resp.results.get(r.domain);
             if (info) {
-              return {
+              const updated = {
                 ...r,
                 available: info.available,
                 checking: false,
@@ -251,6 +277,8 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 listingUrl: info.listingUrl,
                 reachFailed: false,
               };
+              cacheResult(updated);
+              return updated;
             }
             // Whole batch failed to reach the backend → stop the spinner and offer
             // Retry instead of leaving the row checking forever (503 case).
@@ -281,7 +309,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
 
     run();
     return () => { cancelled = true; };
-  }, [debouncedQuery, aiSuggestions, selectedTlds, markFirstAnswer]);
+  }, [debouncedQuery, aiSuggestions, selectedTlds, markFirstAnswer, cacheResult]);
 
 
   useEffect(() => {
@@ -303,7 +331,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
         if (r.domain !== domain) return r;
         const info = results.get(domain);
         if (!info) return { ...r, checking: false, provisional: false, uncertain: true, reachFailed: !ok };
-        return {
+        const updated = {
           ...r,
           checking: false,
           provisional: false,
@@ -320,9 +348,11 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
           listingUrl: info.listingUrl,
           reachFailed: false,
         };
+        cacheResult(updated);
+        return updated;
       })
     );
-  }, []);
+  }, [cacheResult]);
 
   const hasQuery = query.trim().length > 0;
 
