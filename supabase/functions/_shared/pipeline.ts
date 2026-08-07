@@ -111,16 +111,29 @@ const THIRD_SIGNAL_ENABLED = true;
 // ---------------------------------------------------------------------------
 // DNS via DoH (P2) — fast, no Deno.resolveDns hangs.
 //
-// Speed: Cloudflare is the primary resolver, Google is a *hedge* fired only if
-// Cloudflare hasn't answered within 400ms. The first decisive answer wins, so a
-// single slow/edge-cold resolver never dictates the latency of the batch.
+// Speed: Cloudflare is the primary resolver; the remaining resolvers are fired
+// as *hedges* 400ms later. The first decisive (non-error) answer wins, so a
+// single slow/down resolver never dictates the latency of the batch.
+//
+// Resolver set: only endpoints verified to speak the DoH JSON API
+// (Accept: application/dns-json → {Status, Answer}). Quad9's JSON API lives on
+// port 5053 (dns.quad9.net:5053), which is not reachable from all egress paths,
+// and OpenDNS (doh.opendns.com) is RFC8484 wire-format only — it returns
+// HTTP 400 "No valid query received" for JSON queries. Both are therefore
+// excluded in favour of three resolvers confirmed to return {Status:3} on
+// NXDOMAIN: Cloudflare, Google and AdGuard.
 // ---------------------------------------------------------------------------
 type DnsState = "has_records" | "no_records" | "error";
 
 const DOH_ENDPOINTS = [
   "https://cloudflare-dns.com/dns-query",
   "https://dns.google/resolve",
+  "https://dns.adguard-dns.com/resolve",
 ];
+
+/** Delay before each non-primary resolver is fired (index-aligned with DOH_ENDPOINTS). */
+const DOH_HEDGE_DELAY_MS = 400;
+
 
 /**
  * Combine an optional caller signal with a per-probe timeout so a losing
