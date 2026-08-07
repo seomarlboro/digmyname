@@ -337,11 +337,11 @@ const Pricing = () => {
                 <NoMatches query={query} />
               ) : (
               <div className="surface-card-lg overflow-x-auto">
-              <table className="min-w-[900px] text-left">
+              <table className="w-full min-w-[640px] text-left">
                 <thead>
                   <tr className="border-b border-border">
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Domain</th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                    <th className="w-1/3 px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                       Best price · {TERM_LABEL[term]}
                       <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-muted-foreground">
                         {TERM_FORMULA[term]}

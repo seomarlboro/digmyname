@@ -110,7 +110,7 @@ export const Section = ({
           )}
         </div>
         {aside && (
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          <span className="font-mono text-[11px] tracking-[0.02em] text-muted-foreground">
             {aside}
           </span>
         )}
