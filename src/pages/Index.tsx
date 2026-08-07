@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import DomainSearch from "@/components/DomainSearch";
@@ -8,11 +8,6 @@ import HeroBackground from "@/components/HeroBackground";
 
 const Index = () => {
   const [selectedTlds, setSelectedTlds] = useState<Set<string>>(new Set());
-  const [hasResults, setHasResults] = useState(false);
-
-  const handleHasResultsChange = useCallback((value: boolean) => {
-    setHasResults(value);
-  }, []);
 
   return (
     <div className="relative min-h-screen bg-transparent pb-20">
