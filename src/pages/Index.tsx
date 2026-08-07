@@ -49,10 +49,8 @@ const Index = () => {
       <p style={{ position: 'absolute', left: '-9999px', fontSize: '1px', color: 'transparent' }}>Impact-Site-Verification: 0c5c9ad9-2ca3-4d35-a5d5-71f850a02320</p>
       <Header />
       <main>
-        <DomainSearch selectedTlds={selectedTlds} onHasResultsChange={handleHasResultsChange} />
-        {hasResults && (
-          <FilterBar selectedTlds={selectedTlds} onSelectedTldsChange={setSelectedTlds} />
-        )}
+        <DomainSearch selectedTlds={selectedTlds} />
+        <FilterBar selectedTlds={selectedTlds} onSelectedTldsChange={setSelectedTlds} />
       </main>
     </div>
   );
