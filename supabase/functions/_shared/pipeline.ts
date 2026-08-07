@@ -43,8 +43,10 @@ export interface DomainCheckResult {
   price?: number;
   premium?: boolean;
   uncertain?: boolean;
-  /** Why the result is uncertain, when the cause is deterministic (not a probe failure). */
-  uncertainReason?: "brand_protected";
+  /** Why the result is uncertain, when the cause is deterministic (not a probe failure).
+   *  `budget_timeout` = OUR request budget expired before this domain resolved —
+   *  the registry did not fail. Must never be reported as a registry failure. */
+  uncertainReason?: "brand_protected" | "budget_timeout";
   likelyPremium?: boolean;
   /** RDAP-404 + NXDOMAIN agree the name is registerable, but it is a premium-tier
    *  suspect whose real registry price the third signal did NOT confirm this
@@ -908,10 +910,25 @@ export async function checkDomains(
   // `thirdSignalDeadlineAt`: absolute epoch-ms deadline for the third signal,
   // captured by the caller when its own budget starts. Default = now + 6000ms
   // (site search), so callers that pass nothing keep the full window.
-  deps: { supabase?: SupabaseClient; thirdSignalDeadlineAt?: number } = {}
+  // `partialSink`: optional map the pipeline fills IN PLACE as each domain gets a
+  // verdict (cache hit → Pass-1 RDAP/DNS → final). A caller running a wall-clock
+  // budget reads it on timeout so domains that DID resolve keep their real
+  // verdict, and only the still-unresolved ones get a timeout state. This is what
+  // turns a batch-wide "wall of uncertain" into a per-domain outcome.
+  deps: {
+    supabase?: SupabaseClient;
+    thirdSignalDeadlineAt?: number;
+    partialSink?: Map<string, DomainCheckResult>;
+  } = {}
 ): Promise<DomainCheckResult[]> {
   const supabase = deps.supabase ?? getServiceClient();
   const thirdSignalDeadlineAt = deps.thirdSignalDeadlineAt ?? (Date.now() + 6000);
+  const sink = deps.partialSink;
+  const publish = (r: DomainCheckResult) => {
+    if (sink) sink.set(r.domain, isLikelyBlocked(r.domain) ? { ...r, sldBlocked: true } : r);
+  };
+
+
 
 
   const batch = domains.slice(0, 50).filter(isValidDomain);
@@ -975,10 +992,28 @@ export async function checkDomains(
     }
   }
 
+  for (const c of cachedMap.values()) publish(c);
+
   const uncached = batch.filter((d) => !cachedMap.has(d));
 
   // ---- Pass 1: free authoritative sources (RDAP + DNS) -----------------
-  const baseResults = await pMap(uncached, 25, (d) => resolveDomain(d));
+  // Each domain publishes its own base verdict the moment it lands, so a caller
+  // whose budget expires mid-batch can still serve the ones that finished.
+  // The brand-block safeguard is applied here too — a preliminary read must never
+  // be weaker than the final one.
+  const baseResults = await pMap(uncached, 25, (d) =>
+    resolveDomain(d).then((r) => {
+      if (r.available && !r.uncertain && isLikelyBlocked(r.domain)) {
+        publish({ domain: r.domain, available: false, checkedVia: r.checkedVia, uncertain: true, uncertainReason: "brand_protected" });
+      } else if (r.uncertain && isLikelyBlocked(r.domain)) {
+        publish({ ...r, uncertainReason: "brand_protected" });
+      } else {
+        publish(r);
+      }
+      return r;
+    })
+  );
+
 
   // ---- Pass 2: third signal, only where it adds value ------------------
   const needsThirdSignal = baseResults
@@ -1209,7 +1244,7 @@ export async function checkDomains(
 
   const all = new Map<string, DomainCheckResult>();
   for (const c of cachedMap.values()) all.set(c.domain, c);
-  for (const r of fresh) all.set(r.domain, r);
+  for (const r of fresh) { all.set(r.domain, r); publish(r); }
 
   // Label pass (additive, non-verdict): tag every result whose SLD is a known
   // brand/registry-reserved mark, so the frontend can render one consistent

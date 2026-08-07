@@ -136,23 +136,43 @@ async function invokeCheck(domains: string[]) {
   // Pass-1 (registry RDAP) shrinks or skips the Fastly window rather than
   // stacking a fresh relative window on top of it and losing the race.
   const thirdSignalDeadlineAt = Date.now() + 650;
-  const fallback = domains.map((domain) => ({
-    domain,
-    available: false,
-    uncertain: true,
-    checkedVia: "timeout",
-    ...(isLikelyBlocked(domain) ? { uncertainReason: "brand_protected" as const } : {}),
-  }));
+
+  // PER-DOMAIN budget outcome. The pipeline publishes each domain's verdict into
+  // `partial` as soon as it has one (cache hit, then Pass-1 RDAP/DNS, then final).
+  // When the wall-clock budget expires we keep every verdict that actually landed
+  // and only stamp the still-unresolved domains. One slow .io can no longer nuke a
+  // whole batch of resolved names into a "wall of uncertain".
+  const partial = new Map<string, any>();
+  const fallback = () =>
+    domains.map((domain) => {
+      const got = partial.get(domain);
+      if (got) return got;
+      return {
+        domain,
+        available: false,
+        uncertain: true,
+        checkedVia: "timeout",
+        // OUR budget expired — the registry did not fail. Never blame the registry.
+        uncertainReason: isLikelyBlocked(domain)
+          ? ("brand_protected" as const)
+          : ("budget_timeout" as const),
+      };
+    });
+
   let timer: number | undefined;
   const budget = new Promise<any[]>((resolve) => {
-    timer = setTimeout(() => resolve(fallback), HARD_BUDGET_MS) as unknown as number;
+    timer = setTimeout(() => resolve(fallback()), HARD_BUDGET_MS) as unknown as number;
   });
   try {
-    return await Promise.race([checkDomains(domains, { thirdSignalDeadlineAt }), budget]);
+    return await Promise.race([
+      checkDomains(domains, { thirdSignalDeadlineAt, partialSink: partial }),
+      budget,
+    ]);
   } finally {
     if (timer !== undefined) clearTimeout(timer);
   }
 }
+
 
 // Registrar pricing is a nice-to-have: never let a cold DB call drag the
 // availability answer. Resolves to the fallback instead of rejecting.
