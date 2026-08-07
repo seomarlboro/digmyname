@@ -205,16 +205,18 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               <div className="flex items-center gap-2">
                 {isPremium ? (
                   <span className="text-lg font-bold text-foreground">Premium</span>
-                ) : isLikelyPremium ? (
-                  <span className="text-sm font-semibold text-amber-500">{isPremiumUnverified ? "Premium" : "Likely premium"}</span>
+                ) : isLikelyPremium || showCheckPrice ? (
+                  <span className="text-sm font-semibold text-amber-500">
+                    {isPremiumUnverified ? "Premium" : isLikelyPremium ? "Likely premium" : "Check price"}
+                  </span>
                 ) : (
-                  <span className="text-lg font-bold text-foreground">${displayPrice}</span>
+                  <span className="text-lg font-bold text-foreground">${trustedPrice}</span>
                 )}
               </div>
               <Button size="sm" className="h-9 gap-1.5 rounded-3xl btn-gradient text-sm border-0 px-4" asChild>
                 <a href={buyUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-3.5 w-3.5" />
-                  {isPremiumUnverified ? "Check price" : "Buy"}
+                  {showCheckPrice ? "Check price" : "Buy"}
                 </a>
               </Button>
             </>
