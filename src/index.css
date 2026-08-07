@@ -366,6 +366,20 @@
     color: hsl(var(--aurora-mint));
   }
 
+  /* Gentle "live" pulse for the hero chip Zap icon — mirrors the Eyebrow
+     live-dot intent but keeps opacity between 0.55 and 1 so the icon stays
+     readable and doesn't scale like Tailwind's animate-ping. */
+  @keyframes hero-chip-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+  .hero-chip-pulse {
+    animation: hero-chip-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-chip-pulse { animation: none; }
+  }
+
   /* Unified icon frames — one icon language across all pages */
   .icon-frame {
     @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-aurora/25 bg-aurora/10 text-aurora;
