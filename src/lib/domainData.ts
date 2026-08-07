@@ -95,8 +95,9 @@ export interface DomainResult {
   premiumUnverified?: boolean;
   /** APIs disagreed or failed — treat with caution */
   uncertain?: boolean;
-  /** Deterministic cause of uncertainty (brand/trademark protected), not a probe failure. */
-  uncertainReason?: "brand_protected";
+  /** Deterministic cause of uncertainty: `brand_protected` (trademark/registry-reserved)
+   *  or `budget_timeout` (our own request budget expired — NOT a registry failure). */
+  uncertainReason?: "brand_protected" | "budget_timeout";
   /** Client-only: the batch that owned this row never reached the backend (503 /
    *  network error). Distinct from `uncertain` (backend reached, verdict
    *  inconclusive). Renders "couldn't reach — Retry"; cleared on retry. Never
