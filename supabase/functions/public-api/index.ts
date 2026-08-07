@@ -281,10 +281,12 @@ async function cheapestForTlds(tlds: string[]): Promise<Map<string, { registrar:
   const result = new Map<string, { registrar: string; regPrice: number; affiliateUrl: string | null }>();
   if (!tlds.length) return result;
   const supa = createClient(SUPABASE_URL, ANON_KEY);
+  const freshCutoff = new Date(Date.now() - STALE_PRICE_MAX_DAYS * 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await supa
     .from("registrar_prices")
     .select("tld, registrar, reg_price, affiliate_url")
     .eq("supported", true)
+    .gte("updated_at", freshCutoff)
     .in("tld", tlds);
   if (error || !data) return result;
   for (const row of data as any[]) {
