@@ -169,11 +169,13 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
       const FAST_CHUNK = 10;
       const applyFast = (fastMap: Map<string, { available: boolean; uncertain: boolean }>) => {
         if (cancelled || !fastMap.size) return;
+        let anyConfident = false;
         setResults((prev) =>
           prev.map((r) => {
             const info = fastMap.get(r.domain);
             if (!info) return r;
             const confident = !info.uncertain;
+            if (confident) anyConfident = true;
             return {
               ...r,
               available: info.available,
@@ -187,8 +189,11 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
             };
           })
         );
-        markFirstAnswer();
+        // Only stop the stopwatch if a card actually left "Checking" with a real
+        // verdict the user can see. Provisional/uncertain results keep it running.
+        if (anyConfident) markFirstAnswer();
       };
+
       for (let i = 0; i < domainNames.length; i += FAST_CHUNK) {
         const chunk = domainNames.slice(i, i + FAST_CHUNK);
         void checkDomainsFast(chunk).then(applyFast).catch(() => {});
