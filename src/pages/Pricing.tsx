@@ -66,34 +66,25 @@ interface TermView {
   total: number | null;
   /** Promo code, if the winning registrar has one (applies to registration). */
   promo: string | null;
-  /** Renewal-trap ratio (renew/reg). Non-null only when it's a real trap (≥2×). */
-  trapRatio: number | null;
 }
 
 /** One derived view per row. Picks the single registrar with the lowest total
  *  cost of ownership for the selected term, and exposes ONE price from it.
- *  INVARIANT: no cross-registrar splicing — price, promo and trap badge all come
- *  from the same `primary` row. */
+ *  INVARIANT: no cross-registrar splicing — price and promo both come from the
+ *  same `primary` row. */
 const termView = (s: TldSummary, term: PriceTerm): TermView => {
   let best: { row: RegistrarPrice; total: number } | null = null;
   for (const p of s.prices) {
     const total = termCost(p, term);
     if (!best || total < best.total) best = { row: p, total };
   }
-  if (!best) return { primary: null, total: null, promo: null, trapRatio: null };
+  if (!best) return { primary: null, total: null, promo: null };
 
   const { row, total } = best;
-  const ratio =
-    row.reg_price > 0 && row.renew_price / row.reg_price >= 2
-      ? row.renew_price / row.reg_price
-      : null;
-
   return {
     primary: row,
     total,
     promo: row.promo_code ?? null,
-    // Trap only matters when the term includes at least one renewal.
-    trapRatio: term > 1 ? ratio : null,
   };
 };
 
@@ -348,7 +339,6 @@ const Pricing = () => {
                       </span>
                     </th>
                     <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">WHOIS Privacy</th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Updated</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -373,16 +363,6 @@ const Pricing = () => {
                           ) : (
                             <ShieldOff className="h-5 w-5 text-muted-foreground" />
                           )}
-                        </td>
-                        <td className="px-5 py-5">
-                          {(() => {
-                            const rowUpdated = s.prices.reduce((a, b) => (a.updated_at > b.updated_at ? a : b)).updated_at;
-                            return (
-                              <span className={cn("text-sm", isStale(rowUpdated) ? "text-warning" : "text-muted-foreground")}>
-                                {formatUpdated(rowUpdated)}
-                              </span>
-                            );
-                          })()}
                         </td>
                       </tr>
                     );
@@ -447,28 +427,33 @@ const NaCell = () => (
   <div className="flex min-h-[46px] items-center text-sm text-muted-foreground">—</div>
 );
 
-/* ─── Final price cell ─────────────────────────────────── */
+/* ─── PriceTag ─────────────────────────────────────────── */
 
-/** The single price the table shows per row: total cost of ownership over the
- *  selected term, from ONE registrar. One big number, the winning registrar's
- *  name, an optional promo, and — when the term includes a renewal and that
- *  renewal is a rip-off — a small trap badge underneath. No cross-registrar
- *  splicing, no "$X → $Y" arrows. */
-const FinalPriceCell = ({ view, term }: { view: TermView; term: PriceTerm }) => {
-  const { primary, total, promo, trapRatio } = view;
-  if (!primary || total == null) return <NaCell />;
-
-  const c = getRegistrarColor(primary.registrar);
-  const trapPct = trapRatio != null ? Math.round((trapRatio - 1) * 100) : null;
-  const severe = trapPct != null && trapPct >= 500;
-  // Per-year average helps compare across terms without a second big number.
+/** THE single price primitive, used everywhere a term total is shown (summary
+ *  table and detailed table alike). One registrar, one number: total cost of
+ *  ownership over `term` years, with an optional promo chip and a per-year
+ *  average. No renewal-trap badge, no "$X → $Y" arrows, no cross-registrar
+ *  splicing. Keeping this in one component is what guarantees the summary and
+ *  detailed views can never drift apart again. */
+const PriceTag = ({
+  registrar,
+  total,
+  term,
+  promo,
+}: {
+  registrar: string;
+  total: number;
+  term: PriceTerm;
+  promo?: string | null;
+}) => {
+  const c = getRegistrarColor(registrar);
   const perYear = total / term;
 
   return (
     <div className="min-h-[46px]">
       {/* Fixed-height meta line so the promo badge never shifts row height. */}
       <div className="flex min-h-[22px] items-center gap-1.5">
-        <span className={`text-sm font-medium ${c.text}`}>{primary.registrar}</span>
+        <span className={`text-sm font-medium ${c.text}`}>{registrar}</span>
         {promo && (
           <Badge variant="secondary" className="text-[10px] font-mono px-1.5 py-0">
             {promo}
@@ -489,25 +474,16 @@ const FinalPriceCell = ({ view, term }: { view: TermView; term: PriceTerm }) => 
           </span>
         )}
       </p>
-
-      {/* Trap badge sits UNDER the price, only when a renewal is priced in. */}
-      {trapPct != null && (
-        <div className="mt-1">
-          <Badge
-            variant="outline"
-            className={cn(
-              "text-[11px] font-bold",
-              severe
-                ? "border-destructive/40 bg-destructive/15 text-destructive"
-                : "border-warning/40 bg-warning/15 text-warning",
-            )}
-          >
-            +{trapPct.toLocaleString()}% at renewal
-          </Badge>
-        </div>
-      )}
     </div>
   );
+};
+
+/** Summary-row wrapper: resolves the winning registrar from the term view and
+ *  renders the shared PriceTag. */
+const FinalPriceCell = ({ view, term }: { view: TermView; term: PriceTerm }) => {
+  const { primary, total, promo } = view;
+  if (!primary || total == null) return <NaCell />;
+  return <PriceTag registrar={primary.registrar} total={total} term={term} promo={promo} />;
 };
 
 /* ─── Detailed TLD Table ───────────────────────────────── */
@@ -528,10 +504,10 @@ const DetailedTldTable = ({ summary: s, term }: { summary: TldSummary; term: Pri
           Updated {formatUpdated(newestUpdated)}
         </span>
       </div>
-      <table className="min-w-[820px] text-left">
+      <table className="w-full min-w-[720px] text-left">
         <thead>
           <tr className="border-b border-border">
-            <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Registrar</th>
+            <th className="w-1/4 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Registrar</th>
             <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Register</th>
             <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Renew</th>
             <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Transfer</th>
