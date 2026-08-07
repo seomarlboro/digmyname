@@ -1244,7 +1244,7 @@ export async function checkDomains(
 
   const all = new Map<string, DomainCheckResult>();
   for (const c of cachedMap.values()) all.set(c.domain, c);
-  for (const r of fresh) all.set(r.domain, r);
+  for (const r of fresh) { all.set(r.domain, r); publish(r); }
 
   // Label pass (additive, non-verdict): tag every result whose SLD is a known
   // brand/registry-reserved mark, so the frontend can render one consistent
