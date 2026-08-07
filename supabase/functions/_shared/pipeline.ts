@@ -43,8 +43,10 @@ export interface DomainCheckResult {
   price?: number;
   premium?: boolean;
   uncertain?: boolean;
-  /** Why the result is uncertain, when the cause is deterministic (not a probe failure). */
-  uncertainReason?: "brand_protected";
+  /** Why the result is uncertain, when the cause is deterministic (not a probe failure).
+   *  `budget_timeout` = OUR request budget expired before this domain resolved —
+   *  the registry did not fail. Must never be reported as a registry failure. */
+  uncertainReason?: "brand_protected" | "budget_timeout";
   likelyPremium?: boolean;
   /** RDAP-404 + NXDOMAIN agree the name is registerable, but it is a premium-tier
    *  suspect whose real registry price the third signal did NOT confirm this
