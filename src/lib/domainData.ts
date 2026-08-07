@@ -201,7 +201,7 @@ export interface AvailabilityInfo {
   likelyPremium?: boolean;
   premiumUnverified?: boolean;
   uncertain?: boolean;
-  uncertainReason?: "brand_protected";
+  uncertainReason?: "brand_protected" | "budget_timeout";
   sldBlocked?: boolean;
   forSale?: boolean;
   forSaleVia?: string;
