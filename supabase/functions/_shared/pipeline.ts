@@ -910,10 +910,25 @@ export async function checkDomains(
   // `thirdSignalDeadlineAt`: absolute epoch-ms deadline for the third signal,
   // captured by the caller when its own budget starts. Default = now + 6000ms
   // (site search), so callers that pass nothing keep the full window.
-  deps: { supabase?: SupabaseClient; thirdSignalDeadlineAt?: number } = {}
+  // `partialSink`: optional map the pipeline fills IN PLACE as each domain gets a
+  // verdict (cache hit → Pass-1 RDAP/DNS → final). A caller running a wall-clock
+  // budget reads it on timeout so domains that DID resolve keep their real
+  // verdict, and only the still-unresolved ones get a timeout state. This is what
+  // turns a batch-wide "wall of uncertain" into a per-domain outcome.
+  deps: {
+    supabase?: SupabaseClient;
+    thirdSignalDeadlineAt?: number;
+    partialSink?: Map<string, DomainCheckResult>;
+  } = {}
 ): Promise<DomainCheckResult[]> {
   const supabase = deps.supabase ?? getServiceClient();
   const thirdSignalDeadlineAt = deps.thirdSignalDeadlineAt ?? (Date.now() + 6000);
+  const sink = deps.partialSink;
+  const publish = (r: DomainCheckResult) => {
+    if (sink) sink.set(r.domain, isLikelyBlocked(r.domain) ? { ...r, sldBlocked: true } : r);
+  };
+
+
 
 
   const batch = domains.slice(0, 50).filter(isValidDomain);
