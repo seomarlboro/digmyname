@@ -1,0 +1,38 @@
+########## FAMILY 905 — filter test ##########
+-- filter honored? (family_id) first 5 items' actual fam ids --
+  returned fam ids: [7883, 7881, 8339, 2009, 2005]
+-- filter honored? (family) --
+  returned fam ids: [7883, 7881, 8339, 2009, 2005]
+-- per-concept availability within family 905 (using family_id filter + term) --
+  MISS bolt -> no item in fam 905 (got fams [7, 748, 7])
+  MISS balance scale -> no item in fam 905 (got fams [748, 546, 757])
+  MISS search magnifier -> no item in fam 905 (got fams [5413, 10943, 2742])
+  MISS shield -> no item in fam 905 (got fams [3231, 7655, 6577])
+  MISS globe network -> no item in fam 905 (got fams [10452, 2610, 486])
+  MISS shop store -> no item in fam 905 (got fams [519, 8446, 1927])
+  MISS certificate -> no item in fam 905 (got fams [7, 7, 777])
+  MISS license -> no item in fam 905 (got fams [4404, 589, 4547])
+  MISS stopwatch timer -> no item in fam 905 (got fams [22589, 546, 1726787])
+  MISS lock padlock -> no item in fam 905 (got fams [10825, 435990, 3383180])
+  MISS server database -> no item in fam 905 (got fams [4547, 4920, 4918])
+  MISS price tag -> no item in fam 905 (got fams [7, 1978, 915])
+
+########## FAMILY 7 — filter test ##########
+-- filter honored? (family_id) first 5 items' actual fam ids --
+  returned fam ids: [7883, 7881, 8339, 2009, 2005]
+-- filter honored? (family) --
+  returned fam ids: [7883, 7881, 8339, 2009, 2005]
+-- per-concept availability within family 7 (using family_id filter + term) --
+  OK   bolt -> id=1477301 name=Energy (fam 7)
+  MISS balance scale -> no item in fam 7 (got fams [748, 546, 757])
+  MISS search magnifier -> no item in fam 7 (got fams [5413, 10943, 2742])
+  MISS shield -> no item in fam 7 (got fams [3231, 7655, 6577])
+  MISS globe network -> no item in fam 7 (got fams [10452, 2610, 486])
+  MISS shop store -> no item in fam 7 (got fams [519, 8446, 1927])
+  OK   certificate -> id=3135763 name=Certificate (fam 7)
+  MISS license -> no item in fam 7 (got fams [4404, 589, 4547])
+  MISS stopwatch timer -> no item in fam 7 (got fams [22589, 546, 1726787])
+  MISS lock padlock -> no item in fam 7 (got fams [10825, 435990, 3383180])
+  MISS server database -> no item in fam 7 (got fams [4547, 4920, 4918])
+  OK   price tag -> id=473576 name=Tag (fam 7)
+
