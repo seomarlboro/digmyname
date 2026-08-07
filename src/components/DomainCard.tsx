@@ -55,6 +55,11 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const showCheckPrice = available && (isPremiumUnverified || !hasTrustedPrice) && !isPremium;
   const registrarName = hasTrustedPrice ? (cheapest?.registrar ?? null) : null;
   const buyUrl = registrarName ? getRegistrarUrl(registrarName, domain) : null;
+  // When no trusted DB price exists, "Check price" still needs a real
+  // registrar search destination — never "#". Spaceship's URL builder works
+  // for any TLD, so it's a safe universal fallback.
+  const checkPriceUrl = getRegistrarUrl("Spaceship", domain);
+  const actionUrl = buyUrl ?? checkPriceUrl;
   const favorited = isFavorite(domain);
 
   // Registration year for taken domains — fetched lazily in the background,
