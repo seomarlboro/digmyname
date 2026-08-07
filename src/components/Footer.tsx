@@ -102,8 +102,27 @@ const Footer = () => (
         </div>
       </div>
 
-      <div className="mt-10 border-t border-border/60 pt-6 text-xs text-muted-foreground">
-        Built in Ukraine 🇺🇦 · MIT licensed · © 2026 DigMyName
+      <div className="mt-10 flex flex-col gap-4 border-t border-border/60 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <span>Built in Ukraine 🇺🇦 · MIT licensed · © 2026 DigMyName</span>
+        <a
+          href="https://codetrendy.com/?utm_source=digmyname.com&utm_medium=badge"
+          target="_blank"
+          rel="nofollow noopener noreferrer"
+          className="shrink-0"
+        >
+          <img
+            src="https://codetrendy.com/api/badge?style=classic"
+            alt="CodeTrendy (codetrendy.com)"
+            height={27}
+            className="block dark:hidden"
+          />
+          <img
+            src="https://codetrendy.com/api/badge?style=dark"
+            alt="CodeTrendy (codetrendy.com)"
+            height={27}
+            className="hidden dark:block"
+          />
+        </a>
       </div>
     </div>
   </footer>

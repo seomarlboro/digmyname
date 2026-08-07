@@ -337,29 +337,7 @@ const HowItWorks = () => {
           </div>
         </section>
 
-        {/* External verification badge */}
-        <div className="mt-10 flex justify-center">
-          <a
-            href="https://codetrendy.com/?utm_source=digmyname.com&utm_medium=badge"
-            target="_blank"
-            rel="nofollow noopener noreferrer"
-          >
-            <img
-              src="https://codetrendy.com/api/badge?style=classic"
-              alt="CodeTrendy (codetrendy.com)"
-              height={54}
-              className="block dark:hidden"
-            />
-            <img
-              src="https://codetrendy.com/api/badge?style=dark"
-              alt="CodeTrendy (codetrendy.com)"
-              height={54}
-              className="hidden dark:block"
-            />
-          </a>
-        </div>
 
-        {/* CTA */}
         <Section
           title="Try an honest search."
           lede="Type any name and see cross-checked verification in action."
