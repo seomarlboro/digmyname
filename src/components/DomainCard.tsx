@@ -150,7 +150,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               Trademark
             </Badge>
           ) : (
-            <span className="text-xs text-muted-foreground min-w-[80px]">Couldn't verify</span>
+            <span className="text-xs text-muted-foreground min-w-[80px]">{stillChecking ? "Still checking" : "Couldn't verify"}</span>
           )}
           <span className="min-w-[80px]" />
           <span />
