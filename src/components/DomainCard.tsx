@@ -317,9 +317,11 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                       </p>
                     )}
                   </>
-                ) : isLikelyPremium ? (
+                ) : isLikelyPremium || showCheckPrice ? (
                   <>
-                    <p className="text-base font-semibold whitespace-nowrap text-amber-500">{isPremiumUnverified ? "Premium" : "Likely premium"}</p>
+                    <p className="text-base font-semibold whitespace-nowrap text-amber-500">
+                      {isPremiumUnverified ? "Premium" : isLikelyPremium ? "Likely premium" : "Check price"}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {isPremiumUnverified ? "price confirmed at checkout" : "Verify on registrar"}
                     </p>
@@ -327,7 +329,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                 ) : (
                   <>
                     <p className="text-2xl font-bold text-foreground">
-                      ${displayPrice}
+                      ${trustedPrice}
                       <span className="text-sm font-normal text-muted-foreground">/year</span>
                     </p>
                     {hasHighRenewal && (
