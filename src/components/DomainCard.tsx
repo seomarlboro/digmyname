@@ -308,7 +308,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
         </Button>
 
         {/* Mobile: stacked, Desktop: single row */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className={`flex flex-col gap-3 sm:flex-row sm:items-center ${CARD_BODY_MIN}`}>
           {/* Left: domain + badges */}
           <div className="flex-1 min-w-0 pr-8">
             <h3 className="text-xl font-bold text-foreground">
