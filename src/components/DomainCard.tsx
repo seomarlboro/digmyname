@@ -171,7 +171,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
     }
     return (
       <div className="card-hover rounded-xl border border-amber-500/30 p-4 sm:p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className={`flex flex-col gap-3 sm:flex-row sm:items-center ${CARD_BODY_MIN}`}>
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
               <span>{name}.<span className="text-primary">{ext}</span></span>
