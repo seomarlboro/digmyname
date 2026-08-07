@@ -303,7 +303,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
         if (r.domain !== domain) return r;
         const info = results.get(domain);
         if (!info) return { ...r, checking: false, provisional: false, uncertain: true, reachFailed: !ok };
-        return {
+        const updated = {
           ...r,
           checking: false,
           provisional: false,
@@ -320,6 +320,8 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
           listingUrl: info.listingUrl,
           reachFailed: false,
         };
+        cacheResult(updated);
+        return updated;
       })
     );
   }, []);
