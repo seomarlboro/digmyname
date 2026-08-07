@@ -375,7 +375,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
               to="/speed"
               className="hero-chip hero-chip-text mb-5 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] transition-colors hover:text-foreground sm:text-xs"
             >
-              <Zap className="h-3.5 w-3.5 shrink-0 text-aurora-mint" />
+              <Zap className="hero-chip-pulse h-3.5 w-3.5 shrink-0 text-aurora-mint" />
               <span className="whitespace-nowrap">First answer in ~170 ms<span className="hidden sm:inline"> — timed live, no asterisks</span></span>
             </Link>
 
