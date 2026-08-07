@@ -348,14 +348,15 @@
   .text-aurora-link { color: hsl(var(--aurora)); }
   .dark .text-aurora-link { color: hsl(var(--aurora-mint)); }
 
-  /* Hero eyebrow chip — must read on both the light and dark hero backgrounds. */
+  /* Hero eyebrow chip — outline-only pill; border uses the theme foreground so
+     it reads on both the light and dark hero backgrounds without a fill. */
   .hero-chip {
-    background-color: hsl(var(--secondary));
-    border-color: hsl(var(--border));
+    background-color: transparent;
+    border-color: hsl(var(--foreground) / 0.28);
   }
   .dark .hero-chip {
-    background-color: hsl(var(--muted) / 0.6);
-    border-color: hsl(var(--border) / 0.8);
+    background-color: transparent;
+    border-color: hsl(var(--foreground) / 0.35);
   }
 
   /* Unified icon frames — one icon language across all pages */
