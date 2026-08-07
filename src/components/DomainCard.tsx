@@ -18,6 +18,19 @@ interface DomainCardProps {
   onRetry?: (domain: string) => void;
 }
 
+// ---------------------------------------------------------------------------
+// Layout stability (CLS): every state of a card — checking, available,
+// uncertain, taken — must occupy the same vertical space so rows never jump
+// when a result resolves. These are floors, not fixed heights: genuinely
+// taller content (wrapped domain, explanatory copy) can still grow.
+//   • COMPACT_ROW_MIN — compact grid row: py-4 (32px) + h-9 action button.
+//   • CARD_BODY_MIN   — full card body row on sm+: h-10 CTA + badge line.
+// ---------------------------------------------------------------------------
+const COMPACT_ROW_MIN = "min-h-[68px]";
+const CARD_BODY_MIN = "sm:min-h-[56px]";
+
+
+
 const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const { domain, tld, available, checking } = result;
   const isUncertain = result.uncertain === true;
