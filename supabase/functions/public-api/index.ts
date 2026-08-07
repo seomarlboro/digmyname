@@ -29,6 +29,10 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
 const DEFAULT_TLDS = ["com", "io", "ai", "app", "dev", "co", "net", "org", "xyz", "me", "so", "tech"];
+// Prices older than this are treated as untrusted and fall through to the
+// "Check price" state rather than being shown as fact. The weekly cron keeps
+// core TLDs fresh; only genuinely stale long-tail rows drop out.
+const STALE_PRICE_MAX_DAYS = 60;
 const MAX_SLD_LEN = 63;
 const SLD_RE = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const TLD_RE = /^[a-z]{2,24}(?:\.[a-z]{2,24})?$/;
@@ -277,10 +281,12 @@ async function cheapestForTlds(tlds: string[]): Promise<Map<string, { registrar:
   const result = new Map<string, { registrar: string; regPrice: number; affiliateUrl: string | null }>();
   if (!tlds.length) return result;
   const supa = createClient(SUPABASE_URL, ANON_KEY);
+  const freshCutoff = new Date(Date.now() - STALE_PRICE_MAX_DAYS * 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await supa
     .from("registrar_prices")
     .select("tld, registrar, reg_price, affiliate_url")
     .eq("supported", true)
+    .gte("updated_at", freshCutoff)
     .in("tld", tlds);
   if (error || !data) return result;
   for (const row of data as any[]) {
