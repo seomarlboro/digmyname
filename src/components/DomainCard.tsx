@@ -190,9 +190,9 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
               </>
             ) : (
               <p className="text-xs text-muted-foreground mt-1.5">
-                {result.reachFailed
-                  ? "Couldn't reach the registry — try again."
-                  : "Couldn't verify availability — registry didn't respond. Try again."}
+                {stillChecking
+                  ? "Still checking — this one's slow. Retry."
+                  : "Couldn't verify availability — sources disagreed. Try again."}
               </p>
             )}
           </div>
