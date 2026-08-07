@@ -371,13 +371,10 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
       {!hasQuery ? (
         <div className="relative z-10 flex min-h-[38vh] items-center justify-center px-4 pb-4 pt-10 sm:h-[calc(50vh-72px)] sm:min-h-0 sm:pb-0 sm:pt-0">
           <div className="mx-auto w-full max-w-5xl text-center">
-            <Link
-              to="/speed"
-              className="hero-chip hero-chip-text mb-5 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] transition-colors hover:text-foreground sm:text-xs"
-            >
+            <div className="hero-chip hero-chip-text mb-5 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] sm:text-xs">
               <Zap className="hero-chip-pulse h-3.5 w-3.5 shrink-0 text-aurora-mint" />
               <span className="whitespace-nowrap">First answer in ~170 ms<span className="hidden sm:inline"> — timed live, no asterisks</span></span>
-            </Link>
+            </div>
 
             <h1 className="text-gradient mx-auto w-full px-1 text-[clamp(2.25rem,10.5vw,4.75rem)] font-extrabold leading-[1.05] tracking-[-0.04em] sm:leading-[1] sm:tracking-[-0.045em]">
               <span className="block sm:hidden">World's fastest</span>
@@ -388,11 +385,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
             </h1>
 
             <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:mt-6 sm:text-lg md:text-xl">
-              Probably the fastest domain search in the universe. Or the second — the{" "}
-              <Link to="/speed" className="text-aurora-link underline underline-offset-4 hover:opacity-90">
-                live benchmark
-              </Link>{" "}
-              will tell you which.
+              Probably the fastest domain search in the universe. Or the second — the timer on screen will tell you which.
             </p>
 
 
