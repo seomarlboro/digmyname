@@ -1,23 +1,71 @@
-===== auth check: does the key work? =====
-HTTP 500
------ raw first 1500 bytes -----
-{"message":"Client-ID is missing.","status_code":500}
-===== FULL first item =====
+ID present:yes len=14   SECRET present:yes len=32
+
+===== AUTH TEST: search 'bolt' line =====
+{"status":"success","response":{"items":{"current_page":1,"data":[{"id":7854484,"uuid":"76d27ae0-4559-11ee-a46f-0242ac140003","asset":"icon","name":"bolt","slug":"bolt-9533243","price":2,"urls":{"png_64":"https:\/\/cdn.iconscout.com\/icon\/premium\/png-64-thumb\/bolt-icon-svg-download-png-7854484.png","png_128":"https:\/\/cdn.iconscout.com\/icon\/premium\/png-128-thumb\/bolt-icon-svg-download-png-7854484.png","png_256":"https:\/\/cdn.iconscout.com\/icon\/premium\/png-256-thumb\/bolt-icon-svg-download-png-7854484.png"},"color_codes":[{"decimal_color":273,"color_id":90}]},{"id":648062,"uuid":"6d15624f-9d1b-11e8-aa5b-16f546a19484","asset":"icon","name":"bolt","slug":"bolt-105","price":2,"urls":{"png_64":"https:\/\/cdn.iconscout.com\/icon\/premium\/png-64-thumb\/bolt-icon-svg-download-png-648062.png","png_128":"https:\/\/cdn.iconscout.com\/icon\/premium\/png-128-thumb\/bolt-icon-svg-download-png-648062.png","png_256":"https:\/\/cdn.iconscout.com\/icon\/premium\/png-256-thumb\/bolt-icon-svg-download-png-648062.png"},"color_codes":[{"decimal_color":0,"color_id":1}]},{"id":1763431,"uuid":"9221acc0-4e4c-11ea-bf37-0242ac140003","asset":"icon","name":"Bolt","slug":"bolt-2092255","price":2,"urls":{"png_64":"https:\/\/cdn.iconscout.com\/icon\/premium\/png-64-thumb\/bolt-icon-svg-download-png-1763431.png","png_128":"https:\/\/cdn.iconscout.com\/icon\/premium\/png-128-thumb\/bolt-icon-svg-download-png-1763431.png","png_256":"https:\/\/cdn.iconscout.com\/icon\/premium\/png-256-thumb\/bolt-icon-svg-download-png-1763431.png"},"color_codes":[]}],"first_page_url":"\/v3\/search?index_name=items&ip_address=2a07%3A8241%3Afff%3A1107%3A0%3A20%3A0%3A539&sort=relevant&page=1","from":1,"last_page":500,"last_page_url":"\/v3\/search?index_name=items&ip_address=2a07%3A8241%3Afff%3A1107%3A0%3A20%3A0%3A539&sort=relevant&page=500","next_page_url":"\/v3\/search?index_name=items&ip_address=2a07%3A8241%3Afff%3A1107%3A0%3A20%3A0%3A539&sort=relevant&page=2","path":"\/v3\/search","per_page":3,"prev_page_url":null,"to":3,"total":3933}},"message":null,"meta":{"total_time":50.23,"db_query_time":0,"db_query_count":0,"db_query_logs":[],"search_query_time":0,"search_query_logs":[]},"elements":null}
+HTTP 200
+
+===== FULL first item structure =====
 {
-    "message": "Client-ID is missing.",
-    "status_code": 500
+    "status": "success",
+    "response": {
+        "items": {
+            "current_page": 1,
+            "data": [
+                {
+                    "id": 1195965,
+                    "uuid": "6e7444c0-13f5-11e9-b28e-0242ac140003",
+                    "asset": "icon",
+                    "name": "cloud network",
+                    "slug": "cloud-network-1416052",
+                    "price": 2,
+                    "urls": {
+                        "png_64": "https://cdn.iconscout.com/icon/premium/png-64-thumb/cloud-network-icon-svg-download-png-1195965.png",
+                        "png_128": "https://cdn.iconscout.com/icon/premium/png-128-thumb/cloud-network-icon-svg-download-png-1195965.png",
+                        "png_256": "https://cdn.iconscout.com/icon/premium/png-256-thumb/cloud-network-icon-svg-download-png-1195965.png"
+                    },
+                    "color_codes": []
+                }
+            ],
+            "first_page_url": "/v3/search?index_name=items&ip_address=2a07%3A8241%3Afff%3A1107%3A0%3A20%3A0%3A539&sort=relevant&page=1",
+            "from": 1,
+            "last_page": 1500,
+            "last_page_url": "/v3/search?index_name=items&ip_address=2a07%3A8241%3Afff%3A1107%3A0%3A20%3A0%3A539&sort=relevant&page=1500",
+            "next_page_url": "/v3/search?index_name=items&ip_address=2a07%3A8241%3Afff%3A1107%3A0%3A20%3A0%3A539&sort=relevant&page=2",
+            "path": "/v3/search",
+            "per_page": 1,
+            "prev_page_url": null,
+            "to": 1,
+            "total": 215877
+        }
+    },
+    "message": null,
+    "meta": {
+        "total_time": 81.25,
+        "db_query_time": 0,
+        "db_query_count": 0,
+        "db_query_logs": [],
+        "search_query_time": 0,
+        "search_query_logs": []
+    },
+    "elements": null
 }
 
-===== per-concept coverage in style=line =====
-  bolt: none
-  balance-scale: none
-  magnifying-glass: none
-  shield: none
-  globe-network: none
-  store: none
-  certificate: none
-  license: none
-  stopwatch: none
-  lock: none
-  server: none
-  price-tag: none
+===== per-concept =====
+  bolt: uuid=76d27ae0-4559-11ee-a46f-0242ac140003 name=bolt pack=None packuuid=None by=None
+  balance scale: uuid=615d12f0-b9e5-11ee-8562-0242ac140003 name=Balance Scale pack=None packuuid=None by=None
+  magnifier search: uuid=cd78c0e0-4fec-11eb-940f-0242ac140003 name=Magnifier Glass pack=None packuuid=None by=None
+  shield check: uuid=85d646f0-29d9-11ed-a3bd-0242ac140003 name=Shield Check pack=None packuuid=None by=None
+  globe network: uuid=65db1c20-7f31-11ec-ae91-0242ac140003 name=globe network pack=None packuuid=None by=None
+  shop store: uuid=7dd57ce0-e8fd-11ea-8ee8-0242ac140003 name=Shop Store pack=None packuuid=None by=None
+  certificate: uuid=17abb660-43e4-11e9-8d1b-0242ac140003 name=certificate pack=None packuuid=None by=None
+  license: uuid=3d3b0550-3201-11ea-ac61-0242ac140003 name=License pack=None packuuid=None by=None
+  stopwatch: uuid=df20c0f0-0ea7-11ed-9b55-0242ac140003 name=Stopwatch pack=None packuuid=None by=None
+  lock: uuid=3b76b700-5b73-11ee-99d1-0242ac140003 name=lock pack=None packuuid=None by=None
+  server: uuid=ca29fee0-ba06-11ea-8926-0242ac140003 name=Server pack=None packuuid=None by=None
+  price tag: uuid=53a2d210-f5d5-11ec-ab16-0242ac140003 name=price tag pack=None packuuid=None by=None
+
+===== DOWNLOAD TEST (svg) =====
+bolt uuid=76d27ae0-4559-11ee-a46f-0242ac140003
+{"message":"Sorry! We didn't find any subscription under your account. Please subscribe our subscription to avoid this interruption.","code":400,"status_code":500}
+HTTP 500
+
