@@ -1,0 +1,30 @@
+===== per-concept FREE line icons: uuid + download test =====
+  bolt: uuid=0b9d6320-8e86-11e9-abc8-0242ac140003 name=Bolt total=95
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/1425487.svg?
+  balance scale: uuid=ffc588e0-8be0-11eb-b95a-0242ac140003 name=Balance Scale total=473
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/2916368.svg?
+  magnifier search: uuid=613f0e40-40a2-11e9-91fb-0242ac140003 name=Magnifier glass total=435
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/1252925.svg?
+  shield check: uuid=a29b3900-455a-11ee-9654-0242ac140003 name=shield check total=846
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/7856264.svg?
+  globe network: uuid=a1cc2be0-69cb-11eb-a56d-0242ac140003 name=Globe total=417
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/2747888.svg?
+  shop store: uuid=8334ec10-dfee-11eb-bb87-0242ac140003 name=Shop Store Perfume total=1409
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/3319357.svg?
+  certificate: uuid=509dd0c0-85e2-11e9-a304-0242ac140003 name=Certificate total=223
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/1405088.svg?
+  license: uuid=624c7350-aa0c-11ec-b40f-0242ac140003 name=License total=327
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/4316059.svg?
+  stopwatch: uuid=4281d760-8bc1-11ef-8570-0242ac140003 name=stopwatch total=281
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/10440409.svg
+  lock padlock: uuid=392f5db0-69cb-11eb-a093-0242ac140003 name=Lock total=1200
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/2747803.svg?
+  server database: uuid=19af9c10-0cb5-11f1-9303-0242ac140003 name=data-sync total=1244
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/14233905.svg
+  price tag: uuid=3cb39240-98fb-11eb-997f-0242ac140003 name=Price Tag total=924
+       download -> NO_URL:{"status": "success", "response": {"download": {"url": "https://d3sxshmncs10te.cloudfront.net/icon/free/svg/2974228.svg?
+
+===== fetch ONE actual SVG (bolt) =====
+raw download response: {"status":"success","response":{"download":{"url":"https:\/\/d3sxshmncs10te.cloudfront.net\/icon\/free\/svg\/1425487.svg?token=eyJhbGciOiJoczI1NiIsImtpZCI6ImRlZmF1bHQifQ__.eyJpc3MiOiJkM3N4c2htbmNzMTB0ZS5jbG91ZGZyb250Lm5ldCIsImV4cCI6MTc4NjM3MTI1NiwicSI6bnVsbCwiaWF0IjoxNzg2MTEyMDU2fQ__.fc9ce11a4210893dcbc9903846fedcccb78953134830de64da650af2f71f7eae","name":"Bolt","download_license_uuid":null,"downl
+resolved url: 
+
