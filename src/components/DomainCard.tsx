@@ -133,6 +133,9 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   // Uncertain — APIs failed or disagreed. Show retry instead of misleading "Taken".
   if (isUncertain) {
     const brandProtected = result.uncertainReason === "brand_protected";
+    // Our own budget expired (or the batch never reached us) — the registry did
+    // NOT fail, so don't say it did.
+    const stillChecking = result.uncertainReason === "budget_timeout" || result.reachFailed;
     if (compact) {
       return (
         <div className={`grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
