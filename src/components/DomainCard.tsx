@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle, Tag, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
