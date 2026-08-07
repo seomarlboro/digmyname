@@ -843,16 +843,21 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
     };
   }
 
-  // Zones without a trustworthy RDAP server (.co, .me): a hard NXDOMAIN from
-  // two independent resolvers means the name isn't delegated → not registered.
+  // Zones without a trustworthy RDAP server (.co, .me): DNS NXDOMAIN alone is
+  // NOT proof the name is free — registered-but-undelegated domains answer
+  // NXDOMAIN too. Without RDAP agreement we can only be honest about not
+  // knowing, so this is an uncertain result (never available, never priced,
+  // never cached as available) rather than a confident available:true.
   if (rdap === "unknown" && dns === "no_records" && AGGREGATOR_UNRELIABLE_TLDS.has(domain.split(".").pop() ?? "")) {
     return {
       domain,
-      available: true,
+      available: false,
       checkedVia: "dns",
+      uncertain: true,
       likelyPremium: likelyPremium || undefined,
     };
   }
+
 
   // RDAP says available but DNS could not confirm NXDOMAIN → uncertain.
   if (rdap === "available" && dns === "error") {
