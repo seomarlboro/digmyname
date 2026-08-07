@@ -160,6 +160,19 @@ const Mcp = () => {
                 now calls <code className="font-mono text-foreground/80">api.digmyname.com</code>, a
                 Cloudflare edge cache: repeat domain lookups return in ~70 ms, first-time lookups run
                 the full live check (~170 ms first answer, ~370 ms typical full pipeline).
+                <span className="mt-5 flex flex-wrap items-center gap-2">
+                  <a href={NPM_URL} target="_blank" rel="noopener noreferrer">
+                    <img className="h-5" loading="lazy" alt="npm version of domain-check-skills-mcp" src="https://img.shields.io/npm/v/domain-check-skills-mcp?color=6d28d9&label=npm&logo=npm" />
+                  </a>
+                  <a href={NPM_URL} target="_blank" rel="noopener noreferrer">
+                    <img className="h-5" loading="lazy" alt="monthly npm downloads" src="https://img.shields.io/npm/dm/domain-check-skills-mcp?color=10b981&label=downloads" />
+                  </a>
+                  <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+                    <img className="h-5" loading="lazy" alt="MIT licensed" src="https://img.shields.io/badge/license-MIT-2563eb" />
+                  </a>
+                  <img className="h-5" loading="lazy" alt="MCP compatible" src="https://img.shields.io/badge/MCP-compatible-7c3aed" />
+                  <img className="h-5" loading="lazy" alt="Free, no API key required" src="https://img.shields.io/badge/free-no%20API%20key-16a34a" />
+                </span>
               </>
             }
             actions={
@@ -183,19 +196,6 @@ const Mcp = () => {
               </>
             }
           >
-            <div className="mb-8 flex flex-wrap items-center gap-2">
-              <a href={NPM_URL} target="_blank" rel="noopener noreferrer">
-                <img className="h-5" loading="lazy" alt="npm version of domain-check-skills-mcp" src="https://img.shields.io/npm/v/domain-check-skills-mcp?color=6d28d9&label=npm&logo=npm" />
-              </a>
-              <a href={NPM_URL} target="_blank" rel="noopener noreferrer">
-                <img className="h-5" loading="lazy" alt="monthly npm downloads" src="https://img.shields.io/npm/dm/domain-check-skills-mcp?color=10b981&label=downloads" />
-              </a>
-              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-                <img className="h-5" loading="lazy" alt="MIT licensed" src="https://img.shields.io/badge/license-MIT-2563eb" />
-              </a>
-              <img className="h-5" loading="lazy" alt="MCP compatible" src="https://img.shields.io/badge/MCP-compatible-7c3aed" />
-              <img className="h-5" loading="lazy" alt="Free, no API key required" src="https://img.shields.io/badge/free-no%20API%20key-16a34a" />
-            </div>
             <StatGrid>
               <Stat value="50" label="TLDs covered" accent="mint" icon={NetworkIcon} />
               <Stat value="6" label="Registrars compared" accent="violet" icon={StoreIcon} />
