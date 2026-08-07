@@ -178,7 +178,92 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ---- Catalog sources for long-tail TLDs (fault-tolerant, gap-filling) --------
+    // TLDSpy per-registrar pages only list ~core TLDs. These two no-auth catalog
+    // sources cover the long-tail (Porkbun ~627 TLDs, Cloudflare ~400 at-cost).
+    // Each is wrapped so a failure is logged and skipped — never breaks the run.
+    // We only FILL GAPS: a TLD already priced by TLDSpy this run is left as-is.
+    const tldsCoveredByTldspy = new Set(allPrices.map((p) => p.tld));
+    const needsCatalog = TRACKED_TLDS.filter((t) => !tldsCoveredByTldspy.has(t));
+
+    // Source 1 (primary): Porkbun public pricing catalog — no auth.
+    // POST https://api.porkbun.com/api/json/v3/pricing/get
+    //   -> { status:"SUCCESS", pricing: { <tld>: { registration, renewal, transfer } } }
+    async function fetchPorkbunCatalog(): Promise<Map<string, { reg: number; renew: number; transfer: number | null }>> {
+      const out = new Map<string, { reg: number; renew: number; transfer: number | null }>();
+      try {
+        const resp = await fetch("https://api.porkbun.com/api/json/v3/pricing/get", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}",
+          signal: AbortSignal.timeout(20000),
+        });
+        if (!resp.ok) { console.warn(`porkbun catalog HTTP ${resp.status}`); return out; }
+        const data = await resp.json();
+        if (data?.status !== "SUCCESS" || !data.pricing) { console.warn("porkbun catalog non-success"); return out; }
+        for (const [tld, v] of Object.entries(data.pricing as Record<string, Record<string, string>>)) {
+          const reg = Number(v?.registration);
+          const renew = Number(v?.renewal);
+          const transfer = v?.transfer != null ? Number(v.transfer) : null;
+          if (Number.isFinite(reg) && Number.isFinite(renew) && reg > 0) {
+            out.set(tld.toLowerCase(), { reg, renew: Number.isFinite(renew) ? renew : reg, transfer: (transfer != null && Number.isFinite(transfer)) ? transfer : null });
+          }
+        }
+        console.log(`porkbun catalog: ${out.size} TLDs`);
+      } catch (e) {
+        console.warn(`porkbun catalog failed: ${e instanceof Error ? e.message : String(e)}`);
+      }
+      return out;
+    }
+
+    // Source 2 (backup): Cloudflare wholesale at-cost prices, community-maintained
+    // JSON. No auth. Cloudflare is flat (reg == renew, at-cost). Try a couple of
+    // known raw locations; if all fail, skip silently.
+    async function fetchCloudflareCatalog(): Promise<Map<string, number>> {
+      const out = new Map<string, number>();
+      const urls = [
+        "https://raw.githubusercontent.com/matteotrubini/cloudflare-registrar-domain-prices/master/prices.json",
+        "https://raw.githubusercontent.com/matteotrubini/cloudflare-registrar-domain-prices/main/prices.json",
+      ];
+      for (const url of urls) {
+        try {
+          const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+          if (!resp.ok) continue;
+          const data = await resp.json();
+          // Expected shape: { "com": 10.44, "io": 34.0, ... } OR { "com": { price: 10.44 } }
+          for (const [tld, v] of Object.entries(data as Record<string, unknown>)) {
+            const price = typeof v === "number" ? v : Number((v as { price?: unknown })?.price);
+            if (Number.isFinite(price) && price > 0) out.set(tld.toLowerCase(), price as number);
+          }
+          if (out.size > 0) { console.log(`cloudflare catalog: ${out.size} TLDs from ${url}`); break; }
+        } catch (e) {
+          console.warn(`cloudflare catalog ${url} failed: ${e instanceof Error ? e.message : String(e)}`);
+        }
+      }
+      return out;
+    }
+
+    if (needsCatalog.length > 0) {
+      const [porkbunCat, cloudflareCat] = await Promise.all([fetchPorkbunCatalog(), fetchCloudflareCatalog()]);
+      for (const tld of needsCatalog) {
+        // Primary: Porkbun (has reg+renew+transfer).
+        const pb = porkbunCat.get(tld);
+        if (pb) {
+          allPrices.push({ registrar: "Porkbun", tld, reg_price: pb.reg, renew_price: pb.renew, transfer_price: pb.transfer });
+          continue;
+        }
+        // Backup: Cloudflare at-cost (flat: reg == renew, no transfer figure).
+        const cf = cloudflareCat.get(tld);
+        if (cf) {
+          allPrices.push({ registrar: "Cloudflare", tld, reg_price: cf, renew_price: cf, transfer_price: null });
+        }
+        // else: neither source had it — leave supported=false (honest "Check price").
+      }
+      console.log(`catalog gap-fill: ${needsCatalog.length} TLDs needed, ${allPrices.length} total prices after catalog`);
+    }
+
     // Upsert prices into database
+
     let upserted = 0;
     for (const p of allPrices) {
       const { error } = await supabase
