@@ -324,7 +324,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
         return updated;
       })
     );
-  }, []);
+  }, [cacheResult]);
 
   const hasQuery = query.trim().length > 0;
 
