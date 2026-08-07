@@ -186,18 +186,27 @@ async function checkDnsDoH(domain: string, signal?: AbortSignal): Promise<DnsSta
   const ctl = new AbortController();
   const sig = signal ? AbortSignal.any([signal, ctl.signal]) : ctl.signal;
 
-  const primary = dohProbe(DOH_ENDPOINTS[0], domain, 2000, sig);
-  const hedge = sleep(400).then(() => dohProbe(DOH_ENDPOINTS[1], domain, 2000, sig));
+  // Primary fires immediately; every other resolver is staggered by
+  // DOH_HEDGE_DELAY_MS so the common (fast primary) case costs nothing extra.
+  const probes = DOH_ENDPOINTS.map((endpoint, i) =>
+    i === 0
+      ? dohProbe(endpoint, domain, 2000, sig)
+      : sleep(DOH_HEDGE_DELAY_MS).then(() => dohProbe(endpoint, domain, 2000, sig))
+  );
 
   const decisive = (p: Promise<DnsState>) =>
     p.then((s) => (s === "error" ? PENDING_FOREVER<DnsState>() : s));
 
   try {
     return await Promise.race([
-      decisive(primary),
-      decisive(hedge),
-      Promise.all([primary, hedge]).then(([a, b]) => (a !== "error" ? a : b)),
+      // First decisive (non-error) answer wins — an "error" from one resolver
+      // can never beat a real answer from another.
+      ...probes.map(decisive),
+      // All resolvers errored (or all settled as errors): fall back to the
+      // first non-error state if any, else "error".
+      Promise.all(probes).then((states) => states.find((s) => s !== "error") ?? "error"),
     ]);
+
   } finally {
     ctl.abort();
   }
