@@ -234,7 +234,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
           prev.map((r) => {
             const info = resp.results.get(r.domain);
             if (info) {
-              return {
+              const updated = {
                 ...r,
                 available: info.available,
                 checking: false,
@@ -251,6 +251,8 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 listingUrl: info.listingUrl,
                 reachFailed: false,
               };
+              cacheResult(updated);
+              return updated;
             }
             // Whole batch failed to reach the backend → stop the spinner and offer
             // Retry instead of leaving the row checking forever (503 case).
