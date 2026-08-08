@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/domain-check-skills-mcp?color=6d28d9&label=npm&logo=npm)](https://www.npmjs.com/package/domain-check-skills-mcp)
 [![npm downloads](https://img.shields.io/npm/dm/domain-check-skills-mcp?color=10b981&label=downloads)](https://www.npmjs.com/package/domain-check-skills-mcp)
-[![license MIT](https://img.shields.io/badge/license-MIT-2563eb)](https://github.com/seomarlboro/domain-check-skills)
+[![license MIT](https://img.shields.io/badge/license-MIT-2563eb)](https://github.com/seomarlboro/digmyname/blob/main/LICENSE)
 ![MCP compatible](https://img.shields.io/badge/MCP-compatible-7c3aed)
 ![free, no API key](https://img.shields.io/badge/free-no%20API%20key-16a34a)
 
