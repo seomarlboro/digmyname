@@ -20,7 +20,7 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://api.digmyname.com/functions/v1/public-api";
 
-const VERSION = "1.2.0";
+const VERSION = "1.2.6";
 const USER_AGENT = `domain-check-skills-mcp/${VERSION} (+https://digmyname.com/mcp)`;
 const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
 const PRICING_TTL_MS = 6 * 60 * 60 * 1000;
@@ -213,8 +213,8 @@ function registerTool(
 
 registerTool(
   "check_domain",
-  "Check whether a specific domain (e.g. acme.io) is available. Returns cheapest registrar, buy link, and registration year when taken.",
-  { domain: z.string().describe("Fully-qualified domain, e.g. acme.io") },
+  "Check if ONE specific domain (e.g. acme.io) is registrable right now. Use for a single fully-qualified name; to test one word across many extensions, use search_domains instead. Returns an availability verdict, the cheapest registrar and its buy link, the first-year price, and \u2014 for taken names \u2014 the registration year. Availability is cross-checked against three independent signals (RDAP, DNS-over-HTTPS, Fastly Domain Research); when they disagree or a zone has no reliable RDAP (e.g. .co), the verdict comes back as uncertain rather than guessed \u2014 treat uncertain as 'unknown, NOT available', and note that price may be absent for such names.",
+  { domain: z.string().describe("A single fully-qualified domain including its TLD, e.g. 'acme.io'. URLs and 'www.' prefixes are stripped automatically. Not a bare word \u2014 use search_domains to test a word across multiple TLDs.") },
   async ({ domain }) => {
     const clean = normalizeDomain(domain);
     const check = await api<{ result: DomainResult }>(
@@ -238,13 +238,13 @@ registerTool(
 
 registerTool(
   "search_domains",
-  "Check one name across many TLDs at once. Returns availability, cheapest price, buy link and registration year (for taken domains) for each.",
+  "Check ONE name across MANY TLDs in a single call (e.g. 'acme' \u2192 com, io, ai \u2026). Use when comparing extensions for the same word; for a single known domain use check_domain instead. Results are grouped AVAILABLE / TAKEN / UNKNOWN, each carrying cheapest price, buy link, and (for taken names) registration year. Names whose availability cannot be confirmed appear under UNKNOWN and must NOT be treated as available (honest 'unverified' state, never a guess).",
   {
-    query: z.string().describe("Name without TLD, e.g. acme"),
+    query: z.string().describe("The name WITHOUT any TLD, e.g. 'acme' (not 'acme.com'). This single word is tested against each TLD in the tlds list."),
     tlds: z
       .string()
       .optional()
-      .describe("Comma-separated TLDs, e.g. com,io,ai. Defaults to a curated set of 12."),
+      .describe("Optional comma-separated TLDs without dots, e.g. 'com,io,ai'. Omit to use a curated default set of 12 popular TLDs. Whitespace is ignored."),
   },
   async ({ query, tlds }) => {
     const qs = new URLSearchParams({ q: query.trim().toLowerCase() });
@@ -290,8 +290,8 @@ registerTool(
 
 registerTool(
   "compare_registrars",
-  "Compare registrar registration and renewal prices for a TLD (e.g. com, io, ai).",
-  { tld: z.string().describe("TLD without the dot, e.g. com") },
+  "Compare what 6 registrars (Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, OVHcloud) charge for a given TLD \u2014 first-year registration, renewal, and 3-year total \u2014 exposing the renewal traps that cheap first-year promos hide. Use for pricing a TLD you already intend to buy; this does NOT check whether a specific domain is free (use check_domain for that). Returns per-registrar rows with buy links, or a notice if no fresh cached pricing exists for that TLD.",
+  { tld: z.string().describe("A single TLD WITHOUT the leading dot, e.g. 'com', 'io', 'ai'. A leading dot is stripped if present.") },
   async ({ tld }) => {
     const data = await api<{
       tld: string;
@@ -323,8 +323,8 @@ registerTool(
 
 registerTool(
   "get_domain_age",
-  "Return the registration (creation) year and expiration date for a taken domain using RDAP.",
-  { domain: z.string().describe("Fully-qualified domain, e.g. acme.com") },
+  "Return the registration (creation) year and expiration date of a TAKEN domain, via RDAP. Use to gauge how long a name has been held or when it may expire; it does NOT report availability (use check_domain for that). Returns a 'could not determine' notice for names with no RDAP creation record (some ccTLDs, e.g. .co).",
+  { domain: z.string().describe("A fully-qualified domain including its TLD, e.g. 'acme.com'. Meaningful only for taken/registered domains; available names have no registration date.") },
   async ({ domain }) => {
     const clean = normalizeDomain(domain);
     const data = await api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`);
