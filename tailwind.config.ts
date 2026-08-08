@@ -104,6 +104,7 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
       borderRadius: {
         sm: "calc(var(--radius) - 4px)",
         md: "calc(var(--radius) - 2px)",
@@ -112,7 +113,6 @@ export default {
         "2xl": "1.5rem",    // cards
         "3xl": "2rem",      // hero blocks
         "4xl": "2.75rem",
-      },
       },
       keyframes: {
         "accordion-down": {
