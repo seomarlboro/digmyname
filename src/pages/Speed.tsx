@@ -4,7 +4,7 @@ import { Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
 import { LottieAward } from "@/components/LottieAward";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section, CalloutBlock } from "@/components/PageKit";
 import { StopwatchIcon, KeyboardIcon, BoltIcon } from "@/components/StatIcons";
 import LiveBenchmark from "@/components/LiveBenchmark";
 
