@@ -513,10 +513,12 @@ Deno.serve(async (req) => {
       const tld = validateTld(url.searchParams.get("tld") || "");
       if (!tld) return json({ error: "invalid_tld" }, 400, rlHeaders);
       const supa = createClient(SUPABASE_URL, ANON_KEY);
+      const registrarsFreshCutoff = new Date(Date.now() - STALE_PRICE_MAX_DAYS * 24 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supa
         .from("registrar_prices")
         .select("registrar, reg_price, renew_price, transfer_price, promo_code, affiliate_url, whois_privacy")
         .eq("supported", true)
+        .gte("updated_at", registrarsFreshCutoff)
         .eq("tld", tld)
         .order("reg_price", { ascending: true });
       if (error) return json({ error: "upstream_error" }, 502, rlHeaders);
