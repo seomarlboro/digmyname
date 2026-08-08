@@ -17,7 +17,7 @@ import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SearchIcon, ShieldIcon, ScaleIcon } from "@/components/StatIcons";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section, FaqList, CalloutBlock } from "@/components/PageKit";
 
 
 const sources = [
@@ -305,37 +305,21 @@ const HowItWorks = () => {
 
         {/* FAQ */}
         <Section title="Frequently asked">
-          <dl className="space-y-4">
-            {faqs.map((f) => (
-              <div
-                key={f.q}
-                className="surface-card p-5"
-              >
-                <dt className="text-base font-semibold text-foreground">{f.q}</dt>
-                <dd className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  {f.a}
-                </dd>
-              </div>
-            ))}
-          </dl>
+          <FaqList items={faqs.map((f) => ({ q: f.q, a: f.a }))} />
         </Section>
 
         {/* Developers */}
-        <section className="mt-14">
-          <div className="surface-card flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-xl font-bold tracking-tight text-foreground">
-                For developers & AI agents
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Free, no-auth JSON API — 60 requests / 60 s per IP, no key.
-              </p>
-            </div>
+        <CalloutBlock
+          variant="inline"
+          title="For developers & AI agents"
+          body="Free, no-auth JSON API — 60 requests / 60 s per IP, no key."
+          action={
             <Button asChild variant="outline" className="shrink-0">
               <Link to="/api">Read the API docs →</Link>
             </Button>
-          </div>
-        </section>
+          }
+        />
+
 
 
         <Section

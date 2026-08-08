@@ -4,7 +4,7 @@ import { Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
 import { LottieAward } from "@/components/LottieAward";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section, CalloutBlock } from "@/components/PageKit";
 import { StopwatchIcon, KeyboardIcon, BoltIcon } from "@/components/StatIcons";
 import LiveBenchmark from "@/components/LiveBenchmark";
 
@@ -119,24 +119,27 @@ const Speed = () => {
 
 
         {/* Claim */}
-        <section className="surface-card surface-gradient-15 mt-6 flex flex-col items-stretch gap-6 p-5 sm:p-8 md:flex-row md:flex-wrap md:items-center md:justify-between">
-          <div className="flex flex-1 items-center gap-4 sm:gap-5 min-w-0">
-            <LottieAward className="h-16 w-16 shrink-0 sm:h-20 sm:w-20" />
-            <div className="min-w-0 flex-1">
-              <h2 className="section-title">Beat our number, take the crown</h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-lg">
-                Show us a faster public lookup and we'll feature your time here with full credit and a link back.
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+        <CalloutBlock
+          variant="accent"
+          className="!mt-6"
+          icon={() => <LottieAward className="h-full w-full" />}
+          title="Beat our number, take the crown"
+          body={
+            <>
+              Show us a faster public lookup and we'll feature your time here with full credit and a link back.
+              <span className="mt-2 block">
                 As of August 2026: ~370 ms typical full check from our single datacenter. These are everyday
                 numbers, not a lab result — the stopwatch on your screen is the real proof, and it keeps us honest.
-              </p>
-            </div>
-          </div>
-          <Button asChild variant="gradient" size="lg" className="w-full shrink-0 text-lg font-bold text-black md:w-auto [&_*]:text-black">
-            <Link to="/">Run the timer</Link>
-          </Button>
-        </section>
+              </span>
+            </>
+          }
+          action={
+            <Button asChild variant="gradient" size="lg" className="w-full shrink-0 text-lg font-bold text-black md:w-auto [&_*]:text-black">
+              <Link to="/">Run the timer</Link>
+            </Button>
+          }
+        />
+
 
 
         {/* What the timer includes */}
