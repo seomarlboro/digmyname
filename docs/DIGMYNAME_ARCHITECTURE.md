@@ -148,6 +148,14 @@ A Refero-referenced design-system pass ran across all non-homepage pages, plus a
 
 Deliberately left bespoke (primitives didn't fit): HowItWorks comparison matrix, Speed benchmark bar grid, Pricing detailed per-registrar table.
 
+### Award-tier visual redesign (IN PROGRESS — Stages A/B/C landed in main, not yet deployed to prod)
+
+**Status (2026-08-08):** Owner deploys the frontend manually, so these are in `main` but NOT yet on prod.
+- **A+B** — commit `c5e4d58`: activated the squircle radius scale (fixed `borderRadius` mis-nested inside `colors` in tailwind.config — it was inert; `rounded-2xl` now 24px etc.); added `.mint-glow`/`.glass` utilities; removed DataTable row-divider lines + softened Stat/header dividers (Linear discipline, no heavy lines); bigger section rhythm (`mt-16 sm:mt-24`); button H-padding `px-5/6/8` + new `mint`/`ghost-mint` variants + at-rest mint-glow on `gradient`.
+- **C** — this commit: dark-mode glass on card primitives (`.surface-card`/`-lg`/`.bento` → translucent + `backdrop-blur(12px)` + luminous top edge; light mode stays solid; live-search cards untouched — DomainCard uses `.card-hover`, not these); `CalloutBlock` accent gains a large borderless `iconVariant="hero"` slot + section-title → restores the big animated `LottieAward` on Speed (it had been crammed into a 24px chip).
+
+Resolved (the three pre-stage-A questions): large radius first (real superellipse deferred to 1-2 key blocks); A+B merged into one build; reference set kept as-is.
+
 ### Next major track: award-tier visual redesign (PLANNED, not started)
 
 Owner wants a genuine visual upgrade ("цукерка" / Awwwards-tier), not just the structural refactor above. The design-system unification moved structure but not enough aesthetics; owner reviewed it and wanted more visual impact. A full plan exists (owner's private DIGMYNAME_REDESIGN_PLAN.md). Reference-lock from Refero PRO: PRIMARY = Hyperliquid (deep-dark + mint accent, mint-glow elevation, our near-brand done at A+ level); DETAILS from Dimension (glass/backdrop-blur cards, large superellipse radii 24-42px "like Apple", elevation via blur not shadows); ATMOSPHERE from Active Theory (immersive award moody-dark). REJECT: serif headings, Hyperliquid's emerald canvas, fake 3D, averaging into generic. KEEP our brand: Sora font, violet-tinted dark canvas, mint→violet aurora — but make mint the lead accent and add discipline.
