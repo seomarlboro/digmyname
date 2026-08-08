@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getRegistrarColor } from "@/lib/registrarColors";
 import { NetworkIcon, StoreIcon, CertificateIcon } from "@/components/StatIcons";
-import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
+import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid, DataTable } from "@/components/PageKit";
 import { cn } from "@/lib/utils";
 
 interface RegistrarPrice {
@@ -302,59 +302,62 @@ const Pricing = () => {
               {standard.length === 0 ? (
                 <NoMatches query={query} />
               ) : (
-              <div className="surface-card-lg overflow-x-auto">
-              <table className="w-full min-w-[820px] text-left">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Domain</th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest register</th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest renew</th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Cheapest transfer</th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                      Best 3-year value
-                      <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-muted-foreground">
-                        reg + 2 renewals
-                      </span>
-                    </th>
-                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">WHOIS Privacy</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {standard.map((s) => {
-                    const reg = cheapestRegister(s.prices);
-                    const renew = cheapestRenew(s.prices);
-                    const transfer = cheapestTransfer(s.prices);
-                    const best3 = bestThreeYear(s.prices);
-                    return (
-                      <tr key={s.tld} className="border-b border-border/60 transition-colors last:border-0 hover:bg-muted/10">
-                        <td className="px-5 py-5">
-                          <span className="font-display text-3xl font-extrabold tracking-tight text-mint">.{s.tld}</span>
-                        </td>
-                        <td className="px-5 py-5 align-middle">
-                          {reg ? <PriceTag registrar={reg.registrar} price={reg.price} suffix="/yr" promo={reg.promo} /> : <NaCell />}
-                        </td>
-                        <td className="px-5 py-5 align-middle">
-                          {renew ? <PriceTag registrar={renew.registrar} price={renew.price} suffix="/yr" /> : <NaCell />}
-                        </td>
-                        <td className="px-5 py-5 align-middle">
-                          {transfer ? <PriceTag registrar={transfer.registrar} price={transfer.price} suffix="/yr" /> : <NaCell />}
-                        </td>
-                        <td className="px-5 py-5 align-middle">
-                          {best3 ? <PriceTag registrar={best3.registrar} price={best3.price} suffix="/3yr" promo={best3.promo} /> : <NaCell />}
-                        </td>
-                        <td className="px-5 py-5">
-                          {s.prices.some((p) => p.whois_privacy) ? (
-                            <Shield className="h-5 w-5 text-mint" />
-                          ) : (
-                            <ShieldOff className="h-5 w-5 text-muted-foreground" />
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              </div>
+              <DataTable
+                rows={standard}
+                rowKey={(s) => s.tld}
+                minWidth="820px"
+                columns={[
+                  {
+                    header: "Domain",
+                    width: "1.1fr",
+                    cell: (s) => <span className="font-display text-3xl font-extrabold tracking-tight text-mint">.{s.tld}</span>,
+                  },
+                  {
+                    header: "Cheapest register",
+                    width: "1fr",
+                    cell: (s) => {
+                      const reg = cheapestRegister(s.prices);
+                      return reg ? <PriceTag registrar={reg.registrar} price={reg.price} suffix="/yr" promo={reg.promo} /> : <NaCell />;
+                    },
+                  },
+                  {
+                    header: "Cheapest renew",
+                    width: "1fr",
+                    cell: (s) => {
+                      const renew = cheapestRenew(s.prices);
+                      return renew ? <PriceTag registrar={renew.registrar} price={renew.price} suffix="/yr" /> : <NaCell />;
+                    },
+                  },
+                  {
+                    header: "Cheapest transfer",
+                    width: "1fr",
+                    cell: (s) => {
+                      const transfer = cheapestTransfer(s.prices);
+                      return transfer ? <PriceTag registrar={transfer.registrar} price={transfer.price} suffix="/yr" /> : <NaCell />;
+                    },
+                  },
+                  {
+                    header: "Best 3-year value",
+                    sub: "reg + 2 renewals",
+                    width: "1fr",
+                    cell: (s) => {
+                      const best3 = bestThreeYear(s.prices);
+                      return best3 ? <PriceTag registrar={best3.registrar} price={best3.price} suffix="/3yr" promo={best3.promo} /> : <NaCell />;
+                    },
+                  },
+                  {
+                    header: "WHOIS Privacy",
+                    width: "0.7fr",
+                    cell: (s) =>
+                      s.prices.some((p) => p.whois_privacy) ? (
+                        <Shield className="h-5 w-5 text-mint" />
+                      ) : (
+                        <ShieldOff className="h-5 w-5 text-muted-foreground" />
+                      ),
+                  },
+                ]}
+              />
+
               )}
             </Section>
 
