@@ -117,7 +117,7 @@ const LiveBenchmark = () => {
               onClick={run}
               disabled={running}
               variant="gradient"
-              className="shrink-0 text-black [&_*]:text-black"
+              className="shrink-0"
             >
               {running ? "Measuring…" : cold || error ? "Run again" : "Run the benchmark"}
             </Button>
