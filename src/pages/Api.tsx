@@ -155,19 +155,35 @@ print(res.json()["result"]["available"])`,
         </Section>
 
         <Section title="Endpoints" lede="Four routes. That's the whole surface.">
-          <div className="surface-card-lg divide-y divide-border/60">
-            {endpoints.map((e) => (
-              <div key={e.path} className="flex flex-col gap-1 p-5 sm:flex-row sm:items-center sm:gap-4">
-                <Badge variant="outline" className="w-fit font-mono text-[11px]">
-                  {e.method}
-                </Badge>
-                <code className="font-mono text-sm font-semibold text-foreground">{e.path}</code>
-                <span className="text-sm text-muted-foreground sm:ml-auto sm:text-right">
-                  {e.desc}
-                </span>
-              </div>
-            ))}
-          </div>
+          <DataTable
+            columns={[
+              {
+                header: "Method",
+                width: "90px",
+                cell: (e) => (
+                  <Badge variant="outline" className="w-fit font-mono text-[11px]">
+                    {e.method}
+                  </Badge>
+                ),
+              },
+              {
+                header: "Endpoint",
+                width: "1fr",
+                cell: (e) => (
+                  <code className="font-mono text-sm font-semibold text-foreground">{e.path}</code>
+                ),
+              },
+              {
+                header: "Description",
+                width: "1.2fr",
+                numeric: true,
+                cell: (e) => <span className="text-sm text-muted-foreground">{e.desc}</span>,
+              },
+            ]}
+            rows={endpoints}
+            rowKey={(e) => e.path}
+            minWidth="640px"
+          />
         </Section>
 
         <Section
