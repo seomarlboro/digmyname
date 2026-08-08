@@ -2,7 +2,7 @@
 // All availability/pricing logic lives in ../_shared/pipeline.ts so that
 // `public-api` can call it in-process (no edge→edge hop) and share the same
 // warm module-level caches.
-import { checkDomains, isValidDomain } from "../_shared/pipeline.ts";
+import { checkDomains, isValidDomain, type DomainCheckResult } from "../_shared/pipeline.ts";
 
 // Backwards-compat re-exports (tests and any external importers).
 export {
