@@ -17,7 +17,7 @@ import { trackMcpEvent } from "@/lib/trackMcpEvent";
 import WaitlistSection from "@/components/WaitlistSection";
 import { CodeBlock } from "@/components/CodeBlock";
 import { NetworkIcon, StoreIcon, StopwatchIcon, LicenseIcon } from "@/components/StatIcons";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section, CalloutBlock } from "@/components/PageKit";
 
 
 
