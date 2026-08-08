@@ -6,7 +6,7 @@
 ![MCP compatible](https://img.shields.io/badge/MCP-compatible-7c3aed)
 ![free, no API key](https://img.shields.io/badge/free-no%20API%20key-16a34a)
 
-**The fastest domain search — or the second. Dispute it.** Free, honest domain availability checks across 50 TLDs with 6-registrar price comparison.
+**The fastest domain search — or the second. Dispute it.** Free, honest domain availability checks across 50+ TLDs with 6-registrar price comparison.
 
 ## Links
 
@@ -17,7 +17,7 @@
 
 ## What it does
 
-DigMyName checks domain availability in real time across 50 TLDs. Availability is cross-checked against three independent signals — RDAP (resolved via the IANA bootstrap registry), DNS-over-HTTPS (Cloudflare, Google and AdGuard, hedged), and Fastly Domain Research — and when they disagree we show an honest **Unverified** state instead of guessing. Pricing comes from Porkbun's live catalog.
+DigMyName checks domain availability in real time across 50+ TLDs. Availability is cross-checked against three independent signals — RDAP (resolved via the IANA bootstrap registry), DNS-over-HTTPS (Cloudflare, Google and AdGuard, hedged), and Fastly Domain Research — and when they disagree we show an honest **Unverified** state instead of guessing. Pricing comes from Porkbun's live catalog.
 
 On top of availability you get side-by-side registrar pricing for 6 registrars, including the renewal traps that first-year promo prices hide (a $1 registration that renews at $61 is not a deal). Everything is also exposed through a free, no-auth JSON API for agents, plus an MCP server so any LLM — Claude, Cursor, Windsurf, Continue, Zed — can check domains directly.
 

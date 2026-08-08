@@ -102,11 +102,11 @@ const Mcp = () => {
         <title>MCP Server, Claude Skill & Custom GPT — DigMyName</title>
         <meta
           name="description"
-          content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50 TLDs."
+          content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs."
         />
         <link rel="canonical" href="https://digmyname.com/mcp" />
         <meta property="og:title" content="Domain Check Skills — MCP / Claude Skill / Custom GPT" />
-        <meta property="og:description" content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50 TLDs." />
+        <meta property="og:description" content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs." />
         <meta property="og:url" content="https://digmyname.com/mcp" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -121,7 +121,7 @@ const Mcp = () => {
           downloadUrl: NPM_URL,
           codeRepository: GITHUB_URL,
           license: "https://opensource.org/licenses/MIT",
-          description: "The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50 TLDs.",
+          description: "The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs.",
         })}</script>
       </Helmet>
 
@@ -197,7 +197,7 @@ const Mcp = () => {
             }
           >
             <StatGrid>
-              <Stat value="50" label="TLDs covered" accent="mint" icon={NetworkIcon} />
+              <Stat value="50+" label="TLDs covered" accent="mint" icon={NetworkIcon} />
               <Stat value="6" label="Registrars compared" accent="violet" icon={StoreIcon} />
               <Stat value="~170ms" label="Typical response" icon={StopwatchIcon} />
               <Stat value="MIT" label="Open source" icon={LicenseIcon} />

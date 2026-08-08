@@ -24,6 +24,11 @@ export const TLD_LIST: TLD[] = [
   { extension: "cloud", regPrice: 8.99, renewPrice: 24.99, features: ["Free SSL", "Trending"] },
   { extension: "software", regPrice: 24.99, renewPrice: 32.99, features: ["Free SSL"] },
   { extension: "systems", regPrice: 19.99, renewPrice: 24.99, features: ["Free SSL"] },
+  { extension: "build", regPrice: 12.99, renewPrice: 19.99, features: ["Free SSL"] },
+  { extension: "run", regPrice: 12.99, renewPrice: 15.99, features: ["Free SSL"] },
+  { extension: "page", regPrice: 8.99, renewPrice: 12.99, features: ["Free SSL", "Instant activation"] },
+  { extension: "link", regPrice: 9.99, renewPrice: 12.99, features: ["Free SSL"] },
+  { extension: "tools", regPrice: 19.99, renewPrice: 24.99, features: ["Free SSL"] },
   // Startup / Business
   { extension: "co", regPrice: 11.99, renewPrice: 25.99, features: ["Free SSL", "Instant activation"] },
   { extension: "agency", regPrice: 6.99, renewPrice: 24.99, features: ["Free SSL"] },

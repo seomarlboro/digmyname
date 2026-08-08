@@ -114,7 +114,7 @@ const faqs = [
   },
   {
     q: "Do you favour a particular registrar?",
-    a: "No. The Pricing page compares 6 registrars across 50 TLDs and surfaces the best 3-year total cost — including renewal traps. Buy links go to whichever registrar you choose.",
+    a: "No. The Pricing page compares 6 registrars across 50+ TLDs and surfaces the best 3-year total cost — including renewal traps. Buy links go to whichever registrar you choose.",
   },
   {
     q: "Is DigMyName free?",
