@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getRegistrarColor } from "@/lib/registrarColors";
 import { NetworkIcon, StoreIcon, CertificateIcon } from "@/components/StatIcons";
-import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid } from "@/components/PageKit";
+import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid, DataTable } from "@/components/PageKit";
 import { cn } from "@/lib/utils";
 
 interface RegistrarPrice {
