@@ -123,6 +123,7 @@ const Speed = () => {
           variant="accent"
           className="!mt-6"
           icon={() => <LottieAward className="h-full w-full" />}
+          iconVariant="hero"
           title="Beat our number, take the crown"
           body={
             <>

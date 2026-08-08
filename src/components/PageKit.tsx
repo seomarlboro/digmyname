@@ -426,6 +426,7 @@ export function DataTable<Row>({
 export const CalloutBlock = ({
   variant = "inline",
   icon: Icon,
+  iconVariant = "chip",
   eyebrow,
   title,
   body,
@@ -434,6 +435,7 @@ export const CalloutBlock = ({
 }: {
   variant?: "inline" | "accent" | "centered";
   icon?: any;
+  iconVariant?: "chip" | "hero";
   eyebrow?: ReactNode;
   title: ReactNode;
   body?: ReactNode;
@@ -456,20 +458,28 @@ export const CalloutBlock = ({
   }
 
   if (variant === "accent") {
+    const hero = iconVariant === "hero";
     return (
       <div
         className={cn(
-          "mt-16 sm:mt-24 mint-glow-sm flex flex-col items-stretch gap-4 rounded-xl border border-primary/30 bg-primary/10 p-5 sm:flex-row sm:items-center sm:gap-5 sm:p-6",
+          "mt-16 sm:mt-24 mint-glow-sm flex flex-col items-stretch gap-4 rounded-3xl border border-primary/30 bg-primary/10 p-5 sm:flex-row sm:items-center sm:gap-6 sm:p-7",
           className,
         )}
       >
-        {Icon && (
-          <div className="icon-frame h-12 w-12 shrink-0 [&>svg]:h-6 [&>svg]:w-6">
-            <Icon />
-          </div>
-        )}
+        {Icon &&
+          (hero ? (
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center sm:h-24 sm:w-24">
+              <Icon />
+            </div>
+          ) : (
+            <div className="icon-frame h-12 w-12 shrink-0 [&>svg]:h-6 [&>svg]:w-6">
+              <Icon />
+            </div>
+          ))}
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-medium tracking-tight text-primary">{title}</h2>
+          <h2 className={cn("tracking-tight text-primary", hero ? "text-xl font-semibold sm:text-2xl" : "text-lg font-medium")}>
+            {title}
+          </h2>
           {body && <p className="mt-1 text-sm text-muted-foreground">{body}</p>}
         </div>
         {action && <div className="shrink-0">{action}</div>}

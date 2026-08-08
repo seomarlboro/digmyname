@@ -256,12 +256,22 @@
   .surface-card {
     @apply rounded-2xl border border-border bg-card;
   }
-  .dark .surface-card { background-color: hsl(var(--card)); }
+  .dark .surface-card {
+    background-color: hsl(var(--card) / 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 0 hsl(210 25% 94% / 0.06);
+  }
 
   .surface-card-lg {
     @apply rounded-3xl border border-border bg-card;
   }
-  .dark .surface-card-lg { background-color: hsl(var(--card)); }
+  .dark .surface-card-lg {
+    background-color: hsl(var(--card) / 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 0 hsl(210 25% 94% / 0.06);
+  }
 
   .surface-muted {
     @apply rounded-2xl border border-border bg-muted/60;
@@ -274,8 +284,10 @@
            transition-[border-color,transform,box-shadow,background-color] duration-300;
   }
   .dark .bento {
-    background-color: hsl(var(--card));
-    box-shadow: none;
+    background-color: hsl(var(--card) / 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 0 hsl(210 25% 94% / 0.06);
   }
   .bento-hover:hover {
     @apply -translate-y-0.5 border-aurora/40;
