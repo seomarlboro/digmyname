@@ -136,6 +136,24 @@ Functional backlog: essentially drained. Recent session commits (all deployed):
 - 781e09e — check-domains wall-clock budget + partialSink (P2 gap closed).
 - bd2929d — removed dead TLDs code/startup; added freshness guard to /registrars (P3 A+B closed).
 
+### Design-system unification + button system (2026-08-08, DEPLOYED to prod)
+
+A Refero-referenced design-system pass ran across all non-homepage pages, plus a button-system fix. All deployed to prod (bundle index-DN8tOa8R.js).
+
+- `ab45950` — PageKit primitives added: DataTable (grouped/numeric/sticky-blur table), CalloutBlock (inline/accent/centered CTA), FaqList; plus index.css `.table-head` + `.blur-chrome`.
+- `0200a90` — Api endpoints list → DataTable; Mcp footer → CalloutBlock.
+- `e8e42b5` — HowItWorks FAQ → FaqList + "For developers" → CalloutBlock; Speed claim section → CalloutBlock accent.
+- `1fcdf4c` — Pricing "Cheapest per extension" summary table → DataTable.
+- `c7f73b5` — Button system fix: gradient variant now BLACK text on the mint→violet gradient (was white, unreadable on the mint half); base weight font-medium → font-semibold; sizes normalized (sm/default/lg = 36/40/48px); `.btn-gradient` color white → hsl(232 28% 8%). Removed redundant per-page `[&_*]:text-black` hacks (Speed claim, LiveBenchmark).
+
+Deliberately left bespoke (primitives didn't fit): HowItWorks comparison matrix, Speed benchmark bar grid, Pricing detailed per-registrar table.
+
+### Next major track: award-tier visual redesign (PLANNED, not started)
+
+Owner wants a genuine visual upgrade ("цукерка" / Awwwards-tier), not just the structural refactor above. The design-system unification moved structure but not enough aesthetics; owner reviewed it and wanted more visual impact. A full plan exists (owner's private DIGMYNAME_REDESIGN_PLAN.md). Reference-lock from Refero PRO: PRIMARY = Hyperliquid (deep-dark + mint accent, mint-glow elevation, our near-brand done at A+ level); DETAILS from Dimension (glass/backdrop-blur cards, large superellipse radii 24-42px "like Apple", elevation via blur not shadows); ATMOSPHERE from Active Theory (immersive award moody-dark). REJECT: serif headings, Hyperliquid's emerald canvas, fake 3D, averaging into generic. KEEP our brand: Sora font, violet-tinted dark canvas, mint→violet aurora — but make mint the lead accent and add discipline.
+
+Planned stages (each = one build, verify get_diff+tsgo+vitest, preview, then next): A = tokens (squircle radius scale, glass/blur utilities, mint-glow, REMOVE solid row-divider lines per owner — Linear discipline without heavy lines, bigger section rhythm); B = buttons final (horizontal padding = 2× vertical on all sizes per owner; variant hierarchy gradient/mint/ghost-mint = owner's "different colors per context"); C = icon system + glass cards + FIX the Speed-claim Lottie regression (accent variant needs a large borderless icon slot, restore big animated award + section-title); D = Speed benchmark "вау" (animated bars, count-up live timer, mint-glow); E = remaining bespoke sections (comparison matrix, "What we're not", Unverified, Pricing detailed) under the system; F = homepage aurora amplification (optional). SACRED (never touched by redesign): search speed (no heavy effects on the live-search critical path — blur/glow only on static sections), all honesty rules (redesign amplifies honesty, never hides it), cross-surface consistency (redesign changes zero numbers/claims), backend/edge/API/MCP untouched. Open questions for owner before stage A: real superellipse vs large radius (recommend large radius first, superellipse on 1-2 key blocks); merge A+B or separate; is this reference set right or explore more.
+
 Open (owner decides, all low priority):
 - Legacy Domainr naming vs Fastly transport — intentionally left (pure cosmetic, not user-leaked, regression risk > benefit).
 - npm package.json description still has unhedged "~170ms/fastest" — defer to next content MCP bump.
