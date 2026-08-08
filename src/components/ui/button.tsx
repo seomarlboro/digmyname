@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold ring-offset-background transition-[color,background-color,box-shadow,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -15,12 +15,14 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        gradient: "btn-gradient hover:opacity-90 hover:-translate-y-0.5",
+        gradient: "btn-gradient mint-glow-sm hover:opacity-90 hover:-translate-y-0.5",
+        mint: "bg-mint text-[hsl(232_28%_8%)] mint-glow-sm hover:bg-mint/90 hover:-translate-y-0.5",
+        "ghost-mint": "border border-mint/30 bg-transparent text-mint hover:bg-mint/10",
       },
       size: {
-        default: "h-10 px-5 py-2",
-        sm: "h-9 rounded-xl px-4",
-        lg: "h-12 rounded-xl px-6",
+        default: "h-10 px-6 py-2",
+        sm: "h-9 rounded-xl px-5",
+        lg: "h-12 rounded-xl px-8",
         icon: "h-10 w-10",
       },
     },
