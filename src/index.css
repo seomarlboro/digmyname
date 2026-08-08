@@ -493,7 +493,15 @@
   }
 
 
+  .table-head {
+    @apply text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground;
+  }
+
+  .blur-chrome {
+    @apply bg-background/85 backdrop-blur-xl;
+  }
 }
+
 
 /* ============================================================
    Hero animated background — fixed full-viewport

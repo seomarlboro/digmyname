@@ -318,3 +318,198 @@ export const FeatureCard = ({
   </As>
 );
 
+
+/* ── DataTable ──────────────────────────────────────────
+ * The single table primitive for every info page. One card shell,
+ * one uppercase header row, optional grouped section-dividers,
+ * optional per-row "winner" highlight, mono numeric cells, optional
+ * sticky header. Replaces every hand-rolled <table> across the pages. */
+
+export interface DataColumn<Row> {
+  /** Column header label. */
+  header: ReactNode;
+  /** Cell renderer for this column. */
+  cell: (row: Row) => ReactNode;
+  /** Optional sub-label shown under the header (e.g. "reg + 2 renewals"). */
+  sub?: ReactNode;
+  /** Right-align this column (for numeric columns). */
+  numeric?: boolean;
+  /** Explicit grid track (e.g. "1.1fr" or "140px"). Defaults to "1fr". */
+  width?: string;
+}
+
+export interface DataRowGroup {
+  /** Group label rendered as a section-divider bar above its rows. */
+  label: ReactNode;
+  /** Index in the flat rows array where this group starts. */
+  startIndex: number;
+}
+
+export function DataTable<Row>({
+  columns,
+  rows,
+  groups,
+  rowKey,
+  stickyHeader = false,
+  className,
+  minWidth = "720px",
+}: {
+  columns: DataColumn<Row>[];
+  rows: Row[];
+  /** Optional grouped section headers, each marking where a group starts. */
+  groups?: DataRowGroup[];
+  /** Stable key extractor per row. */
+  rowKey: (row: Row, i: number) => string;
+  stickyHeader?: boolean;
+  className?: string;
+  minWidth?: string;
+}) {
+  const template = columns.map((c) => c.width ?? "1fr").join(" ");
+  const groupAt = new Map<number, ReactNode>();
+  (groups ?? []).forEach((g) => groupAt.set(g.startIndex, g.label));
+
+  return (
+    <div className={cn("surface-card-lg overflow-x-auto", className)}>
+      <div style={{ minWidth }}>
+        <div
+          className={cn(
+            "grid border-b border-border px-5 py-4",
+            stickyHeader && "sticky top-0 z-10 blur-chrome",
+          )}
+          style={{ gridTemplateColumns: template }}
+        >
+          {columns.map((c, i) => (
+            <div key={i} className={cn("table-head", c.numeric && "text-right")}>
+              {c.header}
+              {c.sub && (
+                <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-muted-foreground">
+                  {c.sub}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {rows.map((row, ri) => (
+          <div key={rowKey(row, ri)}>
+            {groupAt.has(ri) && (
+              <div className="border-b border-border/60 bg-muted/40 px-5 py-2">
+                <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-secondary-foreground">
+                  {groupAt.get(ri)}
+                </span>
+              </div>
+            )}
+            <div
+              className="grid items-center border-b border-border/60 px-5 py-5 transition-colors last:border-0 hover:bg-muted/10"
+              style={{ gridTemplateColumns: template }}
+            >
+              {columns.map((c, ci) => (
+                <div key={ci} className={cn("min-w-0", c.numeric && "text-right")}>
+                  {c.cell(row)}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── CalloutBlock ───────────────────────────────────────
+ * The single CTA primitive. Three variants:
+ *   inline   — left text + right action, on a plain card
+ *   accent   — icon chip + text + filled action, on a tinted card
+ *   centered — eyebrow pill + title + body + action, centered
+ * Replaces every hand-rolled footer/CTA/claim section. */
+
+export const CalloutBlock = ({
+  variant = "inline",
+  icon: Icon,
+  eyebrow,
+  title,
+  body,
+  action,
+  className,
+}: {
+  variant?: "inline" | "accent" | "centered";
+  icon?: any;
+  eyebrow?: ReactNode;
+  title: ReactNode;
+  body?: ReactNode;
+  action?: ReactNode;
+  className?: string;
+}) => {
+  if (variant === "centered") {
+    return (
+      <div className={cn("surface-card mt-14 p-10 text-center", className)}>
+        {eyebrow && (
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+            {eyebrow}
+          </div>
+        )}
+        <h2 className="section-title">{title}</h2>
+        {body && <p className="mx-auto mt-2 mb-7 max-w-md text-muted-foreground">{body}</p>}
+        {action}
+      </div>
+    );
+  }
+
+  if (variant === "accent") {
+    return (
+      <div
+        className={cn(
+          "mt-14 flex flex-col items-stretch gap-4 rounded-xl border border-primary/30 bg-primary/10 p-5 sm:flex-row sm:items-center sm:gap-5 sm:p-6",
+          className,
+        )}
+      >
+        {Icon && (
+          <div className="icon-frame h-12 w-12 shrink-0 [&>svg]:h-6 [&>svg]:w-6">
+            <Icon />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h2 className="text-lg font-medium tracking-tight text-primary">{title}</h2>
+          {body && <p className="mt-1 text-sm text-muted-foreground">{body}</p>}
+        </div>
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "surface-card mt-14 flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between",
+        className,
+      )}
+    >
+      <div className="min-w-0">
+        <h2 className="text-lg font-medium tracking-tight text-foreground">{title}</h2>
+        {body && <p className="mt-1 text-sm text-muted-foreground">{body}</p>}
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
+    </div>
+  );
+};
+
+/* ── FaqList ────────────────────────────────────────────
+ * The single definition-list primitive: question/answer pairs
+ * (or generic term/detail). Replaces hand-rolled <dl> and <ul> blocks. */
+
+export const FaqList = ({
+  items,
+  className,
+}: {
+  items: { q: ReactNode; a: ReactNode }[];
+  className?: string;
+}) => (
+  <dl className={cn("space-y-4", className)}>
+    {items.map((item, i) => (
+      <div key={i} className="surface-card p-5">
+        <dt className="text-base font-medium text-foreground">{item.q}</dt>
+        <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.a}</dd>
+      </div>
+    ))}
+  </dl>
+);
