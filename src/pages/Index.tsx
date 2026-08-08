@@ -38,7 +38,7 @@ const Index = () => {
           },
           featureList: [
             "Real-time domain availability checks with ~170 ms first answer",
-            "Four-source verification with an honest Unverified state",
+            "Three-signal verification with an honest Unverified state",
             "Registrar price comparison including renewal traps",
             "AI-powered alternative name suggestions",
             "Free no-auth JSON API for agents and developers",
