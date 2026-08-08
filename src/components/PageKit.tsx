@@ -48,7 +48,7 @@ export const PageHeader = ({
   align?: "left" | "center";
   plain?: boolean;
 }) => (
-  <section className="mb-8 py-2 sm:mb-10">
+  <section className="mb-10 py-2 sm:mb-14">
     <div
       className={cn(
         "relative",
@@ -91,7 +91,7 @@ export const Section = ({
   className?: string;
   align?: "center";
 }) => (
-  <section className={cn("mt-14", className)}>
+  <section className={cn("mt-16 sm:mt-24", className)}>
     {title && (
       <div
         className={cn(
@@ -180,7 +180,7 @@ export const StatGrid = ({
 }) => (
   <div
     className={cn(
-      "surface-card mt-8 grid overflow-hidden sm:mt-10",
+      "surface-card mint-glow-sm mt-8 grid overflow-hidden sm:mt-10",
       cols === 2
         ? "grid-cols-1 sm:grid-cols-2"
         : cols === 3
@@ -205,7 +205,7 @@ export const Stat = ({
   accent?: "mint" | "violet" | "warning";
   icon?: (props: { className?: string }) => ReactNode;
 }) => (
-  <div className="flex min-w-0 items-center gap-4 border-b border-border/60 px-5 py-5 transition-colors last:border-b-0 hover:bg-muted/10 sm:gap-5 sm:border-b-0 sm:border-r sm:px-7 sm:py-8 sm:last:border-r-0 lg:px-10 lg:py-10">
+  <div className="flex min-w-0 items-center gap-4 border-b border-border/40 px-5 py-5 transition-colors last:border-b-0 hover:bg-muted/10 sm:gap-5 sm:border-b-0 sm:border-r sm:border-border/40 sm:px-7 sm:py-8 sm:last:border-r-0 lg:px-10 lg:py-10">
     {Icon && (
       <Icon
         className={cn(
@@ -373,7 +373,7 @@ export function DataTable<Row>({
       <div style={{ minWidth }}>
         <div
           className={cn(
-            "grid border-b border-border px-5 py-4",
+            "grid border-b border-border/50 px-5 py-4",
             stickyHeader && "sticky top-0 z-10 blur-chrome",
           )}
           style={{ gridTemplateColumns: template }}
@@ -393,14 +393,14 @@ export function DataTable<Row>({
         {rows.map((row, ri) => (
           <div key={rowKey(row, ri)}>
             {groupAt.has(ri) && (
-              <div className="border-b border-border/60 bg-muted/40 px-5 py-2">
+              <div className="bg-muted/30 px-5 py-2.5">
                 <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-secondary-foreground">
                   {groupAt.get(ri)}
                 </span>
               </div>
             )}
             <div
-              className="grid items-center border-b border-border/60 px-5 py-5 transition-colors last:border-0 hover:bg-muted/10"
+              className="grid items-center px-5 py-5 transition-colors hover:bg-muted/20"
               style={{ gridTemplateColumns: template }}
             >
               {columns.map((c, ci) => (
@@ -442,7 +442,7 @@ export const CalloutBlock = ({
 }) => {
   if (variant === "centered") {
     return (
-      <div className={cn("surface-card mt-14 p-10 text-center", className)}>
+      <div className={cn("surface-card mt-16 sm:mt-24 p-10 text-center", className)}>
         {eyebrow && (
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
             {eyebrow}
@@ -459,7 +459,7 @@ export const CalloutBlock = ({
     return (
       <div
         className={cn(
-          "mt-14 flex flex-col items-stretch gap-4 rounded-xl border border-primary/30 bg-primary/10 p-5 sm:flex-row sm:items-center sm:gap-5 sm:p-6",
+          "mt-16 sm:mt-24 mint-glow-sm flex flex-col items-stretch gap-4 rounded-xl border border-primary/30 bg-primary/10 p-5 sm:flex-row sm:items-center sm:gap-5 sm:p-6",
           className,
         )}
       >
@@ -480,7 +480,7 @@ export const CalloutBlock = ({
   return (
     <div
       className={cn(
-        "surface-card mt-14 flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between",
+        "surface-card mt-16 sm:mt-24 flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between",
         className,
       )}
     >

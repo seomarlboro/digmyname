@@ -501,6 +501,30 @@
   .blur-chrome {
     @apply bg-background/85 backdrop-blur-xl;
   }
+
+  /* Mint-glow elevation — reusable at-rest glow for STATIC surfaces only (never search/results) */
+  .mint-glow    { box-shadow: 0 10px 40px -12px hsl(var(--aurora-mint) / 0.22); }
+  .mint-glow-sm { box-shadow: 0 6px 24px -10px hsl(var(--aurora-mint) / 0.20); }
+  .dark .mint-glow    { box-shadow: 0 14px 60px -12px hsl(var(--aurora-mint) / 0.32); }
+  .dark .mint-glow-sm { box-shadow: 0 8px 34px -12px hsl(var(--aurora-mint) / 0.28); }
+
+  /* Glass surface — DEFINED now for Stage C; do NOT apply to search or result cards */
+  .glass {
+    background-color: hsl(var(--card) / 0.72);
+    border: 1px solid hsl(var(--border) / 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .dark .glass {
+    background-color: hsl(var(--card) / 0.55);
+    border-color: hsl(210 25% 94% / 0.06);
+  }
+  .glass-strong {
+    background-color: hsl(var(--card) / 0.85);
+    border: 1px solid hsl(var(--border) / 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
 }
 
 
