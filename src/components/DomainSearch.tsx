@@ -230,7 +230,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
       // Strategy: the ~10 most popular TLDs are each sent as their OWN request so
       // every card resolves at its own speed (no waiting for the slowest sibling
       // in a batch). Everything else fans out in parallel batches of 20.
-      const BATCH_SIZE = 20;
+      const BATCH_SIZE = 8;
       const TOP_TLDS = ["com", "io", "net", "org", "ai", "co", "app", "dev", "xyz", "me"];
 
       const isTop = (d: string) => {
