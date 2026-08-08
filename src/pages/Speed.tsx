@@ -134,7 +134,7 @@ const Speed = () => {
             </>
           }
           action={
-            <Button asChild variant="gradient" size="lg" className="w-full shrink-0 text-lg font-bold text-black md:w-auto [&_*]:text-black">
+            <Button asChild variant="gradient" size="lg" className="w-full shrink-0 text-lg md:w-auto">ize="lg" className="w-full shrink-0 text-lg font-bold text-black md:w-auto [&_*]:text-black">
               <Link to="/">Run the timer</Link>
             </Button>
           }
