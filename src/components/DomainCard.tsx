@@ -97,7 +97,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
         <div className={`grid border-b border-border px-4 py-4 transition-colors ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
-              {name}.<span className="text-primary">{ext}</span>
+              {name}.<span className="text-mint">{ext}</span>
             </h3>
             <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
           </div>
@@ -115,7 +115,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
           {/* Left slot: domain + reserved badge line (matches resolved layout). */}
           <div className="flex-1 min-w-0 pr-8">
             <h3 className="text-xl font-bold text-foreground">
-              {name}.<span className="text-primary">{ext}</span>
+              {name}.<span className="text-mint">{ext}</span>
             </h3>
             <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
               <Skeleton className="h-5 w-20 rounded-full" />
@@ -146,7 +146,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
         <div className={`grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
-              {name}.<span className="text-primary">{ext}</span>
+              {name}.<span className="text-mint">{ext}</span>
             </h3>
             <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
           </div>
@@ -181,7 +181,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
         <div className={`flex flex-col gap-3 sm:flex-row sm:items-center ${CARD_BODY_MIN}`}>
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <span>{name}.<span className="text-primary">{ext}</span></span>
+              <span>{name}.<span className="text-mint">{ext}</span></span>
               <AlertCircle className="h-4 w-4 text-amber-500" />
             </h3>
             {brandProtected ? (
@@ -225,7 +225,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
         <div className={`grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-foreground">
-              {name}.<span className="text-primary">{ext}</span>
+              {name}.<span className="text-mint">{ext}</span>
             </h3>
             {isBrand && brandChip}
           </div>
@@ -319,7 +319,7 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
           {/* Left: domain + badges */}
           <div className="flex-1 min-w-0 pr-8">
             <h3 className="text-xl font-bold text-foreground">
-              {name}.<span className="text-primary">{ext}</span>
+              {name}.<span className="text-mint">{ext}</span>
             </h3>
             <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
               {isBrand && brandChip}
