@@ -356,6 +356,31 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
 
   const hasQuery = query.trim().length > 0;
 
+  // The exact TLD the user typed (e.g. "xyz" from "asdsdfsdas.xyz"), if any.
+  // That TLD sorts to the very top of each result group so a user searching a
+  // full domain sees their exact match first, not buried under .com/.net.
+  const typedTld = useMemo(() => {
+    const raw = debouncedQuery.toLowerCase().trim();
+    if (!raw.includes(".")) return null;
+    const parts = raw.split(".").filter(Boolean);
+    if (parts.length < 2) return null;
+    const ext = parts.slice(1).join(".");
+    return TLD_RANK[ext] != null ? ext : null;
+  }, [debouncedQuery]);
+
+  // Query-aware ordering: the exact typed TLD first (rank -1), then normal
+  // TLD authority. Still stable — never sorts on available/price/uncertain.
+  const orderResults = useMemo(() => {
+    return (a: DomainResult, b: DomainResult) => {
+      if (typedTld) {
+        const aExact = a.tld.extension === typedTld ? -1 : 0;
+        const bExact = b.tld.extension === typedTld ? -1 : 0;
+        if (aExact !== bExact) return aExact - bExact;
+      }
+      return byTldAuthority(a, b);
+    };
+  }, [typedTld]);
+
   const searchBar = (
     <div className="flex w-full min-w-0 flex-1 items-center gap-0.5 rounded-[100px] border border-white/40 bg-white/25 py-[14px] pl-4 pr-4 sm:pl-5 sm:pr-6 [backdrop-filter:blur(64px)] dark:border-white/10 dark:bg-white/[0.05]">
       <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl">
@@ -511,7 +536,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
             <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
               {results
                 .filter((r) => !r.checking && r.available && !r.uncertain)
-                .sort(byTldAuthority)
+                .sort(orderResults)
                 .map((r) => (
                   <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
                 ))}
@@ -544,7 +569,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && r.uncertain && !r.sldBlocked && !r.provisional)
-                    .sort(byTldAuthority)
+                    .sort(orderResults)
                     .slice(0, 10)
                     .map((r) => (
                       <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
@@ -563,7 +588,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
                   {results
                     .filter((r) => !r.checking && !r.available && (!r.uncertain || r.sldBlocked || r.provisional))
-                    .sort(byTldAuthority)
+                    .sort(orderResults)
                     .slice(0, 10)
                     .map((r) => (
                       <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
