@@ -297,28 +297,26 @@ const Mcp = () => {
           <WaitlistSection />
 
           {/* Footer CTA */}
-          <section className="surface-card mt-14 p-10 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-border text-xs">
-              MIT licensed · Built in Ukraine 🇺🇦
-            </div>
-            <h2 className="section-title">
-              PRs welcome. Stars appreciated.
-            </h2>
-            <p className="text-muted-foreground mb-7 max-w-md mx-auto">
-              Open issues, ship features, or fork it for your own registrar.
-            </p>
-            <Button asChild size="lg" className="gap-2 h-12 px-6 shadow-lg shadow-primary/20">
-              <a
-                href={GITHUB_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackMcpEvent("click", "github_footer")}
-              >
-                <Github className="w-5 h-5" />
-                Star on GitHub
-              </a>
-            </Button>
-          </section>
+          <CalloutBlock
+            variant="centered"
+            eyebrow="MIT licensed · Built in Ukraine 🇺🇦"
+            title="PRs welcome. Stars appreciated."
+            body="Open issues, ship features, or fork it for your own registrar."
+            action={
+              <Button asChild size="lg" className="gap-2 h-12 px-6 shadow-lg shadow-primary/20">
+                <a
+                  href={GITHUB_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackMcpEvent("click", "github_footer")}
+                >
+                  <Github className="w-5 h-5" />
+                  Star on GitHub
+                </a>
+              </Button>
+            }
+          />
+
         </PageMain>
       </div>
     </>
