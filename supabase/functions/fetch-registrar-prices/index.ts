@@ -31,6 +31,7 @@ const TRACKED_TLDS = [
   "com", "net", "org", "info", "biz",
   // Tech
   "io", "ai", "app", "dev", "tech", "digital", "cloud", "code", "software", "systems",
+  "build", "run", "page", "link", "tools",
   // Startup / Business
   "co", "startup", "agency", "company", "ventures", "capital", "inc",
   // Creative
