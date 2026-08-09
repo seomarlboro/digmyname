@@ -39,7 +39,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
 
   return (
     <div>
-      <h2 className="text-lg font-bold text-foreground">Domain Extensions</h2>
+      <h2 className="text-lg font-bold tracking-tight text-foreground">Domain Extensions</h2>
       <p className="mb-3 text-sm text-muted-foreground">Select one or more TLDs</p>
       <div className={`grid gap-2.5 ${mobile ? "grid-cols-3" : "grid-cols-4"}`}>
         {visibleTlds.map((tld) => {
