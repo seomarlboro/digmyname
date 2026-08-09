@@ -250,30 +250,30 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
       <div className="absolute inset-0 -z-10 rounded-[28px] blur-xl opacity-60" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(225 85% 55% / 0.35), hsl(270 80% 58% / 0.3), hsl(30 90% 50% / 0.25), hsl(225 85% 55% / 0.2))" }} />
       <div className="absolute inset-0 -z-10 rounded-[28px] blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(225 85% 55% / 0.25), hsl(270 80% 58% / 0.2))" }} />
 
+      {/* Popovers — rendered as siblings of the bar so their backdrop-blur isn't killed by the bar's own backdrop-filter */}
+      {openFilter && openFilter !== "extensions" && (
+        <div
+          className="absolute z-50 -translate-x-1/2"
+          style={{
+            bottom: "calc(100% + 16px)",
+            left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
+          }}
+        >
+          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-4 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
+            <PopoverContent id={openFilter} />
+          </div>
+        </div>
+      )}
+      {openFilter === "extensions" && (
+        <div className="absolute left-0 right-0 z-50" style={{ bottom: "calc(100% + 16px)" }}>
+          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-4 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
+            <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} />
+          </div>
+        </div>
+      )}
+
       {/* Floating bar */}
       <div className="relative flex items-stretch gap-3 rounded-[28px] border border-transparent bg-white p-3.5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
-        {/* Popovers */}
-        {openFilter && openFilter !== "extensions" && (
-          <div
-            className="absolute z-50 -translate-x-1/2"
-            style={{
-              bottom: "calc(100% + 16px)",
-              left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
-            }}
-          >
-            <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-border bg-card p-4 shadow-2xl dark:border-white/10">
-              <PopoverContent id={openFilter} />
-            </div>
-          </div>
-        )}
-        {openFilter === "extensions" && (
-          <div className="absolute left-0 right-0 z-50" style={{ bottom: "calc(100% + 16px)" }}>
-            <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-border bg-card p-4 shadow-2xl dark:border-white/10">
-              <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} />
-            </div>
-          </div>
-        )}
-
         {filterConfigs.map((f) => (
           <div
             key={f.id}
