@@ -261,14 +261,14 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
               left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
             }}
           >
-            <div className="blur-chrome rounded-xl border border-border p-4 shadow-xl">
+            <div className="max-h-[60vh] overflow-y-auto rounded-2xl border border-border bg-card/92 p-4 shadow-2xl backdrop-blur-2xl dark:border-white/10">
               <PopoverContent id={openFilter} />
             </div>
           </div>
         )}
         {openFilter === "extensions" && (
           <div className="absolute left-0 right-0 z-50" style={{ bottom: "calc(100% + 16px)" }}>
-            <div className="blur-chrome rounded-xl border border-border p-4 shadow-xl">
+            <div className="max-h-[60vh] overflow-y-auto rounded-2xl border border-border bg-card/92 p-4 shadow-2xl backdrop-blur-2xl dark:border-white/10">
               <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} />
             </div>
           </div>
