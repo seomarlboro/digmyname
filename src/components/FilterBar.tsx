@@ -40,7 +40,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
   return (
     <div>
       <h2 className="text-lg font-bold tracking-tight text-foreground">Domain Extensions</h2>
-      <p className="mb-3 text-sm text-muted-foreground">Select one or more TLDs</p>
+      <p className="mb-4 text-sm text-muted-foreground">Select one or more TLDs</p>
       <div className={`grid gap-2.5 ${mobile ? "grid-cols-3" : "grid-cols-4"}`}>
         {visibleTlds.map((tld) => {
           const selected = selectedTlds.has(tld.extension);
@@ -55,7 +55,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
               }`}
             >
               <span className="min-w-0 truncate text-base font-bold tracking-tight text-mint">.{tld.extension}</span>
-              <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground transition-colors group-hover:text-foreground/70">${tld.regPrice}</span>
+              <span className="shrink-0 whitespace-nowrap text-xs text-foreground/70 transition-colors group-hover:text-foreground">${tld.regPrice}</span>
             </div>
           );
         })}
@@ -63,7 +63,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
       {TLD_LIST.length > (mobile ? 8 : INITIAL_TLD_COUNT) && (
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="mt-4 mx-auto flex w-fit items-center gap-1.5 rounded-full border border-mint/25 bg-mint/[0.06] px-4 py-1.5 text-sm font-semibold text-mint transition-all duration-200 hover:border-mint/50 hover:bg-mint/10"
+          className="mt-4 mx-auto flex w-fit items-center gap-1.5 rounded-full border border-violet/30 bg-violet/[0.08] px-4 py-1.5 text-sm font-semibold text-violet transition-all duration-200 hover:border-violet/60 hover:bg-violet/15"
         >
           {showAll ? "Show less" : `Show all ${TLD_LIST.length} extensions`}
         </button>
@@ -76,8 +76,8 @@ const PopoverContent = ({ id }: { id: string }) => {
   if (id === "price") {
     return (
       <div className="w-[250px]">
-        <h3 className="text-sm font-bold text-foreground">Price Range</h3>
-        <p className="mb-4 text-xs text-muted-foreground">Annual registration cost</p>
+        <h3 className="text-lg font-bold tracking-tight text-foreground">Price Range</h3>
+        <p className="mb-4 text-sm text-muted-foreground">Annual registration cost</p>
         <Slider defaultValue={[0, 200]} max={200} step={1} className="mb-3" />
         <div className="flex items-center justify-between">
           <span className="text-base font-bold text-foreground">$0</span>
@@ -90,12 +90,12 @@ const PopoverContent = ({ id }: { id: string }) => {
   if (id === "features") {
     return (
       <div className="w-[220px]">
-        <h3 className="text-sm font-bold text-foreground">Features</h3>
-        <p className="mb-3 text-xs text-muted-foreground">Additional requirements</p>
+        <h3 className="text-lg font-bold tracking-tight text-foreground">Features</h3>
+        <p className="mb-4 text-sm text-muted-foreground">Additional requirements</p>
         <div className="space-y-1">
           {featureOptions.map((f) => (
             <label key={f} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
-              <Checkbox />
+              <Checkbox className="h-5 w-5 rounded-[5px]" />
               <span className="text-sm text-foreground">{f}</span>
             </label>
           ))}
@@ -106,12 +106,12 @@ const PopoverContent = ({ id }: { id: string }) => {
   if (id === "status") {
     return (
       <div className="w-[220px]">
-        <h3 className="text-sm font-bold text-foreground">Status</h3>
-        <p className="mb-3 text-xs text-muted-foreground">Filter by availability</p>
+        <h3 className="text-lg font-bold tracking-tight text-foreground">Status</h3>
+        <p className="mb-4 text-sm text-muted-foreground">Filter by availability</p>
         <div className="space-y-1">
           {statusOptions.map((s) => (
             <label key={s} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
-              <Checkbox />
+              <Checkbox className="h-5 w-5 rounded-full" />
               <span className="text-sm text-foreground">{s}</span>
             </label>
           ))}
@@ -142,12 +142,12 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
 
     {/* Features */}
     <div>
-      <h3 className="text-base font-bold text-foreground">Features</h3>
-      <p className="mb-3 text-sm text-muted-foreground">Additional requirements</p>
+      <h3 className="text-lg font-bold tracking-tight text-foreground">Features</h3>
+      <p className="mb-4 text-sm text-muted-foreground">Additional requirements</p>
       <div className="space-y-1">
         {featureOptions.map((f) => (
           <label key={f} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
-            <Checkbox />
+            <Checkbox className="h-5 w-5 rounded-[5px]" />
             <span className="text-sm text-foreground">{f}</span>
           </label>
         ))}
@@ -156,12 +156,12 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
 
     {/* Status */}
     <div>
-      <h3 className="text-base font-bold text-foreground">Status</h3>
-      <p className="mb-3 text-sm text-muted-foreground">Filter by availability</p>
+      <h3 className="text-lg font-bold tracking-tight text-foreground">Status</h3>
+      <p className="mb-4 text-sm text-muted-foreground">Filter by availability</p>
       <div className="space-y-1">
         {statusOptions.map((s) => (
           <label key={s} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
-            <Checkbox />
+            <Checkbox className="h-5 w-5 rounded-full" />
             <span className="text-sm text-foreground">{s}</span>
           </label>
         ))}
@@ -259,14 +259,14 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
             left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
           }}
         >
-          <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-4 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0.7)] dark:backdrop-blur-2xl">
+          <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0.7)] dark:backdrop-blur-2xl">
             <PopoverContent id={openFilter} />
           </div>
         </div>
       )}
       {openFilter === "extensions" && (
         <div className="absolute left-1/2 z-50 w-[720px] max-w-[92vw] -translate-x-1/2" style={{ bottom: "calc(100% + 16px)" }}>
-          <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-4 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0.7)] dark:backdrop-blur-2xl">
+          <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0,0.7)] dark:backdrop-blur-2xl">
             <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} />
           </div>
         </div>
