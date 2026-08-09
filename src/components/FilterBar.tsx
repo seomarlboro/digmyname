@@ -48,14 +48,14 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
             <div
               key={tld.extension}
               onClick={() => onToggle(tld.extension)}
-              className={`flex flex-1 items-center justify-between gap-1 rounded-xl border border-border/70 dark:border-white/[0.16] px-3 py-2 transition-colors cursor-pointer ${
+              className={`group flex flex-1 items-center justify-between gap-1.5 rounded-xl border px-3 py-2.5 cursor-pointer transition-all duration-200 ease-out active:scale-[0.97] ${
                 selected
-                  ? "bg-mint/15 ring-1 ring-mint/40"
-                  : "bg-muted/20 hover:bg-muted/40 dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"
+                  ? "border-mint/50 bg-mint/15 mint-glow-sm"
+                  : "border-border/70 bg-muted/20 hover:-translate-y-px hover:border-mint/30 hover:bg-muted/40 dark:border-white/[0.16] dark:bg-white/[0.04] dark:hover:border-mint/40 dark:hover:bg-white/[0.08] hover:mint-glow-sm"
               }`}
             >
-              <span className="min-w-0 truncate text-base font-bold text-mint">.{tld.extension}</span>
-              <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">${tld.regPrice}</span>
+              <span className="min-w-0 truncate text-base font-bold tracking-tight text-mint">.{tld.extension}</span>
+              <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground transition-colors group-hover:text-foreground/70">${tld.regPrice}</span>
             </div>
           );
         })}
