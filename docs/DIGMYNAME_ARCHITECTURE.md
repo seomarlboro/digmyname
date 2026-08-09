@@ -148,7 +148,7 @@ A Refero-referenced design-system pass ran across all non-homepage pages, plus a
 
 Deliberately left bespoke (primitives didn't fit): HowItWorks comparison matrix, Speed benchmark bar grid, Pricing detailed per-registrar table.
 
-### Award-tier visual redesign (IN PROGRESS — Stages A–D landed in main, not yet deployed to prod)
+### Award-tier visual redesign (Stages A–F landed in main, not yet deployed to prod)
 
 **Status (2026-08-08):** Owner deploys the frontend manually, so these are in `main` but NOT yet on prod.
 - **A+B** — commit `c5e4d58`: activated the squircle radius scale (fixed `borderRadius` mis-nested inside `colors` in tailwind.config — it was inert; `rounded-2xl` now 24px etc.); added `.mint-glow`/`.glass` utilities; removed DataTable row-divider lines + softened Stat/header dividers (Linear discipline, no heavy lines); bigger section rhythm (`mt-16 sm:mt-24`); button H-padding `px-5/6/8` + new `mint`/`ghost-mint` variants + at-rest mint-glow on `gradient`.
@@ -156,6 +156,9 @@ Deliberately left bespoke (primitives didn't fit): HowItWorks comparison matrix,
 
 - **FilterBar fix** — commit `25514055`: reverted Stage-A over-rounding on the filter pills + TLD capsules (`rounded-xl`), and gave the previously-transparent dropdown panels an opaque `blur-chrome` frosted background (hero aurora had bled through).
 - **D** — this commit: the Speed "Reference numbers" table is now animated — bars grow and the latency + relative-% count up on scroll-into-view (IntersectionObserver, easeOutCubic, staggered ~130ms/row), mint-glow on our bars; `prefers-reduced-motion` shows final values instantly. Numbers/notes/labels unchanged (~170/~47/~70/~370 ms, cold vs cached distinct). Extracted to `src/components/BenchmarkChart.tsx`; LiveBenchmark (real live measurement) untouched. Also folded in 2 minor DomainSearch radius tweaks (search icon slot + view toggle).
+
+- **E** — remaining bespoke sections under the system: HowItWorks comparison matrix (soft dividers + mint-lead DigMyName column) + Unverified highlight (`818b1ccb`); Pricing detailed per-registrar table (soft dividers + mint row-wash on the cheapest registrar) (this commit). Plus the FilterBar full redesign + Apple/Awwwards-tier polish (mint TLD names; glass panel matching the bar via un-nesting so its backdrop-blur works; capsule spring-entrance + hover-lift/mint-glow/press micro-interactions; 720px width; price-overflow fix) across `25514055`→`42c188cd`.
+- **F** — homepage aurora made mint-lead (top-left hero spotlight → mint; stronger mint in the hero-bg gradient) (this commit); kept restrained since the hero was already strong.
 
 Resolved (the three pre-stage-A questions): large radius first (real superellipse deferred to 1-2 key blocks); A+B merged into one build; reference set kept as-is.
 
