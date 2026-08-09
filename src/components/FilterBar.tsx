@@ -54,8 +54,8 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
                   : "bg-muted/20 hover:bg-muted/40 dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"
               }`}
             >
-              <span className={`${mobile ? "text-base" : "text-lg"} font-bold text-mint`}>.{tld.extension}</span>
-              <span className="text-xs text-muted-foreground">${tld.regPrice}</span>
+              <span className="min-w-0 truncate text-base font-bold text-mint">.{tld.extension}</span>
+              <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">${tld.regPrice}</span>
             </div>
           );
         })}
