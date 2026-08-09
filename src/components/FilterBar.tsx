@@ -39,7 +39,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
 
   return (
     <div>
-      <h2 className="text-lg font-bold text-foreground">Domain Extensions</h2>
+      <h2 className="text-lg font-bold tracking-tight text-foreground">Domain Extensions</h2>
       <p className="mb-3 text-sm text-muted-foreground">Select one or more TLDs</p>
       <div className={`grid gap-2.5 ${mobile ? "grid-cols-3" : "grid-cols-4"}`}>
         {visibleTlds.map((tld) => {
@@ -48,14 +48,14 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
             <div
               key={tld.extension}
               onClick={() => onToggle(tld.extension)}
-              className={`flex flex-1 items-center justify-between gap-1 rounded-xl border border-border/70 dark:border-white/[0.16] px-3 py-2 transition-colors cursor-pointer ${
+              className={`group flex flex-1 items-center justify-between gap-1.5 rounded-xl border px-3 py-2.5 cursor-pointer transition-all duration-200 ease-out active:scale-[0.97] ${
                 selected
-                  ? "bg-mint/15 ring-1 ring-mint/40"
-                  : "bg-muted/20 hover:bg-muted/40 dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"
+                  ? "border-mint/50 bg-mint/15 mint-glow-sm"
+                  : "border-border/70 bg-muted/20 hover:-translate-y-px hover:border-mint/30 hover:bg-muted/40 dark:border-white/[0.16] dark:bg-white/[0.04] dark:hover:border-mint/40 dark:hover:bg-white/[0.08] hover:mint-glow-sm"
               }`}
             >
-              <span className="min-w-0 truncate text-base font-bold text-mint">.{tld.extension}</span>
-              <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">${tld.regPrice}</span>
+              <span className="min-w-0 truncate text-base font-bold tracking-tight text-mint">.{tld.extension}</span>
+              <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground transition-colors group-hover:text-foreground/70">${tld.regPrice}</span>
             </div>
           );
         })}
@@ -63,7 +63,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
       {TLD_LIST.length > (mobile ? 8 : INITIAL_TLD_COUNT) && (
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="mt-3 w-full text-center text-sm font-semibold text-mint hover:underline"
+          className="mt-4 mx-auto flex w-fit items-center gap-1.5 rounded-full border border-mint/25 bg-mint/[0.06] px-4 py-1.5 text-sm font-semibold text-mint transition-all duration-200 hover:border-mint/50 hover:bg-mint/10"
         >
           {showAll ? "Show less" : `Show all ${TLD_LIST.length} extensions`}
         </button>
@@ -259,14 +259,14 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
             left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
           }}
         >
-          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-4 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
+          <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-4 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0.7)] dark:backdrop-blur-2xl">
             <PopoverContent id={openFilter} />
           </div>
         </div>
       )}
       {openFilter === "extensions" && (
         <div className="absolute left-1/2 z-50 w-[720px] max-w-[92vw] -translate-x-1/2" style={{ bottom: "calc(100% + 16px)" }}>
-          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-4 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
+          <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-4 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0.7)] dark:backdrop-blur-2xl">
             <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} />
           </div>
         </div>
