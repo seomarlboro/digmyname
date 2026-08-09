@@ -48,7 +48,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
             <div
               key={tld.extension}
               onClick={() => onToggle(tld.extension)}
-              className={`flex flex-1 items-center justify-between gap-1 rounded-xl border border-border/70 px-3 py-2 transition-colors cursor-pointer ${
+              className={`flex flex-1 items-center justify-between gap-1 rounded-xl border border-border/70 dark:border-white/[0.16] px-3 py-2 transition-colors cursor-pointer ${
                 selected
                   ? "bg-mint/15 ring-1 ring-mint/40"
                   : "bg-muted/20 hover:bg-muted/40 dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"
@@ -265,7 +265,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
         </div>
       )}
       {openFilter === "extensions" && (
-        <div className="absolute left-1/2 z-50 w-[700px] max-w-[92vw] -translate-x-1/2" style={{ bottom: "calc(100% + 16px)" }}>
+        <div className="absolute left-1/2 z-50 w-[720px] max-w-[92vw] -translate-x-1/2" style={{ bottom: "calc(100% + 16px)" }}>
           <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-4 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
             <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} />
           </div>
