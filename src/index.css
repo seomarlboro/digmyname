@@ -511,6 +511,9 @@
     @apply bg-background/85 backdrop-blur-xl;
   }
 
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
   /* Mint-glow elevation — reusable at-rest glow for STATIC surfaces only (never search/results) */
   .mint-glow    { box-shadow: 0 10px 40px -12px hsl(var(--aurora-mint) / 0.22); }
   .mint-glow-sm { box-shadow: 0 6px 24px -10px hsl(var(--aurora-mint) / 0.20); }
