@@ -63,7 +63,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
       {TLD_LIST.length > (mobile ? 8 : INITIAL_TLD_COUNT) && (
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="mt-3 w-full text-center text-sm font-semibold text-mint hover:underline"
+          className="mt-4 mx-auto flex w-fit items-center gap-1.5 rounded-full border border-mint/25 bg-mint/[0.06] px-4 py-1.5 text-sm font-semibold text-mint transition-all duration-200 hover:border-mint/50 hover:bg-mint/10"
         >
           {showAll ? "Show less" : `Show all ${TLD_LIST.length} extensions`}
         </button>
