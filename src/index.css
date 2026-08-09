@@ -514,6 +514,18 @@
   .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
 
+  .animate-popover {
+    animation: popover-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: bottom center;
+  }
+  @keyframes popover-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-popover { animation: none; }
+  }
+
   /* Mint-glow elevation — reusable at-rest glow for STATIC surfaces only (never search/results) */
   .mint-glow    { box-shadow: 0 10px 40px -12px hsl(var(--aurora-mint) / 0.22); }
   .mint-glow-sm { box-shadow: 0 6px 24px -10px hsl(var(--aurora-mint) / 0.20); }
