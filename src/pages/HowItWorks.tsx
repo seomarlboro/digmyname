@@ -229,11 +229,11 @@ const HowItWorks = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border text-left">
+                  <tr className="border-b border-border/50 text-left">
                     <th className="px-4 py-3 font-semibold text-foreground">
                       Feature
                     </th>
-                    <th className="px-3 py-3 text-center font-semibold text-primary">
+                    <th className="px-3 py-3 text-center font-semibold text-mint bg-mint/5">
                       DigMyName
                     </th>
                     <th className="px-3 py-3 text-center font-medium text-muted-foreground">
