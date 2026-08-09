@@ -265,7 +265,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
         </div>
       )}
       {openFilter === "extensions" && (
-        <div className="absolute left-0 right-0 z-50" style={{ bottom: "calc(100% + 16px)" }}>
+        <div className="absolute left-1/2 z-50 w-[700px] max-w-[92vw] -translate-x-1/2" style={{ bottom: "calc(100% + 16px)" }}>
           <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-4 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl">
             <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} />
           </div>
