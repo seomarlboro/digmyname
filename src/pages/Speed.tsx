@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section, CalloutBlock } from "@/components/PageKit";
 import { StopwatchIcon, KeyboardIcon, BoltIcon } from "@/components/StatIcons";
 import LiveBenchmark from "@/components/LiveBenchmark";
+import { BenchmarkChart } from "@/components/BenchmarkChart";
 
 
 
