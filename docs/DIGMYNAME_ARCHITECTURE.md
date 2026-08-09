@@ -148,7 +148,7 @@ A Refero-referenced design-system pass ran across all non-homepage pages, plus a
 
 Deliberately left bespoke (primitives didn't fit): HowItWorks comparison matrix, Speed benchmark bar grid, Pricing detailed per-registrar table.
 
-### Award-tier visual redesign (IN PROGRESS — Stages A/B/C landed in main, not yet deployed to prod)
+### Award-tier visual redesign (IN PROGRESS — Stages A–D landed in main, not yet deployed to prod)
 
 **Status (2026-08-08):** Owner deploys the frontend manually, so these are in `main` but NOT yet on prod.
 - **A+B** — commit `c5e4d58`: activated the squircle radius scale (fixed `borderRadius` mis-nested inside `colors` in tailwind.config — it was inert; `rounded-2xl` now 24px etc.); added `.mint-glow`/`.glass` utilities; removed DataTable row-divider lines + softened Stat/header dividers (Linear discipline, no heavy lines); bigger section rhythm (`mt-16 sm:mt-24`); button H-padding `px-5/6/8` + new `mint`/`ghost-mint` variants + at-rest mint-glow on `gradient`.
