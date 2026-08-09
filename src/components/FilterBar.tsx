@@ -39,7 +39,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
 
   return (
     <div>
-      <h2 className="text-base font-bold text-foreground">Domain Extensions</h2>
+      <h2 className="text-lg font-bold text-foreground">Domain Extensions</h2>
       <p className="mb-3 text-sm text-muted-foreground">Select one or more TLDs</p>
       <div className={`grid gap-2.5 ${mobile ? "grid-cols-3" : "grid-cols-4"}`}>
         {visibleTlds.map((tld) => {
@@ -48,13 +48,13 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
             <div
               key={tld.extension}
               onClick={() => onToggle(tld.extension)}
-            className={`flex flex-1 items-center justify-between gap-1 rounded-xl border border-border/70 px-3 py-2 transition-colors cursor-pointer ${
+              className={`flex flex-1 items-center justify-between gap-1 rounded-xl border border-border/70 px-3 py-2 transition-colors cursor-pointer ${
                 selected
-                  ? "bg-primary/15 ring-1 ring-primary/40"
+                  ? "bg-mint/15 ring-1 ring-mint/40"
                   : "bg-muted/20 hover:bg-muted/40 dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"
               }`}
             >
-              <span className={`${mobile ? "text-base" : "text-lg"} font-bold text-primary`}>.{tld.extension}</span>
+              <span className={`${mobile ? "text-base" : "text-lg"} font-bold text-mint`}>.{tld.extension}</span>
               <span className="text-xs text-muted-foreground">${tld.regPrice}</span>
             </div>
           );
@@ -63,7 +63,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
       {TLD_LIST.length > (mobile ? 8 : INITIAL_TLD_COUNT) && (
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="mt-3 w-full text-center text-sm font-semibold text-primary hover:underline"
+          className="mt-3 w-full text-center text-sm font-semibold text-mint hover:underline"
         >
           {showAll ? "Show less" : `Show all ${TLD_LIST.length} extensions`}
         </button>
