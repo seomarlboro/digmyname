@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section, CalloutBlock } from "@/components/PageKit";
 import { StopwatchIcon, KeyboardIcon, BoltIcon } from "@/components/StatIcons";
 import LiveBenchmark from "@/components/LiveBenchmark";
+import { BenchmarkChart } from "@/components/BenchmarkChart";
 
 
 
@@ -170,53 +171,7 @@ const Speed = () => {
           title="Reference numbers"
           lede="Single datacenter connection, August 2026. Lower is better. Repeat lookups within a 60-second window are served from a global edge cache in ~70 ms — first-time lookups run the full live pipeline (~370 ms typical)."
         >
-          <div className="surface-card-lg overflow-hidden">
-            <div className="hidden grid-cols-[1fr_140px_320px] gap-4 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:grid">
-              <div>Target</div>
-              <div className="hidden sm:block">Latency</div>
-              <div className="text-right">Relative</div>
-            </div>
-            {benchmark.map((row) => (
-              <div
-                key={row.name}
-                className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-4 border-b border-border/40 px-5 py-5 transition-colors last:border-0 sm:grid-cols-[1fr_140px_320px] sm:items-center"
-              >
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-base font-bold sm:text-lg">{row.name}</span>
-                    <span
-                      className={`rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase ${
-                        row.us
-                          ? "border-border/60 bg-muted/20 text-foreground"
-                          : "border-border/60 bg-muted/20 text-muted-foreground"
-                      }`}
-                    >
-                      {row.tag}
-                    </span>
-                  </div>
-                  <div className="mt-1 text-sm text-muted-foreground">{row.note}</div>
-                </div>
-                <div className="whitespace-nowrap font-mono text-lg font-bold tabular-nums text-available">
-                  {row.ms}
-                </div>
-                <div className="col-span-2 flex min-w-0 items-center gap-3 sm:col-span-1">
-                  <div className="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-foreground/10 sm:w-64 sm:flex-none">
-                    <div
-                      className={`h-full rounded-full transition-all duration-700 ${
-                        row.us
-                          ? "bg-gradient-to-r from-aurora-mint to-aurora-violet"
-                          : "bg-muted-foreground/40"
-                      }`}
-                      style={{ width: `${row.bar}%` }}
-                    />
-                  </div>
-                  <span className="min-w-[2.5rem] text-right font-mono text-lg font-bold tabular-nums text-available">
-                    {row.bar}%
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <BenchmarkChart rows={benchmark} />
 
           <p className="mt-3 text-xs text-muted-foreground">
             Your own numbers will differ with distance, network and TLD — which is exactly why the timer in the
