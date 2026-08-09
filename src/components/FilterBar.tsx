@@ -261,7 +261,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
               left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
             }}
           >
-            <div className="max-h-[60vh] overflow-y-auto rounded-2xl border border-border bg-card/92 p-4 shadow-2xl backdrop-blur-2xl dark:border-white/10">
+            <div className="max-h-[60vh] overflow-y-auto rounded-2xl border border-border bg-card/97 p-4 shadow-2xl backdrop-blur-2xl dark:border-white/10">
               <PopoverContent id={openFilter} />
             </div>
           </div>
