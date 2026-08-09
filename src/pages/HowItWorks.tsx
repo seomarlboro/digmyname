@@ -201,7 +201,7 @@ const HowItWorks = () => {
         {/* Unverified state */}
         <Section title={'The "Unverified" state'}>
           <div className="surface-card p-8">
-            <div className="icon-frame icon-frame-warning mb-4">
+            <div className="icon-frame icon-frame-warning mb-5 h-14 w-14 [&>svg]:h-7 [&>svg]:w-7">
               <AlertCircle />
             </div>
             <p className="mb-4 text-muted-foreground leading-relaxed">
@@ -251,22 +251,22 @@ const HowItWorks = () => {
                   {comparison.map((row) => (
                     <tr
                       key={row.feature}
-                      className="border-b border-border last:border-0"
+                      className="border-b border-border/40 transition-colors last:border-0 hover:bg-muted/10"
                     >
                       <td className="px-4 py-3 text-foreground">
                         {row.feature}
                       </td>
                       {[row.us, row.instant, row.aggregator, row.basic].map(
                         (v, i) => (
-                          <td key={i} className="px-3 py-3 text-center">
+                          <td key={i} className={`px-3 py-3.5 text-center ${i === 0 ? "bg-mint/5" : ""}`}>
                             {v ? (
                               <Check
                                 className={`mx-auto h-4 w-4 ${
-                                  i === 0 ? "text-primary" : "text-available"
+                                  i === 0 ? "text-mint" : "text-available"
                                 }`}
                               />
                             ) : (
-                              <X className="mx-auto h-4 w-4 text-muted-foreground" />
+                              <X className="mx-auto h-4 w-4 text-muted-foreground/60" />
                             )}
                           </td>
                         )
