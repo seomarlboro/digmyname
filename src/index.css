@@ -559,7 +559,7 @@
   .hero-bg {
     z-index: 0;
     background:
-      radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--aurora-mint) / 0.12), transparent 60%),
+      radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--aurora-mint) / 0.16), transparent 60%),
       radial-gradient(ellipse 70% 50% at 50% 100%, hsl(var(--aurora-violet) / 0.10), transparent 60%);
   }
 

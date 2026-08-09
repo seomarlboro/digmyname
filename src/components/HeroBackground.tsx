@@ -63,7 +63,7 @@ const HeroBackground = () => {
       aria-hidden="true"
     >
       {/* SVG spotlights — Aceternity-style soft beams */}
-      <Spotlight className="-top-40 left-0 md:-top-20 md:left-60" fill="hsl(218 96% 65%)" />
+      <Spotlight className="-top-40 left-0 md:-top-20 md:left-60" fill="hsl(165 80% 55%)" />
       <Spotlight className="top-10 right-0 md:top-32 md:right-40 [transform:scaleX(-1)]" fill="hsl(262 83% 65%)" />
 
       {/* Meteors — lightweight diagonal streaks */}
