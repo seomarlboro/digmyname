@@ -855,7 +855,11 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
   ]);
   if (winner === "rdap" || winner === "dns") {
     ctl.abort();
-    return { domain, available: false, checkedVia: winner, likelyPremium };
+    // A taken-by-RDAP win carries the registration year off the same response
+    // (rdapP is already resolved here, so this await is instant). DNS-only takens
+    // have no RDAP body → no inline year, and fall back to /age as before.
+    const sinceYear = winner === "rdap" ? (await rdapP).sinceYear : undefined;
+    return { domain, available: false, checkedVia: winner, likelyPremium, sinceYear };
   }
 
   const [dns, rdap] = await Promise.all([dnsP, rdapP]);
@@ -1009,6 +1013,9 @@ export async function checkDomains(
         premium: meta.premium as boolean | undefined,
         likelyPremium: meta.likely_premium as boolean | undefined,
         premiumUnverified: meta.premium_unverified as boolean | undefined,
+        // Additive; absent on rows written before Phase 2 → undefined → the MCP
+        // simply falls back to /age for those until they refresh.
+        sinceYear: meta.since_year as number | undefined,
         forSale: meta.for_sale as boolean | undefined,
         forSaleVia: meta.for_sale_via as string | undefined,
         listingUrl: meta.listing_url as string | undefined,
