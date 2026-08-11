@@ -72,20 +72,32 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
   );
 };
 
+const PriceContent = ({ className = "w-[250px]" }: { className?: string }) => {
+  const [range, setRange] = useState<[number, number]>([0, 200]);
+  const atMax = range[1] >= 200;
+  return (
+    <div className={className}>
+      <h3 className="text-lg font-bold tracking-tight text-foreground">Price Range</h3>
+      <p className="mb-4 text-sm text-muted-foreground">Annual registration cost</p>
+      <Slider
+        value={range}
+        onValueChange={(v) => setRange([v[0] ?? 0, v[1] ?? 200])}
+        max={200}
+        step={5}
+        className="mb-3"
+      />
+      <div className="flex items-center justify-between">
+        <span className="text-base font-bold tabular-nums text-foreground">${range[0]}</span>
+        <span className="text-xs text-muted-foreground">to</span>
+        <span className="text-base font-bold tabular-nums text-foreground">${range[1]}{atMax ? "+" : ""}</span>
+      </div>
+    </div>
+  );
+};
+
 const PopoverContent = ({ id }: { id: string }) => {
   if (id === "price") {
-    return (
-      <div className="w-[250px]">
-        <h3 className="text-lg font-bold tracking-tight text-foreground">Price Range</h3>
-        <p className="mb-4 text-sm text-muted-foreground">Annual registration cost</p>
-        <Slider defaultValue={[0, 200]} max={200} step={1} className="mb-3" />
-        <div className="flex items-center justify-between">
-          <span className="text-base font-bold text-foreground">$0</span>
-          <span className="text-xs text-muted-foreground">to</span>
-          <span className="text-base font-bold text-foreground">$200</span>
-        </div>
-      </div>
-    );
+    return <PriceContent />;
   }
   if (id === "features") {
     return (
@@ -129,16 +141,7 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
     <ExtensionsPopover selectedTlds={selectedTlds} onToggle={onToggle} mobile />
 
     {/* Price */}
-    <div>
-      <h3 className="text-lg font-bold tracking-tight text-foreground">Price Range</h3>
-      <p className="mb-4 text-sm text-muted-foreground">Annual registration cost</p>
-      <Slider defaultValue={[0, 200]} max={200} step={1} className="mb-3" />
-      <div className="flex items-center justify-between">
-        <span className="text-base font-bold text-foreground">$0</span>
-        <span className="text-xs text-muted-foreground">to</span>
-        <span className="text-base font-bold text-foreground">$200</span>
-      </div>
-    </div>
+    <PriceContent className="w-full" />
 
     {/* Features */}
     <div>
