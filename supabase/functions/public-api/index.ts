@@ -394,7 +394,21 @@ async function fastStatus(domain: string): Promise<{ available: boolean; uncerta
 }
 
 // ---------- router ----------
+
+let servedOnce = false;
+
 Deno.serve(async (req) => {
+  const t0 = Date.now();
+  const cold = !servedOnce;
+  servedOnce = true;
+  const res = await handleRequest(req);
+  try {
+    res.headers.set("Server-Timing", `total;dur=${Date.now() - t0}, cold;desc="${cold ? "1" : "0"}"`);
+  } catch {}
+  return res;
+});
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "GET") return json({ error: "method_not_allowed" }, 405);
 
@@ -567,4 +581,4 @@ Deno.serve(async (req) => {
     const msg = e instanceof Error ? e.message : "unknown";
     return json({ error: "internal_error", detail: msg.slice(0, 200) }, 500, rlHeaders);
   }
-});
+}
