@@ -341,21 +341,43 @@ export async function loadRdapBootstrap(): Promise<Map<string, string[]>> {
   }
 }
 
-async function rdapQueryOnce(url: string, timeoutMs: number, signal?: AbortSignal): Promise<RdapState> {
+/** RDAP query result plus the registration year parsed off the SAME response
+ *  body we already download for taken names (previously discarded). */
+type RdapAnswer = { state: RdapState; sinceYear?: number };
+
+/** Extract the registration YEAR from an RDAP response body. Mirrors the
+ *  `domain-age` function's event parsing and the MCP's `yearFromIso` guard
+ *  (year > 1990) so the inline value equals what a `/age` fallback would give. */
+function rdapRegistrationYear(data: unknown): number | undefined {
+  const events = (data as { events?: unknown } | null)?.events;
+  if (!Array.isArray(events)) return undefined;
+  for (const e of events) {
+    const ev = e as { eventAction?: string; eventDate?: string };
+    if (ev?.eventAction === "registration" && typeof ev.eventDate === "string") {
+      const y = Number(ev.eventDate.slice(0, 4));
+      return Number.isFinite(y) && y > 1990 ? y : undefined;
+    }
+  }
+  return undefined;
+}
+
+async function rdapQueryOnce(url: string, timeoutMs: number, signal?: AbortSignal): Promise<RdapAnswer> {
   try {
     const resp = await fetch(url, { signal: probeSignal(timeoutMs, signal) });
     if (resp.status === 404) {
       await resp.text().catch(() => {});
-      return "available";
+      return { state: "available" };
     }
     if (resp.ok) {
-      await resp.text().catch(() => {});
-      return "taken";
+      // Parse the registration year off the body we already fetched — the
+      // registry hands it over for free; discarding it forced a separate /age hop.
+      const data = await resp.json().catch(() => null);
+      return { state: "taken", sinceYear: rdapRegistrationYear(data) };
     }
     await resp.text().catch(() => {});
-    return "unknown";
+    return { state: "unknown" };
   } catch {
-    return "unknown";
+    return { state: "unknown" };
   }
 }
 
