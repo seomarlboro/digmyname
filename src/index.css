@@ -558,6 +558,11 @@
 @layer components {
   .hero-bg {
     z-index: 0;
+    /* The hero section sits 2rem above the footer (footer has margin-top: 2rem),
+       so h-screen (100vh) leaves a 2rem seam between the aurora's bottom edge and
+       the footer's top line. Extend the aurora by that 2rem so its edge lands
+       exactly on the footer line. The opaque footer (z-10) caps the extra 2rem. */
+    min-height: calc(100vh + 2rem);
     background:
       radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--aurora-mint) / 0.16), transparent 60%),
       radial-gradient(ellipse 70% 50% at 50% 100%, hsl(var(--aurora-violet) / 0.10), transparent 60%);
