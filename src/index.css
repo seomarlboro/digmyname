@@ -240,7 +240,7 @@
   .results-shell::before {
     content: "";
     position: absolute;
-    inset: -2rem -50vw 0 -50vw;
+    inset: -2rem -50vw -10rem -50vw;
     background-color: hsl(var(--background));
     z-index: -1;
   }
