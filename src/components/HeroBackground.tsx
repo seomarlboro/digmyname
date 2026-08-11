@@ -58,7 +58,7 @@ const HeroBackground = () => {
   return (
     <div
       ref={rootRef}
-      className="hero-bg pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      className="hero-bg pointer-events-none absolute inset-x-0 top-0 z-0 h-screen overflow-hidden"
       style={{ "--mx": "0", "--my": "0" } as React.CSSProperties}
       aria-hidden="true"
     >

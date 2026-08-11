@@ -10,7 +10,7 @@ const Index = () => {
   const [selectedTlds, setSelectedTlds] = useState<Set<string>>(new Set());
 
   return (
-    <div className="relative min-h-screen bg-transparent pb-20">
+    <div className="relative min-h-screen bg-background pb-20">
       <HeroBackground />
       <Helmet>
         <title>Fast Domain Search — Fastest We've Measured | DigMyName</title>
