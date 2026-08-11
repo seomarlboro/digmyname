@@ -20,12 +20,21 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://api.digmyname.com/functions/v1/public-api";
 
-const VERSION = "1.2.6";
+const VERSION = "1.2.7";
 const USER_AGENT = `domain-check-skills-mcp/${VERSION} (+https://digmyname.com/mcp)`;
 const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
 const PRICING_TTL_MS = 6 * 60 * 60 * 1000;
 const AGE_TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_RETRIES = Number(process.env.DIGMYNAME_MAX_RETRIES || "2");
+// Per-attempt hang-guard. The API's server budget is ~1s, so if no response
+// arrives within this window the isolate is cold or the network stalled — abort
+// and let the bounded retry path decide, instead of hanging to the MCP client's
+// deadline (the cause of the 30s timeouts seen in cold-path testing).
+const REQUEST_TIMEOUT_MS = Number(process.env.DIGMYNAME_REQUEST_TIMEOUT_MS || "2500");
+// Hard wall-clock ceiling across ALL retries of a single api() call.
+const OVERALL_DEADLINE_MS = Number(process.env.DIGMYNAME_DEADLINE_MS || "4000");
+// Registration-year enrichment is optional — never let it dominate the answer.
+const AGE_ENRICH_BUDGET_MS = Number(process.env.DIGMYNAME_AGE_BUDGET_MS || "700");
 
 const RegistrarSchema = z.object({
   name: z.string(),
@@ -94,6 +103,7 @@ async function fetchApi(path: string): Promise<unknown> {
   try {
     res = await fetch(url, {
       headers: { accept: "application/json", "user-agent": USER_AGENT },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   } catch (err) {
     // Transport-level failure — no HTTP status, always retryable.
@@ -123,6 +133,7 @@ async function api<T>(path: string): Promise<T> {
   const cached = cacheGet(path);
   if (cached) return cached as T;
 
+  const startedAt = Date.now();
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -133,8 +144,10 @@ async function api<T>(path: string): Promise<T> {
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
       const retryable = err instanceof ApiError ? err.retryable : true;
-      if (retryable && attempt < MAX_RETRIES) {
-        await sleep(500 * 2 ** attempt);
+      const backoff = 300 * 2 ** attempt;
+      // Bounded: never let retries push a single call past OVERALL_DEADLINE_MS.
+      if (retryable && attempt < MAX_RETRIES && Date.now() - startedAt + backoff < OVERALL_DEADLINE_MS) {
+        await sleep(backoff);
         continue;
       }
       throw lastError;
@@ -222,13 +235,15 @@ registerTool(
     );
 
     // Registration year only exists for taken domains — skip the round-trip otherwise.
+    // Age is optional enrichment: cap it hard and drop it on timeout rather than
+    // letting a cold /age call stretch the availability answer.
     let created: string | null = null;
     if (check.result.available === false && !check.result.uncertain) {
-      const age = await api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => ({
-        count: 1,
-        results: [{ domain: clean, created: null, expires: null }],
-      }));
-      created = age.results.find((a) => a.domain === clean)?.created ?? null;
+      const age = await Promise.race([
+        api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => null),
+        sleep(AGE_ENRICH_BUDGET_MS).then(() => null),
+      ]);
+      created = age?.results.find((a) => a.domain === clean)?.created ?? null;
     }
 
     const result = { ...check.result, since_year: yearFromIso(created) };
@@ -256,10 +271,15 @@ registerTool(
     const takenDomains = results.filter((r) => !r.available && !r.uncertain).map((r) => r.domain);
     let ageByDomain: Record<string, string | null> = {};
     if (takenDomains.length) {
-      const ageBatch = await api<AgeBatch>(
-        `/age?domains=${encodeURIComponent(takenDomains.join(","))}`
-      ).catch(() => ({ count: 0, results: [] }));
-      ageByDomain = Object.fromEntries(ageBatch.results.map((a) => [a.domain, a.created]));
+      const ageBatch = await Promise.race([
+        api<AgeBatch>(
+          `/age?domains=${encodeURIComponent(takenDomains.join(","))}`
+        ).catch(() => null),
+        sleep(AGE_ENRICH_BUDGET_MS).then(() => null),
+      ]);
+      ageByDomain = ageBatch
+        ? Object.fromEntries(ageBatch.results.map((a) => [a.domain, a.created]))
+        : {};
     }
 
     const enriched = results.map((r) => ({
