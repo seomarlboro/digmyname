@@ -14,7 +14,7 @@ const product = [
 ];
 
 const Footer = () => (
-  <footer className="mt-8 border-t border-border/60">
+  <footer className="relative z-10 mt-8 border-t border-border/60 bg-background">
     <div className="content-wrap py-12">
       <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
