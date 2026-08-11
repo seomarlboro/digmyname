@@ -112,13 +112,19 @@ export function isLikelyBlocked(domain: string): boolean {
   return BLOCKED_SLDS.has(sld);
 }
 
-/** A result must be confirmed by Domainr before we sell it when its
- *  "available" verdict rests only on absence of evidence (RDAP 404 + DNS
- *  NXDOMAIN) — that fingerprint is shared by registry-reserved / DPML-blocked
- *  names. Pass likelyPremium precomputed. */
+/** Whether a result needs the (paid, metered) third signal before we trust it.
+ *  Escalate ONLY where it is load-bearing:
+ *    • uncertain — no authoritative verdict yet: .co/.me (no reliable public RDAP)
+ *      and RDAP-vs-DNS conflicts. These cannot be confirmed any other way.
+ *    • available & likely-premium — a short / premium-suspect SLD whose "free"
+ *      RDAP-404 could actually be a registry-reserved or premium tier.
+ *  A normal-length available name confirmed by RDAP-404 + DNS-NXDOMAIN is
+ *  authoritatively registerable on gTLDs, so it no longer burns a third-signal
+ *  call. (Brand-blocked available names are escalated separately by the caller
+ *  via isLikelyBlocked, so the trademark safeguard is unaffected.)
+ *  Pass likelyPremium precomputed. */
 export function shouldEscalateToDomainr(r: {
   available: boolean; uncertain?: boolean; checkedVia: string; likelyPremium?: boolean;
 }): boolean {
-  return r.uncertain === true ||
-    (r.available && (r.likelyPremium === true || r.checkedVia === "rdap" || r.checkedVia === "dns"));
+  return r.uncertain === true || (r.available && r.likelyPremium === true);
 }

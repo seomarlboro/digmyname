@@ -1085,6 +1085,21 @@ export async function checkDomains(
     )
     .map((r) => r.domain);
 
+  // Cost telemetry: each escalated domain = one paid Fastly "Precise Status" call.
+  // Split by reason so we can see how much is .co/.me (no-RDAP, unavoidable) vs
+  // premium / brand suspects, and decide whether to also drop .co/.me from defaults.
+  if (needsThirdSignal.length > 0) {
+    let coMe = 0, premium = 0, brand = 0, other = 0;
+    for (const d of needsThirdSignal) {
+      const t = d.split(".").pop()?.toLowerCase() ?? "";
+      if (t === "co" || t === "me") coMe++;
+      else if (isLikelyBlocked(d)) brand++;
+      else if (isLikelyPremium(d)) premium++;
+      else other++;
+    }
+    console.log(`fastly-escalate n=${needsThirdSignal.length} co_me=${coMe} premium=${premium} brand=${brand} other=${other}`);
+  }
+
   const domainrResults = THIRD_SIGNAL_ENABLED && fastlyKey && needsThirdSignal.length > 0
     ? await checkDomainrBatch(needsThirdSignal, fastlyKey, thirdSignalDeadlineAt)
     : null;
