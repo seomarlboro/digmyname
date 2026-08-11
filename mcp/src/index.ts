@@ -20,7 +20,7 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://api.digmyname.com/functions/v1/public-api";
 
-const VERSION = "1.2.8";
+const VERSION = "1.2.9";
 const USER_AGENT = `domain-check-skills-mcp/${VERSION} (+https://digmyname.com/mcp)`;
 const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
 const PRICING_TTL_MS = 6 * 60 * 60 * 1000;
@@ -226,7 +226,7 @@ function registerTool(
 
 registerTool(
   "check_domain",
-  "Check if ONE specific domain (e.g. acme.io) is registrable right now. Use for a single fully-qualified name; to test one word across many extensions, use search_domains instead. Returns an availability verdict, the cheapest registrar and its buy link, the first-year price, and \u2014 for taken names \u2014 the registration year. Availability is cross-checked against three independent signals (RDAP, DNS-over-HTTPS, Fastly Domain Research); when they disagree or a zone has no reliable RDAP (e.g. .co), the verdict comes back as uncertain rather than guessed \u2014 treat uncertain as 'unknown, NOT available', and note that price may be absent for such names.",
+  "Check if ONE specific domain (e.g. acme.io) is registrable right now. Use for a single fully-qualified name; to test one word across many extensions, use search_domains instead. Returns an availability verdict, the cheapest registrar and its buy link, the first-year price, and \u2014 for taken names \u2014 the registration year. Availability is confirmed by RDAP + DNS-over-HTTPS, authoritative for most TLDs; ambiguous names (premium suspects, trademark-blocked names, and zones with no reliable RDAP such as .co/.me) are additionally cross-checked against a third signal (Fastly Domain Research). When no source is authoritative or they disagree, the verdict comes back as uncertain rather than guessed \u2014 treat uncertain as 'unknown, NOT available', and note that price may be absent for such names.",
   { domain: z.string().describe("A single fully-qualified domain including its TLD, e.g. 'acme.io'. URLs and 'www.' prefixes are stripped automatically. Not a bare word \u2014 use search_domains to test a word across multiple TLDs.") },
   async ({ domain }) => {
     const clean = normalizeDomain(domain);
@@ -270,12 +270,16 @@ registerTool(
     const data = await api<{ results: DomainResult[] }>(`/search?${qs.toString()}`);
     const results = data.results ?? [];
 
-    const takenDomains = results.filter((r) => !r.available && !r.uncertain).map((r) => r.domain);
+    // Prefer the registration year the API already returned inline (newer server);
+    // only taken names still missing one need the /age round-trip.
+    const needAge = results
+      .filter((r) => !r.available && !r.uncertain && typeof r.since_year !== "number")
+      .map((r) => r.domain);
     let ageByDomain: Record<string, string | null> = {};
-    if (takenDomains.length) {
+    if (needAge.length) {
       const ageBatch = await Promise.race([
         api<AgeBatch>(
-          `/age?domains=${encodeURIComponent(takenDomains.join(","))}`
+          `/age?domains=${encodeURIComponent(needAge.join(","))}`
         ).catch(() => null),
         sleep(AGE_ENRICH_BUDGET_MS).then(() => null),
       ]);
@@ -286,7 +290,10 @@ registerTool(
 
     const enriched = results.map((r) => ({
       ...r,
-      since_year: !r.available && !r.uncertain ? yearFromIso(ageByDomain[r.domain] ?? null) : null,
+      since_year:
+        !r.available && !r.uncertain
+          ? (typeof r.since_year === "number" ? r.since_year : yearFromIso(ageByDomain[r.domain] ?? null))
+          : null,
     }));
 
     const available = enriched.filter((r) => r.available && !r.uncertain);

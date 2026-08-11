@@ -5,6 +5,17 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.9] — 2026-08-12
+
+### Changed
+- Honest availability copy: `check_domain` no longer claims "three independent signals" for every check. RDAP + DNS-over-HTTPS confirm most TLDs; the third signal (Fastly Domain Research) is consulted only for ambiguous names — premium suspects, trademark-blocked names, and zones with no reliable RDAP (.co/.me).
+- Package description: the "~170 ms" figure is now labelled as a *cached* lookup, not the first/typical answer.
+
+### Performance
+- `search_domains` now prefers the inline registration year the API returns for taken names (matching `check_domain`), calling `/age` only for taken names still missing one — often zero extra round-trips.
+
+_(1.2.5–1.2.8 tightened the client latency budget — per-request timeout + overall deadline + bounded age enrichment; not individually logged here.)_
+
 ## [1.2.4] — 2026-08-07
 
 ### Changed
