@@ -64,6 +64,12 @@ export interface DomainCheckResult {
    *  caching; the frontend uses it to tag every card in a brand class
    *  consistently. Derived per-response, never persisted. */
   sldBlocked?: boolean;
+  /** Registration YEAR from the RDAP `registration` event — TAKEN names only.
+   *  Additive label: never affects available/uncertain/price/caching. Lets
+   *  `/check` answer the registration year inline so the MCP can skip its
+   *  separate `/age` round-trip. `undefined` for available/uncertain names and
+   *  for taken names whose RDAP carried no parseable registration event. */
+  sinceYear?: number;
 }
 
 // TLDs where registries actively price short names as premium / aftermarket.
