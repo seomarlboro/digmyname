@@ -1282,23 +1282,7 @@ export async function checkDomains(
         result: r,
         expiresAt: Date.now() + Math.min(ttl * 1000, HOT_CACHE_TTL_MS),
       });
-      return {
-        domain: r.domain,
-        available: r.available,
-        checked_via: r.checkedVia,
-        rdap_data: {
-          cache_version: CACHE_VERSION,
-          reg_price: r.price ?? null,
-          premium: r.premium ?? false,
-          likely_premium: r.likelyPremium ?? false,
-          premium_unverified: r.premiumUnverified ?? false,
-          for_sale: r.forSale ?? false,
-          for_sale_via: r.forSaleVia ?? null,
-          listing_url: r.listingUrl ?? null,
-          since_year: r.sinceYear ?? null,
-        },
-        expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
-      };
+      return buildCacheRow(r, ttl);
     });
     // Persist in the background — the user's response doesn't wait for the write.
     const write = supabase.from("domain_cache").upsert(rows, { onConflict: "domain" });
@@ -1306,6 +1290,40 @@ export async function checkDomains(
     if (rt?.waitUntil) rt.waitUntil(Promise.resolve(write).catch(() => {}));
     else await write;
   }
+
+  // ---- Background registration-year warm --------------------------------
+  // A taken name's availability is usually decided by DNS (has-records) BEFORE
+  // the slower RDAP returns, so resolveDomain hands back no inline registration
+  // year. Making the response wait for RDAP would cost more than the MCP's own
+  // bounded /age fallback, so instead fetch the year in the BACKGROUND and upsert
+  // it onto the cache row we just wrote — the NEXT check of this taken name
+  // (within its TTL) then carries `since_year` inline and the MCP skips /age.
+  // Zero added latency to this response. Self-limiting: once the year is cached,
+  // the domain is no longer a target. Edge-only (EdgeRuntime.waitUntil) so it can
+  // never leak network calls into the test runner / local dev.
+  const yearWarm = cacheable.filter(
+    ({ r }) => !r.available && !r.uncertain && r.sinceYear == null && !warmingYears.has(r.domain),
+  );
+  const warmRt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+  if (yearWarm.length > 0 && warmRt?.waitUntil) {
+    for (const { r } of yearWarm) warmingYears.add(r.domain);
+    warmRt.waitUntil(
+      pMap(yearWarm, 8, async ({ r, ttl }) => {
+        try {
+          const year = (await checkRdap(r.domain)).sinceYear;
+          if (year == null) return; // RDAP carried no parseable year — leave the row as-is.
+          const withYear: DomainCheckResult = { ...r, sinceYear: year };
+          const hot = hotCache.get(r.domain);
+          if (hot) hotCache.set(r.domain, { result: withYear, expiresAt: hot.expiresAt });
+          await supabase.from("domain_cache").upsert(buildCacheRow(withYear, ttl), { onConflict: "domain" });
+        } finally {
+          warmingYears.delete(r.domain);
+        }
+      }).then(() => {}).catch(() => {}),
+    );
+  }
+
+
 
   const all = new Map<string, DomainCheckResult>();
   for (const c of cachedMap.values()) all.set(c.domain, c);
