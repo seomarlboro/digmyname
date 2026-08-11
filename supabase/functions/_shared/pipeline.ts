@@ -64,6 +64,12 @@ export interface DomainCheckResult {
    *  caching; the frontend uses it to tag every card in a brand class
    *  consistently. Derived per-response, never persisted. */
   sldBlocked?: boolean;
+  /** Registration YEAR from the RDAP `registration` event — TAKEN names only.
+   *  Additive label: never affects available/uncertain/price/caching. Lets
+   *  `/check` answer the registration year inline so the MCP can skip its
+   *  separate `/age` round-trip. `undefined` for available/uncertain names and
+   *  for taken names whose RDAP carried no parseable registration event. */
+  sinceYear?: number;
 }
 
 // TLDs where registries actively price short names as premium / aftermarket.
@@ -335,21 +341,43 @@ export async function loadRdapBootstrap(): Promise<Map<string, string[]>> {
   }
 }
 
-async function rdapQueryOnce(url: string, timeoutMs: number, signal?: AbortSignal): Promise<RdapState> {
+/** RDAP query result plus the registration year parsed off the SAME response
+ *  body we already download for taken names (previously discarded). */
+type RdapAnswer = { state: RdapState; sinceYear?: number };
+
+/** Extract the registration YEAR from an RDAP response body. Mirrors the
+ *  `domain-age` function's event parsing and the MCP's `yearFromIso` guard
+ *  (year > 1990) so the inline value equals what a `/age` fallback would give. */
+function rdapRegistrationYear(data: unknown): number | undefined {
+  const events = (data as { events?: unknown } | null)?.events;
+  if (!Array.isArray(events)) return undefined;
+  for (const e of events) {
+    const ev = e as { eventAction?: string; eventDate?: string };
+    if (ev?.eventAction === "registration" && typeof ev.eventDate === "string") {
+      const y = Number(ev.eventDate.slice(0, 4));
+      return Number.isFinite(y) && y > 1990 ? y : undefined;
+    }
+  }
+  return undefined;
+}
+
+async function rdapQueryOnce(url: string, timeoutMs: number, signal?: AbortSignal): Promise<RdapAnswer> {
   try {
     const resp = await fetch(url, { signal: probeSignal(timeoutMs, signal) });
     if (resp.status === 404) {
       await resp.text().catch(() => {});
-      return "available";
+      return { state: "available" };
     }
     if (resp.ok) {
-      await resp.text().catch(() => {});
-      return "taken";
+      // Parse the registration year off the body we already fetched — the
+      // registry hands it over for free; discarding it forced a separate /age hop.
+      const data = await resp.json().catch(() => null);
+      return { state: "taken", sinceYear: rdapRegistrationYear(data) };
     }
     await resp.text().catch(() => {});
-    return "unknown";
+    return { state: "unknown" };
   } catch {
-    return "unknown";
+    return { state: "unknown" };
   }
 }
 
@@ -442,7 +470,7 @@ export const FAST_RDAP_EXCEPTIONS = new Set(["io", "us"]);
  */
 export const AGGREGATOR_UNRELIABLE_TLDS = new Set(["co", "me"]);
 
-async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapState> {
+async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapAnswer> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
 
   // Fast lane: popular TLD → known registry endpoint, zero lookup latency.
@@ -467,8 +495,8 @@ async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapStat
 
   // Query the registry endpoint(s) and hedge with the public aggregator after
   // 700ms instead of waiting out a full 3s timeout before falling back.
-  const decisive = (p: Promise<RdapState>) =>
-    p.then((s) => (s === "unknown" ? PENDING_FOREVER<RdapState>() : s));
+  const decisive = (p: Promise<RdapAnswer>) =>
+    p.then((a) => (a.state === "unknown" ? PENDING_FOREVER<RdapAnswer>() : a));
 
   // Cancel the losing RDAP probes as soon as one is decisive.
   const ctl = new AbortController();
@@ -481,14 +509,14 @@ async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapStat
   const trustAggregator404 = bases.length > 0 || !AGGREGATOR_UNRELIABLE_TLDS.has(tld);
   const aggregator = sleep(probes.length ? 700 : 0)
     .then(() => rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000, sig))
-    .then((s) => (s === "available" && !trustAggregator404 ? "unknown" as RdapState : s));
+    .then((a) => (a.state === "available" && !trustAggregator404 ? { state: "unknown" as RdapState } : a));
 
   const all = [...probes, aggregator];
 
   try {
     return await Promise.race([
       ...all.map(decisive),
-      Promise.all(all).then((states) => states.find((s) => s !== "unknown") ?? "unknown"),
+      Promise.all(all).then((answers) => answers.find((a) => a.state !== "unknown") ?? { state: "unknown" as RdapState }),
     ]);
   } finally {
     ctl.abort();
@@ -821,13 +849,17 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
 
   // Fast path: the first decisive "taken" signal ends the check.
   const winner = await Promise.race([
-    rdapP.then((r) => (r === "taken" ? "rdap" : PENDING_FOREVER<string>())),
+    rdapP.then((r) => (r.state === "taken" ? "rdap" : PENDING_FOREVER<string>())),
     dnsP.then((d) => (d === "has_records" ? "dns" : PENDING_FOREVER<string>())),
     Promise.all([dnsP, rdapP]).then(() => "settled"),
   ]);
   if (winner === "rdap" || winner === "dns") {
     ctl.abort();
-    return { domain, available: false, checkedVia: winner, likelyPremium };
+    // A taken-by-RDAP win carries the registration year off the same response
+    // (rdapP is already resolved here, so this await is instant). DNS-only takens
+    // have no RDAP body → no inline year, and fall back to /age as before.
+    const sinceYear = winner === "rdap" ? (await rdapP).sinceYear : undefined;
+    return { domain, available: false, checkedVia: winner, likelyPremium, sinceYear };
   }
 
   const [dns, rdap] = await Promise.all([dnsP, rdapP]);
@@ -836,7 +868,7 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
   // RDAP 404 is authoritative for "not registered" only when DNS also answers
   // NXDOMAIN. A DNS lookup error or ambiguous answer must not be treated as
   // confirmation that the name is free.
-  if (rdap === "available" && dns === "no_records") {
+  if (rdap.state === "available" && dns === "no_records") {
     return {
       domain,
       available: true,
@@ -850,7 +882,7 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
   // NXDOMAIN too. Without RDAP agreement we can only be honest about not
   // knowing, so this is an uncertain result (never available, never priced,
   // never cached as available) rather than a confident available:true.
-  if (rdap === "unknown" && dns === "no_records" && AGGREGATOR_UNRELIABLE_TLDS.has(domain.split(".").pop() ?? "")) {
+  if (rdap.state === "unknown" && dns === "no_records" && AGGREGATOR_UNRELIABLE_TLDS.has(domain.split(".").pop() ?? "")) {
     return {
       domain,
       available: false,
@@ -862,7 +894,7 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
 
 
   // RDAP says available but DNS could not confirm NXDOMAIN → uncertain.
-  if (rdap === "available" && dns === "error") {
+  if (rdap.state === "available" && dns === "error") {
     return { domain, available: false, checkedVia: "rdap", uncertain: true };
   }
 
@@ -981,6 +1013,9 @@ export async function checkDomains(
         premium: meta.premium as boolean | undefined,
         likelyPremium: meta.likely_premium as boolean | undefined,
         premiumUnverified: meta.premium_unverified as boolean | undefined,
+        // Additive; absent on rows written before Phase 2 → undefined → the MCP
+        // simply falls back to /age for those until they refresh.
+        sinceYear: meta.since_year as number | undefined,
         forSale: meta.for_sale as boolean | undefined,
         forSaleVia: meta.for_sale_via as string | undefined,
         listingUrl: meta.listing_url as string | undefined,
@@ -1056,6 +1091,8 @@ export async function checkDomains(
         available: false,
         checkedVia: "domainr",
         likelyPremium,
+        // Keep the registration year Pass-1 RDAP already parsed for this name.
+        sinceYear: base.sinceYear,
         forSale: verdict.forSale || undefined,
         forSaleVia: verdict.forSale ? "Aftermarket" : undefined,
         listingUrl: verdict.forSale ? `https://www.afternic.com/domain/${base.domain}` : undefined,
@@ -1231,6 +1268,7 @@ export async function checkDomains(
           for_sale: r.forSale ?? false,
           for_sale_via: r.forSaleVia ?? null,
           listing_url: r.listingUrl ?? null,
+          since_year: r.sinceYear ?? null,
         },
         expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
       };

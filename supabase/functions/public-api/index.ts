@@ -264,6 +264,9 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
     for_sale: !!r.forSale,
     for_sale_via: r.forSaleVia || null,
     listing_url: r.listingUrl || null,
+    // Registration year for TAKEN names, parsed inline from the RDAP response the
+    // pipeline already fetched — lets the MCP skip its separate /age round-trip.
+    since_year: typeof r.sinceYear === "number" ? r.sinceYear : null,
     cheapest_registrar: registrarOk
       ? {
           name: cheapest.registrar,
