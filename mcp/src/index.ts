@@ -20,7 +20,7 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://api.digmyname.com/functions/v1/public-api";
 
-const VERSION = "1.2.7";
+const VERSION = "1.2.8";
 const USER_AGENT = `domain-check-skills-mcp/${VERSION} (+https://digmyname.com/mcp)`;
 const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
 const PRICING_TTL_MS = 6 * 60 * 60 * 1000;
@@ -30,11 +30,11 @@ const MAX_RETRIES = Number(process.env.DIGMYNAME_MAX_RETRIES || "2");
 // arrives within this window the isolate is cold or the network stalled — abort
 // and let the bounded retry path decide, instead of hanging to the MCP client's
 // deadline (the cause of the 30s timeouts seen in cold-path testing).
-const REQUEST_TIMEOUT_MS = Number(process.env.DIGMYNAME_REQUEST_TIMEOUT_MS || "2500");
+const REQUEST_TIMEOUT_MS = Number(process.env.DIGMYNAME_REQUEST_TIMEOUT_MS || "1700");
 // Hard wall-clock ceiling across ALL retries of a single api() call.
-const OVERALL_DEADLINE_MS = Number(process.env.DIGMYNAME_DEADLINE_MS || "4000");
+const OVERALL_DEADLINE_MS = Number(process.env.DIGMYNAME_DEADLINE_MS || "1700");
 // Registration-year enrichment is optional — never let it dominate the answer.
-const AGE_ENRICH_BUDGET_MS = Number(process.env.DIGMYNAME_AGE_BUDGET_MS || "700");
+const AGE_ENRICH_BUDGET_MS = Number(process.env.DIGMYNAME_AGE_BUDGET_MS || "200");
 
 const RegistrarSchema = z.object({
   name: z.string(),
@@ -235,18 +235,20 @@ registerTool(
     );
 
     // Registration year only exists for taken domains — skip the round-trip otherwise.
-    // Age is optional enrichment: cap it hard and drop it on timeout rather than
-    // letting a cold /age call stretch the availability answer.
-    let created: string | null = null;
-    if (check.result.available === false && !check.result.uncertain) {
+    // Prefer the registration year if the API returned it inline (newer server) —
+    // that skips the extra /age round-trip entirely. Otherwise fetch it, hard-capped
+    // so a cold /age never stretches the answer past the budget.
+    let sinceYear: number | null =
+      typeof check.result.since_year === "number" ? check.result.since_year : null;
+    if (sinceYear === null && check.result.available === false && !check.result.uncertain) {
       const age = await Promise.race([
         api<AgeBatch>(`/age?domains=${encodeURIComponent(clean)}`).catch(() => null),
         sleep(AGE_ENRICH_BUDGET_MS).then(() => null),
       ]);
-      created = age?.results.find((a) => a.domain === clean)?.created ?? null;
+      sinceYear = yearFromIso(age?.results.find((a) => a.domain === clean)?.created ?? null);
     }
 
-    const result = { ...check.result, since_year: yearFromIso(created) };
+    const result = { ...check.result, since_year: sinceYear };
     return { content: [{ type: "text" as const, text: formatResult(result) }] };
   }
 );
