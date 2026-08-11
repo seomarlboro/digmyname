@@ -72,104 +72,88 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
   );
 };
 
-const PriceContent = ({ className = "w-[250px]" }: { className?: string }) => {
-  const [range, setRange] = useState<[number, number]>([0, 200]);
-  const atMax = range[1] >= 200;
+const PriceContent = ({ className = "w-[250px]", value, onChange }: { className?: string; value: [number, number]; onChange: (v: [number, number]) => void }) => {
+  const atMax = value[1] >= 200;
   return (
     <div className={className}>
       <h3 className="text-lg font-bold tracking-tight text-foreground">Price Range</h3>
       <p className="mb-4 text-sm text-muted-foreground">Annual registration cost</p>
       <Slider
-        value={range}
-        onValueChange={(v) => setRange([v[0] ?? 0, v[1] ?? 200])}
+        value={value}
+        onValueChange={(v) => onChange([v[0] ?? 0, v[1] ?? 200])}
         max={200}
         step={5}
         className="mb-3"
       />
       <div className="flex items-center justify-between">
-        <span className="text-base font-bold tabular-nums text-foreground">${range[0]}</span>
+        <span className="text-base font-bold tabular-nums text-foreground">${value[0]}</span>
         <span className="text-xs text-muted-foreground">to</span>
-        <span className="text-base font-bold tabular-nums text-foreground">${range[1]}{atMax ? "+" : ""}</span>
+        <span className="text-base font-bold tabular-nums text-foreground">${value[1]}{atMax ? "+" : ""}</span>
       </div>
     </div>
   );
 };
 
-const PopoverContent = ({ id }: { id: string }) => {
-  if (id === "price") {
-    return <PriceContent />;
-  }
-  if (id === "features") {
-    return (
-      <div className="w-[220px]">
-        <h3 className="text-lg font-bold tracking-tight text-foreground">Features</h3>
-        <p className="mb-4 text-sm text-muted-foreground">Additional requirements</p>
-        <div className="space-y-1">
-          {featureOptions.map((f) => (
-            <label key={f} className="flex items-center gap-3 rounded-xl py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
-              <Checkbox className="h-5 w-5 rounded-[5px]" />
-              <span className="text-sm text-foreground">{f}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  if (id === "status") {
-    return (
-      <div className="w-[220px]">
-        <h3 className="text-lg font-bold tracking-tight text-foreground">Status</h3>
-        <p className="mb-4 text-sm text-muted-foreground">Filter by availability</p>
-        <div className="space-y-1">
-          {statusOptions.map((s) => (
-            <label key={s} className="flex items-center gap-3 rounded-xl py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
-              <Checkbox className="h-5 w-5 rounded-full" />
-              <span className="text-sm text-foreground">{s}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-    );
-  }
+const FeaturesContent = ({ className = "w-[220px]", selected, onToggle }: { className?: string; selected: Set<string>; onToggle: (f: string) => void }) => (
+  <div className={className}>
+    <h3 className="text-lg font-bold tracking-tight text-foreground">Features</h3>
+    <p className="mb-4 text-sm text-muted-foreground">Additional requirements</p>
+    <div className="space-y-1">
+      {featureOptions.map((f) => (
+        <label key={f} className="flex items-center gap-3 rounded-xl py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
+          <Checkbox className="h-5 w-5 rounded-[5px]" checked={selected.has(f)} onCheckedChange={() => onToggle(f)} />
+          <span className="text-sm text-foreground">{f}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+);
+
+const StatusContent = ({ className = "w-[220px]", selected, onSelect }: { className?: string; selected: string; onSelect: (s: string) => void }) => (
+  <div className={className}>
+    <h3 className="text-lg font-bold tracking-tight text-foreground">Status</h3>
+    <p className="mb-4 text-sm text-muted-foreground">Filter by availability</p>
+    <div className="space-y-1">
+      {statusOptions.map((s) => (
+        <label key={s} className="flex items-center gap-3 rounded-xl py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
+          <Checkbox className="h-5 w-5 rounded-full" checked={selected === s} onCheckedChange={() => onSelect(s)} />
+          <span className="text-sm text-foreground">{s}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+);
+
+interface FilterState {
+  price: [number, number];
+  onPrice: (v: [number, number]) => void;
+  features: Set<string>;
+  onFeature: (f: string) => void;
+  status: string;
+  onStatus: (s: string) => void;
+}
+
+const PopoverContent = ({ id, filters }: { id: string; filters: FilterState }) => {
+  if (id === "price") return <PriceContent value={filters.price} onChange={filters.onPrice} />;
+  if (id === "features") return <FeaturesContent selected={filters.features} onToggle={filters.onFeature} />;
+  if (id === "status") return <StatusContent selected={filters.status} onSelect={filters.onStatus} />;
   return null;
 };
 
 /* ── Mobile: all filters in a Drawer ── */
-const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<string>; onToggle: (ext: string) => void }) => (
+const MobileFilterContent = ({ selectedTlds, onToggle, filters }: { selectedTlds: Set<string>; onToggle: (ext: string) => void; filters: FilterState }) => (
   <div className="space-y-6 px-1">
     {/* Extensions */}
     <ExtensionsPopover selectedTlds={selectedTlds} onToggle={onToggle} mobile />
 
     {/* Price */}
-    <PriceContent className="w-full" />
+    <PriceContent className="w-full" value={filters.price} onChange={filters.onPrice} />
 
     {/* Features */}
-    <div>
-      <h3 className="text-lg font-bold tracking-tight text-foreground">Features</h3>
-      <p className="mb-4 text-sm text-muted-foreground">Additional requirements</p>
-      <div className="space-y-1">
-        {featureOptions.map((f) => (
-          <label key={f} className="flex items-center gap-3 rounded-xl py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
-            <Checkbox className="h-5 w-5 rounded-[5px]" />
-            <span className="text-sm text-foreground">{f}</span>
-          </label>
-        ))}
-      </div>
-    </div>
+    <FeaturesContent className="w-full" selected={filters.features} onToggle={filters.onFeature} />
 
     {/* Status */}
-    <div>
-      <h3 className="text-lg font-bold tracking-tight text-foreground">Status</h3>
-      <p className="mb-4 text-sm text-muted-foreground">Filter by availability</p>
-      <div className="space-y-1">
-        {statusOptions.map((s) => (
-          <label key={s} className="flex items-center gap-3 rounded-xl py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
-            <Checkbox className="h-5 w-5 rounded-full" />
-            <span className="text-sm text-foreground">{s}</span>
-          </label>
-        ))}
-      </div>
-    </div>
+    <StatusContent className="w-full" selected={filters.status} onSelect={filters.onStatus} />
   </div>
 );
 
@@ -183,6 +167,10 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
   const barRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Record<string, HTMLDivElement>>({});
   const isMobile = useIsMobile();
+
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
+  const [features, setFeatures] = useState<Set<string>>(new Set());
+  const [status, setStatus] = useState<string>("All domains");
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -205,15 +193,33 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
     });
   };
 
+  const toggleFeature = (f: string) =>
+    setFeatures((prev) => {
+      const next = new Set(prev);
+      if (next.has(f)) next.delete(f);
+      else next.add(f);
+      return next;
+    });
+
+  const filters: FilterState = {
+    price: priceRange,
+    onPrice: setPriceRange,
+    features,
+    onFeature: toggleFeature,
+    status,
+    onStatus: setStatus,
+  };
+
   const getFilterValue = (id: string) => {
     if (id === "extensions") return selectedTlds.size === 0 ? "All TLDs" : `${selectedTlds.size} selected`;
-    if (id === "price") return "$0-$200";
-    if (id === "features") return "Any";
-    if (id === "status") return "All";
+    if (id === "price") return `$${priceRange[0]}-$${priceRange[1]}${priceRange[1] >= 200 ? "+" : ""}`;
+    if (id === "features") return features.size === 0 ? "Any" : `${features.size} selected`;
+    if (id === "status") return status === "Available only" ? "Available" : status === "Taken only" ? "Taken" : "All";
     return "";
   };
 
-  const activeCount = selectedTlds.size; // can expand later to count other active filters
+  const priceActive = priceRange[0] > 0 || priceRange[1] < 200;
+  const activeCount = selectedTlds.size + features.size + (status !== "All domains" ? 1 : 0) + (priceActive ? 1 : 0);
 
   /* ── Mobile: FAB + Drawer ── */
   if (isMobile) {
@@ -239,7 +245,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
             </DrawerClose>
           </div>
           <div className="overflow-y-auto px-5 pb-8">
-            <MobileFilterContent selectedTlds={selectedTlds} onToggle={toggleTld} />
+            <MobileFilterContent selectedTlds={selectedTlds} onToggle={toggleTld} filters={filters} />
           </div>
         </DrawerContent>
       </Drawer>
@@ -263,7 +269,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange }: FilterBarProps) => {
           }}
         >
           <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0.7)] dark:backdrop-blur-2xl">
-            <PopoverContent id={openFilter} />
+            <PopoverContent id={openFilter} filters={filters} />
           </div>
         </div>
       )}
