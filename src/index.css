@@ -561,10 +561,6 @@
     background:
       radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--aurora-mint) / 0.16), transparent 60%),
       radial-gradient(ellipse 70% 50% at 50% 100%, hsl(var(--aurora-violet) / 0.10), transparent 60%);
-    /* Fade the whole hero background out below the hero so the drifting TLDs and
-       glow never bleed over the results/footer when scrolling. */
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 62%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 62%);
   }
 
 
