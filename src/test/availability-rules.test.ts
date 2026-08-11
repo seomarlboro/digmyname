@@ -43,11 +43,11 @@ describe("interpretDomainr", () => {
 });
 
 describe("shouldEscalateToDomainr", () => {
-  it("rdap-available escalates", () => {
-    expect(shouldEscalateToDomainr({ available: true, checkedVia: "rdap" })).toBe(true);
+  it("rdap-available (non-premium) does NOT escalate", () => {
+    expect(shouldEscalateToDomainr({ available: true, checkedVia: "rdap" })).toBe(false);
   });
-  it("dns-available escalates", () => {
-    expect(shouldEscalateToDomainr({ available: true, checkedVia: "dns" })).toBe(true);
+  it("dns-available (non-premium) does NOT escalate", () => {
+    expect(shouldEscalateToDomainr({ available: true, checkedVia: "dns" })).toBe(false);
   });
   it("likelyPremium available escalates", () => {
     expect(shouldEscalateToDomainr({ available: true, checkedVia: "domainr", likelyPremium: true })).toBe(true);
