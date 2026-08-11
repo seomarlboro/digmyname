@@ -41,7 +41,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, mobile }: ExtensionsPopover
     <div>
       <h2 className="text-lg font-bold tracking-tight text-foreground">Domain Extensions</h2>
       <p className="mb-4 text-sm text-muted-foreground">Select one or more TLDs</p>
-      <div className={`grid gap-2.5 ${mobile ? "grid-cols-3" : "grid-cols-4"}`}>
+      <div className={`grid gap-2.5 ${mobile ? "grid-cols-2" : "grid-cols-4"}`}>
         {visibleTlds.map((tld) => {
           const selected = selectedTlds.has(tld.extension);
           return (
@@ -94,7 +94,7 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-4 text-sm text-muted-foreground">Additional requirements</p>
         <div className="space-y-1">
           {featureOptions.map((f) => (
-            <label key={f} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
+            <label key={f} className="flex items-center gap-3 rounded-xl py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
               <Checkbox className="h-5 w-5 rounded-[5px]" />
               <span className="text-sm text-foreground">{f}</span>
             </label>
@@ -110,7 +110,7 @@ const PopoverContent = ({ id }: { id: string }) => {
         <p className="mb-4 text-sm text-muted-foreground">Filter by availability</p>
         <div className="space-y-1">
           {statusOptions.map((s) => (
-            <label key={s} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
+            <label key={s} className="flex items-center gap-3 rounded-xl py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
               <Checkbox className="h-5 w-5 rounded-full" />
               <span className="text-sm text-foreground">{s}</span>
             </label>
@@ -130,7 +130,7 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
 
     {/* Price */}
     <div>
-      <h3 className="text-base font-bold text-foreground">Price Range</h3>
+      <h3 className="text-lg font-bold tracking-tight text-foreground">Price Range</h3>
       <p className="mb-4 text-sm text-muted-foreground">Annual registration cost</p>
       <Slider defaultValue={[0, 200]} max={200} step={1} className="mb-3" />
       <div className="flex items-center justify-between">
@@ -146,7 +146,7 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
       <p className="mb-4 text-sm text-muted-foreground">Additional requirements</p>
       <div className="space-y-1">
         {featureOptions.map((f) => (
-          <label key={f} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
+          <label key={f} className="flex items-center gap-3 rounded-xl py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
             <Checkbox className="h-5 w-5 rounded-[5px]" />
             <span className="text-sm text-foreground">{f}</span>
           </label>
@@ -160,7 +160,7 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
       <p className="mb-4 text-sm text-muted-foreground">Filter by availability</p>
       <div className="space-y-1">
         {statusOptions.map((s) => (
-          <label key={s} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
+          <label key={s} className="flex items-center gap-3 rounded-xl py-2.5 transition-colors hover:bg-muted/10 cursor-pointer">
             <Checkbox className="h-5 w-5 rounded-full" />
             <span className="text-sm text-foreground">{s}</span>
           </label>
