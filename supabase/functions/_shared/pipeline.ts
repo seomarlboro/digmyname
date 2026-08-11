@@ -932,6 +932,33 @@ export function getServiceClient(): SupabaseClient {
   return sharedClient;
 }
 
+// Build the `domain_cache` row for a resolved result. Single source of truth so
+// the main cache write and the background registration-year warm can never drift.
+function buildCacheRow(r: DomainCheckResult, ttl: number) {
+  return {
+    domain: r.domain,
+    available: r.available,
+    checked_via: r.checkedVia,
+    rdap_data: {
+      cache_version: CACHE_VERSION,
+      reg_price: r.price ?? null,
+      premium: r.premium ?? false,
+      likely_premium: r.likelyPremium ?? false,
+      premium_unverified: r.premiumUnverified ?? false,
+      for_sale: r.forSale ?? false,
+      for_sale_via: r.forSaleVia ?? null,
+      listing_url: r.listingUrl ?? null,
+      since_year: r.sinceYear ?? null,
+    },
+    expires_at: new Date(Date.now() + ttl * 1000).toISOString(),
+  };
+}
+
+// De-dupe concurrent background year-warms for the same domain within this
+// isolate — a popular taken name checked many times before its first warm
+// completes should trigger ONE RDAP fetch, not one per request.
+const warmingYears = new Set<string>();
+
 /**
  * Core pipeline. Accepts raw domain strings, filters invalid ones, resolves
  * availability/pricing and returns results in the same order as the (valid)
