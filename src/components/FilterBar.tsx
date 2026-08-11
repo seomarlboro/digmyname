@@ -141,16 +141,7 @@ const MobileFilterContent = ({ selectedTlds, onToggle }: { selectedTlds: Set<str
     <ExtensionsPopover selectedTlds={selectedTlds} onToggle={onToggle} mobile />
 
     {/* Price */}
-    <div>
-      <h3 className="text-lg font-bold tracking-tight text-foreground">Price Range</h3>
-      <p className="mb-4 text-sm text-muted-foreground">Annual registration cost</p>
-      <Slider defaultValue={[0, 200]} max={200} step={1} className="mb-3" />
-      <div className="flex items-center justify-between">
-        <span className="text-base font-bold text-foreground">$0</span>
-        <span className="text-xs text-muted-foreground">to</span>
-        <span className="text-base font-bold text-foreground">$200</span>
-      </div>
-    </div>
+    <PriceContent className="w-full" />
 
     {/* Features */}
     <div>
