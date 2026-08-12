@@ -59,6 +59,16 @@ Deno.test("isLikelyBlocked: case-insensitive", () => {
   assert(isLikelyBlocked("MICROSOFT.software"));
 });
 
+Deno.test("isLikelyBlocked: ICANN Spec-5 reserved second-level labels are flagged", () => {
+  // These RDAP-404 + NXDOMAIN like a free name and are not premium suspects,
+  // so the list is the only thing standing between them and a priced buy_url.
+  for (const sld of ["afrinic", "apnic", "arin", "lacnic", "ripe", "nro", "iab",
+                     "iesg", "ietf", "irtf", "istf", "rssac", "ssac", "alac",
+                     "aso", "ccnso", "gac", "gnso", "rfc-editor", "example"]) {
+    assert(isLikelyBlocked(`${sld}.xyz`), `${sld} must be blocked`);
+  }
+});
+
 Deno.test("isLikelyBlocked: no substring matching, coined names pass", () => {
   assertEquals(isLikelyBlocked("kvarturbo2748.digital"), false);
   assertEquals(isLikelyBlocked("notmicrosoftatall.com"), false);

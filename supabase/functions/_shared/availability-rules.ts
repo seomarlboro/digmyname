@@ -104,7 +104,20 @@ const BLOCKED_SLDS = new Set<string>([
   "boeing", "bosch", "chevron", "exxonmobil", "ge", "shell", "siemensenergy",
   "totalenergies",
   // --- Registry / ICANN reserved labels ------------------------------------
+  // Registry-operations labels (ICANN base RA Specification 5, "Reservations
+  // for Registry Operations").
   "iana", "icann", "internic", "nic", "rdds", "whois", "www",
+  // ICANN / IANA related names reserved at the second level in every gTLD
+  // (Specification 5, "ICANN and IANA Related Names"; plus the reserved
+  // "example" label). These answer RDAP-404 + DNS-NXDOMAIN exactly like a free
+  // name and most are 6+ chars, so they are not premium suspects either — with
+  // the narrowed third-signal escalation nothing else stops them being sold.
+  // Without this list `afrinic.xyz` was returned available at $1.98 with a
+  // live buy_url (verified against the live API, 2026-08-12).
+  "afrinic", "alac", "apnic", "arin", "aso", "ccnso", "example", "gac",
+  "gnso", "gtld-servers", "iab", "iana-servers", "iesg", "ietf", "irtf",
+  "istf", "lacnic", "latnic", "nro", "rfc-editor", "ripe", "root-servers",
+  "rssac", "ssac",
 ]);
 
 export function isLikelyBlocked(domain: string): boolean {

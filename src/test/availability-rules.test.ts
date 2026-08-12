@@ -70,6 +70,15 @@ describe("isLikelyBlocked", () => {
     expect(isLikelyBlocked("nic.dev")).toBe(true);
     expect(isLikelyBlocked("microsoft.software")).toBe(true);
   });
+  it("flags ICANN Spec-5 reserved second-level labels", () => {
+    // Regression guard: these RDAP-404 + NXDOMAIN exactly like a free name and
+    // are not premium suspects, so nothing else stops them being sold.
+    for (const sld of ["afrinic", "apnic", "arin", "lacnic", "ripe", "nro", "iab",
+                       "iesg", "ietf", "irtf", "istf", "rssac", "ssac", "alac",
+                       "aso", "ccnso", "gac", "gnso", "rfc-editor", "example"]) {
+      expect(isLikelyBlocked(`${sld}.xyz`), sld).toBe(true);
+    }
+  });
   it("does not flag coined names", () => {
     expect(isLikelyBlocked("kvarturbo2748.digital")).toBe(false);
   });

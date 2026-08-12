@@ -33,7 +33,7 @@ import {
 
 // Bump this whenever availability/premium logic changes so old cached rows are
 // treated as misses instead of returning stale interpretations.
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 
 
 export interface DomainCheckResult {
