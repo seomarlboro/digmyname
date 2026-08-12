@@ -142,6 +142,22 @@ const DOH_ENDPOINTS = [
 /** Delay before each non-primary resolver is fired (index-aligned with DOH_ENDPOINTS). */
 const DOH_HEDGE_DELAY_MS = 400;
 
+/** Delay before the public rdap.org aggregator is fired alongside the registry
+ *  probe. MUST leave room for the aggregator to actually answer inside the
+ *  caller's budget: the API path allows 900ms total and rdap.org answers in
+ *  ~264ms at p50, so a 700ms hedge landed at ~964ms and could NEVER contribute —
+ *  we paid the wait and threw the answer away. At 250ms it lands ~514ms.
+ *  Tradeoff: more requests reach the free public aggregator on zones whose
+ *  registry RDAP is slower than this delay. */
+const RDAP_HEDGE_DELAY_MS = 250;
+
+/** How long a long-tail TLD may block on the IANA bootstrap download before
+ *  giving up and going straight to the aggregator. Same budget arithmetic as
+ *  RDAP_HEDGE_DELAY_MS: at 700ms inside a 900ms budget there was no time left
+ *  to ask anyone afterwards. Correctness is unchanged — an unresolved bootstrap
+ *  already falls through to the aggregator-only path. */
+const RDAP_BOOTSTRAP_WAIT_MS = 250;
+
 
 /**
  * Combine an optional caller signal with a per-probe timeout so a losing
@@ -481,12 +497,13 @@ async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapAnsw
     // Keep the bootstrap warming in the background for the long-tail zones.
     warmRdapBootstrap();
   } else {
-    // Never block on the bootstrap for more than 700ms — if it isn't warm yet we
-    // go straight to the public aggregator instead of stalling the whole batch.
+    // Never block on the bootstrap for more than RDAP_BOOTSTRAP_WAIT_MS — if it
+    // isn't warm yet we go straight to the public aggregator instead of stalling
+    // the whole batch past the caller's budget.
     const bootstrap = await Promise.race([
       warmRdapBootstrap(),
       new Promise<Map<string, string[]>>((res) => {
-        const id = setTimeout(() => res(new Map()), 700);
+        const id = setTimeout(() => res(new Map()), RDAP_BOOTSTRAP_WAIT_MS);
         Deno.unrefTimer?.(id);
       }),
     ]);
@@ -494,7 +511,7 @@ async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapAnsw
   }
 
   // Query the registry endpoint(s) and hedge with the public aggregator after
-  // 700ms instead of waiting out a full 3s timeout before falling back.
+  // RDAP_HEDGE_DELAY_MS instead of waiting out a full 3s timeout before falling back.
   const decisive = (p: Promise<RdapAnswer>) =>
     p.then((a) => (a.state === "unknown" ? PENDING_FOREVER<RdapAnswer>() : a));
 
@@ -507,7 +524,7 @@ async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapAnsw
   // On zones with no trustworthy RDAP server, the aggregator may only *confirm*
   // a registration — its 404s are downgraded to "unknown".
   const trustAggregator404 = bases.length > 0 || !AGGREGATOR_UNRELIABLE_TLDS.has(tld);
-  const aggregator = sleep(probes.length ? 700 : 0)
+  const aggregator = sleep(probes.length ? RDAP_HEDGE_DELAY_MS : 0)
     .then(() => rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000, sig))
     .then((a) => (a.state === "available" && !trustAggregator404 ? { state: "unknown" as RdapState } : a));
 
