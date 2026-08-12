@@ -816,8 +816,28 @@ export function isValidDomain(domain: string): boolean {
 
 
 // Tiered cache TTL (P4).
-function ttlSecondsFor(checkedVia: string, uncertain: boolean): number {
+//
+// The tier depends on the VERDICT as well as the source. "Taken" and "available"
+// decay at completely different rates:
+//
+//   • TAKEN is a stable fact. A registration cannot lapse without a 30-75 day
+//     expiry + redemption cycle, so which probe proved it is irrelevant to how
+//     long it stays true. Keying this on the source alone put 97.7% of taken
+//     names in the `dns` bucket at 30 minutes — measured against production,
+//     that bucket also had by far the highest re-check rate (19.0%, vs 7.4%
+//     rdap / 3.7% domainr), i.e. we were throwing away the one answer that was
+//     both cheapest to keep and most often asked for again.
+//
+//   • AVAILABLE is the volatile one — someone can register the name at any
+//     moment and a stale "available" sells a domain that is already gone.
+//     Its tiers are deliberately left as they were: re-checking 18 names that
+//     had been cached as available for 5-8 days found 0 that had since been
+//     taken, so there was no measured staleness to buy by shortening them.
+//     (Small sample: that bounds the 5-8 day staleness rate at roughly 17%, it
+//     does not prove it is zero. Revisit if a stale-price complaint ever lands.)
+function ttlSecondsFor(checkedVia: string, uncertain: boolean, available: boolean): number {
   if (uncertain) return 0; // never cache uncertain results
+  if (!available) return 24 * 60 * 60; // taken — stable regardless of source
   switch (checkedVia) {
     case "porkbun": return 24 * 60 * 60;             // 24h — authoritative pricing
     case "domainr": return 24 * 60 * 60;             // 24h — authoritative status
@@ -1075,6 +1095,18 @@ export async function checkDomains(
 
   const uncached = batch.filter((d) => !cachedMap.has(d));
 
+  // Cache telemetry. A hit publishes the cached row and never rewrites it, so
+  // hits leave NO trace in `domain_cache` — the hit rate cannot be recovered
+  // from SQL after the fact and has to be counted here. `l1` is the in-isolate
+  // hot cache and is expected to be ~0 while isolates are not reused; `l2` is
+  // the shared DB cache, which is the one a TTL change actually moves.
+  if (batch.length > 0) {
+    const l1 = batch.length - missAfterL1.length;
+    console.log(
+      `cache n=${batch.length} hit=${cachedMap.size} miss=${uncached.length} l1=${l1} l2=${cachedMap.size - l1}`
+    );
+  }
+
   // ---- Pass 1: free authoritative sources (RDAP + DNS) -----------------
   // Each domain publishes its own base verdict the moment it lands, so a caller
   // whose budget expires mid-batch can still serve the ones that finished.
@@ -1294,7 +1326,7 @@ export async function checkDomains(
   // Cache only trustworthy results, with tiered TTL.
   const cacheable = fresh
     .map((r) => {
-      let ttl = ttlSecondsFor(r.checkedVia, r.uncertain === true);
+      let ttl = ttlSecondsFor(r.checkedVia, r.uncertain === true, r.available);
       // premium-unverified "available" has no confirmed price — don't lock it in
       // for hours; re-check soon so a real price can attach on a warmer isolate.
       if (r.premiumUnverified) ttl = Math.min(ttl, 600);
