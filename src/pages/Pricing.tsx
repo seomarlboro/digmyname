@@ -227,6 +227,7 @@ const Pricing = () => {
               item: {
                 "@type": "Product",
                 name: `.${s.tld} domain registration`,
+                image: "https://digmyname.com/og-image.jpg",
                 category: "Domain name registration",
                 offers: {
                   "@type": "Offer",
