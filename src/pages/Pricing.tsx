@@ -228,6 +228,7 @@ const Pricing = () => {
                 "@type": "Product",
                 name: `.${s.tld} domain registration`,
                 image: "https://digmyname.com/og-image.jpg",
+                description: `First-year registration price for a .${s.tld} domain, cheapest of ${s.prices.length} registrars compared. Renewal and transfer prices are listed alongside, so the real multi-year cost is visible before you buy.`,
                 category: "Domain name registration",
                 offers: {
                   "@type": "Offer",
