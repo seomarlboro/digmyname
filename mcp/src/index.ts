@@ -129,6 +129,17 @@ function ttlForPath(path: string): number {
   return CACHE_TTL_MS;
 }
 
+/** An uncertain verdict means "we could not confirm", and the server gives it a
+ *  zero TTL on purpose so the next call can land a real answer. Caching it here
+ *  made UNKNOWN sticky for 30s — long enough that a whole conversation kept
+ *  seeing a verdict the API had already replaced. A /search response is cached
+ *  as one unit, so a single uncertain row keeps the whole batch out of cache. */
+function holdsUncertainVerdict(data: unknown): boolean {
+  const d = data as { result?: { uncertain?: boolean }; results?: Array<{ uncertain?: boolean }> };
+  if (d?.result?.uncertain) return true;
+  return Array.isArray(d?.results) && d.results.some((r) => r?.uncertain);
+}
+
 async function api<T>(path: string): Promise<T> {
   const cached = cacheGet(path);
   if (cached) return cached as T;
@@ -139,7 +150,7 @@ async function api<T>(path: string): Promise<T> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const data = await fetchApi(path);
-      cacheSet(path, data, ttlForPath(path));
+      if (!holdsUncertainVerdict(data)) cacheSet(path, data, ttlForPath(path));
       return data as T;
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));

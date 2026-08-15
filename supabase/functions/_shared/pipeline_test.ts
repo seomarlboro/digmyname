@@ -59,13 +59,23 @@ Deno.test("isLikelyBlocked: case-insensitive", () => {
   assert(isLikelyBlocked("MICROSOFT.software"));
 });
 
-Deno.test("isLikelyBlocked: ICANN Spec-5 reserved second-level labels are flagged", () => {
-  // These RDAP-404 + NXDOMAIN like a free name and are not premium suspects,
-  // so the list is the only thing standing between them and a priced buy_url.
-  for (const sld of ["afrinic", "apnic", "arin", "lacnic", "ripe", "nro", "iab",
-                     "iesg", "ietf", "irtf", "istf", "rssac", "ssac", "alac",
-                     "aso", "ccnso", "gac", "gnso", "rfc-editor", "example"]) {
-    assert(isLikelyBlocked(`${sld}.xyz`), `${sld} must be blocked`);
+Deno.test("isLikelyBlocked: registry-operations labels stay blocked", () => {
+  // Specification 5 "Reservations for Registry Operations" — these registries
+  // genuinely never hand out, and they RDAP-404 + NXDOMAIN like a free name.
+  for (const sld of ["iana", "icann", "internic", "nic", "rdds", "whois", "www"]) {
+    assert(isLikelyBlocked(`${sld}.xyz`), `${sld} must stay blocked`);
+  }
+});
+
+Deno.test("isLikelyBlocked: ICANN/IANA related names are NOT blocked (premise refuted 2026-08-15)", () => {
+  // Measured against the .xyz registry's own RDAP: these answer 200, i.e. they
+  // are registered by ordinary registrants, so they are registerable and the
+  // block list was hiding TAKEN names behind "Unverified" while refusing sales
+  // on the free ones. Re-adding them needs new evidence, not a hunch.
+  for (const sld of ["apnic", "arin", "aso", "gac", "gnso", "gtld-servers", "iab",
+                     "iesg", "irtf", "istf", "nro", "ripe", "root-servers", "ssac",
+                     "afrinic", "lacnic", "ietf", "example"]) {
+    assertEquals(isLikelyBlocked(`${sld}.xyz`), false, `${sld} must not be blocked`);
   }
 });
 

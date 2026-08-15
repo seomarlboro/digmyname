@@ -33,7 +33,10 @@ import {
 
 // Bump this whenever availability/premium logic changes so old cached rows are
 // treated as misses instead of returning stale interpretations.
-const CACHE_VERSION = 3;
+// 4 (2026-08-15): aggregator-404 trust, DoH NXDOMAIN-only and the narrowed
+// block list all change what a verdict MEANS, and the false available:true rows
+// they produced were cached for 6h. Old rows must be re-resolved, not reused.
+const CACHE_VERSION = 4;
 
 
 export interface DomainCheckResult {
@@ -1358,6 +1361,11 @@ export async function checkDomains(
             premium: pb.available ? (isPremium || undefined) : undefined,
             likelyPremium: isPremium || undefined,
             uncertain: undefined,
+            // Porkbun IS the registrar check `premiumUnverified` was waiting for.
+            // Once it answers with a price the flag is satisfied; for a taken
+            // name it is moot. Carrying it forward next to a verified price told
+            // the card to show "Check price" over a $ figure we had confirmed.
+            premiumUnverified: pb.available && price == null ? fresh[idx].premiumUnverified : undefined,
           };
         }
       }

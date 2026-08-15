@@ -107,17 +107,20 @@ const BLOCKED_SLDS = new Set<string>([
   // Registry-operations labels (ICANN base RA Specification 5, "Reservations
   // for Registry Operations").
   "iana", "icann", "internic", "nic", "rdds", "whois", "www",
-  // ICANN / IANA related names reserved at the second level in every gTLD
-  // (Specification 5, "ICANN and IANA Related Names"; plus the reserved
-  // "example" label). These answer RDAP-404 + DNS-NXDOMAIN exactly like a free
-  // name and most are 6+ chars, so they are not premium suspects either — with
-  // the narrowed third-signal escalation nothing else stops them being sold.
-  // Without this list `afrinic.xyz` was returned available at $1.98 with a
-  // live buy_url (verified against the live API, 2026-08-12).
-  "afrinic", "alac", "apnic", "arin", "aso", "ccnso", "example", "gac",
-  "gnso", "gtld-servers", "iab", "iana-servers", "iesg", "ietf", "irtf",
-  "istf", "lacnic", "latnic", "nro", "rfc-editor", "ripe", "root-servers",
-  "rssac", "ssac",
+  // The "ICANN and IANA Related Names" group (afrinic, apnic, arin, ripe, nro,
+  // iab, ietf, ...) was added here on 2026-08-12 on the premise that registries
+  // never release those labels. That premise is FALSE and was retired on
+  // 2026-08-15: queried against the .xyz registry's own RDAP, 14 of the 24
+  // labels answer 200 — apnic, arin, aso, gac, gnso, gtld-servers, iab, iesg,
+  // irtf, istf, nro, ripe, root-servers and ssac are registered by ordinary
+  // registrants, and Porkbun prices the rest. Blocking them hid TAKEN names
+  // behind "Unverified" and refused sales on registerable ones, while the two
+  // request paths disagreed on which it was. They now go through the normal
+  // three-signal pipeline like any other name.
+  //
+  // What stays above is the group registries genuinely never hand out:
+  // registry-operations labels (Specification 5 §"Reservations for Registry
+  // Operations") plus the DPML brand set.
 ]);
 
 export function isLikelyBlocked(domain: string): boolean {
