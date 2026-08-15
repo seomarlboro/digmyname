@@ -28,7 +28,12 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-const DEFAULT_TLDS = ["com", "io", "ai", "app", "dev", "co", "net", "org", "xyz", "me", "so", "tech"];
+// `.so` was dropped 2026-08-15: it has no RDAP server at all (absent from the
+// IANA bootstrap, no registry endpoint), so the only free signals are DNS plus a
+// 404 from an aggregator that cannot route the zone — not enough to call a name
+// free. Confirming it needs the paid third signal, which the traffic does not
+// justify yet. Explicit `?tlds=so` still works and still escalates.
+const DEFAULT_TLDS = ["com", "io", "ai", "app", "dev", "co", "net", "org", "xyz", "me", "tech"];
 // Prices older than this are treated as untrusted and fall through to the
 // "Check price" state rather than being shown as fact. The weekly cron keeps
 // core TLDs fresh; only genuinely stale long-tail rows drop out.

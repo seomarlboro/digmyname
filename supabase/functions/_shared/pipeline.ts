@@ -486,6 +486,31 @@ export const FAST_RDAP_EXCEPTIONS = new Set(["io", "us"]);
  */
 export const AGGREGATOR_UNRELIABLE_TLDS = new Set(["co", "me"]);
 
+/**
+ * May a 404 from the public aggregator be read as "this name is not registered"?
+ *
+ * ONLY when the aggregator can actually route the zone. `rdap.org` resolves a
+ * TLD through the IANA bootstrap; for a zone that is not in that file it answers
+ * 404 to EVERY name, registered or not. Verified live 2026-08-15: `github.io`,
+ * `vercel.io`, `gaming.gg`, `google.so` and `verisign.us` — all registered — each
+ * returned 404, while `facebook.com` returned a 302 to the registry.
+ *
+ * That is why FAST_RDAP_EXCEPTIONS matters here: `io` and `us` have a hand-written
+ * registry endpoint precisely BECAUSE they are absent from the bootstrap, so the
+ * aggregator cannot speak for them either. Reading its 404 as "free" there sold
+ * registered names.
+ *
+ * `bootstrapBaseCount` is how many registry endpoints the bootstrap yielded for
+ * this zone. Zero means either "no RDAP for this TLD" or "bootstrap not warm yet";
+ * both are absence of evidence, so both fail closed.
+ */
+export function trustsAggregator404(tld: string, bootstrapBaseCount: number): boolean {
+  const routableByAggregator = FAST_RDAP[tld]
+    ? !FAST_RDAP_EXCEPTIONS.has(tld)
+    : bootstrapBaseCount > 0;
+  return routableByAggregator && !AGGREGATOR_UNRELIABLE_TLDS.has(tld);
+}
+
 async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapAnswer> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
 
@@ -521,9 +546,9 @@ async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapAnsw
 
   const probes = bases.map((base) => rdapQueryOnce(`${base}/domain/${domain}`, 3000, sig));
 
-  // On zones with no trustworthy RDAP server, the aggregator may only *confirm*
-  // a registration — its 404s are downgraded to "unknown".
-  const trustAggregator404 = bases.length > 0 || !AGGREGATOR_UNRELIABLE_TLDS.has(tld);
+  // On zones the aggregator cannot route, it may only *confirm* a registration —
+  // its 404s are downgraded to "unknown". See trustsAggregator404.
+  const trustAggregator404 = trustsAggregator404(tld, bases.length);
   const aggregator = sleep(probes.length ? RDAP_HEDGE_DELAY_MS : 0)
     .then(() => rdapQueryOnce(`https://rdap.org/domain/${domain}`, 3000, sig))
     .then((a) => (a.state === "available" && !trustAggregator404 ? { state: "unknown" as RdapState } : a));
@@ -996,6 +1021,18 @@ function buildCacheRow(r: DomainCheckResult, ttl: number) {
 // completes should trigger ONE RDAP fetch, not one per request.
 const warmingYears = new Set<string>();
 
+/** A Pass-1 verdict that Pass 2 (the paid third signal) still has to settle:
+ *  anything uncertain, a premium suspect read as available, or an available name
+ *  whose SLD sits on the brand/registry block list. Used BOTH to pick the
+ *  escalation set and to decide whether Pass 1 may publish a preliminary
+ *  available:true — those two must always agree. */
+export function willEscalateToThirdSignal(r: DomainCheckResult): boolean {
+  return (
+    shouldEscalateToDomainr({ ...r, likelyPremium: r.likelyPremium ?? isLikelyPremium(r.domain) }) ||
+    (r.available && isLikelyBlocked(r.domain))
+  );
+}
+
 /**
  * Core pipeline. Accepts raw domain strings, filters invalid ones, resolves
  * availability/pricing and returns results in the same order as the (valid)
@@ -1118,6 +1155,13 @@ export async function checkDomains(
         publish({ domain: r.domain, available: false, checkedVia: r.checkedVia, uncertain: true, uncertainReason: "brand_protected" });
       } else if (r.uncertain && isLikelyBlocked(r.domain)) {
         publish({ ...r, uncertainReason: "brand_protected" });
+      } else if (r.available && willEscalateToThirdSignal(r)) {
+        // Pass 2 exists for this name precisely because Pass 1 cannot settle it
+        // (registry-reserved / premium suspect). A caller whose budget expires
+        // reads `partial` as the FINAL answer, so the preliminary read has to be
+        // the cautious one — publishing available:true here sold reserved names
+        // (`test.dev`, `mail.dev`) whenever Pass 2 missed the 900ms API budget.
+        publish({ domain: r.domain, available: false, checkedVia: r.checkedVia, uncertain: true });
       } else {
         publish(r);
       }
@@ -1127,11 +1171,10 @@ export async function checkDomains(
 
 
   // ---- Pass 2: third signal, only where it adds value ------------------
+  // Same predicate the Pass-1 publish uses, so the preliminary verdict and the
+  // escalation set can never drift apart.
   const needsThirdSignal = baseResults
-    .filter((r) =>
-      shouldEscalateToDomainr({ ...r, likelyPremium: r.likelyPremium ?? isLikelyPremium(r.domain) }) ||
-      (r.available && isLikelyBlocked(r.domain))
-    )
+    .filter(willEscalateToThirdSignal)
     .map((r) => r.domain);
 
   // Cost telemetry: each escalated domain = one paid Fastly "Precise Status" call.

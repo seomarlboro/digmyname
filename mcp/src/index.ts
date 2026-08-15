@@ -20,7 +20,7 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://api.digmyname.com/functions/v1/public-api";
 
-const VERSION = "1.2.9";
+const VERSION = "1.2.10";
 const USER_AGENT = `domain-check-skills-mcp/${VERSION} (+https://digmyname.com/mcp)`;
 const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
 const PRICING_TTL_MS = 6 * 60 * 60 * 1000;
@@ -261,7 +261,7 @@ registerTool(
     tlds: z
       .string()
       .optional()
-      .describe("Optional comma-separated TLDs without dots, e.g. 'com,io,ai'. Omit to use a curated default set of 12 popular TLDs. Whitespace is ignored."),
+      .describe("Optional comma-separated TLDs without dots, e.g. 'com,io,ai'. Omit to use a curated default set of 11 popular TLDs. Whitespace is ignored."),
   },
   async ({ query, tlds }) => {
     const qs = new URLSearchParams({ q: query.trim().toLowerCase() });

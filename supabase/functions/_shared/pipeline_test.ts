@@ -2,7 +2,7 @@
 // Run with: deno test supabase/functions/_shared/pipeline_test.ts
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { interpretDomainr, isLikelyBlocked } from "./availability-rules.ts";
-import { isLikelyPremium } from "./pipeline.ts";
+import { isLikelyPremium, trustsAggregator404, willEscalateToThirdSignal } from "./pipeline.ts";
 
 // ---- interpretDomainr -------------------------------------------------------
 
@@ -203,4 +203,58 @@ Deno.test("pass2 branch3 inert when third signal disabled → falls through to b
   const base = { domain: "noiz.xyz", available: true, checkedVia: "rdap", likelyPremium: true };
   assertEquals(resolvePass2NoVerdict(base, { thirdSignalEnabled: false, fastlyKey: true }), base);
   assertEquals(resolvePass2NoVerdict(base, { thirdSignalEnabled: true, fastlyKey: false }), base);
+});
+
+// ---- trustsAggregator404 (P0, 2026-08-15) -----------------------------------
+// rdap.org answers 404 for EVERY name in a zone it cannot route. Verified live:
+// github.io, vercel.io, gaming.gg, google.so, verisign.us — all registered, all
+// 404. Only zones the IANA bootstrap maps may have that 404 read as "free".
+
+Deno.test("trustsAggregator404: bootstrap-mapped fast zone → 404 means free", () => {
+  assertEquals(trustsAggregator404("com", 1), true);
+  assertEquals(trustsAggregator404("xyz", 1), true);
+});
+
+Deno.test("trustsAggregator404: FAST_RDAP exceptions (io, us) are NOT in the bootstrap → never trust the aggregator", () => {
+  // Regression: `gaming.gg` was sold as available $51.80 and every registered
+  // .io without DNS records was one hedge away from the same fate.
+  assertEquals(trustsAggregator404("io", 1), false);
+  assertEquals(trustsAggregator404("us", 1), false);
+});
+
+Deno.test("trustsAggregator404: zone with no RDAP base at all → never trust", () => {
+  assertEquals(trustsAggregator404("gg", 0), false);
+  assertEquals(trustsAggregator404("so", 0), false);
+});
+
+Deno.test("trustsAggregator404: a cold bootstrap (0 bases) fails closed even for a real zone", () => {
+  assertEquals(trustsAggregator404("dance", 0), false);
+});
+
+Deno.test("trustsAggregator404: .co/.me stay untrusted regardless of bases", () => {
+  assertEquals(trustsAggregator404("co", 1), false);
+  assertEquals(trustsAggregator404("me", 2), false);
+});
+
+// ---- willEscalateToThirdSignal (P0, 2026-08-15) -----------------------------
+// Pass 1 may only publish a preliminary available:true for names Pass 2 will NOT
+// revisit — a caller whose budget expires serves that preliminary read as final.
+
+Deno.test("willEscalateToThirdSignal: premium suspect read as available → escalates (no preliminary sale)", () => {
+  assert(willEscalateToThirdSignal({ domain: "test.dev", available: true, checkedVia: "rdap", likelyPremium: true }));
+});
+
+Deno.test("willEscalateToThirdSignal: uncertain always escalates", () => {
+  assert(willEscalateToThirdSignal({ domain: "anything.com", available: false, checkedVia: "rdap", uncertain: true }));
+});
+
+Deno.test("willEscalateToThirdSignal: blocked SLD read as available → escalates", () => {
+  assert(willEscalateToThirdSignal({ domain: "visa.xyz", available: true, checkedVia: "rdap" }));
+});
+
+Deno.test("willEscalateToThirdSignal: plain available name does NOT escalate (stays fast + free)", () => {
+  assertEquals(
+    willEscalateToThirdSignal({ domain: "kirillsdomainidea2026.com", available: true, checkedVia: "rdap" }),
+    false,
+  );
 });

@@ -46,8 +46,11 @@ export const TLD_LIST: TLD[] = [
   { extension: "me", regPrice: 5.99, renewPrice: 19.99, features: ["Free SSL", "Instant activation"] },
   { extension: "cc", regPrice: 9.99, renewPrice: 12.99, features: ["Free SSL"] },
   { extension: "tv", regPrice: 29.99, renewPrice: 34.99, features: ["Free SSL"] },
-  { extension: "gg", regPrice: 49.99, renewPrice: 49.99, features: ["Free SSL", "Trending"] },
-  { extension: "so", regPrice: 29.99, renewPrice: 69.99, features: ["Free SSL"] },
+  // .gg and .so were removed 2026-08-15 — neither zone has an RDAP server (both
+  // absent from the IANA bootstrap), so availability there rests on DNS plus a
+  // 404 from an aggregator that cannot route the zone. That combination sold
+  // registered names (`gaming.gg`, registered 2020, was shown available $51.80).
+  // Re-add them only together with a paid third signal, if the demand appears.
   // E-commerce
   { extension: "shop", regPrice: 2.99, renewPrice: 34.99, features: ["Free SSL", "Trending"] },
   { extension: "store", regPrice: 3.99, renewPrice: 49.99, features: ["Free SSL"] },

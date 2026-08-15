@@ -1,7 +1,7 @@
 {
   "name": "domain-check-skills-mcp",
   "mcpName": "io.github.seomarlboro/domain-check-skills-mcp",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "description": "The fastest domain-availability MCP server — or the second, dispute it. Cached checks in ~170 ms, from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs, no API key. By DigMyName.",
   "license": "MIT",
   "type": "module",
