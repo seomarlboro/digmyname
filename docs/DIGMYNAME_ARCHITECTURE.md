@@ -77,6 +77,16 @@ This CANNOT be fixed at the speed layer — there is no faster authority. Solved
 
 .fm/.ly/.sh have the same problem (ccTLD, no RDAP) -> deliberately NOT added. .co stays (too valuable; flap killed by the cache).
 
+.gg and .so were REMOVED from the defaults on 2026-08-15 for the same reason (no RDAP at all): confirming them needs the paid third signal, and the traffic does not justify it. An explicit `?tlds=gg` still works and still escalates.
+
+## 4a. .io is deliberately outside the speed target (decided 2026-08-15)
+
+.io has a working registry RDAP but is NOT in the IANA bootstrap, so the public aggregator answers 404 for EVERY .io name — including registered ones (verified live: github.io, vercel.io). Reading that 404 as "free" is what sold registered names, so `trustsAggregator404()` now refuses it and the verdict waits for the real registry at rdap.identitydigital.services.
+
+That registry costs 0.83–1.11s cold, of which ~580ms is TCP + TLS handshake and only ~210–425ms is the registry itself. With isolates cold ~95% of the time there is no connection to reuse. Measured on the live API after the fix: 8 fresh .io names, 1 uncertain, and **0 of 8 under 1000ms** (1.11–1.50s wall).
+
+Decision: **accept it.** .io answers correctly and slowly; it is excluded from the 99% <1000ms target rather than being made fast by trusting a source that lies. Do NOT "optimise" this by re-trusting the aggregator's 404 or by dropping the registry probe — that is the exact regression, and `pipeline_test.ts` guards it.
+
 ## 5. Pricing subsystem
 
 - 6 registrars: Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, OVHcloud.
