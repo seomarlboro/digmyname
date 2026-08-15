@@ -184,21 +184,26 @@ async function dohProbe(endpoint: string, domain: string, timeoutMs: number, sig
         }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
       )
     );
-    let any = false;
     let hasRecords = false;
     let nxdomain = false;
     for (const data of responses) {
       if (!data) continue;
-      any = true;
       if (Array.isArray(data.Answer) && data.Answer.length > 0) hasRecords = true;
       // Status 3 = NXDOMAIN
       if (data.Status === 3) nxdomain = true;
     }
     // Records take precedence: a domain can have NS records but no A record.
     if (hasRecords) return "has_records";
-    // Only call it "no records" if at least one resolver explicitly answered NXDOMAIN.
+    // Only call it "no records" if at least one resolver explicitly answered
+    // NXDOMAIN. Anything else a resolver may hand back — SERVFAIL (Status 2,
+    // broken authoritative NS or bogus DNSSEC), REFUSED, or NOERROR with an
+    // empty Answer for both A and NS — is absence of evidence, not evidence of
+    // absence, and a registered name hits every one of those. Returning
+    // "no_records" there paired an RDAP 404 into a false available:true.
+    // An unregistered name gets a real NXDOMAIN from the TLD's servers, so the
+    // ordinary free-name path is unaffected.
     if (nxdomain) return "no_records";
-    return any ? "no_records" : "error";
+    return "error";
   } catch {
     return "error";
   }

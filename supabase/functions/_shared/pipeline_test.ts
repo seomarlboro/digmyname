@@ -258,3 +258,41 @@ Deno.test("willEscalateToThirdSignal: plain available name does NOT escalate (st
     false,
   );
 });
+
+// ---- DoH verdict shape (P1, 2026-08-15) -------------------------------------
+// Faithful re-model of dohProbe's decision over the A + NS responses. Guards the
+// rule stated in its comment: only an explicit NXDOMAIN counts as "no records".
+function dohVerdict(responses: Array<{ Status?: number; Answer?: unknown[] } | null>) {
+  let hasRecords = false;
+  let nxdomain = false;
+  for (const data of responses) {
+    if (!data) continue;
+    if (Array.isArray(data.Answer) && data.Answer.length > 0) hasRecords = true;
+    if (data.Status === 3) nxdomain = true;
+  }
+  if (hasRecords) return "has_records";
+  if (nxdomain) return "no_records";
+  return "error";
+}
+
+Deno.test("doh: explicit NXDOMAIN → no_records (the ordinary free name)", () => {
+  assertEquals(dohVerdict([{ Status: 3 }, { Status: 3 }]), "no_records");
+});
+
+Deno.test("doh: SERVFAIL is absence of evidence → error, never no_records", () => {
+  // A registered name whose authoritative NS is broken or DNSSEC-bogus answers
+  // SERVFAIL. Paired with an RDAP 404 the old fallback sold it as available.
+  assertEquals(dohVerdict([{ Status: 2 }, { Status: 2 }]), "error");
+});
+
+Deno.test("doh: NOERROR with an empty Answer → error, never no_records", () => {
+  assertEquals(dohVerdict([{ Status: 0, Answer: [] }, { Status: 0 }]), "error");
+});
+
+Deno.test("doh: records win over everything", () => {
+  assertEquals(dohVerdict([{ Status: 0, Answer: [{}] }, { Status: 3 }]), "has_records");
+});
+
+Deno.test("doh: no resolver answered → error", () => {
+  assertEquals(dohVerdict([null, null]), "error");
+});
