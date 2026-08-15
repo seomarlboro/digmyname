@@ -5,6 +5,14 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.10] — 2026-08-15
+
+### Fixed
+- Uncertain verdicts are no longer cached. The API gives them a zero TTL on purpose so a retry can land a real answer; holding them for 30s made an UNKNOWN stick for a whole conversation. A `search_domains` response is cached as one unit, so a single uncertain row keeps the batch out of cache.
+
+### Changed
+- `search_domains` describes the default set as 11 TLDs, matching the API after `.so` was dropped — that zone has no RDAP server, so availability there could not be confirmed from free signals.
+
 ## [1.2.9] — 2026-08-12
 
 ### Changed
