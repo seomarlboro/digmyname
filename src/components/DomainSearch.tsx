@@ -25,7 +25,7 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
 );
 import DomainCard from "@/components/DomainCard";
 
-import { generateDomainList, checkDomainsAvailability, checkDomainsFast, TLD_RANK, type DomainResult, type AvailabilityResponse } from "@/lib/domainData";
+import { generateDomainList, checkDomainsAvailability, checkDomainsFast, applyFastVerdict, TLD_RANK, type DomainResult, type AvailabilityResponse, type FastInfo } from "@/lib/domainData";
 
 /** Stable ordering key: TLD authority only. Never sort on available/uncertain/
  *  provisional/price — those mutate over a row's lifecycle and would reorder
@@ -192,27 +192,20 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
       // Step 2: Fast DNS pre-check — fired in the BACKGROUND (never awaited) so a
       // slow/large DNS batch can't delay the authoritative lookups below.
       // Split into small chunks so the first chunk lands in ~50-100ms.
+      // It is a pre-check only: applyFastVerdict never touches a row that has
+      // already left Checking (a fast chunk can land AFTER the authoritative
+      // batch) and never surfaces an uncertain DNS answer as a verdict.
       const FAST_CHUNK = 10;
-      const applyFast = (fastMap: Map<string, { available: boolean; uncertain: boolean }>) => {
+      const applyFast = (fastMap: Map<string, FastInfo>) => {
         if (cancelled || !fastMap.size) return;
         let anyConfident = false;
         setResults((prev) =>
           prev.map((r) => {
             const info = fastMap.get(r.domain);
             if (!info) return r;
-            const confident = !info.uncertain;
-            if (confident) anyConfident = true;
-            return {
-              ...r,
-              available: info.available,
-              uncertain: info.uncertain,
-              // Only graduate out of the spinner on a confident fast verdict. An
-              // uncertain fast answer (e.g. NXDOMAIN -> available:true + uncertain:true)
-              // stays in Checking until the authoritative batch confirms, so we never
-              // flash a priced "available" card or an amber card off a DNS-only probe.
-              checking: confident ? false : r.checking,
-              provisional: confident ? true : r.provisional,
-            };
+            const next = applyFastVerdict(r, info);
+            if (next !== r) anyConfident = true;
+            return next;
           })
         );
         // Only stop the stopwatch if a card actually left "Checking" with a real
@@ -220,8 +213,11 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
         if (anyConfident) markFirstAnswer();
       };
 
-      for (let i = 0; i < domainNames.length; i += FAST_CHUNK) {
-        const chunk = domainNames.slice(i, i + FAST_CHUNK);
+      // Rows hydrated from the session cache already show their verdict — a
+      // DNS pre-check for them has nothing to flip, so don't spend the probes.
+      const fastTargets = hydrated.filter((d) => d.checking).map((d) => d.domain);
+      for (let i = 0; i < fastTargets.length; i += FAST_CHUNK) {
+        const chunk = fastTargets.slice(i, i + FAST_CHUNK);
         void checkDomainsFast(chunk).then(applyFast).catch(() => {});
       }
 
@@ -254,7 +250,10 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
 
       const applyBatch = (slice: string[], resp: AvailabilityResponse) => {
         if (cancelled) return;
-        markFirstAnswer();
+        // The honest stopwatch stops on the first ANSWER. A batch that never
+        // reached the backend (503 / network error) only turns rows into
+        // "couldn't reach — Retry"; that is not an answer and must not stop it.
+        if (resp.results.size > 0) markFirstAnswer();
         const sliceSet = new Set(slice);
         setResults((prev) =>
           prev.map((r) => {

@@ -67,6 +67,10 @@ Each wrapper races the pipeline against a hard budget. On timeout it serves what
 - public-api: hardBudgetMs 900ms (core) / 1000ms (.co/.me); Fastly deadline 650/780ms.
 - check-domains: HARD_BUDGET_MS 8000ms; Fastly window 6000ms.
 
+### Website fetch lanes (DomainSearch.tsx) and their one invariant
+
+The site fires two lanes per search: a DNS-only pre-check (`/public-api/fast`, chunks of 10) so cards can flip early, and the authoritative `check-domains` lane (one request per top TLD, batches of 8 for the rest). The lanes race, and on a cold isolate a fast chunk can land AFTER the authoritative batch for the same names (measured live 2026-09-08: authoritative 0.9–1.9 s, slowest fast chunk 2.3 s). Invariant, enforced by `applyFastVerdict()` in `domainData.ts` and guarded by `fast-verdict.test.ts`: **the fast lane may only fill in a row that is still Checking, and an uncertain DNS answer never leaves Checking.** Before this rule the late chunk wrote `uncertain:true` over ten confirmed available:true cards ("Couldn't verify — sources disagreed"), with nothing left in flight to correct them. Rows hydrated from the session cache are not sent to the fast lane at all.
+
 ## 4. The .co / .me problem (a permanent architectural constraint)
 
 .co and .me have NO working public RDAP: not in the IANA bootstrap; rdap.nic.co is dead; rdap.org actively LIES (returns 404 even for registered .co names — verified live). So AGGREGATOR_UNRELIABLE_TLDS = {co, me}: a 404 from the aggregator on these zones is downgraded to unknown, never read as available.
@@ -183,6 +187,7 @@ Open (owner decides, all low priority):
 - npm package.json description still has unhedged "~170ms/fastest" — defer to next content MCP bump.
 - .co/.me flap on API/MCP path — by design (no RDAP, single slow Fastly authority).
 - Glama "related servers" — owner-only admin action, optional, low ROI.
+- The per-IP rate limiters in `check-domains` (30 req/min) and `public-api` (60 req/min) are in-memory per isolate, and isolates are not reused — measured 2026-09-08: 66+ check-domains requests from one IP inside a minute, zero 429s. They protect nothing today; if abuse ever matters they need a shared store. Note the arithmetic the site itself needs: an all-TLD search is 16 check-domains + 6 fast requests, and the 80 ms debounce fires a full wave on every keystroke of a normal typist — a working 30/min limiter would break the site on the second search.
 
 Parked / future:
 - Hosted SSE/Streamable-HTTP MCP endpoint for native Claude/ChatGPT connectors (needs OAuth 2.1).

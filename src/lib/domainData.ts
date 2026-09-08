@@ -181,8 +181,8 @@ export function generateDomainList(query: string, withVariations = false, allowe
  *  flip to a preliminary state before the authoritative RDAP/pricing check. */
 export async function checkDomainsFast(
   domains: string[]
-): Promise<Map<string, { available: boolean; uncertain: boolean }>> {
-  const resultMap = new Map<string, { available: boolean; uncertain: boolean }>();
+): Promise<Map<string, FastInfo>> {
+  const resultMap = new Map<string, FastInfo>();
   if (!domains.length) return resultMap;
 
   try {
@@ -200,6 +200,34 @@ export async function checkDomainsFast(
   }
 
   return resultMap;
+}
+
+/** Fast-probe verdict shape as returned by `/public-api/fast`. */
+export interface FastInfo {
+  available: boolean;
+  uncertain: boolean;
+}
+
+/** Merge a fast DNS-only answer into a result row.
+ *
+ *  The fast probe is a PRE-check: it may only fill in a row that is still
+ *  waiting for its authoritative verdict. Two rules keep it honest:
+ *   1. A row that has already left Checking (authoritative batch, or the
+ *      session cache) is never touched. The /fast chunk and the authoritative
+ *      batch race each other, and on a cold isolate the fast chunk can land
+ *      LAST (measured live 2026-09-08: authoritative 0.9-1.9 s, slowest fast
+ *      chunk 2.3 s). Letting it write `uncertain:true` over a confirmed
+ *      available:true turned ten confirmed cards into "Couldn't verify -
+ *      sources disagreed" with nothing left in flight to correct them.
+ *   2. An uncertain fast answer (NXDOMAIN -> available:true + uncertain:true)
+ *      is not a verdict the user may see: the row stays in Checking untouched
+ *      until the authoritative batch confirms it.
+ *  Returns the SAME object when nothing changes, so a caller can detect a
+ *  confident flip by identity. */
+export function applyFastVerdict(row: DomainResult, info: FastInfo): DomainResult {
+  if (!row.checking) return row;
+  if (info.uncertain) return row;
+  return { ...row, available: info.available, uncertain: false, checking: false, provisional: true };
 }
 
 export interface AvailabilityInfo {
