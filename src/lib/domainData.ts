@@ -180,7 +180,8 @@ export function generateDomainList(query: string, withVariations = false, allowe
 /** Fast DNS-only pre-check via public API. Returns in ~30-80ms so cards can
  *  flip to a preliminary state before the authoritative RDAP/pricing check. */
 export async function checkDomainsFast(
-  domains: string[]
+  domains: string[],
+  signal?: AbortSignal
 ): Promise<Map<string, FastInfo>> {
   const resultMap = new Map<string, FastInfo>();
   if (!domains.length) return resultMap;
@@ -189,14 +190,15 @@ export async function checkDomainsFast(
     const base = import.meta.env.VITE_SUPABASE_URL ?? "";
     if (!base) return resultMap;
     const url = `${base.replace(/\/$/, "")}/functions/v1/public-api/fast?domains=${encodeURIComponent(domains.join(","))}`;
-    const res = await fetch(url, { headers: { accept: "application/json" } });
+    const res = await fetch(url, { headers: { accept: "application/json" }, signal });
     if (!res.ok) return resultMap;
     const data = await res.json();
     for (const r of data.results ?? []) {
       resultMap.set(r.domain, { available: !!r.available, uncertain: !!r.uncertain });
     }
   } catch (err) {
-    if (import.meta.env.DEV) console.error("Fast check failed:", err);
+    // A superseded search aborting its own probes is expected, not a failure.
+    if (import.meta.env.DEV && !signal?.aborted) console.error("Fast check failed:", err);
   }
 
   return resultMap;
@@ -257,17 +259,20 @@ export interface AvailabilityResponse {
  *  when the batch failed to reach the backend, so callers can show Retry instead
  *  of an eternal spinner. */
 export async function checkDomainsAvailability(
-  domains: string[]
+  domains: string[],
+  signal?: AbortSignal
 ): Promise<AvailabilityResponse> {
   const results = new Map<string, AvailabilityInfo>();
 
   try {
     const { data, error } = await supabase.functions.invoke("check-domains", {
       body: { domains },
+      signal,
     });
 
     if (error) {
-      if (import.meta.env.DEV) console.error("Edge function error:", error);
+      // A superseded search aborting its own batch is expected, not a failure.
+      if (import.meta.env.DEV && !signal?.aborted) console.error("Edge function error:", error);
       return { ok: false, results };
     }
 
@@ -291,7 +296,7 @@ export async function checkDomainsAvailability(
 
     return { ok: true, results };
   } catch (err) {
-    if (import.meta.env.DEV) console.error("Failed to check domains:", err);
+    if (import.meta.env.DEV && !signal?.aborted) console.error("Failed to check domains:", err);
     return { ok: false, results };
   }
 }

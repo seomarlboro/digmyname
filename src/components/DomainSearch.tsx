@@ -44,6 +44,18 @@ interface DomainSearchProps {
 /** Per-entry lifetime of the session result cache. */
 const RESULT_CACHE_TTL_MS = 5 * 60 * 1000;
 
+/** Debounce for the DNS pre-check lane, measured from the last keystroke:
+ *  short so taken names flip while the user is still looking at the field. */
+const FAST_DEBOUNCE_MS = 80;
+/** Debounce for the authoritative lane, measured from the same keystroke.
+ *  Human typing sits at ~150-300 ms between keys, so at 80 ms every keystroke
+ *  of a normal typist fired a full 53-TLD authoritative wave — 16 requests,
+ *  plus paid Fastly calls for .co/.me on every wave and for every short prefix
+ *  (a 1-5 char SLD is a premium suspect on every TLD). 250 ms lets the fast
+ *  lane keep the instant feel while the authoritative wave fires once per
+ *  pause. The honest stopwatch counts this delay against us. */
+const AUTH_DEBOUNCE_MS = 250;
+
 const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const stickySearchRef = useRef<HTMLDivElement>(null);
@@ -111,7 +123,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
   }, [scrolled]);
 
   // ---- Honest speed measurement -------------------------------------------
-  // The clock starts on the LAST keystroke (so the 80 ms debounce is counted
+  // The clock starts on the LAST keystroke (so both debounces are counted
   // against us) and stops when the first availability answer lands on screen.
   const typingStopRef = useRef<number | null>(null);
   const [liveMs, setLiveMs] = useState<number | null>(null);
@@ -124,8 +136,9 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
     setLiveMs(null);
   }, []);
 
-  // Debounce: very short so results feel instant, but not so short that every
-  // keystroke triggers a request storm.
+  // Debounce, lane one: the DNS pre-check fires FAST_DEBOUNCE_MS after the last
+  // keystroke. The authoritative lane waits out AUTH_DEBOUNCE_MS inside the
+  // search effect below, so a superseded prefix never reaches the backend.
   useEffect(() => {
     if (!query.trim()) {
       setDebouncedQuery("");
@@ -141,7 +154,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
     setLiveMs(0);
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 80);
+    }, FAST_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -170,6 +183,11 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
     }
 
     let cancelled = false;
+    // One controller per search: when the query moves on, every request still
+    // in flight for the superseded query is aborted instead of finishing into
+    // the void (its result is already dropped via `cancelled`). Fewer stale
+    // requests on the wire = the current query's answers land sooner.
+    const ctl = new AbortController();
 
     const run = async () => {
       // Step 1: Show domains immediately with "checking" state
@@ -218,8 +236,14 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
       const fastTargets = hydrated.filter((d) => d.checking).map((d) => d.domain);
       for (let i = 0; i < fastTargets.length; i += FAST_CHUNK) {
         const chunk = fastTargets.slice(i, i + FAST_CHUNK);
-        void checkDomainsFast(chunk).then(applyFast).catch(() => {});
+        void checkDomainsFast(chunk, ctl.signal).then(applyFast).catch(() => {});
       }
+
+      // Debounce, lane two: wait out the rest of AUTH_DEBOUNCE_MS before the
+      // authoritative wave. If the query moves on meanwhile, this search is
+      // cancelled and the wave for the superseded prefix is never sent.
+      await new Promise<void>((resolve) => setTimeout(resolve, AUTH_DEBOUNCE_MS - FAST_DEBOUNCE_MS));
+      if (cancelled) return;
 
 
       // Step 3: Authoritative availability + pricing.
@@ -290,7 +314,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
       };
 
       const runBatch = async (slice: string[]) => {
-        const resp = await checkDomainsAvailability(slice);
+        const resp = await checkDomainsAvailability(slice, ctl.signal);
         applyBatch(slice, resp);
       };
 
@@ -307,7 +331,10 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
     };
 
     run();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      ctl.abort();
+    };
   }, [debouncedQuery, aiSuggestions, selectedTlds, markFirstAnswer, cacheResult]);
 
 
