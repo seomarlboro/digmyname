@@ -16,6 +16,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkDomains, isValidDomain, AGGREGATOR_UNRELIABLE_TLDS } from "../_shared/pipeline.ts";
 import { isLikelyBlocked } from "../_shared/availability-rules.ts";
+import { clientIpOf, createBudget } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,9 +44,19 @@ const SLD_RE = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const TLD_RE = /^[a-z]{2,24}(?:\.[a-z]{2,24})?$/;
 
 // ---------- rate limiting (in-memory, per edge instance) ----------
-const WINDOW_MS = 60_000;
+// Two budgets, logic in ../_shared/rate-limit.ts:
+//  • API endpoints (/check, /search, /registrars, /age): the documented
+//    60 requests / minute / IP — unchanged.
+//  • /fast: the website's DNS-only pre-check lane, six requests per keystroke
+//    wave (chunks of 10 domains). Sharing the API budget would have exhausted
+//    it inside one typed name the day the platform starts reusing isolates
+//    (measured 2026-09-08: it does not yet — zero 429s at 66+ req/min). Its own
+//    budget is counted in domains; a 429 there is harmless (cards wait for the
+//    authoritative lane) but must still never hit a real typist.
 const LIMIT = 60;
-const buckets = new Map<string, number[]>();
+const spendApiBudget = createBudget({ windowMs: 60_000, maxRequests: LIMIT, maxCost: Number.POSITIVE_INFINITY });
+const FAST_LIMIT = { windowMs: 60_000, maxRequests: 1200, maxCost: 10_000 };
+const spendFastBudget = createBudget(FAST_LIMIT);
 
 // ---------- registrar deeplinks (domain prefilled) ----------
 const REGISTRAR_LINKS: Record<string, (d: string) => string> = {
@@ -68,29 +79,9 @@ function registerUrl(registrar: string, domain?: string | null): string {
 const UTM = "utm_source=mcp&utm_medium=api&utm_campaign=domain-check-skills";
 
 
-function clientIp(req: Request): string {
-  const xff = req.headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
-  return req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || "anon";
-}
-
 function rateCheck(ip: string): { ok: boolean; retryAfter: number; remaining: number } {
-  const now = Date.now();
-  const arr = (buckets.get(ip) || []).filter((t) => now - t < WINDOW_MS);
-  if (arr.length >= LIMIT) {
-    const retryAfter = Math.ceil((WINDOW_MS - (now - arr[0])) / 1000);
-    buckets.set(ip, arr);
-    return { ok: false, retryAfter, remaining: 0 };
-  }
-  arr.push(now);
-  buckets.set(ip, arr);
-  // best-effort GC
-  if (buckets.size > 5000) {
-    for (const [k, v] of buckets) {
-      if (v.length === 0 || now - v[v.length - 1] > WINDOW_MS) buckets.delete(k);
-    }
-  }
-  return { ok: true, retryAfter: 0, remaining: LIMIT - arr.length };
+  const v = spendApiBudget(ip, 1);
+  return { ok: v.ok, retryAfter: v.retryAfterSec, remaining: v.remainingRequests };
 }
 
 // ---------- helpers ----------
@@ -353,7 +344,7 @@ const OPENAPI = {
     },
     "/fast": {
       get: {
-        summary: "Fast DNS-only availability signal",
+        summary: "Fast DNS-only availability signal (website pre-check lane; its own budget, not counted against the 60/min API limit)",
         parameters: [{ name: "domains", in: "query", required: true, schema: { type: "string", example: "myname.com,myname.io" } }],
         responses: { "200": { description: "Quick available/taken/uncertain signal" } },
       },
@@ -434,7 +425,38 @@ async function handleRequest(req: Request): Promise<Response> {
     return json(OPENAPI);
   }
 
-  const ip = clientIp(req);
+  const ip = clientIpOf(req, "anon");
+
+  // /fast spends its own domain-counted budget, never the documented API one.
+  if (path === "/fast") {
+    const raw = url.searchParams.get("domains") || url.searchParams.get("domain") || "";
+    const domains = raw
+      .split(",")
+      .map((d) => validateDomain(d))
+      .filter((d): d is string => !!d)
+      .slice(0, 24);
+    if (!domains.length) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400);
+    const fb = spendFastBudget(ip, domains.length);
+    if (!fb.ok) {
+      return json(
+        { error: "rate_limited", limit: FAST_LIMIT.maxRequests, window_seconds: 60, retry_after_seconds: fb.retryAfterSec },
+        429,
+        { "Retry-After": String(fb.retryAfterSec), "X-RateLimit-Limit": String(FAST_LIMIT.maxRequests), "X-RateLimit-Remaining": "0" },
+      );
+    }
+    try {
+      const results = await Promise.all(domains.map(async (domain) => ({ domain, ...(await fastStatus(domain)) })));
+      return json({ count: results.length, results }, 200, {
+        "X-RateLimit-Limit": String(FAST_LIMIT.maxRequests),
+        "X-RateLimit-Remaining": String(fb.remainingRequests),
+        "Cache-Control": "no-store",
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "unknown";
+      return json({ error: "internal_error", detail: msg.slice(0, 200) }, 500);
+    }
+  }
+
   const rl = rateCheck(ip);
   if (!rl.ok) {
     return json(
@@ -469,18 +491,6 @@ async function handleRequest(req: Request): Promise<Response> {
         200,
         rlHeaders,
       );
-    }
-
-    if (path === "/fast") {
-      const raw = url.searchParams.get("domains") || url.searchParams.get("domain") || "";
-      const domains = raw
-        .split(",")
-        .map((d) => validateDomain(d))
-        .filter((d): d is string => !!d)
-        .slice(0, 24);
-      if (!domains.length) return json({ error: "invalid_domain", hint: "Use form 'name.tld', a-z 0-9 - only." }, 400, rlHeaders);
-      const results = await Promise.all(domains.map(async (domain) => ({ domain, ...(await fastStatus(domain)) })));
-      return json({ count: results.length, results }, 200, { ...rlHeaders, "Cache-Control": "no-store" });
     }
 
     if (path === "/check") {

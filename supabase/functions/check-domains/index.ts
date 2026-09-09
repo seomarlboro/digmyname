@@ -3,6 +3,7 @@
 // `public-api` can call it in-process (no edge→edge hop) and share the same
 // warm module-level caches.
 import { checkDomains, isValidDomain, type DomainCheckResult } from "../_shared/pipeline.ts";
+import { clientIpOf, createBudget } from "../_shared/rate-limit.ts";
 
 // Backwards-compat re-exports (tests and any external importers).
 export {
@@ -28,49 +29,18 @@ const corsHeaders = {
 };
 
 // ---------------------------------------------------------------------------
-// Lightweight per-IP rate limiter (in-memory, sliding window).
-// Each isolate gets its own counter — good enough to stop trivial abuse
-// without external infra.
+// Per-IP budget (in-memory, sliding window, per isolate). Counted in DOMAINS,
+// not requests: the website sends one request per top TLD plus batches of 8
+// (16 requests for a 53-TLD search, 318 domains with AI variations on), so the
+// old 30-requests/min cap would have failed it on the second search the day
+// the platform starts reusing isolates. The request cap bounds a flood of
+// 1-domain requests. Logic and tests live in ../_shared/rate-limit.ts.
 // ---------------------------------------------------------------------------
-const RATE_LIMIT_MAX = 30;            // requests
-const RATE_LIMIT_WINDOW_MS = 60_000;  // per minute
-const rateBuckets = new Map<string, number[]>();
-
-function clientIp(req: Request): string {
-  const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return req.headers.get("cf-connecting-ip") ?? req.headers.get("x-real-ip") ?? "unknown";
-}
-
-function rateLimited(req: Request): boolean {
-  const ip = clientIp(req);
-  const now = Date.now();
-  const window = rateBuckets.get(ip) ?? [];
-  const recent = window.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-  if (recent.length >= RATE_LIMIT_MAX) {
-    rateBuckets.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  rateBuckets.set(ip, recent);
-  // Best-effort cleanup to prevent unbounded growth.
-  if (rateBuckets.size > 5000) {
-    for (const [k, v] of rateBuckets) {
-      if (v.every((t) => now - t > RATE_LIMIT_WINDOW_MS)) rateBuckets.delete(k);
-    }
-  }
-  return false;
-}
+const RATE_LIMIT = { windowMs: 60_000, maxRequests: 600, maxCost: 4000 };
+const spendBudget = createBudget(RATE_LIMIT);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-
-  if (rateLimited(req)) {
-    return new Response(JSON.stringify({ error: "Too many requests" }), {
-      status: 429,
-      headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
-    });
-  }
 
   try {
     const { domains } = (await req.json()) as { domains: string[] };
@@ -81,12 +51,32 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (domains.slice(0, 50).filter(isValidDomain).length === 0) {
+    const validOrder = domains.slice(0, 50).filter(isValidDomain);
+    if (validOrder.length === 0) {
       return new Response(JSON.stringify({ error: "No valid domains provided" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // The budget is spent per valid domain, so the request is parsed first.
+    const quota = spendBudget(clientIpOf(req), validOrder.length);
+    if (!quota.ok) {
+      return new Response(JSON.stringify({ error: "Too many requests" }), {
+        status: 429,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          "Retry-After": String(quota.retryAfterSec),
+          "X-RateLimit-Limit": String(RATE_LIMIT.maxRequests),
+          "X-RateLimit-Remaining": "0",
+        },
+      });
+    }
+    const quotaHeaders = {
+      "X-RateLimit-Limit": String(RATE_LIMIT.maxRequests),
+      "X-RateLimit-Remaining": String(quota.remainingRequests),
+    };
 
     // Wall-clock budget: on a cold isolate a slow zone (.co/.me via the third
     // signal) can run long. We race the full pipeline against a hard budget and,
@@ -97,7 +87,6 @@ Deno.serve(async (req) => {
     const THIRD_SIGNAL_WINDOW_MS = 6000;
 
     const partialSink = new Map<string, DomainCheckResult>();
-    const validOrder = domains.slice(0, 50).filter(isValidDomain);
 
     const pipeline = checkDomains(domains, {
       partialSink,
@@ -140,7 +129,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ results }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, ...quotaHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
     console.error("check-domains error:", err instanceof Error ? err.message : "Unknown error");

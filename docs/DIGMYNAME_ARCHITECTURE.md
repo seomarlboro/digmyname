@@ -187,7 +187,7 @@ Open (owner decides, all low priority):
 - npm package.json description still has unhedged "~170ms/fastest" — defer to next content MCP bump.
 - .co/.me flap on API/MCP path — by design (no RDAP, single slow Fastly authority).
 - Glama "related servers" — owner-only admin action, optional, low ROI.
-- The per-IP rate limiters in `check-domains` (30 req/min) and `public-api` (60 req/min) are in-memory per isolate, and isolates are not reused — measured 2026-09-08: 66+ check-domains requests from one IP inside a minute, zero 429s. They protect nothing today; if abuse ever matters they need a shared store. Note the arithmetic the site itself needs: an all-TLD search is 16 check-domains + 6 fast requests, and the 80 ms debounce fires a full wave on every keystroke of a normal typist — a working 30/min limiter would break the site on the second search.
+- Per-IP rate limiters are in-memory per isolate, and isolates are not reused — measured 2026-09-08: 66+ check-domains requests from one IP inside a minute, zero 429s. They only bite if the platform starts reusing isolates, so since 2026-09-10 they are sized so that day cannot break the site: `_shared/rate-limit.ts` (tested) counts DOMAINS with a request cap on top — check-domains 4000 domains + 600 requests / min / IP (an all-TLD search is 16 requests / 53 domains, 318 domains with AI variations), `/fast` has its own 10 000 domains + 1200 requests / min budget, and the documented 60 req/min stays for the API endpoints. A working shared-store limiter is still an open item if abuse ever matters.
 
 Parked / future:
 - Hosted SSE/Streamable-HTTP MCP endpoint for native Claude/ChatGPT connectors (needs OAuth 2.1).
