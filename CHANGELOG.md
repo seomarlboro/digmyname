@@ -2,6 +2,15 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-10 — Registrar price coverage (edge: fetch-registrar-prices)
+
+### Changed
+- The weekly price refresh reads three registrars' **own pages** in addition to tldspy: Namecheap's full TLD list (one server-rendered table), OVHcloud's per-TLD pages (the embedded `tldPrices` blob) and GoDaddy's per-TLD pages ("Starting at <s>regular</s> promo /1st yr"; a promo that needs a multi-year term is not recorded as the first-year price). tldspy's per-registrar pages only ever listed ~17 core TLDs per registrar, which is why 35 of 53 extensions had Porkbun-only prices; its per-TLD pages are members-only, so they cannot fill the gap.
+- Porkbun's public catalog is now written for every tracked TLD, not only as a gap-fill.
+- Direct fetch first, Firecrawl raw-HTML fallback second (capped at 24 fallbacks per run) so a bot wall on one registrar costs credits but not coverage.
+- `{ "dryRun": true, "tlds": [...], "sources": [...] }` in the request body reports what every source would write — per-source fetched/parsed counts, samples and errors — without touching the table.
+- Parsers live in `parsers.ts` with fixtures captured from the real pages (`fixtures/`) and Deno tests (`parsers_test.ts`).
+
 ## 2026-09-10 — Usable before JavaScript, faster first answer (frontend)
 
 ### Changed
