@@ -298,7 +298,7 @@ export const FeatureCard = ({
     </div>
     <div className="min-w-0 flex-1">
       {index && (
-        <span className="absolute right-5 top-5 font-mono text-xs text-muted-foreground/70">
+        <span className="absolute right-5 top-5 font-mono text-xs text-muted-foreground">
           {index}
         </span>
       )}
@@ -477,7 +477,7 @@ export const CalloutBlock = ({
             </div>
           ))}
         <div className="min-w-0 flex-1">
-          <h2 className={cn("tracking-tight text-primary", hero ? "text-xl font-semibold sm:text-2xl" : "text-lg font-medium")}>
+          <h2 className={cn("tracking-tight text-primary dark:text-violet", hero ? "text-xl font-semibold sm:text-2xl" : "text-lg font-medium")}>
             {title}
           </h2>
           {body && <p className="mt-1 text-sm text-muted-foreground">{body}</p>}

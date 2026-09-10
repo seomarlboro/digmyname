@@ -114,7 +114,9 @@
     --popover: 230 22% 8%;
     --popover-foreground: 210 25% 94%;
 
-    --primary: 254 90% 66%;
+    /* 64 % → white text on primary buttons reads at 4.9:1 (66 % was 4.46, just under AA).
+       Primary as TEXT on dark cards stays below AA — use `dark:text-violet` for text. */
+    --primary: 254 90% 64%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 230 18% 14%;
@@ -134,7 +136,7 @@
 
     --border: 230 18% 16%;
     --input: 230 18% 16%;
-    --ring: 254 90% 66%;
+    --ring: 254 90% 64%;
 
     --hero-bg: 232 28% 6%;
     --search-bg: 230 20% 13%;
@@ -147,12 +149,12 @@
 
     --sidebar-background: 232 28% 5%;
     --sidebar-foreground: 210 25% 94%;
-    --sidebar-primary: 254 90% 66%;
+    --sidebar-primary: 254 90% 64%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 230 18% 14%;
     --sidebar-accent-foreground: 210 25% 94%;
     --sidebar-border: 230 18% 16%;
-    --sidebar-ring: 254 90% 66%;
+    --sidebar-ring: 254 90% 64%;
   }
 }
 

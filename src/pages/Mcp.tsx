@@ -150,12 +150,14 @@ const Mcp = () => {
                 Cloudflare edge cache: repeat domain lookups return in ~70 ms, first-time lookups run
                 the full live check (~170 ms first answer, ~370 ms typical full pipeline).
                 <span className="mt-5 flex flex-wrap items-center gap-2">
-                  {/* Live figures stay as shields.io images; the three static badges are plain markup (three fewer third-party requests). */}
+                  {/* Live figures stay as shields.io images; the three static badges are plain markup (three fewer third-party requests).
+                      width/height reserve the badge's footprint before it loads — without them the row re-wrapped on
+                      load and pushed the stat grid down (CLS 0.10 on mobile). */}
                   <a href={NPM_URL} target="_blank" rel="noopener noreferrer">
-                    <img className="h-5 w-auto" height={20} loading="lazy" decoding="async" alt="npm version of domain-check-skills-mcp" src="https://img.shields.io/npm/v/domain-check-skills-mcp?color=6d28d9&label=npm&logo=npm" />
+                    <img className="h-5 w-auto" width={105} height={20} loading="lazy" decoding="async" alt="npm version of domain-check-skills-mcp" src="https://img.shields.io/npm/v/domain-check-skills-mcp?color=6d28d9&label=npm&logo=npm" />
                   </a>
                   <a href={NPM_URL} target="_blank" rel="noopener noreferrer">
-                    <img className="h-5 w-auto" height={20} loading="lazy" decoding="async" alt="monthly npm downloads" src="https://img.shields.io/npm/dm/domain-check-skills-mcp?color=10b981&label=downloads" />
+                    <img className="h-5 w-auto" width={144} height={20} loading="lazy" decoding="async" alt="monthly npm downloads" src="https://img.shields.io/npm/dm/domain-check-skills-mcp?color=10b981&label=downloads" />
                   </a>
                   <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="static-badge">
                     <span className="static-badge-key">license</span><span className="static-badge-value bg-[#2563eb]">MIT</span>
@@ -164,7 +166,7 @@ const Mcp = () => {
                     <span className="static-badge-key">MCP</span><span className="static-badge-value bg-[#7c3aed]">compatible</span>
                   </span>
                   <span className="static-badge">
-                    <span className="static-badge-key">free</span><span className="static-badge-value bg-[#16a34a]">no API key</span>
+                    <span className="static-badge-key">free</span><span className="static-badge-value bg-[#15803d]">no API key</span>
                   </span>
                 </span>
               </>
@@ -221,7 +223,7 @@ const Mcp = () => {
                       <Badge variant="outline" className="text-xs">
                         {f.badge}
                       </Badge>
-                      <span className="text-sm text-primary inline-flex items-center gap-1 group-hover:gap-2 transition-all font-medium">
+                      <span className="text-sm text-primary dark:text-violet inline-flex items-center gap-1 group-hover:gap-2 transition-all font-medium">
                         Install <ArrowUpRight className="w-4 h-4" />
                       </span>
                     </>
@@ -277,7 +279,7 @@ const Mcp = () => {
                   title={
                     <span className="flex flex-wrap items-baseline gap-2">
                       {t.name}
-                      <span className="text-sm font-normal text-muted-foreground/70">{t.sig}</span>
+                      <span className="text-sm font-normal text-muted-foreground">{t.sig}</span>
                     </span>
                   }
                 >
