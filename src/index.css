@@ -238,9 +238,14 @@
 
   .btn-gradient {
     background: linear-gradient(135deg, hsl(var(--aurora-mint)), hsl(var(--aurora-violet)));
-    color: hsl(232 28% 8%);
+    /* Light theme: the gradient stops are deep (mint 42 %, violet 58 %), so the label is white.
+       Dark theme: the stops are bright, so the label is the dark ink. */
+    color: hsl(0 0% 100%);
     font-weight: 600;
     transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .dark .btn-gradient {
+    color: hsl(232 28% 8%);
   }
 
   .btn-gradient:hover {
@@ -571,36 +576,19 @@
   }
 
   /* Mint-glow elevation — reusable at-rest glow for STATIC surfaces only (never search/results) */
-  /* Accent panel (the /speed claim): dark glass with the aurora glowing behind it,
-     a luminous top edge and a soft violet drop glow. Light mode keeps the same
-     composition at lower intensity. */
+  /* Accent panel (the /speed claim): glass surface, thin mint-tinted border and a
+     luminous hairline along the top edge. No glow — the type and the number carry it. */
   .claim-panel {
     position: relative;
     overflow: hidden;
     border-radius: 32px;
     border: 1px solid hsl(var(--aurora-mint) / 0.22);
     background-color: hsl(var(--card));
-    box-shadow: 0 30px 80px -30px hsl(var(--aurora-violet) / 0.35);
   }
   .dark .claim-panel {
     background-color: hsl(var(--card) / 0.6);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 40px 100px -30px hsl(var(--aurora-violet) / 0.5), 0 0 60px -20px hsl(var(--aurora-mint) / 0.25);
-  }
-  .claim-panel::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-      radial-gradient(70% 60% at 0% 0%, hsl(var(--aurora-mint) / 0.16), transparent 62%),
-      radial-gradient(65% 70% at 100% 100%, hsl(var(--aurora-violet) / 0.2), transparent 62%);
-  }
-  .dark .claim-panel::before {
-    background:
-      radial-gradient(70% 60% at 0% 0%, hsl(var(--aurora-mint) / 0.28), transparent 62%),
-      radial-gradient(65% 70% at 100% 100%, hsl(var(--aurora-violet) / 0.36), transparent 62%);
   }
   .claim-panel::after {
     content: "";
