@@ -108,6 +108,45 @@ export function parseNamecheapTldList(html: string, tracked: ReadonlySet<string>
   return out;
 }
 
+/**
+ * The same Namecheap table as Firecrawl renders it in markdown:
+ *   | .com* | gTLD | — | The King of domains | $11.28 Sale 25% off 1st year $14.98 | $18.48 | $11.48 Sale … | $0.20 | … |
+ * Column order is fixed by the page: TLD, Type, Country, Description, Register, Renew, Transfer, ICANN Fee, Features.
+ */
+export function parseNamecheapMarkdown(markdown: string, tracked: ReadonlySet<string>): ParsedPrice[] {
+  const out: ParsedPrice[] = [];
+  for (const line of markdown.split("\n")) {
+    if (!line.trim().startsWith("|")) continue;
+    const cells = line.split("|").slice(1, -1).map((c) => c.replace(/\\\*/g, "*").trim());
+    if (cells.length < 8) continue;
+    const tld = cells[0].replace(/[\s*]/g, "").replace(/^\./, "").toLowerCase();
+    if (!/^[a-z.]+$/.test(tld) || !tracked.has(tld)) continue;
+    const reg = dollarFigures(cells[4])[0];
+    const renew = dollarFigures(cells[5])[0];
+    const transfer = dollarFigures(cells[6])[0] ?? null;
+    const icann = dollarFigures(cells[7])[0];
+    if (reg == null || renew == null || reg <= 0 || renew <= 0) continue;
+    out.push({ registrar: "Namecheap", tld, reg_price: reg, renew_price: renew, transfer_price: transfer, icann_fee: icann ?? null });
+  }
+  return out;
+}
+
+/**
+ * Which slice of `tlds` a rotating source scrapes this run. A source that costs
+ * a paid call per TLD is spread over `parts` weekly runs; every TLD is still
+ * re-verified well inside the 21-day quarantine window.
+ */
+export function rotationSlice<T>(items: readonly T[], runIndex: number, parts: number): T[] {
+  if (parts <= 1) return [...items];
+  const part = ((runIndex % parts) + parts) % parts;
+  return items.filter((_, i) => i % parts === part);
+}
+
+/** ISO-week-ish counter that changes once per calendar week (UTC). */
+export function weekIndex(now = new Date()): number {
+  return Math.floor(now.getTime() / (7 * 24 * 60 * 60 * 1000));
+}
+
 /* ── OVHcloud per-TLD page ─────────────────────────────────────────────── */
 
 /**

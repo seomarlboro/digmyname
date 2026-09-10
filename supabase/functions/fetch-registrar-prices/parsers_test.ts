@@ -2,10 +2,13 @@ import { assertEquals, assertStrictEquals } from "https://deno.land/std@0.224.0/
 import {
   mergePrices,
   parseGodaddyTldPage,
+  parseNamecheapMarkdown,
   parseNamecheapTldList,
   parseOvhTldPage,
   parseTldSpyMarkdown,
+  rotationSlice,
   stripTags,
+  weekIndex,
 } from "./parsers.ts";
 
 const fixture = (name: string) => Deno.readTextFile(new URL(`./fixtures/${name}`, import.meta.url));
@@ -53,6 +56,30 @@ Deno.test("GoDaddy: a promo that needs a multi-year term is not a first-year pri
 Deno.test("GoDaddy: the eyebrow must name the requested TLD (guards against redirects to other pages)", async () => {
   assertStrictEquals(parseGodaddyTldPage(await fixture("godaddy-art.fragment.html"), "agency"), null);
   assertStrictEquals(parseGodaddyTldPage("<html><h1 data-cy=\"eyebrow\">Not found</h1></html>", "art"), null);
+});
+
+Deno.test("Namecheap markdown (Firecrawl) uses the fixed column order", () => {
+  const md = [
+    "| TLD | Type | Country | Description | Register | Renew | Transfer | ICANN Fee | Features |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| .com\\* | gTLD | — | The King of domains | $11.28 Sale 25% off 1st year $14.98 | $18.48 | $11.48 Sale 23% OFF $14.98 | $0.20 | Domain Privacy |",
+    "| .io | ccTLD | British Indian Ocean Territory | The tech-friendly TLD | $34.98 Sale 47% off 1st year $65.98 | $75.98 | $65.98 |  | Domain Privacy |",
+    "| .zzz | gTLD | — | untracked | $1.00 | $2.00 | $3.00 | $0.20 | x |",
+  ].join("\n");
+  assertEquals(parseNamecheapMarkdown(md, new Set(["com", "io"])), [
+    { registrar: "Namecheap", tld: "com", reg_price: 11.28, renew_price: 18.48, transfer_price: 11.48, icann_fee: 0.2 },
+    { registrar: "Namecheap", tld: "io", reg_price: 34.98, renew_price: 75.98, transfer_price: 65.98, icann_fee: null },
+  ]);
+});
+
+Deno.test("rotationSlice spreads a list over N runs and covers everything", () => {
+  const items = ["a", "b", "c", "d", "e", "f", "g"];
+  const parts = [0, 1, 2].map((i) => rotationSlice(items, i, 3));
+  assertEquals(parts, [["a", "d", "g"], ["b", "e"], ["c", "f"]]);
+  assertEquals(parts.flat().sort(), items);
+  assertEquals(rotationSlice(items, 5, 3), rotationSlice(items, 2, 3));
+  assertEquals(rotationSlice(items, 9, 1), items);
+  assertEquals(weekIndex(new Date("2026-09-10T00:00:00Z")) - weekIndex(new Date("2026-09-03T00:00:00Z")), 1);
 });
 
 Deno.test("tldspy markdown rows keep working", () => {

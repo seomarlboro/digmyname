@@ -2,9 +2,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   mergePrices,
   parseGodaddyTldPage,
+  parseNamecheapMarkdown,
   parseNamecheapTldList,
   parseOvhTldPage,
   parseTldSpyMarkdown,
+  rotationSlice,
+  stripTags,
+  weekIndex,
   type ParsedPrice,
 } from "./parsers.ts";
 
@@ -70,14 +74,22 @@ const REGISTRAR_SOURCES: Record<string, { url: string }> = {
 };
 
 // Registrars' own pages (server-rendered, verified 2026-09-10) fill the long tail.
+//   - OVHcloud answers a plain fetch (no Firecrawl needed).
+//   - GoDaddy and Namecheap sit behind bot walls for a plain fetch (0/5 in the
+//     first live dry run) and are read through Firecrawl.
 const NAMECHEAP_LIST_URL = "https://www.namecheap.com/domains/full-tld-list/";
 const ovhTldUrl = (tld: string) => `https://www.ovhcloud.com/en/domains/tld/${tld}/`;
 const godaddyTldUrl = (tld: string) => `https://www.godaddy.com/tlds/${tld}-domain`;
 
+/** GoDaddy costs one Firecrawl credit per TLD page, so it is spread over this many weekly runs (21-day quarantine ÷ 7). */
+const GODADDY_ROTATION_PARTS = 3;
+
 /** Direct fetches per registrar run this many at a time — polite, and well inside the function's wall clock. */
-const PAGE_CONCURRENCY = 4;
-/** Firecrawl is billed per call: cap the fallbacks a single run may spend on registrar pages. */
-const FIRECRAWL_FALLBACK_CAP = 24;
+const DIRECT_CONCURRENCY = 4;
+/** Firecrawl scrapes in flight per source; the run keeps ≤ 4 total so a small plan's concurrency cap isn't tripped. */
+const FIRECRAWL_CONCURRENCY = 2;
+/** Firecrawl is billed per call: cap what a single run may spend on registrar pages (tldspy's 6 are on top). */
+const FIRECRAWL_PAGE_CAP = 40;
 
 const BROWSER_HEADERS = {
   "user-agent":
@@ -92,9 +104,20 @@ interface SourceReport {
   fetched: number;
   parsed: number;
   firecrawlUsed: number;
+  /** Histogram of direct-fetch outcomes, e.g. { "403": 5 } — says whether a source needs Firecrawl. */
+  directStatus: Record<string, number>;
   errors: string[];
   sample?: ParsedPrice[];
+  /** First characters of a page that fetched but did not parse (what did we actually get?). */
+  unparsedSnippet?: string;
+  ms?: number;
 }
+
+const newReport = (source: string): SourceReport => ({ source, attempted: 0, fetched: 0, parsed: 0, firecrawlUsed: 0, directStatus: {}, errors: [] });
+const snippet = (html: string) => {
+  const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim();
+  return `${title ? `title="${stripTags(title).slice(0, 80)}" ` : ""}${stripTags(html).slice(0, 220)}`;
+};
 
 type FetchResult = { ok: true; body: string; status: number } | { ok: false; status: number; error: string };
 
@@ -109,7 +132,7 @@ async function fetchPage(url: string): Promise<FetchResult> {
   }
 }
 
-/** Firecrawl scrape; `formats` decides whether we get markdown (tldspy tables) or the raw HTML (registrar pages). */
+/** Firecrawl scrape; `format` decides whether we get markdown (tables) or the raw HTML (structured pages). */
 async function firecrawl(apiKey: string, url: string, format: "markdown" | "rawHtml"): Promise<FetchResult> {
   try {
     const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
@@ -131,7 +154,7 @@ async function firecrawl(apiKey: string, url: string, format: "markdown" | "rawH
 async function mapConcurrent<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const out: R[] = new Array(items.length);
   let next = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+  const workers = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
     while (next < items.length) {
       const i = next++;
       out[i] = await fn(items[i]);
@@ -142,33 +165,43 @@ async function mapConcurrent<T, R>(items: T[], limit: number, fn: (item: T) => P
 }
 
 /**
- * Registrar own-page source: fetch each TLD's page directly; when the direct
- * fetch fails or the page doesn't parse (bot wall, redirect), spend a Firecrawl
- * raw-HTML fallback — up to the shared cap for the run.
+ * Registrar own-page source: one page per TLD. `direct` sources are fetched
+ * plainly and only fall back to Firecrawl when the page fails or doesn't parse;
+ * bot-walled sources skip the doomed direct attempt and go to Firecrawl at once.
+ * Every Firecrawl call draws on the run's shared page budget.
  */
 async function scrapePerTldPages(
   name: string,
   tlds: string[],
   urlFor: (tld: string) => string,
   parse: (html: string, tld: string) => ParsedPrice | null,
-  firecrawlKey: string | undefined,
-  fallbackBudget: { left: number },
+  opts: { direct: boolean; firecrawlKey: string | undefined; budget: { left: number } },
 ): Promise<{ prices: ParsedPrice[]; report: SourceReport }> {
-  const report: SourceReport = { source: name, attempted: tlds.length, fetched: 0, parsed: 0, firecrawlUsed: 0, errors: [] };
+  const started = Date.now();
+  const report = newReport(name);
+  report.attempted = tlds.length;
   const prices: ParsedPrice[] = [];
-  await mapConcurrent(tlds, PAGE_CONCURRENCY, async (tld) => {
+  const concurrency = opts.direct ? DIRECT_CONCURRENCY : FIRECRAWL_CONCURRENCY;
+  await mapConcurrent(tlds, concurrency, async (tld) => {
     const url = urlFor(tld);
-    let res = await fetchPage(url);
-    let parsed = res.ok ? parse(res.body, tld) : null;
-    if (res.ok) report.fetched++;
-    if (!parsed && firecrawlKey && fallbackBudget.left > 0) {
-      fallbackBudget.left--;
+    let res: FetchResult | null = null;
+    let parsed: ParsedPrice | null = null;
+    if (opts.direct) {
+      res = await fetchPage(url);
+      report.directStatus[String(res.status)] = (report.directStatus[String(res.status)] ?? 0) + 1;
+      if (res.ok) {
+        report.fetched++;
+        parsed = parse(res.body, tld);
+      }
+    }
+    if (!parsed && opts.firecrawlKey && opts.budget.left > 0) {
+      opts.budget.left--;
       report.firecrawlUsed++;
-      const fc = await firecrawl(firecrawlKey, url, "rawHtml");
+      const fc = await firecrawl(opts.firecrawlKey, url, "rawHtml");
       if (fc.ok) {
         res = fc;
         parsed = parse(fc.body, tld);
-      } else {
+      } else if (report.errors.length < 40) {
         report.errors.push(`${tld}: ${fc.error}`);
       }
     }
@@ -176,17 +209,19 @@ async function scrapePerTldPages(
       prices.push(parsed);
       report.parsed++;
     } else if (report.errors.length < 40) {
-      report.errors.push(`${tld}: ${res.ok ? "page fetched but no price found" : res.error}`);
+      report.errors.push(`${tld}: ${res?.ok ? "page fetched but no price found" : res?.error ?? "no fetch attempted (no Firecrawl key or budget)"}`);
+      if (res?.ok && !report.unparsedSnippet) report.unparsedSnippet = snippet(res.body);
     }
   });
   report.sample = prices.slice(0, 3);
+  report.ms = Date.now() - started;
   return { prices, report };
 }
 
 interface RunOptions {
   /** Report what every source would write, write nothing. */
   dryRun: boolean;
-  /** Restrict per-TLD sources to these TLDs (dry runs, debugging). */
+  /** Restrict per-TLD sources to these TLDs (dry runs, debugging). Disables the GoDaddy rotation. */
   tlds?: string[];
   /** Restrict to these sources: tldspy | porkbun | namecheap | ovh | godaddy. */
   sources?: string[];
@@ -220,16 +255,17 @@ Deno.serve(async (req) => {
       /* empty body → defaults */
     }
     const wants = (s: string) => !opts.sources || opts.sources.includes(s);
-    const tlds = opts.tlds?.length ? opts.tlds : TRACKED_TLDS;
+    const explicitTlds = Boolean(opts.tlds?.length);
+    const tlds = explicitTlds ? opts.tlds! : TRACKED_TLDS;
 
     const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY") ?? undefined;
-    const reports: SourceReport[] = [];
-    const fallbackBudget = { left: FIRECRAWL_FALLBACK_CAP };
+    const budget = { left: FIRECRAWL_PAGE_CAP };
 
-    // ---- 1. tldspy per-registrar pages (Firecrawl markdown) ------------------
-    const tldspyPrices: ParsedPrice[] = [];
-    if (wants("tldspy")) {
-      const report: SourceReport = { source: "tldspy", attempted: 0, fetched: 0, parsed: 0, firecrawlUsed: 0, errors: [] };
+    // ---- 1. tldspy per-registrar pages (Firecrawl markdown, sequential) -------
+    const tldspy = async () => {
+      const started = Date.now();
+      const report = newReport("tldspy");
+      const prices: ParsedPrice[] = [];
       if (!firecrawlKey) {
         report.errors.push("FIRECRAWL_API_KEY not configured");
       } else {
@@ -243,19 +279,23 @@ Deno.serve(async (req) => {
           }
           report.fetched++;
           const parsed = parseTldSpyMarkdown(res.body, registrar, TRACKED);
+          if (parsed.length === 0 && !report.unparsedSnippet) report.unparsedSnippet = `${registrar}: ${res.body.replace(/\s+/g, " ").slice(0, 220)}`;
           report.parsed += parsed.length;
-          tldspyPrices.push(...parsed);
+          prices.push(...parsed);
           console.log(`tldspy ${registrar}: ${parsed.length} TLD prices`);
         }
       }
-      report.sample = tldspyPrices.slice(0, 3);
-      reports.push(report);
-    }
+      report.sample = prices.slice(0, 3);
+      report.ms = Date.now() - started;
+      return { prices, report };
+    };
 
     // ---- 2. Porkbun public catalog — every tracked TLD -------------------------
-    const porkbunPrices: ParsedPrice[] = [];
-    if (wants("porkbun")) {
-      const report: SourceReport = { source: "porkbun", attempted: 1, fetched: 0, parsed: 0, firecrawlUsed: 0, errors: [] };
+    const porkbun = async () => {
+      const started = Date.now();
+      const report = newReport("porkbun");
+      report.attempted = 1;
+      const prices: ParsedPrice[] = [];
       try {
         const resp = await fetch("https://api.porkbun.com/api/json/v3/pricing/get", {
           method: "POST",
@@ -274,7 +314,7 @@ Deno.serve(async (req) => {
             const renew = Number(v?.renewal);
             const transfer = v?.transfer != null ? Number(v.transfer) : NaN;
             if (Number.isFinite(reg) && reg > 0) {
-              porkbunPrices.push({
+              prices.push({
                 registrar: "Porkbun",
                 tld,
                 reg_price: reg,
@@ -283,60 +323,89 @@ Deno.serve(async (req) => {
               });
             }
           }
-          report.parsed = porkbunPrices.length;
+          report.parsed = prices.length;
         }
       } catch (e) {
         report.errors.push(`porkbun catalog failed: ${e instanceof Error ? e.message : String(e)}`);
       }
-      report.sample = porkbunPrices.slice(0, 3);
-      reports.push(report);
-    }
+      report.sample = prices.slice(0, 3);
+      report.ms = Date.now() - started;
+      return { prices, report };
+    };
 
-    // ---- 3. Namecheap full TLD list (one server-rendered page) -----------------
-    const namecheapPrices: ParsedPrice[] = [];
-    if (wants("namecheap")) {
-      const report: SourceReport = { source: "namecheap", attempted: 1, fetched: 0, parsed: 0, firecrawlUsed: 0, errors: [] };
-      let res = await fetchPage(NAMECHEAP_LIST_URL);
-      let parsed = res.ok ? parseNamecheapTldList(res.body, new Set(tlds)) : [];
-      if (res.ok) report.fetched = 1;
-      if (parsed.length === 0 && firecrawlKey && fallbackBudget.left > 0) {
-        fallbackBudget.left--;
-        report.firecrawlUsed = 1;
-        res = await firecrawl(firecrawlKey, NAMECHEAP_LIST_URL, "rawHtml");
-        parsed = res.ok ? parseNamecheapTldList(res.body, new Set(tlds)) : [];
+    // ---- 3. Namecheap full TLD list (one page; direct → Firecrawl HTML → Firecrawl markdown) ----
+    const namecheap = async () => {
+      const started = Date.now();
+      const report = newReport("namecheap");
+      report.attempted = 1;
+      const tracked = new Set(tlds);
+      let prices: ParsedPrice[] = [];
+      const direct = await fetchPage(NAMECHEAP_LIST_URL);
+      report.directStatus[String(direct.status)] = 1;
+      if (direct.ok) {
+        report.fetched = 1;
+        prices = parseNamecheapTldList(direct.body, tracked);
+        if (prices.length === 0) report.unparsedSnippet = `direct: ${snippet(direct.body)}`;
       }
-      if (!res.ok) report.errors.push(res.error);
-      else if (parsed.length === 0) report.errors.push("page fetched but no rows parsed");
-      namecheapPrices.push(...parsed);
-      report.parsed = parsed.length;
-      report.sample = parsed.slice(0, 3);
-      reports.push(report);
-    }
+      if (prices.length === 0 && firecrawlKey && budget.left > 0) {
+        budget.left--;
+        report.firecrawlUsed++;
+        const html = await firecrawl(firecrawlKey, NAMECHEAP_LIST_URL, "rawHtml");
+        if (html.ok) {
+          prices = parseNamecheapTldList(html.body, tracked);
+          if (prices.length === 0) report.unparsedSnippet = `firecrawl rawHtml: ${snippet(html.body)}`;
+        } else {
+          report.errors.push(`rawHtml: ${html.error}`);
+        }
+      }
+      if (prices.length === 0 && firecrawlKey && budget.left > 0) {
+        budget.left--;
+        report.firecrawlUsed++;
+        const md = await firecrawl(firecrawlKey, NAMECHEAP_LIST_URL, "markdown");
+        if (md.ok) {
+          prices = parseNamecheapMarkdown(md.body, tracked);
+          if (prices.length === 0) report.unparsedSnippet = `firecrawl markdown: ${md.body.replace(/\s+/g, " ").slice(0, 300)}`;
+        } else {
+          report.errors.push(`markdown: ${md.error}`);
+        }
+      }
+      if (prices.length === 0) report.errors.push("no rows parsed from any variant");
+      report.parsed = prices.length;
+      report.sample = prices.slice(0, 3);
+      report.ms = Date.now() - started;
+      return { prices, report };
+    };
 
-    // ---- 4. OVHcloud per-TLD pages ------------------------------------------------
-    let ovhPrices: ParsedPrice[] = [];
-    if (wants("ovh")) {
-      const r = await scrapePerTldPages("ovh", tlds, ovhTldUrl, parseOvhTldPage, firecrawlKey, fallbackBudget);
-      ovhPrices = r.prices;
-      reports.push(r.report);
-    }
+    // ---- 4. OVHcloud per-TLD pages (plain fetch works) -----------------------------
+    const ovh = () => scrapePerTldPages("ovh", tlds, ovhTldUrl, parseOvhTldPage, { direct: true, firecrawlKey, budget });
 
-    // ---- 5. GoDaddy per-TLD pages -------------------------------------------------
-    let godaddyPrices: ParsedPrice[] = [];
-    if (wants("godaddy")) {
-      const r = await scrapePerTldPages("godaddy", tlds, godaddyTldUrl, parseGodaddyTldPage, firecrawlKey, fallbackBudget);
-      godaddyPrices = r.prices;
-      reports.push(r.report);
-    }
+    // ---- 5. GoDaddy per-TLD pages (bot-walled → Firecrawl; rotated over 3 weekly runs) ----
+    const godaddyTlds = explicitTlds ? tlds : rotationSlice(tlds, weekIndex(), GODADDY_ROTATION_PARTS);
+    const godaddy = () => scrapePerTldPages("godaddy", godaddyTlds, godaddyTldUrl, parseGodaddyTldPage, { direct: false, firecrawlKey, budget });
 
-    // The registrar's own page beats the aggregator for the same (registrar, tld).
-    const allPrices = mergePrices(tldspyPrices, porkbunPrices, namecheapPrices, ovhPrices, godaddyPrices);
+    // Sources run side by side so the whole refresh fits the function's wall clock
+    // (the first live dry run measured ~33 s for 5 TLDs run one after another).
+    const jobs = [
+      ["tldspy", tldspy],
+      ["porkbun", porkbun],
+      ["namecheap", namecheap],
+      ["ovh", ovh],
+      ["godaddy", godaddy],
+    ] as const;
+    const settled = await Promise.all(
+      jobs.filter(([name]) => wants(name)).map(([name, job]) =>
+        job().catch((e: unknown) => ({ prices: [] as ParsedPrice[], report: { ...newReport(name), errors: [`crashed: ${e instanceof Error ? e.message : String(e)}`] } })),
+      ),
+    );
+    const reports = settled.map((s) => s.report);
+    // Later lists win: the registrar's own page beats the aggregator for the same (registrar, tld).
+    const allPrices = mergePrices(...settled.map((s) => s.prices));
     const perRegistrar: Record<string, number> = {};
     for (const p of allPrices) perRegistrar[p.registrar] = (perRegistrar[p.registrar] ?? 0) + 1;
 
     if (opts.dryRun) {
       return new Response(
-        JSON.stringify({ success: true, dryRun: true, ms: Date.now() - startedAt, perRegistrar, total: allPrices.length, reports }),
+        JSON.stringify({ success: true, dryRun: true, ms: Date.now() - startedAt, perRegistrar, total: allPrices.length, godaddyRotation: godaddyTlds, reports }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -401,6 +470,7 @@ Deno.serve(async (req) => {
         perRegistrar,
         upserted,
         quarantined,
+        godaddyRotation: godaddyTlds,
         errors: [...reports.flatMap((r) => r.errors.map((e) => `${r.source}: ${e}`)), ...upsertErrors],
         reports,
       }),
