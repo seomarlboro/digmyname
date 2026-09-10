@@ -5,6 +5,7 @@ import {
   parseNamecheapMarkdown,
   parseNamecheapTldList,
   parseOvhTldPage,
+  parseTldListExtensions,
   parseTldSpyMarkdown,
   rotationSlice,
   stripTags,
@@ -99,4 +100,57 @@ Deno.test("mergePrices: the registrar's own page overrides the aggregator, ICANN
   assertEquals(merged.find((p) => p.registrar === "Namecheap"), {
     registrar: "Namecheap", tld: "com", reg_price: 11.28, renew_price: 18.48, transfer_price: 11.48, icann_fee: 0.2,
   });
+});
+
+/* ── tld-list.com API ──────────────────────────────────────────────────── */
+
+// The fixture's `.com` block is the response example from https://tld-list.com/docs-api
+// (extension/get); `.agency` adds the documented edge cases (multi-year promo,
+// ICANN fee added to the final price, a registrar we don't track, a registrar
+// without a renewal price).
+const tldListFixture = async () => JSON.parse(await fixture("tld-list-extension-get.json")).data;
+
+Deno.test("tld-list: one row per tracked registrar, promo price with its code, ICANN fee taken back out", async () => {
+  const rows = parseTldListExtensions(await tldListFixture(), new Set(["com"]));
+  assertEquals(rows.map((r) => r.registrar), ["GoDaddy", "Porkbun"]); // Epik is not a registrar we track
+  assertEquals(rows[0], {
+    registrar: "GoDaddy", tld: "com", reg_price: 2.99, renew_price: 19.99, transfer_price: 7.99,
+    icann_fee: 0.18, promo_code: "GDD2dom", whois_privacy: true,
+  });
+  assertEquals(rows[1], {
+    registrar: "Porkbun", tld: "com", reg_price: 8.73, renew_price: 9.73, transfer_price: 9.73,
+    icann_fee: 0, promo_code: "AWESOMENESS", whois_privacy: true,
+  });
+});
+
+Deno.test("tld-list: a promo that needs a multi-year term is not the first-year price", async () => {
+  const rows = parseTldListExtensions(await tldListFixture(), new Set(["agency"]));
+  const spaceship = rows.find((r) => r.registrar === "Spaceship")!;
+  assertEquals([spaceship.reg_price, spaceship.renew_price, spaceship.transfer_price, spaceship.promo_code], [4.34, 25.04, 17.98, null]);
+});
+
+Deno.test("tld-list: registrar ids map to our names; no renewal price → no row; untracked extensions ignored", async () => {
+  const rows = parseTldListExtensions(await tldListFixture(), new Set(["agency", "com"]));
+  const agency = rows.filter((r) => r.tld === "agency");
+  assertEquals(agency.map((r) => r.registrar).sort(), ["Namecheap", "OVHcloud", "Spaceship"]); // Cloudflare lacks renewal, Dynadot untracked
+  assertEquals(agency.find((r) => r.registrar === "Namecheap"), {
+    registrar: "Namecheap", tld: "agency", reg_price: 4.98, renew_price: 38.98, transfer_price: 37.98, icann_fee: 0.2, promo_code: null, whois_privacy: false,
+  });
+  assertEquals(agency.find((r) => r.registrar === "OVHcloud"), {
+    registrar: "OVHcloud", tld: "agency", reg_price: 6.92, renew_price: 30.09, transfer_price: 29.49, icann_fee: 0, promo_code: null, whois_privacy: undefined,
+  });
+  assertEquals(rows.some((r) => r.tld === "zzz"), false);
+});
+
+Deno.test("tld-list: garbage payloads yield nothing", () => {
+  assertEquals(parseTldListExtensions(null, new Set(["com"])), []);
+  assertEquals(parseTldListExtensions([{ name: "com" }, { name: "com", registrars: [{ id: "godaddy" }] }], new Set(["com"])), []);
+});
+
+Deno.test("mergePrices keeps a known promo code and privacy flag when the newer source is silent", () => {
+  const merged = mergePrices(
+    [{ registrar: "GoDaddy", tld: "com", reg_price: 2.99, renew_price: 19.99, transfer_price: 7.99, icann_fee: 0.18, promo_code: "GDD2dom", whois_privacy: true }],
+    [{ registrar: "GoDaddy", tld: "com", reg_price: 3.99, renew_price: 21.99, transfer_price: null }],
+  );
+  assertEquals(merged, [{ registrar: "GoDaddy", tld: "com", reg_price: 3.99, renew_price: 21.99, transfer_price: null, icann_fee: 0.18, promo_code: "GDD2dom", whois_privacy: true }]);
 });

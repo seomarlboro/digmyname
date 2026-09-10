@@ -1,0 +1,97 @@
+{
+  "data": [
+    {
+      "name": "com",
+      "pricingUpdated": "2023-02-04T11:04:33",
+      "registrars": [
+        {
+          "currency": "USD",
+          "freeFeatures": [{ "name": "dns" }, { "name": "whois-privacy" }],
+          "id": "godaddy",
+          "name": "GoDaddy",
+          "notes": {
+            "feeIcann": { "addedToListPrice": true, "amount": "0.18", "pricetype": ["register", "renewal", "transfer"] },
+            "feeTax": [{ "addedToListPrice": false, "amountRate": "~", "amountRateType": "percent-varies-by-location", "appliesToCustomers": ["eu"], "type": "vat" }]
+          },
+          "prices": { "register": "3.17", "renewal": "20.17", "transfer": "8.17", "whoisPrivacy": "0.00" },
+          "pricesOriginal": { "register": "10.18" },
+          "promos": [{ "amount": "2.99", "code": "GDD2dom", "pricetype": ["register"], "start": "2023-01-01T00:00:00", "type": "price" }],
+          "terms": { "limitPerCustomer": { "count": 1, "pricetype": ["register"] } },
+          "threeYearValueScore": "5.76"
+        },
+        {
+          "currency": "USD",
+          "freeFeatures": [{ "name": "whois-privacy" }, { "name": "dns" }],
+          "id": "epik",
+          "name": "Epik",
+          "prices": { "register": "9.99", "renewal": "10.99", "restore": "90.00", "transfer": "9.99", "whoisPrivacy": "0.00" },
+          "threeYearValueScore": "8.29"
+        },
+        {
+          "currency": "USD",
+          "freeFeatures": [{ "name": "whois-privacy" }, { "name": "dns" }, { "name": "email-forward" }, { "name": "ssl-cert" }],
+          "id": "porkbun",
+          "name": "Porkbun",
+          "prices": { "register": "8.73", "renewal": "9.73", "transfer": "9.73", "whoisPrivacy": "0.00" },
+          "pricesOriginal": { "register": "9.73" },
+          "promos": [{ "amount": "1.00", "code": "AWESOMENESS", "pricetype": ["register"], "type": "discount" }],
+          "terms": { "limitPerCustomer": { "count": 1, "pricetype": ["register"] } },
+          "threeYearValueScore": "16.03"
+        }
+      ]
+    },
+    {
+      "name": "agency",
+      "pricingUpdated": "2026-09-10T03:00:00",
+      "registrars": [
+        {
+          "currency": "USD",
+          "freeFeatures": [{ "name": "dns" }, { "name": "whois-privacy" }],
+          "id": "spaceship",
+          "name": "Spaceship",
+          "prices": { "register": "0.01", "renewal": "25.04", "transfer": "17.98" },
+          "pricesOriginal": { "register": "4.34", "transfer": "25.04" },
+          "promos": [
+            { "amount": "0.01", "code": "SPSAGENCY3Y", "pricetype": ["register"], "type": "price" },
+            { "amount": "17.98", "code": "SPST25", "pricetype": ["transfer"], "type": "price" }
+          ],
+          "terms": { "multiYearPurchaseRequired": { "count": 3, "pricetype": ["register"] } }
+        },
+        {
+          "currency": "USD",
+          "freeFeatures": [{ "name": "dns" }],
+          "id": "namecheap",
+          "name": "Namecheap",
+          "notes": { "feeIcann": { "addedToListPrice": true, "amount": "0.20", "pricetype": ["register", "renewal", "transfer"] } },
+          "prices": { "register": "5.18", "renewal": "39.18", "transfer": "38.18" }
+        },
+        {
+          "currency": "USD",
+          "id": "ovh",
+          "name": "OVHcloud",
+          "notes": { "currencyExchangeRate": { "base": "EUR", "quote": "USD", "rate": "1.1620" } },
+          "prices": { "register": "6.92", "renewal": "30.09", "transfer": "29.49" }
+        },
+        {
+          "currency": "USD",
+          "id": "cloudflare",
+          "name": "Cloudflare",
+          "prices": { "register": "16.18" }
+        },
+        {
+          "currency": "USD",
+          "id": "dynadot",
+          "name": "Dynadot",
+          "prices": { "register": "2.99", "renewal": "29.99", "transfer": "29.99" }
+        }
+      ]
+    },
+    {
+      "name": "zzz",
+      "registrars": [{ "id": "porkbun", "name": "Porkbun", "prices": { "register": "1.00", "renewal": "2.00" } }]
+    }
+  ],
+  "errors": [],
+  "seconds": 0.068,
+  "status": "SUCCESS"
+}

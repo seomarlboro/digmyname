@@ -2,6 +2,11 @@
 // the HTML fixtures in ./fixtures (captured from the real pages, then trimmed).
 //
 // Sources and what each one is good for:
+//   - tld-list.com API (`extension/get`, needs a subscription keypair): every
+//     tracked registrar × TLD in one JSON call, promos, terms and ICANN fees
+//     included. The primary source whenever the keys are configured; the
+//     scrapers below are the fallback. (tld-list's pages sit behind a bot
+//     challenge and its terms forbid scraping — only the API is used.)
 //   - tldspy.com per-registrar pages (via Firecrawl markdown): ~17-18 core TLDs
 //     per registrar. Its per-TLD pages are members-only, so it cannot fill the
 //     long tail.
@@ -20,6 +25,10 @@ export interface ParsedPrice {
   transfer_price: number | null;
   /** Only some sources publish it; undefined leaves the stored value alone. */
   icann_fee?: number | null;
+  /** First-year promo code the price depends on; undefined leaves the stored value alone. */
+  promo_code?: string | null;
+  /** Free WHOIS privacy; undefined leaves the stored value alone. */
+  whois_privacy?: boolean;
 }
 
 const price = (s: string | undefined | null): number | null => {
@@ -204,9 +213,115 @@ export function mergePrices(...lists: ParsedPrice[][]): ParsedPrice[] {
     for (const p of list) {
       const key = `${p.registrar}|${p.tld}`;
       const prev = byKey.get(key);
-      // Keep an ICANN fee we already know when the newer source doesn't publish one.
-      byKey.set(key, prev && p.icann_fee === undefined ? { ...p, icann_fee: prev.icann_fee } : p);
+      const merged: ParsedPrice = { ...p };
+      // Keep what we already know (ICANN fee, promo code, privacy) when the newer source doesn't say.
+      if (prev) {
+        if (merged.icann_fee === undefined && prev.icann_fee !== undefined) merged.icann_fee = prev.icann_fee;
+        if (merged.promo_code === undefined && prev.promo_code !== undefined) merged.promo_code = prev.promo_code;
+        if (merged.whois_privacy === undefined && prev.whois_privacy !== undefined) merged.whois_privacy = prev.whois_privacy;
+      }
+      byKey.set(key, merged);
     }
   }
   return [...byKey.values()];
+}
+
+/* ── tld-list.com API: POST https://api.tld-list.com/v1/extension/get ──── */
+
+/** tld-list registrar ids (their URL slugs, e.g. /registrars/ovh) → the names our table uses. */
+export const TLDLIST_REGISTRARS: Readonly<Record<string, string>> = {
+  porkbun: "Porkbun",
+  namecheap: "Namecheap",
+  godaddy: "GoDaddy",
+  cloudflare: "Cloudflare",
+  ovh: "OVHcloud",
+  spaceship: "Spaceship",
+};
+
+type PriceType = "register" | "renewal" | "transfer";
+const PRICE_TYPES: readonly PriceType[] = ["register", "renewal", "transfer"];
+
+/** The documented `RegistrarPricing` object (https://tld-list.com/docs-api), the parts we read. */
+export interface TldListRegistrar {
+  id?: string;
+  name?: string;
+  /** Final retail prices, promos applied, as numeric strings. */
+  prices?: Partial<Record<string, string>>;
+  /** Regular prices; only present when a promo is active. */
+  pricesOriginal?: Partial<Record<string, string>>;
+  promos?: { code?: string; pricetype?: string[]; type?: string; amount?: string }[];
+  /** Special terms keyed by id; `pricetype` says which prices they apply to. */
+  terms?: Partial<Record<string, { pricetype?: string[]; count?: number }>>;
+  notes?: { feeIcann?: { amount?: string; addedToListPrice?: boolean; pricetype?: string[] } };
+  freeFeatures?: { name?: string }[];
+}
+export interface TldListExtension {
+  name?: string;
+  punycode?: string;
+  registrars?: TldListRegistrar[];
+  pricingUpdated?: string;
+}
+
+const appliesTo = (pricetype: string[] | undefined, type: PriceType) => !pricetype || pricetype.includes(type);
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * One row per (registrar we track, extension we track). Rules that keep the
+ * stored numbers comparable with the registrars' own pages:
+ *   - `prices.*` already have the promo applied; a promo that needs a
+ *     multi-year term is not a first-year price, so `pricesOriginal.register`
+ *     is stored instead (same rule as the GoDaddy page parser).
+ *   - When tld-list added an ICANN fee to the final price, it is taken back out
+ *     and stored in `icann_fee` (our table keeps the fee separate, like
+ *     Namecheap's own list does). No fee note → `icann_fee` 0.
+ *   - `promo_code` is the code of the promo that applies to registration, when
+ *     the promo price is what we store.
+ */
+export function parseTldListExtensions(
+  data: unknown,
+  tracked: ReadonlySet<string>,
+  registrars: Readonly<Record<string, string>> = TLDLIST_REGISTRARS,
+): ParsedPrice[] {
+  const out: ParsedPrice[] = [];
+  if (!Array.isArray(data)) return out;
+  for (const ext of data as TldListExtension[]) {
+    const tld = String(ext?.punycode ?? ext?.name ?? "").toLowerCase();
+    if (!tld || !tracked.has(tld) || !Array.isArray(ext.registrars)) continue;
+    for (const r of ext.registrars) {
+      const registrar = r?.id ? registrars[r.id] : undefined;
+      if (!registrar || !r.prices) continue;
+      const fee = r.notes?.feeIcann;
+      const feeAmount = fee ? price(fee.amount) : null;
+      const final: Partial<Record<PriceType, number | null>> = {};
+      for (const t of PRICE_TYPES) {
+        let v = price(r.prices[t]);
+        if (v != null && feeAmount != null && fee?.addedToListPrice && appliesTo(fee.pricetype, t)) v = round2(v - feeAmount);
+        final[t] = v;
+      }
+      const multiYear = r.terms?.multiYearPurchaseRequired;
+      const promoNeedsTerm = multiYear != null && appliesTo(multiYear.pricetype, "register");
+      let reg = final.register ?? null;
+      let promoCode: string | null = null;
+      if (promoNeedsTerm) {
+        let regular = price(r.pricesOriginal?.register);
+        if (regular != null && feeAmount != null && fee?.addedToListPrice && appliesTo(fee.pricetype, "register")) regular = round2(regular - feeAmount);
+        reg = regular ?? final.renewal ?? reg;
+      } else if (r.pricesOriginal?.register != null) {
+        promoCode = r.promos?.find((p) => p.code && appliesTo(p.pricetype, "register"))?.code ?? null;
+      }
+      const renew = final.renewal ?? null;
+      if (reg == null || renew == null || reg <= 0 || renew <= 0) continue;
+      out.push({
+        registrar,
+        tld,
+        reg_price: reg,
+        renew_price: renew,
+        transfer_price: final.transfer ?? null,
+        icann_fee: feeAmount ?? 0,
+        promo_code: promoCode,
+        whois_privacy: Array.isArray(r.freeFeatures) ? r.freeFeatures.some((f) => f?.name === "whois-privacy") : undefined,
+      });
+    }
+  }
+  return out;
 }

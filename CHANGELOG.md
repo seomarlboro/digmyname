@@ -2,6 +2,13 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-10 — One price source instead of five scrapers (edge: fetch-registrar-prices)
+
+### Changed
+- **tld-list.com's API is the primary price source.** One `extension/get` call returns every tracked registrar × TLD (Porkbun, Namecheap, GoDaddy, Cloudflare, OVHcloud, Spaceship) with promo codes, special terms and ICANN fees; a run that gets an answer skips every scraper and spends no Firecrawl credit. The parser (`parseTldListExtensions`) keeps the stored numbers comparable with the registrars' own pages: a promo that needs a multi-year term is not recorded as the first-year price, an ICANN fee tld-list folded into the final price is taken back out into `icann_fee`, and `promo_code` / `whois_privacy` are now written by the refresh. Fixture from the documented response shape, 5 new Deno tests.
+- The API needs a subscription keypair (`TLDLIST_API_PUBLIC` / `TLDLIST_API_PRIVATE` edge secrets). Until they exist the previous scrapers run unchanged; naming a scraper in `sources` runs it even when tld-list answered. tld-list's pages are not scraped: they sit behind a bot challenge and its terms forbid it.
+- Fallback scrapers now share one Firecrawl pacer (strictly sequential, ≥ 6.5 s apart, 16 registrar pages per run) after a full run hit the plan's 10 req/min and 2-browser limits (429/408). OVHcloud is plain-fetch only, GoDaddy's long tail rotates over four weekly runs, quarantine is 30 days (must exceed the slowest rotation).
+
 ## 2026-09-10 — Registrar price coverage (edge: fetch-registrar-prices)
 
 ### Changed
