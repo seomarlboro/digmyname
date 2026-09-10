@@ -173,7 +173,7 @@ const Mcp = () => {
             }
             actions={
               <>
-                <Button asChild size="lg" className="h-12 gap-2 px-6 shadow-lg shadow-primary/20">
+                <Button asChild size="lg">
                   <a
                     href={GITHUB_URL}
                     target="_blank"
@@ -184,7 +184,7 @@ const Mcp = () => {
                     View on GitHub
                   </a>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-12 gap-2 px-6">
+                <Button asChild size="lg" variant="outline">
                   <Link to="/?q=example.com" onClick={() => trackMcpEvent("click", "try_live_search")}>
                     Try a live search
                   </Link>
@@ -299,7 +299,7 @@ const Mcp = () => {
             title="PRs welcome. Stars appreciated."
             body="Open issues, ship features, or fork it for your own registrar."
             action={
-              <Button asChild size="lg" className="gap-2 h-12 px-6 shadow-lg shadow-primary/20">
+              <Button asChild size="lg">
                 <a
                   href={GITHUB_URL}
                   target="_blank"

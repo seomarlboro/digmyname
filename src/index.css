@@ -241,7 +241,6 @@
     /* Light theme: the gradient stops are deep (mint 42 %, violet 58 %), so the label is white.
        Dark theme: the stops are bright, so the label is the dark ink. */
     color: hsl(0 0% 100%);
-    font-weight: 600;
     transition: opacity 0.2s ease, transform 0.2s ease;
   }
   .dark .btn-gradient {

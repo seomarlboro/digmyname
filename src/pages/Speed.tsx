@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import RouteHead from "@/seo/RouteHead";
 import { Button } from "@/components/ui/button";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
-import { SpeedClaim } from "@/components/SpeedClaim";
+import { SpeedClaim, SpeedChallenge } from "@/components/SpeedClaim";
 import { StopwatchIcon, KeyboardIcon, BoltIcon } from "@/components/StatIcons";
 import LiveBenchmark from "@/components/LiveBenchmark";
 import { BenchmarkChart } from "@/components/BenchmarkChart";
@@ -114,6 +114,7 @@ const Speed = () => {
 
         {/* Claim */}
         <SpeedClaim />
+        <SpeedChallenge />
 
         {/* What the timer includes */}
         <div id="how-we-measure" className="scroll-mt-24" />

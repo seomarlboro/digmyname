@@ -64,13 +64,13 @@ const Api = () => {
           lede="One HTTP GET tells you whether a domain is free, what it really costs, and which registrar is cheapest. No signup, no API key, no scraping — ChatGPT, Claude, Perplexity and your own scripts can call it directly."
           actions={
             <>
-              <Button asChild size="lg" className="h-12 gap-2 px-6">
+              <Button asChild size="lg">
                 <a href={`${API_BASE}/check?domain=acmeforge.io`} target="_blank" rel="noopener noreferrer">
                   <Terminal className="h-5 w-5" />
                   Try a live request
                 </a>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-12 gap-2 px-6">
+              <Button asChild size="lg" variant="outline">
                 <Link to="/mcp">Use it inside your LLM</Link>
               </Button>
             </>

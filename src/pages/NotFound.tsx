@@ -125,7 +125,7 @@ const NotFound = () => {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg" className="btn-gradient rounded-2xl">
+            <Button asChild size="lg" variant="gradient">
               <Link to="/">
                 <Search className="mr-2 h-4 w-4" />
                 Search a domain

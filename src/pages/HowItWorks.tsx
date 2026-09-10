@@ -313,7 +313,7 @@ const HowItWorks = () => {
           align="center"
           className="text-center"
         >
-          <Button asChild size="lg" className="btn-gradient h-12 px-8 text-base">
+          <Button asChild size="lg" variant="gradient">
             <Link to="/">Start searching</Link>
           </Button>
         </Section>
