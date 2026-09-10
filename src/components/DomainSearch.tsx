@@ -78,6 +78,8 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   // race. Only trustworthy results are cached (never uncertain/provisional), each
   // with a 5-minute TTL so prices can't go stale. In-memory only (no storage).
   const resultCacheRef = useRef<Map<string, { result: DomainResult; expiresAt: number }>>(new Map());
+  /** The search currently in flight; cancelled on the very next keystroke (see the search effect). */
+  const activeJobRef = useRef<{ cancelled: boolean; ctl: AbortController } | null>(null);
   const cacheResult = useCallback((r: DomainResult) => {
     // Honesty guardrail: only remember confident, authoritative verdicts.
     if (r.checking || r.uncertain || r.provisional || r.reachFailed) return;
@@ -182,6 +184,13 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   // keystroke. The authoritative lane waits out AUTH_DEBOUNCE_MS inside the
   // search effect below, so a superseded prefix never reaches the backend.
   useEffect(() => {
+    // The previous search is stale the moment the query changes; abort it now
+    // so none of its answers can touch the new stopwatch or the new rows.
+    if (activeJobRef.current) {
+      activeJobRef.current.cancelled = true;
+      activeJobRef.current.ctl.abort();
+      activeJobRef.current = null;
+    }
     if (!query.trim()) {
       setDebouncedQuery("");
       setResults([]);
@@ -209,12 +218,15 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       return;
     }
 
-    let cancelled = false;
-    // One controller per search: when the query moves on, every request still
-    // in flight for the superseded query is aborted instead of finishing into
-    // the void (its result is already dropped via `cancelled`). Fewer stale
-    // requests on the wire = the current query's answers land sooner.
-    const ctl = new AbortController();
+    // One job per search: when the query moves on, every request still in
+    // flight for the superseded query is aborted instead of finishing into the
+    // void (its result is already dropped via `job.cancelled`). The job is also
+    // reachable from the keystroke effect, which cancels it IMMEDIATELY — not
+    // 80 ms later when this effect re-runs — because a late answer for the
+    // previous prefix landing in that window used to stop the new query's
+    // stopwatch ("55 ms first answer" for a name nobody had checked yet).
+    const job = { cancelled: false, ctl: new AbortController() };
+    activeJobRef.current = job;
 
     const run = async () => {
       // Step 1: Show domains immediately with "checking" state
@@ -228,7 +240,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         }
         return d;
       });
-      if (cancelled) return;
+      if (job.cancelled) return;
       setResults(hydrated);
       setLoading(false);
 
@@ -242,7 +254,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       // batch) and never surfaces an uncertain DNS answer as a verdict.
       const FAST_CHUNK = 10;
       const applyFast = (fastMap: Map<string, FastInfo>) => {
-        if (cancelled || !fastMap.size) return;
+        if (job.cancelled || !fastMap.size) return;
         let anyConfident = false;
         setResults((prev) =>
           prev.map((r) => {
@@ -263,7 +275,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       const fastTargets = hydrated.filter((d) => d.checking).map((d) => d.domain);
       for (let i = 0; i < fastTargets.length; i += FAST_CHUNK) {
         const chunk = fastTargets.slice(i, i + FAST_CHUNK);
-        void checkDomainsFast(chunk, ctl.signal).then(applyFast).catch(() => {});
+        void checkDomainsFast(chunk, job.ctl.signal).then(applyFast).catch(() => {});
       }
 
       // Step 3: Authoritative availability + pricing.
@@ -293,7 +305,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       }
 
       const applyBatch = (slice: string[], resp: AvailabilityResponse) => {
-        if (cancelled) return;
+        if (job.cancelled) return;
         // The honest stopwatch stops on the first ANSWER. A batch that never
         // reached the backend (503 / network error) only turns rows into
         // "couldn't reach — Retry"; that is not an answer and must not stop it.
@@ -334,7 +346,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       };
 
       const runBatch = async (slice: string[]) => {
-        const resp = await checkDomainsAvailability(slice, ctl.signal);
+        const resp = await checkDomainsAvailability(slice, job.ctl.signal);
         applyBatch(slice, resp);
       };
 
@@ -351,7 +363,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       // full authoritative wave. If the query moves on meanwhile, this search is
       // cancelled and the wave for the superseded prefix is never sent.
       await new Promise<void>((resolve) => setTimeout(resolve, AUTH_DEBOUNCE_MS - FAST_DEBOUNCE_MS));
-      if (cancelled) return;
+      if (job.cancelled) return;
 
       const restBatches: string[][] = [];
       for (let i = 0; i < rest.length; i += BATCH_SIZE) {
@@ -368,8 +380,9 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
 
     run();
     return () => {
-      cancelled = true;
-      ctl.abort();
+      job.cancelled = true;
+      job.ctl.abort();
+      if (activeJobRef.current === job) activeJobRef.current = null;
     };
   }, [debouncedQuery, aiSuggestions, selectedTlds, markFirstAnswer, cacheResult]);
 

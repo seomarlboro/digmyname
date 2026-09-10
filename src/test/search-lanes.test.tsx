@@ -98,6 +98,59 @@ describe("DomainSearch lanes", () => {
     expect(authCalls()).toBeGreaterThan(1);
   });
 
+  it("a late answer for the previous prefix never stops the new query's stopwatch", async () => {
+    // Every authoritative call is held until released, so the test controls
+    // which answer lands when. The first keystroke's headline answer arrives
+    // only after the user has typed more; the new query's clock must keep running.
+    type Resolver = (v: { data: { results: { domain: string; available: boolean }[] }; error: null }) => void;
+    const pending: Resolver[] = [];
+    invoke.mockImplementation(() => new Promise((resolve) => { pending.push(resolve as Resolver); }));
+    const { default: DomainSearch } = await import("@/components/DomainSearch");
+    const { DEFAULT_FILTERS } = await import("@/lib/resultFilters");
+    const qc = new QueryClient();
+    const { container } = render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter>
+          <DomainSearch selectedTlds={new Set()} filters={DEFAULT_FILTERS} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const input = container.querySelector('input[aria-label="Search domain name"]') as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    const type = async (text: string) => {
+      await act(async () => {
+        setter.call(input, text);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    };
+    await type("acmeforge");
+    await act(async () => { vi.advanceTimersByTime(100); });
+    expect(pending).toHaveLength(1); // headline acmeforge.com
+
+    await type("acmeforgex");
+    // Stale answer lands 20 ms after the new keystroke — inside the old 80 ms window.
+    await act(async () => {
+      vi.advanceTimersByTime(20);
+      pending[0]({ data: { results: [{ domain: "acmeforge.com", available: true }] }, error: null });
+      await Promise.resolve();
+    });
+    // The new run starts at +80 ms and issues its own headline check.
+    await act(async () => { vi.advanceTimersByTime(80); });
+    expect(pending.length).toBeGreaterThanOrEqual(2);
+    const pill = () => container.querySelector('a[title^="How we measure"]');
+    expect(pill()).not.toBeNull();
+    expect(pill()!.getAttribute("aria-live")).toBe("off"); // still running: the stale answer was ignored
+
+    // The new query's own headline answer stops it.
+    await act(async () => {
+      pending[1]({ data: { results: [{ domain: "acmeforgex.com", available: true }] }, error: null });
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(pill()!.getAttribute("aria-live")).toBe("polite");
+    invoke.mockImplementation(async (..._args: unknown[]) => ({ data: { results: [] }, error: null }));
+  });
+
   it("a short (premium-suspect) label waits for the authoritative lane", async () => {
     const { default: DomainSearch } = await import("@/components/DomainSearch");
     const { DEFAULT_FILTERS } = await import("@/lib/resultFilters");
