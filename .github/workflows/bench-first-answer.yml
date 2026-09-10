@@ -1,0 +1,49 @@
+# First-answer benchmark from a GitHub-hosted runner (US): cold visitors in a
+# real Chromium, then raw registry / DoH / edge probes. Manual only; prints a
+# summary and keeps the JSON as an artifact. No secrets, public site only.
+name: bench-first-answer
+
+on:
+  workflow_dispatch:
+    inputs:
+      n:
+        description: "Cold visitors to simulate"
+        default: "150"
+      raw_n:
+        description: "Raw probes per host"
+        default: "60"
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright in a scratch dir (the project's own deps are not needed)
+        run: |
+          mkdir -p /tmp/bench && cd /tmp/bench
+          npm init -y > /dev/null
+          npm install playwright > /dev/null 2>&1
+          npx playwright install --with-deps chromium > /dev/null 2>&1
+          cp "$GITHUB_WORKSPACE/scripts/bench/first-answer.mjs" .
+      - name: Run
+        env:
+          BENCH_N: ${{ inputs.n }}
+          BENCH_RAW_N: ${{ inputs.raw_n }}
+          BENCH_OUT: /tmp/bench/bench-results.json
+        run: |
+          cd /tmp/bench
+          node first-answer.mjs | tee summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bench-results
+          path: |
+            /tmp/bench/bench-results.json
+            /tmp/bench/summary.md
