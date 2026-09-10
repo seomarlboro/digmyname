@@ -571,6 +571,16 @@
   }
 
   /* Mint-glow elevation — reusable at-rest glow for STATIC surfaces only (never search/results) */
+  /* The aurora gradient the logo uses, as a surface: fixed vivid stops so dark ink reads in both themes. */
+  .surface-aurora {
+    background-image: linear-gradient(120deg, hsl(165 80% 58%) 0%, hsl(210 85% 66%) 48%, hsl(258 92% 74%) 100%);
+  }
+  .aurora-glow {
+    box-shadow:
+      0 0 0 1px hsl(165 80% 58% / 0.25),
+      0 24px 70px -20px hsl(258 92% 74% / 0.55),
+      0 12px 40px -10px hsl(165 80% 58% / 0.45);
+  }
   .mint-glow    { box-shadow: 0 10px 40px -12px hsl(var(--aurora-mint) / 0.22); }
   .mint-glow-sm { box-shadow: 0 6px 24px -10px hsl(var(--aurora-mint) / 0.20); }
   .dark .mint-glow    { box-shadow: 0 14px 60px -12px hsl(var(--aurora-mint) / 0.32); }

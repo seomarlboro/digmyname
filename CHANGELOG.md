@@ -2,6 +2,12 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-11 — /speed claim banner (frontend)
+
+### Changed
+- The "Beat our number, take the crown" callout is now a gradient surface in the logo's aurora colours (`.surface-aurora`, mint → sky → violet, fixed vivid stops so the dark ink reads in both themes) with a frosted well for the icon and a dark pill button. `CalloutBlock` gained `tone="gradient"` for the accent variant; every other accent callout keeps the tinted look.
+- The hand-drawn trophy SVG is replaced by Phosphor Icons' `trophy` (fill weight, MIT), picked from the Iconify catalogue and inlined; it inherits `currentColor`.
+
 ## 2026-09-11 — Latency copy states what was measured (frontend, MCP package copy)
 
 ### Changed

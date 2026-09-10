@@ -425,6 +425,7 @@ export function DataTable<Row>({
 
 export const CalloutBlock = ({
   variant = "inline",
+  tone = "tinted",
   icon: Icon,
   iconVariant = "chip",
   eyebrow,
@@ -434,6 +435,8 @@ export const CalloutBlock = ({
   className,
 }: {
   variant?: "inline" | "accent" | "centered";
+  /** accent only: `tinted` (primary wash, default) or `gradient` (the aurora gradient the logo uses, dark ink). */
+  tone?: "tinted" | "gradient";
   icon?: any;
   iconVariant?: "chip" | "hero";
   eyebrow?: ReactNode;
@@ -459,16 +462,26 @@ export const CalloutBlock = ({
 
   if (variant === "accent") {
     const hero = iconVariant === "hero";
+    const gradient = tone === "gradient";
     return (
       <div
         className={cn(
-          "mt-16 sm:mt-24 mint-glow-sm flex flex-col items-stretch gap-4 rounded-3xl border border-primary/30 bg-primary/10 p-5 sm:flex-row sm:items-center sm:gap-6 sm:p-7",
+          "mt-16 sm:mt-24 flex flex-col items-stretch gap-4 rounded-3xl p-5 sm:flex-row sm:items-center sm:gap-6 sm:p-7",
+          gradient
+            ? "surface-aurora aurora-glow text-ink-on-aurora sm:gap-7 sm:p-8"
+            : "mint-glow-sm border border-primary/30 bg-primary/10",
           className,
         )}
       >
         {Icon &&
           (hero ? (
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center sm:h-24 sm:w-24">
+            <div
+              className={cn(
+                "flex h-20 w-20 shrink-0 items-center justify-center sm:h-24 sm:w-24",
+                // On the gradient the icon sits in a frosted dark well, like the logo mark on a badge.
+                gradient && "rounded-[26px] bg-ink-on-aurora/15 shadow-[inset_0_1px_0_hsl(0_0%_100%/0.35)] [&>svg]:h-12 [&>svg]:w-12 sm:[&>svg]:h-14 sm:[&>svg]:w-14",
+              )}
+            >
               <Icon />
             </div>
           ) : (
@@ -477,10 +490,16 @@ export const CalloutBlock = ({
             </div>
           ))}
         <div className="min-w-0 flex-1">
-          <h2 className={cn("tracking-tight text-primary dark:text-violet", hero ? "text-xl font-semibold sm:text-2xl" : "text-lg font-medium")}>
+          <h2
+            className={cn(
+              "tracking-tight",
+              gradient ? "text-ink-on-aurora" : "text-primary dark:text-violet",
+              hero ? "text-xl font-semibold sm:text-2xl" : "text-lg font-medium",
+            )}
+          >
             {title}
           </h2>
-          {body && <p className="mt-1 text-sm text-muted-foreground">{body}</p>}
+          {body && <p className={cn("mt-1 text-sm", gradient ? "text-ink-on-aurora/80 sm:text-[15px] sm:leading-relaxed" : "text-muted-foreground")}>{body}</p>}
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>

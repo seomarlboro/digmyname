@@ -115,6 +115,7 @@ const Speed = () => {
         {/* Claim */}
         <CalloutBlock
           variant="accent"
+          tone="gradient"
           className="!mt-6"
           icon={() => <TrophyIcon className="h-full w-full" />}
           iconVariant="hero"
@@ -130,7 +131,11 @@ const Speed = () => {
             </>
           }
           action={
-            <Button asChild variant="gradient" size="lg" className="w-full shrink-0 text-lg md:w-auto">
+            <Button
+              asChild
+              size="lg"
+              className="w-full shrink-0 rounded-full bg-ink-on-aurora px-8 text-lg text-white shadow-[0_8px_24px_-8px_hsl(232_28%_8%/0.6)] hover:-translate-y-0.5 hover:bg-ink-on-aurora/90 md:w-auto"
+            >
               <Link to="/">Run the timer</Link>
             </Button>
           }
