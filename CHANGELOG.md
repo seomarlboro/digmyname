@@ -2,6 +2,15 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-10 — Usable before JavaScript, faster first answer (frontend)
+
+### Changed
+- **The home page is usable before React loads.** `index.html` now carries the real hero and a real search input (same classes React renders, theme class set by an inline script before first paint). On a phone the field is focusable the moment CSS lands instead of after ~180 KB of JS; anything typed before mount is picked up by React, and Enter before mount submits to `/?q=…`. Prerendered deep routes get a plain spinner instead of the home hero (`src/seo/prerender.ts`).
+- **The headline domain (typed TLD, else `.com`) is checked authoritatively with the fast lane at +80 ms** instead of waiting for the 250 ms authoritative debounce — unless its label is 1–5 characters, which the pipeline treats as a premium suspect (a per-keystroke check would buy a paid third-signal call). `src/lib/searchLanes.ts`, covered by a fake-timer test that drives the real component.
+- **The live stopwatch no longer re-renders the results list every frame.** Its digits are written straight into a text node from `requestAnimationFrame` (`LiveStopwatch`); the list re-renders only when the first answer lands.
+- `DomainCard` is memoised and takes the cheapest-registrar row, favourite state and the sign-in handler as props; the list reads auth, favourites and the price table once instead of 53 cards × 3 store subscriptions each, and mounts one sign-in dialog instead of one per card.
+- The floating filter bar switches to the button + drawer below 1024 px (was 768), so tablets and large phones in landscape don't get a 620 px bar crowding the edge; the drawer has a proper `DrawerTitle`.
+
 ## 2026-09-10 — Site audit fixes (frontend)
 
 Everything from the full-site audit except the latency claims (~170 ms / ~70 ms copy and the /speed methodology), which stay as they are pending the owner's decision.

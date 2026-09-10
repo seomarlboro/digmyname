@@ -9,6 +9,21 @@
     <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
     <link rel="preload" href="/src/assets/fonts/sora-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/src/assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <script>
+      // Theme before first paint: next-themes only sets the class once React mounts,
+      // and the static shell below must not flash light-then-dark. Same key and
+      // defaults as <ThemeProvider defaultTheme="dark" enableSystem>.
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          var light = t === "light" || (t === "system" && matchMedia("(prefers-color-scheme: light)").matches);
+          document.documentElement.classList.add(light ? "light" : "dark");
+          document.documentElement.style.colorScheme = light ? "light" : "dark";
+        } catch (e) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
 
     <!-- Route-managed head. Regenerated per route at build time by scripts/prerender-plugin.ts
          from src/seo/routes.ts; react-helmet-async adopts these (data-rh) on mount. -->
@@ -81,27 +96,93 @@
     </script>
   </head>
 
-  <body style="margin:0;background:#0a0b10;">
-    <script>
-      // Paint the light ground before React mounts when the visitor chose the light theme,
-      // so a light-mode visitor doesn't get a dark flash. next-themes stores the choice as `theme`.
-      try {
-        if (localStorage.getItem("theme") === "light") document.body.style.background = "#f9f9fb";
-      } catch (e) {}
-    </script>
+  <body style="margin:0;">
     <div id="root">
-      <div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:inherit;">
-        <div
-          style="width:36px;height:36px;border-radius:50%;border:3px solid rgba(127,127,127,0.25);border-top-color:#3fe9be;animation:dmn-spin .8s linear infinite;"
-        ></div>
+      <!-- Pre-hydration shell: the real hero and a real search input, styled with the
+           same classes React renders, so the page is readable and the field is
+           focusable the moment CSS lands — not after ~180 KB of JS on a phone.
+           DomainSearch reads #prehydrate-q on mount; Enter before mount submits
+           to /?q=… which React also understands. Prerendered deep routes get a
+           plain spinner instead (see src/seo/prerender.ts). -->
+      <!-- route-shell:start -->
+      <div class="relative min-h-screen bg-background pb-20">
+        <div class="hero-bg pointer-events-none absolute inset-x-0 top-0 z-0 h-screen overflow-hidden" aria-hidden="true">
+          <div class="hero-grid"></div>
+          <div class="hero-vignette"></div>
+        </div>
+        <header class="sticky top-0 z-50 w-full border-b border-transparent bg-transparent">
+          <div class="content-wrap flex h-16 items-center justify-between">
+            <a href="/" class="flex items-center gap-2.5" aria-label="DigMyName home">
+              <svg class="h-8 w-8" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                  <linearGradient id="shell-shovel-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="hsl(var(--aurora-mint))" />
+                    <stop offset="100%" stop-color="hsl(var(--primary))" />
+                  </linearGradient>
+                </defs>
+                <path fill="url(#shell-shovel-gradient)" d="m417.023 4.932-121.375 121.375c2.253 2.048 4.465 4.156 6.633 6.325 59.607 59.606 59.607 156.593 0 216.2-48.86 48.86-128.361 48.86-177.22 0-19.504-19.504-30.245-45.436-30.245-73.018 0-27.583 10.741-53.515 30.245-73.018 6.102-6.103 16.138-5.875 21.946.685 5.261 5.942 4.83 15.116-.769 20.741-28.392 28.527-28.351 74.834.124 103.309 37.114 37.114 97.503 37.114 134.617 0 23.185-23.185 35.953-54.01 35.953-86.799 0-32.788-12.768-63.614-35.953-86.798-4.741-4.741-9.73-9.141-14.941-13.19-1.262-.679-2.447-1.552-3.512-2.617-.042-.041-.082-.082-.123-.124-26.724-19.556-58.841-30.113-92.585-30.113-41.991 0-81.469 16.352-111.161 46.044-37.825 37.825-58.657 88.118-58.657 141.612s20.832 103.788 58.659 141.614c99.075 99.075 260.284 99.076 359.36 0 117.797-117.797 124.856-305.043 21.188-431.171-5.619-6.837-15.926-7.315-22.184-1.057z" />
+              </svg>
+              <span class="logo-text text-foreground">DigMyName</span>
+            </a>
+            <nav class="hidden items-center gap-6 md:flex" aria-label="Primary">
+              <a href="/" class="text-base font-medium text-foreground underline decoration-mint/70 decoration-2 underline-offset-8" aria-current="page">Domains</a>
+              <a href="/pricing" class="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
+              <a href="/how-it-works" class="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">How it works</a>
+              <a href="/speed" class="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">Speed</a>
+              <a href="/mcp" class="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">MCP</a>
+              <a href="/api" class="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">API</a>
+            </nav>
+            <div class="flex h-10 items-center gap-2" aria-hidden="true"></div>
+          </div>
+        </header>
+        <main>
+          <div class="relative z-10 flex min-h-[38vh] items-center justify-center px-4 pb-4 pt-10 sm:h-[calc(50vh-72px)] sm:min-h-0 sm:pb-0 sm:pt-0">
+            <div class="mx-auto w-full max-w-5xl text-center">
+              <div class="hero-chip hero-chip-text mb-5 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] sm:text-xs">
+                <svg class="hero-chip-pulse h-3.5 w-3.5 shrink-0 text-aurora-mint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg>
+                <span class="whitespace-nowrap">First answer in ~170 ms<span class="hidden sm:inline"> — timed live, no asterisks</span></span>
+              </div>
+              <h1 class="text-gradient mx-auto w-full px-1 text-[clamp(2.25rem,10.5vw,5.7rem)] font-extrabold leading-[1.05] tracking-[-0.04em] sm:leading-[1] sm:tracking-[-0.045em]">
+                <span class="block sm:hidden">World's fastest</span>
+                <span class="block sm:hidden">domain search.</span>
+                <span class="block sm:hidden">Fight us.</span>
+                <span class="hidden sm:block whitespace-nowrap">World's fastest</span>
+                <span class="hidden sm:block whitespace-nowrap">domain search. Fight us.</span>
+              </h1>
+              <p class="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:mt-6 sm:text-lg md:text-xl">
+                Probably the fastest domain search in the universe. Or the second — the timer on screen will tell you which.
+              </p>
+            </div>
+          </div>
+          <div class="sticky top-16 z-40 py-4">
+            <div class="container relative mx-auto flex max-w-3xl items-center px-4">
+              <form action="/" method="get" role="search" class="flex w-full min-w-0 flex-1 items-center gap-0.5 rounded-[100px] border border-white/40 bg-white/25 py-[14px] pl-4 pr-4 sm:pl-5 sm:pr-6 [backdrop-filter:blur(64px)] dark:border-white/10 dark:bg-white/[0.05]">
+                <div class="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
+                  <svg class="h-7 w-7 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                </div>
+                <input
+                  id="prehydrate-q"
+                  name="q"
+                  type="text"
+                  placeholder="Enter domain name..."
+                  autofocus
+                  autocomplete="off"
+                  autocapitalize="none"
+                  spellcheck="false"
+                  aria-label="Search domain name"
+                  class="w-full min-w-0 flex-1 bg-transparent pl-1 pr-2 text-lg sm:pr-10 sm:text-2xl font-semibold text-foreground/60 dark:text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
+                />
+                <span class="relative flex h-[38px] w-[58px] shrink-0 items-center rounded-full bg-black/10 p-1 dark:bg-white/10" aria-hidden="true"><span class="flex h-[30px] w-[30px] rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18)]"></span></span>
+              </form>
+            </div>
+          </div>
+        </main>
       </div>
-      <style>
-        @keyframes dmn-spin{to{transform:rotate(360deg)}}
-      </style>
+      <!-- route-shell:end -->
       <!-- Static content for crawlers / AI bots that don't execute JS. React replaces #root on mount, so real users never see this. Regenerated per route at build time. -->
       <div style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
         <!-- route-static:start -->
-        <h1>DigMyName — Fast Domain Availability Search &amp; Registrar Price Comparison</h1>
+        <h2>DigMyName — Fast Domain Availability Search &amp; Registrar Price Comparison</h2>
         <p>
           DigMyName checks domain availability in real time across 50+ TLDs and compares registration, renewal, and
           transfer prices across 6 registrars (Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, and OVHcloud).

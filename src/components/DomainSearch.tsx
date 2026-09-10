@@ -3,8 +3,13 @@ import { Link } from "react-router-dom";
 import { Search, X, Loader2, CheckCircle2, LayoutGrid, List, AlertCircle, Zap } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
+import { useAuth } from "@/hooks/useAuth";
+import { useFavorites } from "@/hooks/useFavorites";
+import AuthDialog from "@/components/LazyAuthDialog";
+import LiveStopwatch from "@/components/LiveStopwatch";
 import { deriveCardFacts } from "@/lib/cardFacts";
 import { matchesFilters, type ResultFilters } from "@/lib/resultFilters";
+import { earlyHeadline } from "@/lib/searchLanes";
 
 const StarsIcon = ({ className, active }: { className?: string; active?: boolean }) => (
   <svg
@@ -83,7 +88,12 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   }, []);
   const [query, setQuery] = useState(() => {
     if (typeof window === "undefined") return "";
-    return new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
+    const fromUrl = new URLSearchParams(window.location.search).get("q")?.trim();
+    if (fromUrl) return fromUrl;
+    // Whatever was typed into the static shell's input before React mounted
+    // (index.html renders the hero and a real input so the page is usable at once).
+    const shell = document.getElementById("prehydrate-q") as HTMLInputElement | null;
+    return shell?.value.trim() ?? "";
   });
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -92,6 +102,26 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const [viewMode, setViewMode] = useState<"cards" | "compact">("cards");
   const [scrolled, setScrolled] = useState(false);
   const isMobile = useIsMobile();
+
+  // Auth, favourites and the price table are read ONCE here and handed to the
+  // cards as props: 53 cards each subscribing to react-query themselves meant
+  // 150+ observers re-rendering on every store notification.
+  const { user } = useAuth();
+  const { favorites, toggleFavorite } = useFavorites();
+  const favoritedSet = useMemo(() => new Set(favorites), [favorites]);
+  const [authOpen, setAuthOpen] = useState(false);
+  const toggleFavoriteRef = useRef(toggleFavorite);
+  toggleFavoriteRef.current = toggleFavorite;
+  const handleToggleFavorite = useCallback(
+    (domain: string) => {
+      if (!user) {
+        setAuthOpen(true);
+        return;
+      }
+      toggleFavoriteRef.current(domain);
+    },
+    [user],
+  );
 
   // Warm the TLS connection to the edge API once on mount so the first real
   // lookup doesn't pay for the handshake. Never throws, never blocks render.
@@ -133,14 +163,19 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   // The clock starts on the LAST keystroke (so both debounces are counted
   // against us) and stops when the first availability answer lands on screen.
   const typingStopRef = useRef<number | null>(null);
-  const [liveMs, setLiveMs] = useState<number | null>(null);
+  // "running" while the clock ticks, "done" once the first answer landed. The
+  // ticking digits are painted by <LiveStopwatch/> straight into the DOM from
+  // requestAnimationFrame. They used to be React state updated every frame,
+  // which re-rendered the whole 53-card list 60× a second and (measured on
+  // prod) delayed the fast lane by ~0.9 s and the authoritative lane by ~1.7 s.
+  const [stopwatch, setStopwatch] = useState<"idle" | "running" | "done">("idle");
   const [firstAnswerMs, setFirstAnswerMs] = useState<number | null>(null);
 
   const markFirstAnswer = useCallback(() => {
     if (typingStopRef.current == null) return;
     setFirstAnswerMs(Math.round(performance.now() - typingStopRef.current));
     typingStopRef.current = null;
-    setLiveMs(null);
+    setStopwatch("done");
   }, []);
 
   // Debounce, lane one: the DNS pre-check fires FAST_DEBOUNCE_MS after the last
@@ -151,34 +186,19 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       setDebouncedQuery("");
       setResults([]);
       typingStopRef.current = null;
-      setLiveMs(null);
+      setStopwatch("idle");
       setFirstAnswerMs(null);
       return;
     }
     setLoading(true);
     typingStopRef.current = performance.now();
     setFirstAnswerMs(null);
-    setLiveMs(0);
+    setStopwatch("running");
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
     }, FAST_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [query]);
-
-  // Live ticking counter while we wait for the first answer.
-  useEffect(() => {
-    if (liveMs === null) return;
-    let raf = 0;
-    const tick = () => {
-      if (typingStopRef.current != null) {
-        setLiveMs(Math.round(performance.now() - typingStopRef.current));
-        raf = requestAnimationFrame(tick);
-      }
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [liveMs === null]);
 
 
   // Generate domain list + check availability
@@ -246,17 +266,10 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         void checkDomainsFast(chunk, ctl.signal).then(applyFast).catch(() => {});
       }
 
-      // Debounce, lane two: wait out the rest of AUTH_DEBOUNCE_MS before the
-      // authoritative wave. If the query moves on meanwhile, this search is
-      // cancelled and the wave for the superseded prefix is never sent.
-      await new Promise<void>((resolve) => setTimeout(resolve, AUTH_DEBOUNCE_MS - FAST_DEBOUNCE_MS));
-      if (cancelled) return;
-
-
       // Step 3: Authoritative availability + pricing.
       // Strategy: the ~10 most popular TLDs are each sent as their OWN request so
       // every card resolves at its own speed (no waiting for the slowest sibling
-      // in a batch). Everything else fans out in parallel batches of 20.
+      // in a batch). Everything else fans out in parallel batches of 8.
       const BATCH_SIZE = 8;
       const TOP_TLDS = ["com", "io", "net", "org", "ai", "co", "app", "dev", "xyz", "me"];
 
@@ -325,14 +338,30 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         applyBatch(slice, resp);
       };
 
+      // Step 3a: the headline card (typed TLD, else .com) leaves NOW, with the
+      // fast lane, unless its label is a premium suspect (see searchLanes.ts).
+      // It is the card the stopwatch usually stops on, so it must not sit
+      // behind the authoritative debounce; a superseded prefix is aborted by
+      // `ctl` like every other in-flight request.
+      const headline = earlyHeadline(solo);
+      const headlineDone = headline ? runBatch([headline]) : Promise.resolve();
+      const laterSolo = headline ? solo.filter((d) => d !== headline) : solo;
+
+      // Debounce, lane two: wait out the rest of AUTH_DEBOUNCE_MS before the
+      // full authoritative wave. If the query moves on meanwhile, this search is
+      // cancelled and the wave for the superseded prefix is never sent.
+      await new Promise<void>((resolve) => setTimeout(resolve, AUTH_DEBOUNCE_MS - FAST_DEBOUNCE_MS));
+      if (cancelled) return;
+
       const restBatches: string[][] = [];
       for (let i = 0; i < rest.length; i += BATCH_SIZE) {
         restBatches.push(rest.slice(i, i + BATCH_SIZE));
       }
 
       await Promise.all([
+        headlineDone,
         // one request per top TLD → each card flips as soon as its own lookup lands
-        ...solo.map((d) => runBatch([d])),
+        ...laterSolo.map((d) => runBatch([d])),
         ...restBatches.map(runBatch),
       ]);
     };
@@ -533,18 +562,8 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                 <span className="text-muted-foreground"><span className="inline-block min-w-[2.5ch] text-right tabular-nums text-xl font-extrabold text-amber-500 sm:text-2xl">{uncertainCount}</span> unverified</span>
               )}
 
-              {(liveMs !== null || firstAnswerMs !== null) && (
-                <Link
-                  to="/speed"
-                  title="How we measure: clock starts on your last keystroke, stops on the first answer"
-                  className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <Zap className="h-3.5 w-3.5 text-primary" />
-                  <span className="tabular-nums font-semibold text-foreground">
-                    {liveMs !== null ? liveMs : firstAnswerMs} ms
-                  </span>
-                  <span className="hidden sm:inline">first answer</span>
-                </Link>
+              {stopwatch !== "idle" && (
+                <LiveStopwatch startRef={typingStopRef} state={stopwatch} finalMs={firstAnswerMs} />
               )}
             </div>
 
@@ -598,7 +617,15 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                 .filter((r) => r.available && !r.uncertain)
                 .sort(orderResults)
                 .map((r) => (
-                  <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
+                  <DomainCard
+                      key={r.domain}
+                      result={r}
+                      compact={viewMode === "compact"}
+                      onRetry={retryDomain}
+                      cheapest={cheapestByTld.get(r.tld.extension)}
+                      favorited={favoritedSet.has(r.domain)}
+                      onToggleFavorite={handleToggleFavorite}
+                    />
                 ))}
             </div>
 
@@ -613,7 +640,15 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                   {checkingResults
                     .slice(0, 20)
                     .map((r) => (
-                      <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
+                      <DomainCard
+                      key={r.domain}
+                      result={r}
+                      compact={viewMode === "compact"}
+                      onRetry={retryDomain}
+                      cheapest={cheapestByTld.get(r.tld.extension)}
+                      favorited={favoritedSet.has(r.domain)}
+                      onToggleFavorite={handleToggleFavorite}
+                    />
                     ))}
                 </div>
               </>
@@ -632,7 +667,15 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                     .sort(orderResults)
                     .slice(0, 10)
                     .map((r) => (
-                      <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
+                      <DomainCard
+                      key={r.domain}
+                      result={r}
+                      compact={viewMode === "compact"}
+                      onRetry={retryDomain}
+                      cheapest={cheapestByTld.get(r.tld.extension)}
+                      favorited={favoritedSet.has(r.domain)}
+                      onToggleFavorite={handleToggleFavorite}
+                    />
                     ))}
                 </div>
               </>
@@ -651,7 +694,15 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                     .sort(orderResults)
                     .slice(0, 10)
                     .map((r) => (
-                      <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
+                      <DomainCard
+                      key={r.domain}
+                      result={r}
+                      compact={viewMode === "compact"}
+                      onRetry={retryDomain}
+                      cheapest={cheapestByTld.get(r.tld.extension)}
+                      favorited={favoritedSet.has(r.domain)}
+                      onToggleFavorite={handleToggleFavorite}
+                    />
                     ))}
                 </div>
               </>
@@ -659,6 +710,8 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
           </>
         )}
       </section>
+      {/* One sign-in dialog for the whole list (the cards used to mount one each). */}
+      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </div>
   );
 };

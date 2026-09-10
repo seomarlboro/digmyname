@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo, Dispatch, SetStateAction } from "
 import { ChevronUp, SlidersHorizontal, X } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger, DrawerClose, DrawerTitle } from "@/components/ui/drawer";
 import { TLD_LIST } from "@/lib/domainData";
 import {
   FEATURE_OPTIONS,
@@ -201,7 +201,10 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange, filters, onFiltersChang
   const [openFilter, setOpenFilter] = useState<FilterConfig["id"] | null>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Record<string, HTMLDivElement>>({});
-  const isMobile = useIsMobile();
+  // The floating bar is ~620 px wide and its extensions popover 720 px: below
+  // 1024 px (tablets, large phones in landscape) it crowds the edge, so those
+  // get the button + drawer like phones do.
+  const isMobile = useIsMobile(1024);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -282,7 +285,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange, filters, onFiltersChang
         </DrawerTrigger>
         <DrawerContent className="max-h-[85vh]">
           <div className="flex items-center justify-between px-5 pt-4 pb-2">
-            <h2 className="text-lg font-bold text-foreground">Filters</h2>
+            <DrawerTitle className="text-lg font-bold text-foreground">Filters</DrawerTitle>
             <DrawerClose asChild>
               <button type="button" aria-label="Close filters" className="rounded-full p-1.5 hover:bg-muted/10 transition-colors">
                 <X className="h-5 w-5 text-muted-foreground" />

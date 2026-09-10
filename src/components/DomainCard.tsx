@@ -1,22 +1,23 @@
-import { useState } from "react";
+import { memo } from "react";
 import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle, Tag, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/hooks/useAuth";
-import { useFavorites } from "@/hooks/useFavorites";
-import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
 import { useDomainAge, formatRegisteredSince } from "@/hooks/useDomainAge";
-import AuthDialog from "@/components/LazyAuthDialog";
 import { getRegistrarColor, getRegistrarUrl } from "@/lib/registrarColors";
 
 import type { DomainResult } from "@/lib/domainData";
-import { deriveCardFacts } from "@/lib/cardFacts";
+import { deriveCardFacts, type CheapestRegistrar } from "@/lib/cardFacts";
 
 interface DomainCardProps {
   result: DomainResult;
   compact?: boolean;
   onRetry?: (domain: string) => void;
+  /** Cheapest registrar row for this card's TLD, from the list's single price-table read. */
+  cheapest?: CheapestRegistrar;
+  favorited: boolean;
+  /** The list decides whether to toggle or to ask for sign-in first. */
+  onToggleFavorite: (domain: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -32,16 +33,15 @@ const CARD_BODY_MIN = "sm:min-h-[56px]";
 
 
 
-const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
+/**
+ * One result row. Pure function of its props (memoised): no store subscriptions
+ * of its own, so an answer landing on one card does not re-render the other 52.
+ */
+const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onToggleFavorite }: DomainCardProps) => {
   const { domain, available, checking } = result;
   const isUncertain = result.uncertain === true;
   const isBrand = result.sldBlocked === true;
-  const { user } = useAuth();
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const cheapestByTld = useCheapestRegistrars();
-  const [authOpen, setAuthOpen] = useState(false);
 
-  const ext = domain.split(".").pop() ?? "";
   // One derivation shared with the filter bar (src/lib/cardFacts.ts): premium
   // flags, the trusted price (never a seed), renewal trap, "Check price" state.
   const {
@@ -55,14 +55,13 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
     registrarName,
     promoCode,
     whoisPrivacy,
-  } = deriveCardFacts(result, cheapestByTld.get(ext));
+  } = deriveCardFacts(result, cheapest);
   const buyUrl = registrarName ? getRegistrarUrl(registrarName, domain) : null;
   // When no trusted DB price exists, "Check price" still needs a real
   // registrar search destination — never "#". Spaceship's URL builder works
   // for any TLD, so it's a safe universal fallback.
   const checkPriceUrl = getRegistrarUrl("Spaceship", domain);
   const actionUrl = buyUrl ?? checkPriceUrl;
-  const favorited = isFavorite(domain);
 
   // Registration year for taken domains — fetched lazily in the background,
   // so it never delays the availability check.
@@ -70,16 +69,11 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const sinceLabel = formatRegisteredSince(age);
 
 
-  const handleFavorite = () => {
-    if (!user) {
-      setAuthOpen(true);
-      return;
-    }
-    toggleFavorite(domain);
-  };
+  const handleFavorite = () => onToggleFavorite(domain);
 
   const parts = domain.split(".");
   const name = parts.slice(0, -1).join(".");
+  const ext = parts[parts.length - 1] ?? "";
 
   // One consistent brand marker across every section (available/taken/uncertain).
   // Same amber tone as the uncertain "brand_protected" box so the whole
@@ -297,7 +291,6 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
             </>
           )}
         </div>
-        <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
       </>
     );
   }
@@ -451,9 +444,8 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
           </div>
         </div>
       </div>
-      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </>
   );
 };
 
-export default DomainCard;
+export default memo(DomainCard);

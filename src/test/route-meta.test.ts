@@ -3,6 +3,8 @@ import { ROUTES, SITEMAP_ROUTES, SITE_URL, canonicalUrl, getRouteMeta } from "@/
 import {
   HEAD_END,
   HEAD_START,
+  SHELL_END,
+  SHELL_START,
   STATIC_END,
   STATIC_START,
   outputPathsFor,
@@ -15,7 +17,11 @@ const template = `<!doctype html><html><head>
     <title data-rh="true">OLD</title>
     ${HEAD_END}
     <meta property="og:site_name" content="DigMyName" />
-  </head><body><div id="root"><div>
+  </head><body><div id="root">
+      ${SHELL_START}
+      <div class="hero"><input id="prehydrate-q" /></div>
+      ${SHELL_END}
+      <div>
         ${STATIC_START}
         <h1>OLD</h1>
         ${STATIC_END}
@@ -106,9 +112,21 @@ describe("prerender", () => {
     expect(outputPathsFor("/how-it-works")).toEqual(["how-it-works/index.html", "how-it-works.html"]);
   });
 
-  it("is idempotent: rendering the rendered output again gives the same file", () => {
-    const once = renderRouteHtml(template, getRouteMeta("/mcp"));
-    const twice = renderRouteHtml(once, getRouteMeta("/mcp"));
+  it("keeps the pre-hydration hero shell on the home route only", () => {
+    const home = renderRouteHtml(template, getRouteMeta("/"));
+    expect(home).toContain('id="prehydrate-q"');
+    expect(home).toContain(SHELL_START);
+    const pricing = renderRouteHtml(template, getRouteMeta("/pricing"));
+    expect(pricing).not.toContain('id="prehydrate-q"');
+    expect(pricing).not.toContain(SHELL_START);
+    expect(pricing).toContain("dmn-spin");
+    // The crawler block survives the shell swap.
+    expect(pricing).toContain("<h1>Domain pricing, side by side</h1>");
+  });
+
+  it("is idempotent on the home route: rendering the rendered output again gives the same file", () => {
+    const once = renderRouteHtml(template, getRouteMeta("/"));
+    const twice = renderRouteHtml(once, getRouteMeta("/"));
     expect(twice).toBe(once);
   });
 });
