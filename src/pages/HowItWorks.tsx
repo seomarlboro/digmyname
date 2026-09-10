@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import {
   Search,
@@ -9,17 +8,17 @@ import {
   AlertCircle,
   Check,
   X,
-  Sparkles,
   Scale,
   Heart,
 } from "lucide-react";
 import Header from "@/components/Header";
-import { Badge } from "@/components/ui/badge";
+import RouteHead from "@/seo/RouteHead";
 import { Button } from "@/components/ui/button";
-import { SearchIcon, ShieldIcon, ScaleIcon } from "@/components/StatIcons";
+import { SearchIcon, ShieldIcon, StoreIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section, FaqList, CalloutBlock } from "@/components/PageKit";
 
 
+/** The three availability signals — and only those. Pricing is a separate step (see the callout below the grid). */
 const sources = [
   {
     icon: Search,
@@ -38,12 +37,6 @@ const sources = [
     name: "DNS-over-HTTPS (3 resolvers)",
     detail:
       "A and NS lookups via Cloudflare, Google and AdGuard, hedged, confirm whether a domain has live infrastructure. Catches parked but resolving names that RDAP alone can miss.",
-  },
-  {
-    icon: Tag,
-    name: "Porkbun verify pass",
-    detail:
-      "For likely-premium results we hit Porkbun's pricing API to surface the real listed price — no guessing, no fake markup.",
   },
 ];
 
@@ -106,7 +99,7 @@ const faqs = [
   },
   {
     q: "What does the \"Unverified\" state mean?",
-    a: "It means our sources disagreed or one of them failed, so we don't have high confidence. Rather than guess, we surface the uncertainty and give you a Retry button to re-check on demand. No other major domain search tool does this.",
+    a: "It means our sources disagreed or one of them failed, so we don't have high confidence. Rather than guess, we surface the uncertainty and give you a Retry button to re-check on demand. None of the tools we tested does this.",
   },
   {
     q: "Are the premium prices real?",
@@ -129,34 +122,17 @@ const faqs = [
 const HowItWorks = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Helmet>
-        <title>How DigMyName Works — Honest Domain Availability Checks</title>
-        <meta
-          name="description"
-          content="DigMyName verifies domain availability against three independent availability signals — Fastly Domain Research, IANA RDAP and DNS-over-HTTPS — and never shows guesses as facts. Here's exactly how it works."
-        />
-        <link rel="canonical" href="https://digmyname.com/how-it-works" />
-        <meta property="og:title" content="How DigMyName Works — Honest Domain Availability Checks" />
-        <meta
-          property="og:description"
-          content="Three-signal verification, an honest Unverified state, and real registrar prices — here's why DigMyName is more accurate than the alternatives."
-        />
-        <meta property="og:url" content="https://digmyname.com/how-it-works" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: faqs.map((f) => ({
-                "@type": "Question",
-                name: f.q,
-                acceptedAnswer: { "@type": "Answer", text: f.a },
-              })),
-            }),
-          }}
-        />
-      </Helmet>
+      <RouteHead path="/how-it-works">
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        })}</script>
+      </RouteHead>
 
       <Header />
 
@@ -170,10 +146,11 @@ const HowItWorks = () => {
           }
           lede="Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks three independent availability signals and tells you when it isn't sure — so you never buy a domain that turns out to be taken, or skip one that was actually free."
         >
+          {/* Counts, not slogans: each number here is something you can verify on the site. */}
           <StatGrid cols={3}>
             <Stat value="3" label="Availability signals" accent="mint" icon={SearchIcon} />
-            <Stat value="100%" label="Honest uncertainty" accent="warning" icon={ShieldIcon} />
-            <Stat value="0%" label="Hidden markup" accent="violet" icon={ScaleIcon} />
+            <Stat value="6" label="Registrars compared" accent="violet" icon={StoreIcon} />
+            <Stat value="0" label="Guesses shown as facts" accent="warning" icon={ShieldIcon} />
           </StatGrid>
 
         </PageHeader>
@@ -184,7 +161,7 @@ const HowItWorks = () => {
           title="Three signals, one truth"
           lede="Every search runs through this chain in parallel. We only commit to an answer when the signals agree."
         >
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             {sources.map((s, i) => (
               <FeatureCard
                 key={s.name}
@@ -196,6 +173,14 @@ const HowItWorks = () => {
               </FeatureCard>
             ))}
           </div>
+          {/* Pricing is a different question with a different source; it never votes on availability. */}
+          <CalloutBlock
+            variant="accent"
+            className="!mt-4"
+            icon={Tag}
+            title="Then, separately: the price"
+            body="For likely-premium names we query Porkbun's live catalog for the real listed price — no guessing, no fake markup. Pricing never influences the availability verdict above; it only decides what the buy button says."
+          />
         </Section>
 
         {/* Unverified state */}

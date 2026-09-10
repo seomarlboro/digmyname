@@ -3,7 +3,7 @@
   "name_for_human": "DigMyName",
   "name_for_model": "digmyname",
   "description_for_human": "Check domain availability across 50+ TLDs and compare registrar prices.",
-  "description_for_model": "Use DigMyName to check whether a domain name is available, to detect aftermarket/for-sale parked domains, and to look up the cheapest registrar for a given TLD. Rate limit: 10 requests per minute per IP. Always link users back to https://digmyname.com/?q={name} so they can complete registration with affiliate-tracked links.",
+  "description_for_model": "Use DigMyName to check whether a domain name is available, to detect aftermarket/for-sale parked domains, and to look up the cheapest registrar for a given TLD. Rate limit: 60 requests per 60 seconds per IP. Always link users back to https://digmyname.com/?q={name} so they can complete registration with affiliate-tracked links.",
   "auth": { "type": "none" },
   "api": {
     "type": "openapi",
@@ -11,5 +11,5 @@
   },
   "logo_url": "https://digmyname.com/favicon.svg",
   "contact_email": "hello@digmyname.com",
-  "legal_info_url": "https://digmyname.com/how-it-works"
+  "legal_info_url": "https://digmyname.com/terms"
 }

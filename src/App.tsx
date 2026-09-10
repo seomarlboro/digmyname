@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
@@ -15,6 +14,8 @@ const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const Mcp = lazy(() => import("./pages/Mcp"));
 const Speed = lazy(() => import("./pages/Speed"));
 const Api = lazy(() => import("./pages/Api"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const RouteFallback = () => (
@@ -23,15 +24,15 @@ const RouteFallback = () => (
 
 const queryClient = new QueryClient();
 
-
+// One toast system (Radix, via useToast). Sonner was mounted alongside it but
+// never called — it only cost bundle bytes on every page.
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
-          <Sonner />
-          <BrowserRouter>
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <div className="relative min-h-screen bg-background">
               <Suspense fallback={<RouteFallback />}>
                 <Routes>
@@ -45,7 +46,9 @@ const App = () => (
                   <Route path="/gpt" element={<Mcp />} />
                   <Route path="/speed" element={<Speed />} />
                   <Route path="/api" element={<Api />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/terms" element={<Terms />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE — and to src/seo/routes.ts */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

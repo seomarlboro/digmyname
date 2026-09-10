@@ -1,80 +1,81 @@
 import { supabase } from "@/integrations/supabase/client";
 
+/** A curated extension. Deliberately nothing else: prices come from the live
+ *  registrar table (`registrar_prices`) and card attributes from real verdicts,
+ *  never from a static seed — a seed price here once contradicted /pricing on
+ *  the very first click of the TLD picker. */
 export interface TLD {
   extension: string;
-  regPrice: number;
-  renewPrice: number;
-  features: string[];
 }
 
 export const TLD_LIST: TLD[] = [
   // Classic
-  { extension: "com", regPrice: 10.99, renewPrice: 12.99, features: ["Free SSL", "Instant activation", "WHOIS protection"] },
-  { extension: "net", regPrice: 11.49, renewPrice: 14.99, features: ["Free SSL", "WHOIS protection"] },
-  { extension: "org", regPrice: 9.99, renewPrice: 14.99, features: ["Free SSL", "WHOIS protection"] },
-  { extension: "info", regPrice: 3.99, renewPrice: 18.99, features: ["Free SSL", "WHOIS protection"] },
-  { extension: "biz", regPrice: 4.99, renewPrice: 18.99, features: ["Free SSL"] },
+  { extension: "com" },
+  { extension: "net" },
+  { extension: "org" },
+  { extension: "info" },
+  { extension: "biz" },
   // Tech
-  { extension: "io", regPrice: 32.99, renewPrice: 39.99, features: ["Free SSL", "Instant activation"] },
-  { extension: "ai", regPrice: 69.99, renewPrice: 89.99, features: ["Free SSL", "Trending"] },
-  { extension: "app", regPrice: 14.99, renewPrice: 18.99, features: ["Free SSL", "Instant activation"] },
-  { extension: "dev", regPrice: 12.99, renewPrice: 15.99, features: ["Free SSL", "Instant activation"] },
-  { extension: "tech", regPrice: 6.99, renewPrice: 45.99, features: ["Free SSL", "Trending"] },
-  { extension: "digital", regPrice: 3.99, renewPrice: 35.99, features: ["Free SSL"] },
-  { extension: "cloud", regPrice: 8.99, renewPrice: 24.99, features: ["Free SSL", "Trending"] },
-  { extension: "software", regPrice: 24.99, renewPrice: 32.99, features: ["Free SSL"] },
-  { extension: "systems", regPrice: 19.99, renewPrice: 24.99, features: ["Free SSL"] },
-  { extension: "build", regPrice: 12.99, renewPrice: 19.99, features: ["Free SSL"] },
-  { extension: "run", regPrice: 12.99, renewPrice: 15.99, features: ["Free SSL"] },
-  { extension: "page", regPrice: 8.99, renewPrice: 12.99, features: ["Free SSL", "Instant activation"] },
-  { extension: "link", regPrice: 9.99, renewPrice: 12.99, features: ["Free SSL"] },
-  { extension: "tools", regPrice: 19.99, renewPrice: 24.99, features: ["Free SSL"] },
+  { extension: "io" },
+  { extension: "ai" },
+  { extension: "app" },
+  { extension: "dev" },
+  { extension: "tech" },
+  { extension: "digital" },
+  { extension: "cloud" },
+  { extension: "software" },
+  { extension: "systems" },
+  { extension: "build" },
+  { extension: "run" },
+  { extension: "page" },
+  { extension: "link" },
+  { extension: "tools" },
   // Startup / Business
-  { extension: "co", regPrice: 11.99, renewPrice: 25.99, features: ["Free SSL", "Instant activation"] },
-  { extension: "agency", regPrice: 6.99, renewPrice: 24.99, features: ["Free SSL"] },
-  { extension: "company", regPrice: 8.99, renewPrice: 14.99, features: ["Free SSL"] },
-  { extension: "ventures", regPrice: 39.99, renewPrice: 49.99, features: ["Free SSL"] },
-  { extension: "capital", regPrice: 39.99, renewPrice: 49.99, features: ["Free SSL"] },
-  { extension: "inc", regPrice: 2499.99, renewPrice: 2499.99, features: ["Free SSL", "Premium"] },
+  { extension: "co" },
+  { extension: "agency" },
+  { extension: "company" },
+  { extension: "ventures" },
+  { extension: "capital" },
+  { extension: "inc" },
   // Creative
-  { extension: "design", regPrice: 29.99, renewPrice: 39.99, features: ["Free SSL"] },
-  { extension: "studio", regPrice: 24.99, renewPrice: 29.99, features: ["Free SSL"] },
-  { extension: "art", regPrice: 12.99, renewPrice: 14.99, features: ["Free SSL"] },
-  { extension: "media", regPrice: 14.99, renewPrice: 34.99, features: ["Free SSL"] },
+  { extension: "design" },
+  { extension: "studio" },
+  { extension: "art" },
+  { extension: "media" },
   // Short / Brandable
-  { extension: "xyz", regPrice: 1.99, renewPrice: 12.99, features: ["Free SSL", "Instant activation", "WHOIS protection"] },
-  { extension: "me", regPrice: 5.99, renewPrice: 19.99, features: ["Free SSL", "Instant activation"] },
-  { extension: "cc", regPrice: 9.99, renewPrice: 12.99, features: ["Free SSL"] },
-  { extension: "tv", regPrice: 29.99, renewPrice: 34.99, features: ["Free SSL"] },
+  { extension: "xyz" },
+  { extension: "me" },
+  { extension: "cc" },
+  { extension: "tv" },
   // .gg and .so were removed 2026-08-15 — neither zone has an RDAP server (both
   // absent from the IANA bootstrap), so availability there rests on DNS plus a
   // 404 from an aggregator that cannot route the zone. That combination sold
   // registered names (`gaming.gg`, registered 2020, was shown available $51.80).
   // Re-add them only together with a paid third signal, if the demand appears.
   // E-commerce
-  { extension: "shop", regPrice: 2.99, renewPrice: 34.99, features: ["Free SSL", "Trending"] },
-  { extension: "store", regPrice: 3.99, renewPrice: 49.99, features: ["Free SSL"] },
-  { extension: "market", regPrice: 29.99, renewPrice: 29.99, features: ["Free SSL"] },
-  { extension: "buy", regPrice: 29.99, renewPrice: 29.99, features: ["Free SSL"] },
+  { extension: "shop" },
+  { extension: "store" },
+  { extension: "market" },
+  { extension: "buy" },
   // Community / Social
-  { extension: "community", regPrice: 24.99, renewPrice: 29.99, features: ["Free SSL"] },
-  { extension: "social", regPrice: 24.99, renewPrice: 29.99, features: ["Free SSL"] },
-  { extension: "club", regPrice: 3.99, renewPrice: 14.99, features: ["Free SSL"] },
-  { extension: "group", regPrice: 14.99, renewPrice: 14.99, features: ["Free SSL"] },
+  { extension: "community" },
+  { extension: "social" },
+  { extension: "club" },
+  { extension: "group" },
   // Finance
-  { extension: "finance", regPrice: 39.99, renewPrice: 49.99, features: ["Free SSL"] },
-  { extension: "money", regPrice: 24.99, renewPrice: 29.99, features: ["Free SSL"] },
-  { extension: "fund", regPrice: 39.99, renewPrice: 49.99, features: ["Free SSL"] },
+  { extension: "finance" },
+  { extension: "money" },
+  { extension: "fund" },
   // Other popular
-  { extension: "life", regPrice: 2.99, renewPrice: 29.99, features: ["Free SSL"] },
-  { extension: "world", regPrice: 2.99, renewPrice: 29.99, features: ["Free SSL"] },
-  { extension: "site", regPrice: 2.99, renewPrice: 29.99, features: ["Free SSL"] },
-  { extension: "online", regPrice: 2.99, renewPrice: 34.99, features: ["Free SSL"] },
-  { extension: "space", regPrice: 1.99, renewPrice: 19.99, features: ["Free SSL"] },
-  { extension: "pro", regPrice: 3.99, renewPrice: 18.99, features: ["Free SSL"] },
-  { extension: "one", regPrice: 8.99, renewPrice: 12.99, features: ["Free SSL", "Trending"] },
-  { extension: "wtf", regPrice: 2.99, renewPrice: 29.99, features: ["Free SSL"] },
-  { extension: "lol", regPrice: 24.99, renewPrice: 29.99, features: ["Free SSL"] },
+  { extension: "life" },
+  { extension: "world" },
+  { extension: "site" },
+  { extension: "online" },
+  { extension: "space" },
+  { extension: "pro" },
+  { extension: "one" },
+  { extension: "wtf" },
+  { extension: "lol" },
 ];
 
 /** Authority rank per TLD = its index in the curated TLD_LIST (lower = more

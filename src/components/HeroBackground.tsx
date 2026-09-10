@@ -5,6 +5,11 @@ import Meteors from "@/components/Meteors";
 /**
  * Full-viewport animated hero background.
  * Spotlights + aurora mesh + drifting TLD constellation (mouse parallax) + dot grid + vignette.
+ *
+ * Cost control: the parallax interpolation only runs while the cursor target
+ * is still moving (it stops itself once settled, instead of ticking every
+ * frame forever), and the whole scene pauses — rAF and CSS keyframes — while
+ * the hero is scrolled out of view.
  */
 const TLDS = [
   { label: ".com", x: "8%",  y: "8%", size: 64, depth: 40, delay: "0s",   dur: "14s" },
@@ -16,6 +21,9 @@ const TLDS = [
   { label: ".co",  x: "20%", y: "80%", size: 30, depth: 12, delay: "1s",   dur: "20s" },
   { label: ".so",  x: "88%", y: "44%", size: 28, depth: 10, delay: "2.8s", dur: "16s" },
 ];
+
+/** Below this distance from the target the interpolation is done and the loop stops. */
+const SETTLE_EPSILON = 0.002;
 
 const HeroBackground = () => {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -31,27 +39,50 @@ const HeroBackground = () => {
     let currentX = 0;
     let currentY = 0;
     let raf = 0;
+    let inView = true;
+
+    const step = () => {
+      currentX += (targetX - currentX) * 0.06;
+      currentY += (targetY - currentY) * 0.06;
+      el.style.setProperty("--mx", currentX.toFixed(3));
+      el.style.setProperty("--my", currentY.toFixed(3));
+      const settled = Math.abs(targetX - currentX) < SETTLE_EPSILON && Math.abs(targetY - currentY) < SETTLE_EPSILON;
+      raf = settled || !inView ? 0 : requestAnimationFrame(step);
+    };
+
+    const kick = () => {
+      if (raf === 0 && inView) raf = requestAnimationFrame(step);
+    };
 
     const onMove = (e: PointerEvent) => {
       // Normalize cursor to [-1, 1] from viewport center
       targetX = (e.clientX / window.innerWidth) * 2 - 1;
       targetY = (e.clientY / window.innerHeight) * 2 - 1;
+      kick();
     };
 
-    const tick = () => {
-      // Smooth interpolation
-      currentX += (targetX - currentX) * 0.06;
-      currentY += (targetY - currentY) * 0.06;
-      el.style.setProperty("--mx", currentX.toFixed(3));
-      el.style.setProperty("--my", currentY.toFixed(3));
-      raf = requestAnimationFrame(tick);
-    };
+    // Pause everything while the hero is off-screen (the user is reading results).
+    const observer =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(
+            (entries) => {
+              inView = entries[0]?.isIntersecting ?? true;
+              el.dataset.paused = inView ? "false" : "true";
+              if (!inView && raf !== 0) {
+                cancelAnimationFrame(raf);
+                raf = 0;
+              }
+            },
+            { threshold: 0 },
+          )
+        : null;
+    observer?.observe(el);
 
     window.addEventListener("pointermove", onMove, { passive: true });
-    raf = requestAnimationFrame(tick);
     return () => {
       window.removeEventListener("pointermove", onMove);
-      cancelAnimationFrame(raf);
+      observer?.disconnect();
+      if (raf !== 0) cancelAnimationFrame(raf);
     };
   }, []);
 

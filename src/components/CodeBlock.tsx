@@ -1,12 +1,27 @@
 import { useId, useState } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
+import bash from "react-syntax-highlighter/dist/esm/languages/prism/bash";
+import json from "react-syntax-highlighter/dist/esm/languages/prism/json";
+import javascript from "react-syntax-highlighter/dist/esm/languages/prism/javascript";
+import python from "react-syntax-highlighter/dist/esm/languages/prism/python";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Check, Copy, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// PrismLight ships no grammars; register only the four the site's snippets use.
+// The full `Prism` build pulled every language in (a 700 KB chunk for six snippets).
+SyntaxHighlighter.registerLanguage("bash", bash);
+SyntaxHighlighter.registerLanguage("json", json);
+SyntaxHighlighter.registerLanguage("javascript", javascript);
+SyntaxHighlighter.registerLanguage("python", python);
+
+/** Languages a snippet may declare. Anything else renders as plain text. */
+export const SUPPORTED_LANGUAGES = ["bash", "json", "javascript", "python"] as const;
+export type SnippetLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+
 interface CodeTab {
   label: string;
-  language: string;
+  language: SnippetLanguage;
   code: string;
 }
 
@@ -16,7 +31,7 @@ interface CodeBlockProps {
   defaultTab?: number;
   /** Single-snippet mode */
   label?: string;
-  language?: string;
+  language?: SnippetLanguage;
   code?: string;
   /** Text to place on the clipboard (defaults to the rendered code) */
   copyText?: string;
@@ -123,7 +138,6 @@ export function CodeBlock({
             background: "transparent",
             fontSize: "14px",
             lineHeight: "1.6",
-
           }}
           codeTagProps={{
             style: {
@@ -138,4 +152,3 @@ export function CodeBlock({
     </div>
   );
 }
-

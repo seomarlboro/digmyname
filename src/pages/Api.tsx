@@ -1,7 +1,7 @@
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Terminal, Zap, KeyRound, Bot } from "lucide-react";
 import Header from "@/components/Header";
+import RouteHead from "@/seo/RouteHead";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
@@ -37,31 +37,18 @@ const endpoints = [
 const Api = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Free Domain Availability API — DigMyName</title>
-        <meta
-          name="description"
-          content="Free, no-auth JSON API for domain availability, multi-TLD search and registrar prices. 60 requests/60s per IP, no key. Built for AI agents and developers."
-        />
-        <link rel="canonical" href="https://digmyname.com/api" />
-        <meta property="og:title" content="Free Domain Availability API — DigMyName" />
-        <meta
-          property="og:description"
-          content="No-auth JSON API for domain availability and registrar pricing. 60 req/60s per IP, no key."
-        />
-        <meta property="og:url" content="https://digmyname.com/api" />
-        <meta property="og:type" content="website" />
+      <RouteHead path="/api">
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebAPI",
           name: "DigMyName Public API",
           url: "https://digmyname.com/api",
           documentation: "https://digmyname.com/api",
-          termsOfService: "https://digmyname.com/how-it-works",
+          termsOfService: "https://digmyname.com/terms",
           provider: { "@type": "Organization", name: "DigMyName", url: "https://digmyname.com/" },
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         })}</script>
-      </Helmet>
+      </RouteHead>
 
       <Header />
 
@@ -240,6 +227,10 @@ print(res.json()["result"]["available"])`,
                   digmyname.com
                 </a>{" "}
                 when you surface our data to users.
+              </li>
+              <li>
+                The <Link to="/terms" className="text-aurora hover:underline">terms of use</Link> and{" "}
+                <Link to="/privacy" className="text-aurora hover:underline">privacy policy</Link> cover the API too — in short: results as-is, no scraping around the limit, no reselling the feed.
               </li>
             </ul>
           </div>

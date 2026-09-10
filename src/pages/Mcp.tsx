@@ -1,5 +1,5 @@
-import { Helmet } from "react-helmet-async";
 import { MCP_VERSION } from "@/generated/mcp-version";
+import RouteHead from "@/seo/RouteHead";
 import { Link } from "react-router-dom";
 import {
   Github,
@@ -47,7 +47,7 @@ const formats = [
     title: "Custom GPT",
     for: "ChatGPT Plus / Team",
     href: `${GITHUB_URL}/tree/main/gpt`,
-    badge: "200M+ users",
+    badge: "GPT Store",
   },
 ];
 
@@ -62,7 +62,7 @@ const tools = [
     name: "search_domains",
     sig: "(query: string, tlds?: string[])",
     icon: Puzzle,
-    desc: "Check one name across 12 popular TLDs in parallel. Returns availability + price + registration year for taken results.",
+    desc: "Check one name across 11 popular TLDs in parallel (or the ones you pass). Returns availability + price + registration year for taken results.",
   },
   {
     name: "compare_registrars",
@@ -98,18 +98,7 @@ const Mcp = () => {
 
   return (
     <>
-      <Helmet>
-        <title>MCP Server, Claude Skill & Custom GPT — DigMyName</title>
-        <meta
-          name="description"
-          content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs."
-        />
-        <link rel="canonical" href="https://digmyname.com/mcp" />
-        <meta property="og:title" content="Domain Check Skills — MCP / Claude Skill / Custom GPT" />
-        <meta property="og:description" content="The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs." />
-        <meta property="og:url" content="https://digmyname.com/mcp" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
+      <RouteHead path="/mcp">
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
@@ -123,7 +112,7 @@ const Mcp = () => {
           license: "https://opensource.org/licenses/MIT",
           description: "The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs.",
         })}</script>
-      </Helmet>
+      </RouteHead>
 
       <div className="min-h-screen bg-background relative overflow-hidden">
         <Header />
@@ -161,17 +150,22 @@ const Mcp = () => {
                 Cloudflare edge cache: repeat domain lookups return in ~70 ms, first-time lookups run
                 the full live check (~170 ms first answer, ~370 ms typical full pipeline).
                 <span className="mt-5 flex flex-wrap items-center gap-2">
+                  {/* Live figures stay as shields.io images; the three static badges are plain markup (three fewer third-party requests). */}
                   <a href={NPM_URL} target="_blank" rel="noopener noreferrer">
-                    <img className="h-5" loading="lazy" alt="npm version of domain-check-skills-mcp" src="https://img.shields.io/npm/v/domain-check-skills-mcp?color=6d28d9&label=npm&logo=npm" />
+                    <img className="h-5 w-auto" height={20} loading="lazy" decoding="async" alt="npm version of domain-check-skills-mcp" src="https://img.shields.io/npm/v/domain-check-skills-mcp?color=6d28d9&label=npm&logo=npm" />
                   </a>
                   <a href={NPM_URL} target="_blank" rel="noopener noreferrer">
-                    <img className="h-5" loading="lazy" alt="monthly npm downloads" src="https://img.shields.io/npm/dm/domain-check-skills-mcp?color=10b981&label=downloads" />
+                    <img className="h-5 w-auto" height={20} loading="lazy" decoding="async" alt="monthly npm downloads" src="https://img.shields.io/npm/dm/domain-check-skills-mcp?color=10b981&label=downloads" />
                   </a>
-                  <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-                    <img className="h-5" loading="lazy" alt="MIT licensed" src="https://img.shields.io/badge/license-MIT-2563eb" />
+                  <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="static-badge">
+                    <span className="static-badge-key">license</span><span className="static-badge-value bg-[#2563eb]">MIT</span>
                   </a>
-                  <img className="h-5" loading="lazy" alt="MCP compatible" src="https://img.shields.io/badge/MCP-compatible-7c3aed" />
-                  <img className="h-5" loading="lazy" alt="Free, no API key required" src="https://img.shields.io/badge/free-no%20API%20key-16a34a" />
+                  <span className="static-badge">
+                    <span className="static-badge-key">MCP</span><span className="static-badge-value bg-[#7c3aed]">compatible</span>
+                  </span>
+                  <span className="static-badge">
+                    <span className="static-badge-key">free</span><span className="static-badge-value bg-[#16a34a]">no API key</span>
+                  </span>
                 </span>
               </>
             }

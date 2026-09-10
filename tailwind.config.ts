@@ -30,6 +30,12 @@ export default {
         display: ["Sora", "system-ui", "sans-serif"],
         mono: ["Geist Mono", "ui-monospace", "monospace"],
       },
+      transitionTimingFunction: {
+        // Material "standard" curve for the AI toggle knob. Named here because
+        // the arbitrary form `ease-[cubic-bezier(…)]` is ambiguous to Tailwind
+        // and was being dropped at build time.
+        toggle: "cubic-bezier(0.4, 0, 0.2, 1)",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

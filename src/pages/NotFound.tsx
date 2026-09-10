@@ -1,12 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useMemo } from "react";
-import { ArrowLeft, Home, Search } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { ArrowLeft, Search } from "lucide-react";
+import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
+
+/** Star count: enough for a sky, few enough for a phone GPU (was 90). */
+const STAR_COUNT = 36;
 
 /**
  * 404 — cosmic, 2026-canon.
- * Pure CSS/SVG: warping starfield, drifting nebula, orbiting lost planet, shooting stars.
- * No external assets, respects prefers-reduced-motion.
+ * Pure CSS/SVG: twinkling starfield, drifting nebula, orbiting lost planet, shooting stars.
+ * No external assets, respects prefers-reduced-motion. Served with `noindex`
+ * because the host answers 200 for unknown paths (a classic soft-404).
  */
 const NotFound = () => {
   const location = useLocation();
@@ -15,13 +21,12 @@ const NotFound = () => {
     if (import.meta.env.DEV) {
       console.error("404: route not found:", location.pathname);
     }
-    document.title = "404 — Lost in space | DigMyName";
   }, [location.pathname]);
 
   // Deterministic star field so it doesn't re-shuffle on every render
   const stars = useMemo(
     () =>
-      Array.from({ length: 90 }, (_, i) => {
+      Array.from({ length: STAR_COUNT }, (_, i) => {
         const seed = (i * 9301 + 49297) % 233280;
         const rnd = seed / 233280;
         const rnd2 = ((i * 4817 + 12345) % 100) / 100;
@@ -39,108 +44,108 @@ const NotFound = () => {
   );
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-transparent text-foreground">
-      {/* ------- Cosmic backdrop ------- */}
-      <div aria-hidden className="absolute inset-0 nf-bg" />
-      <div aria-hidden className="absolute inset-0 nf-nebula-a" />
-      <div aria-hidden className="absolute inset-0 nf-nebula-b" />
-      <div aria-hidden className="absolute inset-0 nf-nebula-c" />
-      <div aria-hidden className="absolute inset-0 nf-grid" />
+    <div className="relative min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>404 — Lost in space | DigMyName</title>
+        <meta name="description" content="This page drifted out of orbit. Search a domain or head back to somewhere charted." />
+        <meta name="robots" content="noindex" />
+      </Helmet>
 
-      {/* Starfield */}
-      <div aria-hidden className="absolute inset-0">
-        {stars.map((s, i) => (
-          <span
-            key={i}
-            className="nf-star"
-            style={{
-              top: s.top,
-              left: s.left,
-              width: `${s.size}px`,
-              height: `${s.size}px`,
-              animationDelay: s.delay,
-              animationDuration: s.dur,
-              opacity: s.op,
-            }}
-          />
-        ))}
-      </div>
+      <Header />
 
-      {/* Shooting stars */}
-      <div aria-hidden className="absolute inset-0 overflow-hidden">
-        <span className="nf-shoot" style={{ top: "12%", left: "80%", animationDelay: "0s" }} />
-        <span className="nf-shoot" style={{ top: "38%", left: "90%", animationDelay: "3.4s" }} />
-        <span className="nf-shoot" style={{ top: "68%", left: "70%", animationDelay: "6.1s" }} />
-      </div>
+      <main className="relative overflow-hidden">
+        {/* ------- Cosmic backdrop ------- */}
+        <div aria-hidden className="absolute inset-0 nf-bg" />
+        <div aria-hidden className="absolute inset-0 nf-nebula-a" />
+        <div aria-hidden className="absolute inset-0 nf-nebula-b" />
+        <div aria-hidden className="absolute inset-0 nf-nebula-c" />
+        <div aria-hidden className="absolute inset-0 nf-grid" />
 
-      {/* Orbit + lost planet */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="nf-orbit">
-          <div className="nf-orbit-ring" />
-          <div className="nf-orbit-ring nf-orbit-ring--2" />
-          <div className="nf-planet">
-            <div className="nf-planet-inner" />
-            <div className="nf-planet-glow" />
+        {/* Starfield */}
+        <div aria-hidden className="absolute inset-0">
+          {stars.map((s, i) => (
+            <span
+              key={i}
+              className="nf-star"
+              style={{
+                top: s.top,
+                left: s.left,
+                width: `${s.size}px`,
+                height: `${s.size}px`,
+                animationDelay: s.delay,
+                animationDuration: s.dur,
+                opacity: s.op,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Shooting stars */}
+        <div aria-hidden className="absolute inset-0 overflow-hidden">
+          <span className="nf-shoot" style={{ top: "12%", left: "80%", animationDelay: "0s" }} />
+          <span className="nf-shoot" style={{ top: "38%", left: "90%", animationDelay: "3.4s" }} />
+          <span className="nf-shoot" style={{ top: "68%", left: "70%", animationDelay: "6.1s" }} />
+        </div>
+
+        {/* Orbit + lost planet */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="nf-orbit">
+            <div className="nf-orbit-ring" />
+            <div className="nf-orbit-ring nf-orbit-ring--2" />
+            <div className="nf-planet">
+              <div className="nf-planet-inner" />
+              <div className="nf-planet-glow" />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Vignette */}
-      <div aria-hidden className="absolute inset-0 nf-vignette" />
+        {/* Vignette */}
+        <div aria-hidden className="absolute inset-0 nf-vignette" />
 
-      {/* ------- Content ------- */}
-      <section className="relative z-10 mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">
-        <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium tracking-wide text-foreground/80 backdrop-blur-md">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+        {/* ------- Content ------- */}
+        <section className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">
+          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium tracking-wide text-foreground/80 backdrop-blur-md">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+            </span>
+            Signal lost · sector 404
           </span>
-          Signal lost · sector 404
-        </span>
 
-        <h1 className="text-gradient text-[clamp(6rem,22vw,14rem)] font-black leading-none tracking-tighter">
-          404
-        </h1>
+          <h1 className="text-gradient text-[clamp(6rem,22vw,14rem)] font-black leading-none tracking-tighter">
+            404
+          </h1>
 
-        <p className="mt-4 text-xl font-semibold sm:text-2xl">
-          This page drifted out of orbit.
-        </p>
-        <p className="mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
-          The domain you're chasing isn't in our star chart. Let's get you back
-          to somewhere charted.
-        </p>
+          <p className="mt-4 text-xl font-semibold sm:text-2xl">
+            This page drifted out of orbit.
+          </p>
+          <p className="mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
+            The domain you're chasing isn't in our star chart. Let's get you back
+            to somewhere charted.
+          </p>
 
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Button asChild size="lg" className="btn-gradient rounded-2xl">
-            <Link to="/">
-              <Home className="mr-2 h-4 w-4" />
-              Back to Earth
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="rounded-2xl border-white/15 bg-white/5 backdrop-blur-md hover:bg-white/10"
-          >
-            <Link to="/">
-              <Search className="mr-2 h-4 w-4" />
-              Search a domain
-            </Link>
-          </Button>
-          <button
-            onClick={() => window.history.back()}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Go back
-          </button>
-        </div>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Button asChild size="lg" className="btn-gradient rounded-2xl">
+              <Link to="/">
+                <Search className="mr-2 h-4 w-4" />
+                Search a domain
+              </Link>
+            </Button>
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Go back
+            </button>
+          </div>
 
-        <p className="mt-10 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60">
-          error_code: NX_404 · path: {location.pathname}
-        </p>
-      </section>
+          <p className="mt-10 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/80">
+            error_code: NX_404 · path: {location.pathname}
+          </p>
+        </section>
+      </main>
 
       {/* Scoped styles */}
       <style>{`
@@ -151,7 +156,7 @@ const NotFound = () => {
             linear-gradient(180deg, hsl(230 40% 4%), hsl(240 45% 6%) 60%, hsl(260 50% 5%));
         }
         .nf-nebula-a, .nf-nebula-b, .nf-nebula-c {
-          filter: blur(90px);
+          filter: blur(48px);
           border-radius: 50%;
           opacity: 0.55;
           will-change: transform;
@@ -292,7 +297,7 @@ const NotFound = () => {
           }
         }
       `}</style>
-    </main>
+    </div>
   );
 };
 

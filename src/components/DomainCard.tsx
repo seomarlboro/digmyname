@@ -10,7 +10,8 @@ import { useDomainAge, formatRegisteredSince } from "@/hooks/useDomainAge";
 import AuthDialog from "@/components/LazyAuthDialog";
 import { getRegistrarColor, getRegistrarUrl } from "@/lib/registrarColors";
 
-import { resolveDisplayPrice, type DomainResult } from "@/lib/domainData";
+import type { DomainResult } from "@/lib/domainData";
+import { deriveCardFacts } from "@/lib/cardFacts";
 
 interface DomainCardProps {
   result: DomainResult;
@@ -32,7 +33,7 @@ const CARD_BODY_MIN = "sm:min-h-[56px]";
 
 
 const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
-  const { domain, tld, available, checking } = result;
+  const { domain, available, checking } = result;
   const isUncertain = result.uncertain === true;
   const isBrand = result.sldBlocked === true;
   const { user } = useAuth();
@@ -41,19 +42,20 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
   const [authOpen, setAuthOpen] = useState(false);
 
   const ext = domain.split(".").pop() ?? "";
-  const cheapest = cheapestByTld.get(ext);
-  const isPremium = result.premium === true;
-  const isPremiumUnverified = result.premiumUnverified === true;
-  const isLikelyPremium = !isPremium && (result.likelyPremium === true || isPremiumUnverified);
-  // Never fabricate a price: if no trusted DB row exists, fall through to the
-  // price-less "Check price" state instead of the static seed price.
-  const trustedPrice = resolveDisplayPrice(cheapest?.regPrice);
-  const hasTrustedPrice = trustedPrice != null;
-  const displayRenew = hasTrustedPrice ? (cheapest?.renewPrice ?? null) : null;
-  const hasHighRenewal =
-    !isPremium && !isLikelyPremium && hasTrustedPrice && displayRenew != null && displayRenew > trustedPrice * 1.8;
-  const showCheckPrice = available && (isPremiumUnverified || !hasTrustedPrice) && !isPremium;
-  const registrarName = hasTrustedPrice ? (cheapest?.registrar ?? null) : null;
+  // One derivation shared with the filter bar (src/lib/cardFacts.ts): premium
+  // flags, the trusted price (never a seed), renewal trap, "Check price" state.
+  const {
+    isPremium,
+    isPremiumUnverified,
+    isLikelyPremium,
+    trustedPrice,
+    renewPrice: displayRenew,
+    hasHighRenewal,
+    showCheckPrice,
+    registrarName,
+    promoCode,
+    whoisPrivacy,
+  } = deriveCardFacts(result, cheapestByTld.get(ext));
   const buyUrl = registrarName ? getRegistrarUrl(registrarName, domain) : null;
   // When no trusted DB price exists, "Check price" still needs a real
   // registrar search destination — never "#". Spaceship's URL builder works
@@ -331,11 +333,17 @@ const DomainCard = ({ result, compact = false, onRetry }: DomainCardProps) => {
                   </Badge>
                 );
               })()}
-              {available && tld.features.map((f) => (
-                <Badge key={f} variant="secondary" className="text-xs font-normal">
-                  {f}
+              {/* Real attributes of the cheapest registrar's offer — from the price table, never a static seed. */}
+              {available && whoisPrivacy && (
+                <Badge variant="secondary" className="text-xs font-normal">
+                  WHOIS privacy
                 </Badge>
-              ))}
+              )}
+              {available && promoCode && (
+                <Badge variant="secondary" className="font-mono text-xs font-normal" title="Promo code at the cheapest registrar">
+                  {promoCode}
+                </Badge>
+              )}
             </div>
           </div>
 

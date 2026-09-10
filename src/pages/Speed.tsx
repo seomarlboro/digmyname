@@ -1,8 +1,8 @@
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
-import { LottieAward } from "@/components/LottieAward";
+import { TrophyIcon } from "@/components/TrophyIcon";
 import Header from "@/components/Header";
+import RouteHead from "@/seo/RouteHead";
 import { Button } from "@/components/ui/button";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section, CalloutBlock } from "@/components/PageKit";
 import { StopwatchIcon, KeyboardIcon, BoltIcon } from "@/components/StatIcons";
@@ -42,12 +42,13 @@ const pipeline = [
   },
 ];
 
+// Bar lengths are computed from `ms` by BenchmarkChart (fastest row = 100 %),
+// never typed by hand.
 const benchmark = [
   {
     name: "DigMyName /fast",
     note: "Availability signal across the full TLD set",
     ms: "~170 ms",
-    bar: 92,
     us: true,
     tag: "Ours",
   },
@@ -55,7 +56,6 @@ const benchmark = [
     name: "Raw registry RDAP",
     note: "Verisign .com — one TLD, no pricing, no UI. The physical floor.",
     ms: "~47 ms",
-    bar: 100,
     us: false,
     tag: "Theoretical floor",
   },
@@ -63,7 +63,6 @@ const benchmark = [
     name: "DigMyName cached (repeat)",
     note: "Repeat lookup within 60s — served from the Cloudflare edge cache, not a first-time check",
     ms: "~70 ms",
-    bar: 88,
     us: true,
     tag: "Ours · cached",
   },
@@ -71,7 +70,6 @@ const benchmark = [
     name: "DigMyName full check",
     note: "Availability + premium detection + registrar pricing · typically under 1s",
     ms: "~370 ms",
-    bar: 78,
     us: true,
     tag: "Ours",
   },
@@ -80,21 +78,7 @@ const benchmark = [
 const Speed = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Fastest domain search in the universe (or second) — DigMyName</title>
-        <meta
-          name="description"
-          content="We think we run the fastest domain search in the universe. If we're second, the timer on every search will tell you. Here is the full methodology, pipeline and benchmarks."
-        />
-        <link rel="canonical" href="https://digmyname.com/speed" />
-        <meta property="og:title" content="Fastest domain search in the universe (or second)" />
-        <meta
-          property="og:description"
-          content="A live, honest timer on every domain search — and the full methodology behind it."
-        />
-        <meta property="og:type" content="article" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <RouteHead path="/speed" />
 
       <Header />
 
@@ -123,7 +107,7 @@ const Speed = () => {
         <CalloutBlock
           variant="accent"
           className="!mt-6"
-          icon={() => <LottieAward className="h-full w-full" />}
+          icon={() => <TrophyIcon className="h-full w-full" />}
           iconVariant="hero"
           title="Beat our number, take the crown"
           body={

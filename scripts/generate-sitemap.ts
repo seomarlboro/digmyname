@@ -1,31 +1,17 @@
-// Runs before `vite dev` and `vite build`; writes public/sitemap.xml.
+// Runs before `vite dev` and `vite build`; writes public/sitemap.xml from the
+// shared route table (src/seo/routes.ts) so the sitemap, the pages' <head> and
+// the prerendered HTML can never disagree about which URLs exist.
 import { writeFileSync } from "fs";
 import { resolve } from "path";
+import { SITEMAP_ROUTES, canonicalUrl } from "../src/seo/routes";
 
-const BASE_URL = "https://digmyname.com";
-
-interface SitemapEntry {
-  path: string;
-  changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
-  priority?: string;
-}
-
-const entries: SitemapEntry[] = [
-  { path: "/", changefreq: "weekly", priority: "1.0" },
-  { path: "/pricing", changefreq: "weekly", priority: "0.8" },
-  { path: "/how-it-works", changefreq: "monthly", priority: "0.7" },
-  { path: "/speed", changefreq: "weekly", priority: "0.7" },
-  { path: "/mcp", changefreq: "weekly", priority: "0.7" },
-  { path: "/api", changefreq: "monthly", priority: "0.7" },
-];
-
-function generateSitemap(items: SitemapEntry[]) {
-  const urls = items.map((e) =>
+export function generateSitemap(): string {
+  const urls = SITEMAP_ROUTES.map((r) =>
     [
       `  <url>`,
-      `    <loc>${BASE_URL}${e.path}</loc>`,
-      e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
-      e.priority ? `    <priority>${e.priority}</priority>` : null,
+      `    <loc>${canonicalUrl(r)}</loc>`,
+      r.changefreq ? `    <changefreq>${r.changefreq}</changefreq>` : null,
+      r.priority ? `    <priority>${r.priority}</priority>` : null,
       `  </url>`,
     ]
       .filter(Boolean)
@@ -40,5 +26,6 @@ function generateSitemap(items: SitemapEntry[]) {
   ].join("\n");
 }
 
-writeFileSync(resolve("public/sitemap.xml"), generateSitemap(entries));
-console.log(`sitemap.xml written (${entries.length} entries)`);
+const target = resolve("public/sitemap.xml");
+writeFileSync(target, generateSitemap());
+console.log(`sitemap.xml written (${SITEMAP_ROUTES.length} entries)`);

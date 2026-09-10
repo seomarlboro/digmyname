@@ -2,7 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@100..900&display=swap');
+/* Self-hosted variable fonts (latin subset, OFL). Hashed by Vite → immutable
+   cache; `swap` so text paints in the fallback stack immediately. The old
+   Google Fonts @import sat after the @tailwind directives, which PostCSS drops
+   silently — the site had shipped without any web font. */
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('./assets/fonts/sora-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('./assets/fonts/manrope-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./assets/fonts/geist-mono-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 @layer base {
   :root {
@@ -22,7 +49,8 @@
     --secondary-foreground: 230 25% 15%;
 
     --muted: 240 10% 96%;
-    --muted-foreground: 230 10% 50%;
+    /* 48 % lightness → 4.7:1 on white (WCAG AA for 14 px text). */
+    --muted-foreground: 230 10% 48%;
 
     --accent: 262 83% 95%;
     --accent-foreground: 262 83% 40%;
@@ -93,7 +121,10 @@
     --secondary-foreground: 210 25% 94%;
 
     --muted: 230 18% 14%;
-    --muted-foreground: 225 12% 52%;
+    /* 58 % lightness → 5.5:1 on cards and 5.0:1 on muted surfaces (52 % was 4.3:1, below AA). */
+    --muted-foreground: 225 12% 58%;
+    /* Spaceship's brand violet lifted to 6.0:1 on dark cards (68 % was 4.5:1 at bold 16 px, borderline). */
+    --registrar-spaceship: 247 81% 74%;
 
     --accent: 262 45% 18%;
     --accent-foreground: 262 90% 82%;
@@ -507,6 +538,17 @@
     @apply text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground;
   }
 
+  /* shields.io-style static badge, rendered locally (no image request). */
+  .static-badge {
+    @apply inline-flex h-5 items-stretch overflow-hidden rounded-[3px] font-sans text-[11px] font-medium leading-5 text-white;
+  }
+  .static-badge-key {
+    @apply bg-[#555] px-1.5;
+  }
+  .static-badge-value {
+    @apply px-1.5;
+  }
+
   .blur-chrome {
     @apply bg-background/85 backdrop-blur-xl;
   }
@@ -689,5 +731,43 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hero-blob, .hero-tld { animation: none !important; }
+}
+
+/* HeroBackground sets data-paused while the hero is scrolled out of view:
+   four 120 px-blurred blobs animating under 6 000 px of results is pure GPU waste. */
+.hero-bg[data-paused="true"] .hero-blob,
+.hero-bg[data-paused="true"] .hero-tld,
+.hero-bg[data-paused="true"] .animate-meteor {
+  animation-play-state: paused;
+}
+
+/* Phones: half the blobs, a third of the blur radius — the composite cost of
+   blur() scales with radius², and nobody can tell on a 390 px screen. */
+@media (max-width: 640px) {
+  .hero-blob { filter: blur(48px); }
+  .hero-blob-3, .hero-blob-4 { display: none; }
+}
+
+/* BenchmarkChart: bars render at their final width; when the table scrolls
+   into view they grow once from the left. */
+@keyframes benchmark-bar-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.benchmark-bar-grow {
+  animation: benchmark-bar-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* TrophyIcon: a single highlight sweeps across the cup every few seconds. */
+@keyframes trophy-shine {
+  0%, 70% { transform: translateX(0) skewX(-18deg); }
+  100%    { transform: translateX(150px) skewX(-18deg); }
+}
+.trophy-shine {
+  animation: trophy-shine 4.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .benchmark-bar-grow { animation: none; }
+  .trophy-shine { animation: none; }
 }
 

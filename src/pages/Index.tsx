@@ -1,25 +1,32 @@
-import { useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { lazy, Suspense, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import DomainSearch from "@/components/DomainSearch";
-import FilterBar from "@/components/FilterBar";
 import HeroBackground from "@/components/HeroBackground";
+import RouteHead from "@/seo/RouteHead";
+import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
+import { DEFAULT_FILTERS, type ResultFilters } from "@/lib/resultFilters";
 
+// The filter bar carries the Drawer/Slider/Checkbox primitives; nobody needs
+// them before the page has painted, so it loads after the search does.
+const FilterBar = lazy(() => import("@/components/FilterBar"));
 
 const Index = () => {
   const [selectedTlds, setSelectedTlds] = useState<Set<string>>(new Set());
+  const [filters, setFilters] = useState<ResultFilters>(DEFAULT_FILTERS);
+  const cheapestByTld = useCheapestRegistrars();
+
+  // Live first-year price per TLD for the extension picker — the same table
+  // the result cards and /pricing read, so the three can never disagree.
+  const priceByTld = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const [tld, cheapest] of cheapestByTld) map.set(tld, cheapest.regPrice);
+    return map;
+  }, [cheapestByTld]);
 
   return (
     <div className="relative min-h-screen bg-background pb-20">
       <HeroBackground />
-      <Helmet>
-        <title>Fast Domain Search — Fastest We've Measured | DigMyName</title>
-        <meta name="description" content="The fastest domain search we've measured. Check availability across 50+ TLDs in milliseconds — if you find a faster checker, come dispute it." />
-        <link rel="canonical" href="https://digmyname.com/" />
-        <meta property="og:title" content="Fast Domain Search — Fastest We've Measured | DigMyName" />
-        <meta property="og:description" content="The fastest domain search we've measured. Check availability in milliseconds — if you find a faster checker, come dispute it." />
-        <meta property="og:url" content="https://digmyname.com/" />
-        <meta property="og:image" content="https://digmyname.com/og-image.jpg" />
+      <RouteHead path="/">
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
@@ -45,12 +52,21 @@ const Index = () => {
           ],
           publisher: { "@type": "Organization", name: "DigMyName", url: "https://digmyname.com/" },
         })}</script>
-      </Helmet>
-      <p style={{ position: 'absolute', left: '-9999px', fontSize: '1px', color: 'transparent' }}>Impact-Site-Verification: 0c5c9ad9-2ca3-4d35-a5d5-71f850a02320</p>
+      </RouteHead>
       <Header />
       <main>
-        <DomainSearch selectedTlds={selectedTlds} />
-        <FilterBar selectedTlds={selectedTlds} onSelectedTldsChange={setSelectedTlds} />
+        {/* Impact affiliate-network site verification; kept inside <main> so it sits in a landmark. */}
+        <p className="sr-only">Impact-Site-Verification: 0c5c9ad9-2ca3-4d35-a5d5-71f850a02320</p>
+        <DomainSearch selectedTlds={selectedTlds} filters={filters} onResetFilters={() => setFilters(DEFAULT_FILTERS)} />
+        <Suspense fallback={null}>
+          <FilterBar
+            selectedTlds={selectedTlds}
+            onSelectedTldsChange={setSelectedTlds}
+            filters={filters}
+            onFiltersChange={setFilters}
+            priceByTld={priceByTld}
+          />
+        </Suspense>
       </main>
     </div>
   );

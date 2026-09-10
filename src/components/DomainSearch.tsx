@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Search, X, Loader2, CheckCircle2, LayoutGrid, List, AlertCircle, Zap } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
+import { deriveCardFacts } from "@/lib/cardFacts";
+import { matchesFilters, type ResultFilters } from "@/lib/resultFilters";
 
 const StarsIcon = ({ className, active }: { className?: string; active?: boolean }) => (
   <svg
@@ -39,6 +42,9 @@ const byTldAuthority = (a: DomainResult, b: DomainResult) => {
 
 interface DomainSearchProps {
   selectedTlds: Set<string>;
+  /** Price / features / status from the filter bar; applied to settled rows (see src/lib/resultFilters.ts). */
+  filters: ResultFilters;
+  onResetFilters?: () => void;
   onHasResultsChange?: (hasResults: boolean) => void;
 }
 /** Per-entry lifetime of the session result cache. */
@@ -56,8 +62,9 @@ const FAST_DEBOUNCE_MS = 80;
  *  pause. The honest stopwatch counts this delay against us. */
 const AUTH_DEBOUNCE_MS = 250;
 
-const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) => {
+const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChange }: DomainSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const cheapestByTld = useCheapestRegistrars();
   const stickySearchRef = useRef<HTMLDivElement>(null);
   // Session-scoped cache of authoritative results, keyed by domain. Lets a user
   // who returns to an already-checked name (deletes a letter, retypes, re-searches)
@@ -343,7 +350,15 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
   }, [results.length, onHasResultsChange]);
 
   const checkingResults = useMemo(() => results.filter((r) => r.checking), [results]);
-  const checkedResults = useMemo(() => results.filter((r) => !r.checking), [results]);
+  const settledResults = useMemo(() => results.filter((r) => !r.checking), [results]);
+  // Price / features / status apply to settled rows only: a row still checking
+  // has nothing to filter on yet and would flicker in and out as answers land.
+  const passesFilters = useCallback(
+    (r: DomainResult) => matchesFilters(deriveCardFacts(r, cheapestByTld.get(r.tld.extension)), filters),
+    [cheapestByTld, filters],
+  );
+  const checkedResults = useMemo(() => settledResults.filter(passesFilters), [settledResults, passesFilters]);
+  const hiddenByFilters = settledResults.length - checkedResults.length;
   const availableCount = useMemo(() => checkedResults.filter((r) => r.available && !r.uncertain).length, [checkedResults]);
   const uncertainCount = useMemo(() => checkedResults.filter((r) => r.uncertain && !r.sldBlocked && !r.provisional).length, [checkedResults]);
   const takenCount = useMemo(() => checkedResults.filter((r) => !r.available && (!r.uncertain || r.sldBlocked || r.provisional)).length, [checkedResults]);
@@ -440,7 +455,7 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
         }`}
       >
         <span
-          className={`flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          className={`flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-toggle ${
             aiSuggestions ? "translate-x-5" : "translate-x-0"
           }`}
         >
@@ -533,6 +548,25 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
               )}
             </div>
 
+            {hiddenByFilters > 0 && (
+              <p className="mb-4 text-center text-xs text-muted-foreground" role="status">
+                {hiddenByFilters} {hiddenByFilters === 1 ? "domain" : "domains"} hidden by your filters
+                {onResetFilters && (
+                  <>
+                    {" · "}
+                    <button type="button" onClick={onResetFilters} className="underline underline-offset-2 hover:text-foreground">
+                      reset filters
+                    </button>
+                  </>
+                )}
+              </p>
+            )}
+
+            {/* Affiliate disclosure sits where the buy buttons are, not on a page nobody reads first. */}
+            <p className="mb-6 text-center text-xs text-muted-foreground">
+              Buy links may earn us a commission. Prices are the registrar's own, never marked up.{" "}
+              <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms</Link>
+            </p>
 
             {/* Available */}
             {availableCount > 0 && (
@@ -560,8 +594,8 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
               </div>
             )}
             <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
-              {results
-                .filter((r) => !r.checking && r.available && !r.uncertain)
+              {checkedResults
+                .filter((r) => r.available && !r.uncertain)
                 .sort(orderResults)
                 .map((r) => (
                   <DomainCard key={r.domain} result={r} compact={viewMode === "compact"} onRetry={retryDomain} />
@@ -593,8 +627,8 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                   <h2 className="text-lg font-bold text-foreground">Couldn't verify</h2>
                 </div>
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
-                  {results
-                    .filter((r) => !r.checking && r.uncertain && !r.sldBlocked && !r.provisional)
+                  {checkedResults
+                    .filter((r) => r.uncertain && !r.sldBlocked && !r.provisional)
                     .sort(orderResults)
                     .slice(0, 10)
                     .map((r) => (
@@ -612,8 +646,8 @@ const DomainSearch = ({ selectedTlds, onHasResultsChange }: DomainSearchProps) =
                   <h2 className="text-lg font-bold text-foreground">Taken Domains</h2>
                 </div>
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
-                  {results
-                    .filter((r) => !r.checking && !r.available && (!r.uncertain || r.sldBlocked || r.provisional))
+                  {checkedResults
+                    .filter((r) => !r.available && (!r.uncertain || r.sldBlocked || r.provisional))
                     .sort(orderResults)
                     .slice(0, 10)
                     .map((r) => (

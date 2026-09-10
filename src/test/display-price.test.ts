@@ -14,12 +14,14 @@ describe("resolveDisplayPrice", () => {
     expect(resolveDisplayPrice(undefined)).toBeNull();
   });
 
-  it("no trusted DB price → null (Check price), never a fabricated seed price", () => {
-    const seed = TLD_LIST.find((t) => t.extension === "com");
-    expect(seed?.regPrice).toBeTypeOf("number");
-    // The helper must never substitute the static seed price for a missing
-    // trusted price — that is exactly the .buy fabricated-price incident.
-    expect(resolveDisplayPrice(undefined)).not.toBe(seed?.regPrice);
+  it("no trusted DB price → null (Check price); there is no seed price left to fall back to", () => {
+    // The static TLD list used to carry a seed regPrice that once fabricated a
+    // $ figure for an unpriced (registrar, tld) pair — the .buy incident — and
+    // later contradicted /pricing in the TLD picker. It is gone for good.
+    const seed = TLD_LIST.find((t) => t.extension === "com") as unknown as Record<string, unknown>;
+    expect(seed).toBeDefined();
+    expect("regPrice" in seed).toBe(false);
+    expect(resolveDisplayPrice(undefined)).toBeNull();
     expect(resolveDisplayPrice(null)).toBeNull();
   });
 });

@@ -11,12 +11,14 @@ import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/com
 const navItems = [
   { to: "/", label: "Domains" },
   { to: "/pricing", label: "Pricing" },
-  { to: "/how-it-works", label: "How it works" },
+  { to: "/how-it-works", label: "How it works", aliases: ["/about"] },
   { to: "/speed", label: "Speed" },
-  { to: "/mcp", label: "MCP" },
+  { to: "/mcp", label: "MCP", aliases: ["/skill", "/gpt"] },
   { to: "/api", label: "API" },
-
 ];
+
+const isActive = (item: (typeof navItems)[number], pathname: string) =>
+  pathname === item.to || item.aliases?.includes(pathname) === true;
 
 const Header = () => {
   const { theme, setTheme } = useTheme();
@@ -42,6 +44,7 @@ const Header = () => {
   }, []);
 
   const usesSharedSearchBackdrop = pathname === "/" && searchPinned;
+  const nextTheme = theme === "dark" ? "light" : "dark";
 
   return (
     <>
@@ -53,17 +56,27 @@ const Header = () => {
         }`}
       >
         <div className="content-wrap flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
+          <Link to="/" className="flex items-center gap-2.5" aria-label="DigMyName home">
             <ShovelLogo className="h-8 w-8" />
             <span className="logo-text text-foreground">DigMyName</span>
           </Link>
 
-          <nav className="hidden items-center gap-6 md:flex">
-            {navItems.map((item) => (
-              <Link key={item.to} to={item.to} className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground">
-                {item.label}
-              </Link>
-            ))}
+          <nav className="hidden items-center gap-6 md:flex" aria-label="Primary">
+            {navItems.map((item) => {
+              const active = isActive(item, pathname);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  aria-current={active ? "page" : undefined}
+                  className={`text-base font-medium transition-colors hover:text-foreground ${
+                    active ? "text-foreground underline decoration-mint/70 decoration-2 underline-offset-8" : "text-muted-foreground"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-2">
@@ -75,19 +88,23 @@ const Header = () => {
               </SheetTrigger>
               <SheetContent className="w-[82vw] max-w-xs border-border bg-background p-6">
                 <SheetTitle className="pr-8 text-left text-xl">Navigate</SheetTitle>
-                <nav className="mt-8 flex flex-col">
-                  {navItems.map((item) => (
-                    <SheetClose asChild key={item.to}>
-                      <Link
-                        to={item.to}
-                        className={`border-b border-border/60 py-4 text-lg font-semibold transition-colors hover:text-foreground ${
-                          pathname === item.to ? "text-foreground" : "text-muted-foreground"
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                    </SheetClose>
-                  ))}
+                <nav className="mt-8 flex flex-col" aria-label="Primary">
+                  {navItems.map((item) => {
+                    const active = isActive(item, pathname);
+                    return (
+                      <SheetClose asChild key={item.to}>
+                        <Link
+                          to={item.to}
+                          aria-current={active ? "page" : undefined}
+                          className={`border-b border-border/60 py-4 text-lg font-semibold transition-colors hover:text-foreground ${
+                            active ? "text-foreground" : "text-muted-foreground"
+                          }`}
+                        >
+                          {item.label}
+                        </Link>
+                      </SheetClose>
+                    );
+                  })}
                 </nav>
               </SheetContent>
             </Sheet>
@@ -95,11 +112,12 @@ const Header = () => {
               variant="ghost"
               size="icon"
               className="text-muted-foreground"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() => setTheme(nextTheme)}
+              aria-label={`Switch to ${nextTheme} theme`}
+              title={`Switch to ${nextTheme} theme`}
             >
               <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
             </Button>
 
             {user ? (
@@ -125,6 +143,7 @@ const Header = () => {
                 size="sm"
                 className="gap-1.5 text-muted-foreground"
                 onClick={() => setAuthOpen(true)}
+                aria-label="Sign in"
               >
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">Sign in</span>
