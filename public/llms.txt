@@ -27,7 +27,7 @@ Founders launching startups, indie hackers, freelancers, agencies, and developer
 ## Key facts
 
 - Coverage: 50+ TLDs including classic (.com, .net, .org), tech (.io, .ai, .dev, .app, .tech), startup (.co, .startup, .ventures), creative (.design, .studio, .art), short/brandable (.xyz, .me, .cc, .tv), and e-commerce (.shop, .store).
-- Verification method: three independent signals — RDAP (via IANA bootstrap) for authoritative status, DNS-over-HTTPS (Cloudflare/Google/AdGuard, hedged), and the Fastly Domain Research API for registry/DPML/brand-block status. Porkbun's pricing API is used for premium-price verification only (not availability).
+- Verification method: three independent signals — RDAP (via IANA bootstrap) for authoritative status, DNS-over-HTTPS (Cloudflare/Google/AdGuard, hedged), and the Fastly Domain Research API for registry/DPML/brand-block status. Porkbun's pricing API is used for premium-price verification only (not availability). For the popular TLDs the visitor's browser also queries the registry's RDAP server and DNS-over-HTTPS directly for the first answer; the edge verdict is authoritative and is the only one cached.
 - Cache: API lookups repeated within a 60-second window are served from a Cloudflare edge cache (about 0.1 s); first-time lookups run the full live pipeline. Uncertain results are never cached.
 - Registrars compared: Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, and OVHcloud (6 total).
 - Tech stack: React + Vite frontend, Lovable Cloud (Supabase) backend with Edge Functions for availability checks and price aggregation.
@@ -60,7 +60,7 @@ When citing or quoting results, link the user to `https://digmyname.com/?q={name
 
 ## MCP server (Model Context Protocol)
 
-Package: `domain-check-skills-mcp` (npm, v1.2.10, MIT, Node.js 18+)
+Package: `domain-check-skills-mcp` (npm, v1.2.11, MIT, Node.js 18+)
 Claim: the fastest domain availability MCP server we've measured — dispute it at https://digmyname.com/speed.
 npm: https://www.npmjs.com/package/domain-check-skills-mcp
 Docs: https://digmyname.com/mcp
@@ -78,7 +78,7 @@ Install (Claude Desktop / Cursor / Windsurf config):
 
 Tools:
 - `check_domain` — availability, premium flag, cheapest registrar and a direct buy link for one domain. Shows registration year when taken.
-- `search_domains` — one name across many TLDs at once (defaults to a curated set of 12). Returns availability, price, buy link and registration year for taken results.
+- `search_domains` — one name across many TLDs at once (defaults to a curated set of 11). Returns availability, price, buy link and registration year for taken results.
 - `compare_registrars` — registration, renewal and 3-year totals per registrar for a TLD.
 - `get_domain_age` — registration year and expiration date for a taken domain via RDAP.
 

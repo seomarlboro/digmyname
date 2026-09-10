@@ -1,6 +1,6 @@
 # DigMyName — Architecture & State Protocol
 
-> **This is the living source-of-truth for DigMyName.** It must be kept current: any architectural change, new decision, or shift in what we're building gets reflected here in the SAME commit. Read it in full at the start of any work session. It is written so a human OR an AI agent with zero prior knowledge can understand how the system works, why it's built this way, what's live, and where the weak spots are — enough that a fresh chat can run a full review from this document alone. Last verified: 2026-08-08.
+> **This is the living source-of-truth for DigMyName.** It must be kept current: any architectural change, new decision, or shift in what we're building gets reflected here in the SAME commit. Read it in full at the start of any work session. It is written so a human OR an AI agent with zero prior knowledge can understand how the system works, why it's built this way, what's live, and where the weak spots are — enough that a fresh chat can run a full review from this document alone. Last verified: 2026-09-11.
 
 ## 1. What the product is
 
@@ -17,15 +17,15 @@ It ships three surfaces: the **website**, a free **no-auth JSON API** (for scrip
 
 | Layer | Tech | Where |
 |---|---|---|
-| Frontend | Vite + React + TypeScript + Tailwind + shadcn/ui | Lovable-managed, project_id 3705f2e7-ed58-4590-993e-64df5ef13df4 |
-| Backend logic | Supabase Edge Functions (Deno) | Supabase project ref ifamsapmecefkyspmojb |
+| Frontend | Vite + React + TypeScript + Tailwind + shadcn/ui | Lovable-managed (project in the owner's Lovable workspace) |
+| Backend logic | Supabase Edge Functions (Deno) | the owner's Supabase project (via Lovable Cloud) |
 | Database | Supabase Postgres + RLS | same project |
 | Edge cache | Cloudflare Worker (60s TTL) | api.digmyname.com fronts the Supabase functions |
 | MCP package | domain-check-skills-mcp (npm, stdio) | published from mcp/ subfolder |
 
-**Repos:** github.com/seomarlboro/digmyname — main, Lovable-managed (the agent commits here directly; edge functions auto-deploy on commit). GitHub username is canonically lowercase `seomarlboro` — directory scanners 404 on the capitalized form.
+**Repos:** github.com/seomarlboro/digmyname — main, Lovable-managed. A direct git push lands code but deploys NOTHING: edge functions deploy only through a Lovable build (send a "redeploy only" message naming the function), the frontend through Lovable's deploy. Verified 2026-08-12 and again 2026-09-10. GitHub username is canonically lowercase `seomarlboro` — directory scanners 404 on the capitalized form.
 
-**Critical Supabase gotcha:** the real DB is ref ifamsapmecefkyspmojb under org "seomarlboro@gmail.com's Org" — NOT the empty decoy project literally named "DigMyName". Sanity check: `select count(*) from registrar_prices` ~= 165+.
+**Critical Supabase gotcha:** the real DB is the project under the owner's org — NOT the empty decoy project literally named "DigMyName". Sanity check: `select count(*) from registrar_prices` ~= 200+.
 
 ## 3. How availability works (the core pipeline)
 
@@ -52,8 +52,8 @@ This is the single most important invariant. An uncertain result is NEVER cached
 
 ### Pass structure inside checkDomains()
 
-1. L1 hot cache (per-isolate, in-memory, 10 min) — zero network.
-2. L2 DB cache (domain_cache table, tiered TTL) — skips network probes.
+1. L1 hot cache (per-isolate, in-memory, 10 min). **Measured dead** (2026-08-12, three ways: 0–6 % of requests reach a warm isolate), so in practice it never fires; same for the in-isolate response cache in public-api.
+2. L2 DB cache (domain_cache table, tiered TTL) — skips network probes. Awaited BEFORE the probes start (100–115 ms from another region, ~10–30 in-region); running it in parallel with the probes is a known free win, not yet applied (owner go pending).
 3. Pass 1 — free authoritative sources (RDAP + DNS) run in parallel per domain; each publishes its verdict into partialSink the moment it lands.
 4. Pass 2 — the third signal (Fastly) fires ONLY where it adds value (premium suspects, brand-blocked names).
 5. Aftermarket NS detection — registered names on Sedo/Dan/Afternic/etc. get a resale listing link.
@@ -69,7 +69,15 @@ Each wrapper races the pipeline against a hard budget. On timeout it serves what
 
 ### Website fetch lanes (DomainSearch.tsx) and their one invariant
 
-The site fires two lanes per search: a DNS-only pre-check (`/public-api/fast`, chunks of 10, 80 ms after the last keystroke) so cards can flip early, and the authoritative `check-domains` lane (one request per top TLD, batches of 8 for the rest, 250 ms after the last keystroke — human typing is ~150-300 ms between keys, and at 80 ms every keystroke fired a full 53-TLD wave with paid Fastly calls for .co/.me and for every short prefix). When the query moves on, the superseded search's in-flight requests are aborted. The lanes race, and on a cold isolate a fast chunk can land AFTER the authoritative batch for the same names (measured live 2026-09-08: authoritative 0.9–1.9 s, slowest fast chunk 2.3 s). Invariant, enforced by `applyFastVerdict()` in `domainData.ts` and guarded by `fast-verdict.test.ts`: **the fast lane may only fill in a row that is still Checking, and an uncertain DNS answer never leaves Checking.** Before this rule the late chunk wrote `uncertain:true` over ten confirmed available:true cards ("Couldn't verify — sources disagreed"), with nothing left in flight to correct them. Rows hydrated from the session cache are not sent to the fast lane at all.
+The site fires three lanes per search (the browser lane is described right after this paragraph): a DNS-only pre-check (`/public-api/fast`, chunks of 10, 80 ms after the last keystroke) so cards can flip early, and the authoritative `check-domains` lane (one request per top TLD, batches of 8 for the rest, 250 ms after the last keystroke — human typing is ~150-300 ms between keys, and at 80 ms every keystroke fired a full 53-TLD wave with paid Fastly calls for .co/.me and for every short prefix). When the query moves on, the superseded search's in-flight requests are aborted. The lanes race, and on a cold isolate a fast chunk can land AFTER the authoritative batch for the same names (measured live 2026-09-08: authoritative 0.9–1.9 s, slowest fast chunk 2.3 s). Invariant, enforced by `applyFastVerdict()` in `domainData.ts` and guarded by `fast-verdict.test.ts`: **the fast lane may only fill in a row that is still Checking, and an uncertain DNS answer never leaves Checking.** Before this rule the late chunk wrote `uncertain:true` over ten confirmed available:true cards ("Couldn't verify — sources disagreed"), with nothing left in flight to correct them. Rows hydrated from the session cache are not sent to the fast lane at all.
+
+### Browser lane — the registry answers the visitor directly (shipped 2026-09-10, `src/lib/browserLane.ts`)
+
+Every registry behind the popular TLDs serves RDAP with `Access-Control-Allow-Origin: *` (RFC 7480), as do Cloudflare/Google DoH. So the browser runs the same two base signals the edge runs first (registry RDAP + DoH) over its OWN connection, pre-opened by `<link rel="preconnect">` on landing and re-opened on focus/first keystroke (`warmRegistries()`, browsers drop unused sockets after ~10 s). Rules mirror `resolveDomain`'s base pass: taken on RDAP 200 or DNS records; available only on RDAP 404 + NXDOMAIN, and never for a premium-suspect (1–5 char) or brand-blocked label (those stay with the edge and its paid third signal); anything else is `unknown` and changes nothing. `applyBrowserVerdict()` follows the fast-lane contract: only a row still Checking changes, the row stays `provisional` (never cached), and the authoritative edge answer overwrites it. Coverage table `BROWSER_RDAP` = Verisign (com, net), PIR (org), Identity Digital (io, ai, studio, info, …), Google Registry (app, dev, page, new), CentralNic (xyz, art, lol, icu, inc), Radix (tech, store, site, online, space); `.co`/`.me` have no public RDAP and stay edge-only. A test pins every entry to the edge's `FAST_RDAP`. Timing: the headline card (the first generated domain — the typed TLD when one was typed, else .com — ALWAYS goes solo, even outside TOP_TLDS, fixed 2026-09-10 after the benchmark caught .tech waiting in a batch) is asked at +80 ms with the fast lane; the other popular TLDs with the 250 ms wave, one registry query each. Privacy: the registry and the DoH resolvers see the visitor's IP with the name; /privacy says so.
+
+Stopwatch rule (fixed 2026-09-10): whether a lane actually flipped a card is only known inside React's state updater, and React runs updaters eagerly only when nothing else is pending — so both the fast lane and the browser lane stop the clock from inside the updater via `queueMicrotask(markFirstAnswer)`; `markFirstAnswer` is idempotent. Before the fix the clock could run past the first visible answer and report a later, worse time.
+
+**Cold-visitor benchmark (2026-09-10, `scripts/bench/first-answer.mjs`, workflow `bench-first-answer` = US runner):** 150 fresh browser contexts per location, half typing a bare word, half a name with a TLD incl. .co/.me. US (Dallas): p50 227, p90 361, **p95 386**, max 423 ms; EU (Vienna): p50 307, p90 443, **p95 485**, max 765 ms; 300/300 under one second; 136/131 first verdicts came from the browser lane. Edge alone (public API /check, fresh .com): US p50 536 / p95 868, EU p50 382 / p95 515. The public copy ("First answer under 0.5 s · p95", owner's decision 2026-09-11) quotes exactly this.
 
 ## 4. The .co / .me problem (a permanent architectural constraint)
 
@@ -91,12 +99,14 @@ That registry costs 0.83–1.11s cold, of which ~580ms is TCP + TLS handshake an
 
 Decision: **accept it.** .io answers correctly and slowly; it is excluded from the 99% <1000ms target rather than being made fast by trusting a source that lies. Do NOT "optimise" this by re-trusting the aggregator's 404 or by dropping the registry probe — that is the exact regression, and `pipeline_test.ts` guards it.
 
+Update 2026-09-10: on the SITE path the browser lane asks rdap.identitydigital.services directly (CORS), so .io now paints in ~0.3 s (benchmark p95 275 ms US / 479 ms EU). The constraint above still holds for the API/MCP path, which has no browser.
+
 ## 5. Pricing subsystem
 
 - 6 registrars: Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, OVHcloud.
 - registrar_prices table (~165 rows, 50 TLDs). Columns: reg_price / renew_price / transfer_price, supported (bool), updated_at, verified_at.
-- Scraper (fetch-registrar-prices, weekly cron Sun 04:00): TLDSpy per-registrar pages for core TLDs, then two no-auth catalog gap-fillers for long-tail — Porkbun public catalog (primary, ~627 TLDs) + Cloudflare wholesale JSON (backup). Each wrapped in try/catch so one source failing never breaks the run.
-- Freshness: prices older than STALE_PRICE_MAX_DAYS = 60 fall through to an honest "Check price" instead of a stale number. Enforced on /check, /search (via cheapestForTlds()) AND /registrars. A separate 21-day auto-quarantine flips supported=false on rows not re-verified.
+- Refresh (fetch-registrar-prices, weekly cron Sun 04:00 UTC, 150 s timeout; admin-only via service role or `x-cron-secret`). Primary source since 2026-09-10: **tld-list.com's API** (`extension/get`, all six registrars × all tracked TLDs in one call with promos, terms and ICANN fees) — needs `TLDLIST_API_PUBLIC` / `TLDLIST_API_PRIVATE`, which the owner has requested from tld-list (keys pending). Until then the scrapers run: Porkbun public catalog (every TLD), OVHcloud per-TLD pages (plain fetch), GoDaddy per-TLD pages via Firecrawl (long tail rotated over 4 weekly runs), tldspy per-registrar pages via Firecrawl for Cloudflare/Spaceship/GoDaddy/Namecheap (~17 core TLDs each), Namecheap's full list opt-in. All Firecrawl calls go through one pacer (sequential, ≥ 6.5 s apart, 16 pages/run — the plan allows ~10 req/min and 2 browsers). Parsers are pure (`parsers.ts`, fixtures from the real pages, Deno tests). `{dryRun, tlds, sources}` in the request body reports what each source would write. tld-list's pages are never scraped (bot wall + ToS). The old Cloudflare wholesale JSON backup is dead (404).
+- Freshness: prices older than STALE_PRICE_MAX_DAYS = 60 fall through to an honest "Check price" instead of a stale number. Enforced on /check, /search (via cheapestForTlds()) AND /registrars. A separate 30-day auto-quarantine (was 21; must exceed the slowest scraper rotation) flips supported=false on rows not re-verified. The refresh also writes `promo_code` and `whois_privacy` when the source publishes them.
 - Pricing model on the site is cheapest-by-action: 4 independent columns (Cheapest register / renew / transfer / Best 3-year value), each showing its own cheapest registrar — no cross-registrar splicing.
 
 Known constraint: Claude's cloud container is geo/Cloudflare-blocked from Porkbun/Namecheap/Spaceship/TLDSpy. Edge functions reach them fine. Verify pricing via prod /check or query_database, NOT local curl.
@@ -106,7 +116,8 @@ Known constraint: Claude's cloud container is geo/Cloudflare-blocked from Porkbu
 These are product identity, not preferences. Breaking any is a defect:
 
 - Never unhedged "fastest" — always pair with a dispute mechanism / live timer.
-- Cold vs cached latency kept distinct — never present a ~70ms cache figure as the typical first answer.
+- Cold vs cached latency kept distinct — never present a cache figure as the typical first answer. Latency claims come only from a benchmark run, quoted with date, location, n and percentile.
+- Browser-lane rules (see §3): available only on RDAP 404 + NXDOMAIN, never for premium-suspect or brand-blocked labels; browser verdicts are provisional and never cached.
 - Uncertain availability: never cached, never shown as available.
 - Never show a price without a fresh, trusted DB row (supported=true, within 60 days).
 - Brand-protected / sldBlocked names -> uncertain:true, uncertainReason:"brand_protected" on all paths; never fall through to available.
@@ -121,12 +132,12 @@ Any number / count / claim (registrar count, TLD count, latency, signal names) c
 
 After any such change -> grep all surfaces, confirm zero mismatches. The npm package is installed by devs + shown in registries, so false claims there spread wider than the site.
 
-Canon (verified against live API + npm): 6 registrars, 3 signals, 50+ TLDs, 60s edge cache, npm domain-check-skills-mcp v1.2.6.
+Canon (verified 2026-09-11): 6 registrars, 3 signals, 53 tracked TLDs ("50+"), 60 s API edge cache, first answer under 0.5 s at p95 (cold visitor, US+EU benchmark), API first-time check about half a second / p95 under 0.9 s, cache hit ~0.1 s, npm domain-check-skills-mcp v1.2.11.
 
 ## 8. Deploy & verification workflow
 
-- Edits go through the Lovable agent, which commits directly to GitHub main. Edge functions auto-deploy on commit. Frontend can be deployed via deploy_project.
-- npm publish is manual (owner runs it): cd mcp (confirm package.json name is domain-check-skills-mcp, NOT the root vite_react_shadcn_ts), npm run build, npm publish. Version must exceed the currently-published one.
+- Code lands on GitHub main either through the Lovable agent or a direct push. **Nothing deploys on push:** edge functions deploy only through a Lovable build (a "redeploy only" message naming the function, ~0.5 credit), the frontend through Lovable's deploy_project. Lovable's `send_message` may time out while the build still completes — check `list_messages`.
+- npm publish is manual, from a maintainer's machine: `cd mcp` (package.json name domain-check-skills-mcp, NOT the root vite_react_shadcn_ts); sync the version in package.json, server.json (two places), the `VERSION` constant in src/index.ts and CHANGELOG.md; `npm run build`; `npm login --auth-type=web` (browser login, no password in the terminal); `npm publish --provenance=false` under a real terminal — npm 11 then prints a `npmjs.com/auth/cli/…` link for the 2FA confirmation in the browser (no authenticator code needed). The tag-triggered CI workflow has never run (no NPM_TOKEN). The site reads the published version from the npm registry at build time.
 - Verify a frontend deploy by bundle-hash change: curl -s https://digmyname.com/?cb=$RANDOM | grep -oE '/assets/index-[^"]*\.js'. Route components are code-split into lazy chunks not in raw HTML — only the main bundle hash is curl-verifiable.
 - Verify a commit independently with get_diff on the SHA (more reliable than the agent's self-report).
 - Concurrency guard: check list_messages before driving the agent — never run two agent sessions at once.
@@ -184,7 +195,7 @@ Planned stages (each = one build, verify get_diff+tsgo+vitest, preview, then nex
 
 Open (owner decides, all low priority):
 - Legacy Domainr naming vs Fastly transport — intentionally left (pure cosmetic, not user-leaked, regression risk > benefit).
-- npm package.json description still has unhedged "~170ms/fastest" — defer to next content MCP bump.
+- ~~npm package.json description still has unhedged "~170ms/fastest"~~ — resolved in 1.2.11 (2026-09-11): every surface now quotes the measured figures.
 - .co/.me flap on API/MCP path — by design (no RDAP, single slow Fastly authority).
 - Glama "related servers" — owner-only admin action, optional, low ROI.
 - Per-IP rate limiters are in-memory per isolate, and isolates are not reused — measured 2026-09-08: 66+ check-domains requests from one IP inside a minute, zero 429s. They only bite if the platform starts reusing isolates, so since 2026-09-10 they are sized so that day cannot break the site: `_shared/rate-limit.ts` (tested) counts DOMAINS with a request cap on top — check-domains 4000 domains + 600 requests / min / IP (an all-TLD search is 16 requests / 53 domains, 318 domains with AI variations), `/fast` has its own 10 000 domains + 1200 requests / min budget, and the documented 60 req/min stays for the API endpoints. A working shared-store limiter is still an open item if abuse ever matters.
@@ -194,7 +205,15 @@ Parked / future:
 - Deno Deploy migration as the cold-start fix (code is already Deno; $0 free tier). Not yet — cold-start self-resolves with traffic.
 - Refero design-system pass (next major track): a single unified design system across all non-homepage pages (Api/Mcp/HowItWorks/Speed/Pricing) — modern info presentation, tables where they fit, animations, blur, interactivity. Built from Refero PRO references (Wise provider-comparison-table, Parallel per-section pricing). Sequencing rule: do the design pass only AFTER the functional/visual backlog is stable, so the rework isn't invalidated by later changes.
 
-Cold-start note: Supabase edge isolates sleep on idle -> first search after idle ~2.5-6s; warm ~450ms. Keep-warm cron is ineffective (multiple isolate instances). Platform trait, self-resolves with traffic. Real fix if ever needed: Deno Deploy or CF Workers.
+Cold-start note: Supabase edge isolates are effectively never reused (0–6 % warm, measured three ways 2026-08-12), so every request pays isolate boot plus a fresh TLS handshake to the registry (~105 ms to Verisign, ~560–600 ms to PIR / Identity Digital from eu-central). Keep-warm cron cannot fix that (it never hits the routed isolate).
+
+### Warm-origin track (2026-09-10) — what was tried, what shipped
+
+Owner goal: first answer ≤ 1 s "under any conditions", honest number, free means only. Measured and decided (decision doc in the owner's artifacts):
+- Cloudflare Workers / Durable Object as the registry client — **dead**: all Workers share an egress IP pool, so Identity Digital answers 429 (error 1015) from some colos, rdap.org 403, and new connections to Verisign take 480–800 ms with 2–6 s outliers. Probe worker deployed and deleted the same day.
+- Railway always-on process — rejected by the owner (paid). Free always-on VM with its own IP (Oracle Always Free Frankfurt / GCP e2-micro) — parked; would need the owner to open the account.
+- **Shipped instead: the browser lane (§3)** — no infrastructure, first answer p95 386 ms US / 485 ms EU.
+- Still open, free: run the `domain_cache` read in parallel with the probes inside `checkDomains` (owner go pending).
 
 ## 11. How to work on this (quick protocol for any new session)
 

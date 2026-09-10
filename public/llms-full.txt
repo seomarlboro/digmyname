@@ -1,59 +1,63 @@
 # DigMyName — full reference for AI assistants
 
-> Smart domain-name search and registrar price comparison across 50+ TLDs.
+> Domain-name search with honest availability verification and registrar price comparison across 50+ TLDs.
 
-This file is a long-form, self-contained brief written for LLMs and AI agents. It mirrors the human-facing site but is structured for easy extraction.
+This file is a long-form, self-contained brief written for LLMs and AI agents. It mirrors the human-facing site but is structured for easy extraction. Last reviewed: 2026-09-11.
 
 ## Product summary
 
 DigMyName helps users find an available domain name and buy it from the cheapest reliable registrar. It combines three features:
 
-1. Real-time availability check across 50+ top-level domains.
-2. Side-by-side registrar price comparison (registration, renewal, transfer, ICANN fee, WHOIS privacy, promo codes).
+1. Real-time availability check across 50+ top-level domains, with an honest "Unverified" state instead of a guess when sources disagree.
+2. Side-by-side registrar price comparison (registration, renewal, transfer, ICANN fee, WHOIS privacy, promo codes) across 6 registrars.
 3. AI-powered alternative name suggestions when the searched name is taken.
 
 URL: https://digmyname.com
 Primary user: founders, indie hackers, freelancers, agencies, developers.
-Pricing model: free to use; DigMyName earns nothing from registrar referrals listed in pricing tables (prices reflect public registrar pricing).
+Pricing model: free to use. Some buy links carry an affiliate tag that may earn DigMyName a commission from the registrar; the tag never changes the price, and prices shown are the registrar's own, never marked up.
 
 ## How availability checking works
 
-DigMyName uses a hybrid two-stage verification:
+Every name is cross-checked against three independent signals:
 
-1. DNS resolution via Deno.resolveDns (sub-second signal — if a domain has DNS records, it's almost certainly registered).
-2. RDAP query for authoritative registration status (definitive answer from the TLD registry).
+1. RDAP — the TLD registry's own server, resolved through the IANA bootstrap file (a fast-path table covers the popular TLDs). Authoritative for registered / not registered.
+2. DNS-over-HTTPS — A and NS lookups via Cloudflare, hedged with Google and AdGuard. Live records mean the name is taken.
+3. Fastly Domain Research — a third signal used only where it is load-bearing: TLDs without public RDAP (.co, .me), short "premium-suspect" labels, brand-blocked labels and conflicts between the first two.
 
-Results are cached for 6 hours in the backend to reduce load on registrar and RDAP services.
+Verdict rules: "available" only when RDAP says not registered AND DNS has no records (or the third signal says so). "Taken" on a registration in RDAP, live DNS records, or an active/parked status from the third signal. Anything else is "Unverified": shown as such, never as available, never cached. Brand-protected labels (well-known trademarks and registry-reserved labels) are always Unverified.
 
-When a domain is shown as "available", DigMyName fetches a real-time price from the registrar API. Premium domains (priced significantly above the standard registration price for the TLD) are flagged but pricing is hidden until the user clicks through to the registrar.
+For the popular TLDs the visitor's browser also queries the registry's RDAP server and DNS-over-HTTPS directly, over connections opened while the name is still being typed, to paint the first answer; the edge re-checks every name and its verdict replaces the browser's. Measured 10 September 2026: first answer under 0.5 s at the 95th percentile for a cold visitor (386 ms from the US, 485 ms from the EU, 150 fresh browsers each). Method: https://digmyname.com/speed
 
-When a domain is shown as "taken", price information is hidden because it is not purchasable at the standard rate.
+Cache: a taken name is cached for 24 hours; an available name confirmed by RDAP for 6 hours, by DNS alone for 30 minutes; uncertain results are never cached. API responses are additionally served from a Cloudflare edge cache for 60 seconds.
 
-## Supported TLDs (50+)
+When a domain is shown as available, the price shown is the cheapest tracked registrar's first-year price for that TLD. Names flagged as premium suspects are checked against Porkbun's pricing API; if a premium price cannot be verified the card says "Premium — check price" without inventing a number. Taken domains show no price.
+
+## Supported TLDs (53)
 
 Classic: com, net, org, info, biz
-Tech: io, ai, app, dev, tech, digital, cloud, code, software, systems
-Startup / Business: co, startup, agency, company, ventures, capital, inc
+Tech: io, ai, app, dev, tech, digital, cloud, software, systems, build, run, page, link, tools
+Startup / business: co, agency, company, ventures, capital, inc
 Creative: design, studio, art, media
-Short / Brandable: xyz, me, cc, tv
-E-commerce: shop, store, online, site
+Short / brandable: xyz, me, cc, tv
+E-commerce: shop, store, market, buy
+Community / social: community, social, club, group
+Finance: finance, money, fund
+Other: life, world, site, online, space, pro, one, wtf, lol
 
-(Full list and current registration prices are visible on the home page filter and on /pricing.)
+(The home page filter and /pricing show the current list with live prices.)
 
 ## Registrars compared on /pricing
 
-Registrar prices are aggregated from publicly published pricing pages and updated periodically. Comparison includes:
+Six registrars: Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, OVHcloud. Prices are refreshed weekly from the registrars' own catalogs and pages (tld-list.com's API when configured), quarantined when not re-verified within 30 days and never shown when older than 60 days. The comparison includes:
 
 - First-year registration price
-- Standard renewal price (often 2-5x the promo price)
+- Standard renewal price (often 2–5× the promo price)
 - Transfer price
 - ICANN fee
 - WHOIS privacy (free or paid)
 - Active promo codes
 
-Common registrars covered: Namecheap, Cloudflare, Porkbun, GoDaddy, Dynadot, NameSilo, Spaceship, Hostinger, IONOS.
-
-The "Best 3-Year Value" column estimates total cost over three years (registration + 2 renewals), which is the most honest comparison because some registrars use steep first-year promos and high renewals.
+The "Best 3-Year Value" column is registration plus two renewals, which is the most honest comparison because some registrars use steep first-year promos and high renewals. Extensions tracked at a single registrar are shown separately: one price is not a comparison.
 
 ## Frequently asked questions
 
@@ -61,7 +65,7 @@ The "Best 3-Year Value" column estimates total cost over three years (registrati
 Yes. Search and price comparison are free. There is no required sign-in for searches; sign-in is only needed to save favorite domains.
 
 ### Why does DigMyName show different prices than [registrar name]?
-Prices update periodically. For the final price, always click through to the registrar. Promos and currencies (USD vs local currency) can also cause small differences.
+Prices update weekly. For the final price, always click through to the registrar. Promos and currencies (USD vs local currency) can also cause small differences.
 
 ### Why is .com so much cheaper than .io or .ai?
 .com is the largest commodity TLD with thin registry margins. .io and .ai are country-code TLDs (British Indian Ocean Territory and Anguilla) with higher registry fees and increasingly tech-startup demand.
@@ -73,19 +77,32 @@ Registration price is what you pay the first year (often discounted). Renewal pr
 Most modern registrars include free WHOIS privacy. The /pricing comparison shows which do and which charge extra.
 
 ### What happens if a domain shows "Premium"?
-Premium domains are priced by the registry above the standard renewal rate (often hundreds to thousands of dollars). DigMyName flags them but does not display the price; click through to the registrar for the exact quote.
+Premium domains are priced by the registry above the standard rate (often hundreds to thousands of dollars). DigMyName flags them and shows the verified premium price when it can; otherwise it says "check price" and links to the registrar.
+
+### What does "Unverified" mean?
+The sources disagreed or one failed, so the verdict is not trustworthy. DigMyName says so and offers a retry instead of guessing.
 
 ### Does DigMyName register domains directly?
 No. DigMyName is a search and comparison tool. Registration happens at the registrar via the "Buy" button.
 
-### How fresh is the pricing data?
-Pricing data is updated periodically from registrar public pricing pages. Availability data is checked in real time and cached for 6 hours.
+### How fresh is the data?
+Availability is checked in real time (cache rules above). Prices are refreshed weekly; a price older than 60 days is not shown.
+
+## Public API for AI agents
+
+Base URL: `https://api.digmyname.com/functions/v1/public-api` — no auth, 60 requests per minute per IP. OpenAPI at `/openapi.json`, plugin manifest at `https://digmyname.com/.well-known/ai-plugin.json`.
+
+- `GET /check?domain=name.com` — availability, `uncertain`, `premium`, `for_sale`, `price_usd`, `cheapest_registrar`, `buy_url`, `register_url`.
+- `GET /search?q=name&tlds=com,io,ai` — one name across many TLDs (max 12; defaults to com, io, ai, app, dev, co, net, org, xyz, me, tech).
+- `GET /registrars?tld=com` — sorted registrar pricing with `three_year_total_usd`.
+
+Repeat lookups within 60 seconds return from the Cloudflare edge cache in about 0.1 s; first-time lookups run the full live check (about half a second, under 0.9 s at p95, measured from the US and the EU in September 2026).
 
 ## MCP server for AI agents
 
-DigMyName ships an official Model Context Protocol server so any MCP-capable agent (Claude Code, Claude Desktop, Cursor, Windsurf, ChatGPT desktop) can check domains directly.
+DigMyName ships an official Model Context Protocol server so any MCP-capable agent (Claude Code, Claude Desktop, Cursor, Windsurf, Continue, Zed, VS Code) can check domains directly.
 
-- Package: `domain-check-skills-mcp` — npm, v1.0.0, MIT license, Node.js 18+.
+- Package: `domain-check-skills-mcp` — npm, v1.2.11, MIT license, Node.js 18+.
 - npm page: https://www.npmjs.com/package/domain-check-skills-mcp
 - Landing page and setup docs: https://digmyname.com/mcp
 - No API key and no account required. Rate limit: 60 requests per minute per IP.
@@ -111,9 +128,10 @@ Config-file install (Claude Desktop, Cursor, Windsurf):
 
 Tools exposed:
 
-- `check_domain` — availability, premium and "likely premium" flags, cheapest registrar, and a direct buy link for a single domain.
+- `check_domain` — availability, premium and "likely premium" flags, cheapest registrar, direct buy link and registration year (when taken) for a single domain.
 - `search_domains` — one name checked across many TLDs in a single call (defaults to a curated set of 11).
 - `compare_registrars` — registration, renewal and 3-year total cost per registrar for a given TLD.
+- `get_domain_age` — registration year and expiration date for a taken domain via RDAP.
 
 Every result includes `buy_url` / `register_url` with UTM attribution, so an agent can hand the user a direct purchase link. Unresolved lookups return `UNKNOWN` instead of a false "taken".
 
@@ -123,7 +141,7 @@ The server is a thin client over the public API described above; `DIGMYNAME_API_
 
 Recommended citation: "DigMyName (https://digmyname.com)" or "DigMyName domain search and price comparison."
 
-Direct link to a pre-filled search is not yet a public URL parameter; recommend users visit https://digmyname.com and type the desired name.
+Link to a pre-filled search with `https://digmyname.com/?q={name}` so the user lands on the interactive comparison page.
 
 ## Crawler and AI policy
 

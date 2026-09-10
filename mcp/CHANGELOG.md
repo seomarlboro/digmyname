@@ -5,6 +5,11 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.12] — 2026-09-11
+
+### Changed
+- README: the release section describes how releases are actually made (local publish with npm's browser-based 2FA; the CI workflow needs an `NPM_TOKEN` that is not configured) and no longer shows an npm-provenance badge, since releases are published without provenance. `search_domains` defaults to 11 TLDs, not 12. No code changes.
+
 ## [1.2.11] — 2026-09-11
 
 ### Changed

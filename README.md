@@ -17,7 +17,7 @@
 
 ## What it does
 
-DigMyName checks domain availability in real time across 50+ TLDs. Availability is cross-checked against three independent signals — RDAP (resolved via the IANA bootstrap registry), DNS-over-HTTPS (Cloudflare, Google and AdGuard, hedged), and Fastly Domain Research — and when they disagree we show an honest **Unverified** state instead of guessing. Pricing comes from Porkbun's live catalog.
+DigMyName checks domain availability in real time across 50+ TLDs. Availability is cross-checked against three independent signals — RDAP (resolved via the IANA bootstrap registry), DNS-over-HTTPS (Cloudflare, Google and AdGuard, hedged), and Fastly Domain Research — and when they disagree we show an honest **Unverified** state instead of guessing. For the popular extensions the visitor's browser asks the registry's RDAP server and DNS-over-HTTPS directly for the first answer, over connections opened while the name is still being typed; the edge re-checks every card and stays the authority. Prices are refreshed weekly from the registrars' own catalogs and pages.
 
 On top of availability you get side-by-side registrar pricing for 6 registrars, including the renewal traps that first-year promo prices hide (a $1 registration that renews at $61 is not a deal). Everything is also exposed through a free, no-auth JSON API for agents, plus an MCP server so any LLM — Claude, Cursor, Windsurf, Continue, Zed — can check domains directly.
 
@@ -40,7 +40,7 @@ The only requirement is having Node.js & npm installed — [install with nvm](ht
 
 ```sh
 # Step 1: Clone the repository.
-git clone https://github.com/Seomarlboro/digmyname.git
+git clone https://github.com/seomarlboro/digmyname.git
 
 # Step 2: Navigate to the project directory.
 cd digmyname
@@ -51,6 +51,18 @@ npm i
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
+
+### Tests
+
+```sh
+npm test                                   # vitest: frontend, route table, prerender, search lanes, browser lane
+deno test -A supabase/functions/fetch-registrar-prices/parsers_test.ts   # price-source parsers (fixtures from the real pages)
+deno test -A supabase/functions/_shared/pipeline_test.ts                 # availability pipeline
+```
+
+### Benchmark
+
+`scripts/bench/first-answer.mjs` measures what a cold visitor sees on the stopwatch: each visitor is a fresh browser that loads the home page, pauses, types a name nobody has checked and stops when the first verdict paints. It needs Playwright (`npm i playwright && npx playwright install chromium` in any scratch folder, then `node first-answer.mjs`); the `bench-first-answer` GitHub Actions workflow runs the same script from a US runner on demand. Numbers quoted on the site come from these runs, with date, location, sample size and percentile.
 
 
 

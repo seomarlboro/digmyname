@@ -2,7 +2,6 @@
 
 [![npm version](https://img.shields.io/npm/v/domain-check-skills-mcp?color=145DFB&label=npm&style=flat-square)](https://www.npmjs.com/package/domain-check-skills-mcp)
 [![downloads](https://img.shields.io/npm/dm/domain-check-skills-mcp?color=145DFB&style=flat-square)](https://www.npmjs.com/package/domain-check-skills-mcp)
-[![provenance](https://img.shields.io/badge/npm-provenance-145DFB?style=flat-square)](https://www.npmjs.com/package/domain-check-skills-mcp)
 [![license](https://img.shields.io/npm/l/domain-check-skills-mcp?style=flat-square)](./LICENSE)
 
 ## ⚡ The fastest domain availability MCP server — or the second
@@ -82,7 +81,7 @@ No API key, no account, no config — it works right after install.
 | Tool | Description |
 | --- | --- |
 | `check_domain` | Availability, premium / likely-premium flags, cheapest registrar, direct buy link and registration year (when taken) for one domain. |
-| `search_domains` | One name across many TLDs at once (defaults to a curated set of 12). Includes availability, price, buy link and registration year for taken results. |
+| `search_domains` | One name across many TLDs at once (defaults to a curated set of 11). Includes availability, price, buy link and registration year for taken results. |
 | `compare_registrars` | Registration, renewal and 3-year totals per registrar for a TLD. |
 | `get_domain_age` | Registration year and expiration date for a taken domain via RDAP. |
 
@@ -111,14 +110,16 @@ Rate limit: 60 requests / minute / IP. Repeat lookups are served from the Cloudf
 
 ## Releasing (maintainers)
 
-Releases are published from CI with npm provenance:
+Releases are published from a maintainer's machine:
 
 ```bash
-# after bumping the version in mcp/package.json
-git tag mcp-v1.2.0 && git push origin mcp-v1.2.0
+cd mcp
+# bump the version in package.json, server.json (two places) and the VERSION constant in src/index.ts; add a CHANGELOG entry
+npm run build
+npm publish --provenance=false   # npm asks you to confirm in the browser (web-based 2FA)
 ```
 
-The `Publish MCP to npm` workflow builds, smoke-tests and publishes with `--provenance`. It needs an `NPM_TOKEN` (automation token) repo secret.
+The `Publish MCP to npm` workflow (tag `mcp-v*`) would publish with provenance from CI, but it needs an `NPM_TOKEN` repo secret that is not configured; releases so far have been published without provenance.
 
 ## Requirements
 
@@ -126,7 +127,7 @@ Node.js 18+
 
 ## Changelog
 
-See [CHANGELOG.md](./CHANGELOG.md). Current version: **1.2.5**.
+See [CHANGELOG.md](./CHANGELOG.md).
 
 ## License
 
