@@ -254,4 +254,27 @@ describe("DomainSearch lanes", () => {
     expect(card.querySelector(".animate-spin")).not.toBeNull();
     expect(container.querySelector('a[title^="How we measure"]')!.getAttribute("aria-live")).toBe("off");
   });
+
+  it("a typed TLD outside the top list is still the headline: server lane and browser lane both leave at +80 ms", async () => {
+    invoke.mockImplementation(() => new Promise(() => {}));
+    const { default: DomainSearch } = await import("@/components/DomainSearch");
+    const { DEFAULT_FILTERS } = await import("@/lib/resultFilters");
+    const qc = new QueryClient();
+    const { container } = render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter>
+          <DomainSearch selectedTlds={new Set()} filters={DEFAULT_FILTERS} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const input = container.querySelector('input[aria-label="Search domain name"]') as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    await act(async () => {
+      setter.call(input, "acmeforge.tech");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => { vi.advanceTimersByTime(80); });
+    expect((invoke.mock.calls[0] as unknown[])[1]).toMatchObject({ body: { domains: ["acmeforge.tech"] } });
+    expect(fetchMock.mock.calls.some((c) => String(c[0]).includes("rdap.radix.host/rdap/domain/acmeforge.tech"))).toBe(true);
+  });
 });

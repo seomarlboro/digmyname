@@ -2,6 +2,15 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-10 — Cold-visitor benchmark, US and EU (frontend)
+
+### Added
+- `scripts/bench/first-answer.mjs` + the manual `bench-first-answer` workflow: every visitor is a fresh browser context that loads the home page, pauses, types a name nobody has checked and stops when the on-page stopwatch stops. Reports p50/p90/p95 overall, per lane and per TLD, plus raw registry / DoH / public-API probes from the same machine.
+- First run, 150 cold visitors each, half typing a bare word and half a name with a TLD (including .co/.me): **US (Dallas) p50 227 ms, p95 386 ms, max 423 ms; EU (Vienna) p50 307 ms, p95 485 ms, max 765 ms; 300/300 under one second.** The edge alone (public API `/check`, fresh .com) was p50 536 / p95 868 ms from the US and p50 382 / p95 515 ms from the EU.
+
+### Fixed
+- A typed TLD outside the top-ten list (".tech", ".store", …) is now the headline card: it goes solo to the server lane and the browser lane at +80 ms instead of sitting in a batch of eight while the .com card answers first (the benchmark showed its own verdict landing 480–640 ms later).
+
 ## 2026-09-10 — The registry answers the visitor directly (frontend)
 
 ### Changed

@@ -326,12 +326,16 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       };
 
       // Keep only the first occurrence per TLD (base name first when AI variations are on).
+      // The first generated domain is the headline card — the typed TLD when the
+      // user typed one — and always goes solo, even outside TOP_TLDS: a typed
+      // ".tech" used to sit in a batch of eight while the .com card answered
+      // first (benchmark 2026-09-10: its verdict landed 480–640 ms later).
       const seenTop = new Set<string>();
       const solo: string[] = [];
       const rest: string[] = [];
       for (const d of domainNames) {
         const tld = d.slice(d.indexOf(".") + 1);
-        if (isTop(d) && !seenTop.has(tld)) {
+        if ((d === domainNames[0] || isTop(d)) && !seenTop.has(tld)) {
           seenTop.add(tld);
           solo.push(d);
         } else {
