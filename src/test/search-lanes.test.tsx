@@ -42,7 +42,12 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 
 describe("DomainSearch lanes", () => {
-  const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ results: [] }), { status: 200 }));
+  // Registry / DoH calls of the browser lane answer 500 (→ "unknown") unless a
+  // test routes them, so the lane cannot decide anything by accident here.
+  const isRegistry = (url: string) => /rdap\.|dns-query|dns\.google/.test(url);
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) =>
+    isRegistry(String(input)) ? new Response("", { status: 500 }) : new Response(JSON.stringify({ results: [] }), { status: 200 }),
+  );
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -172,5 +177,81 @@ describe("DomainSearch lanes", () => {
     expect(invoke.mock.calls.filter((c) => c[0] === "check-domains")).toHaveLength(0);
     await act(async () => { vi.advanceTimersByTime(200); });
     expect(invoke.mock.calls.filter((c) => c[0] === "check-domains").length).toBeGreaterThan(0);
+  });
+
+  it("the browser lane answers the headline card from the registry before the server does", async () => {
+    // Server lane held forever; the registry (RDAP 404) and DoH (NXDOMAIN) answer at once.
+    invoke.mockImplementation(() => new Promise(() => {}));
+    fetchMock.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("rdap.verisign.com/com/v1/domain/acmeforge.com")) return new Response("", { status: 404 });
+      if (url.includes("dns-query") || url.includes("dns.google")) return new Response(JSON.stringify({ Status: 3, Answer: [] }), { status: 200 });
+      if (isRegistry(url)) return new Response("", { status: 500 });
+      return new Response(JSON.stringify({ results: [] }), { status: 200 });
+    });
+    const { default: DomainSearch } = await import("@/components/DomainSearch");
+    const { DEFAULT_FILTERS } = await import("@/lib/resultFilters");
+    const qc = new QueryClient();
+    const { container } = render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter>
+          <DomainSearch selectedTlds={new Set()} filters={DEFAULT_FILTERS} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const input = container.querySelector('input[aria-label="Search domain name"]') as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    await act(async () => {
+      setter.call(input, "acmeforge");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    const pill = () => container.querySelector('a[title^="How we measure"]');
+    const headlineCard = () => [...container.querySelectorAll("h3")].find((h) => h.textContent === "acmeforge.com")!.closest(".card-hover")!;
+
+    // At +80 ms the registry query leaves with the fast lane.
+    await act(async () => { vi.advanceTimersByTime(80); });
+    expect(fetchMock.mock.calls.some((c) => String(c[0]).includes("rdap.verisign.com/com/v1/domain/acmeforge.com"))).toBe(true);
+    expect(fetchMock.mock.calls.some((c) => String(c[0]).includes("dns-query?name=acmeforge.com"))).toBe(true);
+
+    // Its answer lands: the card leaves Checking and the stopwatch stops — the server has not answered.
+    await act(async () => { for (let i = 0; i < 6; i++) await Promise.resolve(); });
+    expect(headlineCard().querySelector(".animate-spin")).toBeNull();
+    expect(pill()!.getAttribute("aria-live")).toBe("polite");
+    expect(invoke.mock.calls.length).toBeGreaterThan(0); // the server lane was still asked, as the authority
+  });
+
+  it("a registry answer the browser cannot trust leaves the card checking and the clock running", async () => {
+    invoke.mockImplementation(() => new Promise(() => {}));
+    // RDAP 404 for a premium-suspect label: the browser may not call it available.
+    fetchMock.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("rdap.verisign.com")) return new Response("", { status: 404 });
+      if (url.includes("dns-query") || url.includes("dns.google")) return new Response(JSON.stringify({ Status: 3, Answer: [] }), { status: 200 });
+      if (isRegistry(url)) return new Response("", { status: 500 });
+      return new Response(JSON.stringify({ results: [] }), { status: 200 });
+    });
+    const { default: DomainSearch } = await import("@/components/DomainSearch");
+    const { DEFAULT_FILTERS } = await import("@/lib/resultFilters");
+    const qc = new QueryClient();
+    const { container } = render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter>
+          <DomainSearch selectedTlds={new Set()} filters={DEFAULT_FILTERS} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const input = container.querySelector('input[aria-label="Search domain name"]') as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    await act(async () => {
+      setter.call(input, "acme");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => { vi.advanceTimersByTime(80); for (let i = 0; i < 6; i++) await Promise.resolve(); });
+    // The browser did ask (a "taken" would have been fine to show) …
+    expect(fetchMock.mock.calls.some((c) => String(c[0]).includes("rdap.verisign.com/com/v1/domain/acme.com"))).toBe(true);
+    // … but an "available" for a premium suspect is not its call: still checking, clock still running.
+    const card = [...container.querySelectorAll("h3")].find((h) => h.textContent === "acme.com")!.closest(".card-hover")!;
+    expect(card.querySelector(".animate-spin")).not.toBeNull();
+    expect(container.querySelector('a[title^="How we measure"]')!.getAttribute("aria-live")).toBe("off");
   });
 });

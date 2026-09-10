@@ -2,6 +2,14 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-10 — The registry answers the visitor directly (frontend)
+
+### Changed
+- **Browser lane.** For the popular extensions the visitor's browser now asks the registry's public RDAP server and Cloudflare / Google DNS-over-HTTPS itself (`src/lib/browserLane.ts`), over connections opened with `preconnect` while the name is still being typed. It runs the same two base signals the edge checks first, under the same rules: *taken* on RDAP 200 or DNS records, *available* only on RDAP 404 + NXDOMAIN and never for a premium-suspect (1–5 char) or brand-blocked label, anything else changes nothing. The verdict is provisional: the authoritative edge answer still runs for every card, overwrites the browser's, and is the only thing the session cache keeps. Registries with CORS verified on 2026-09-10: Verisign (.com .net), PIR (.org), Identity Digital (.io .ai …), Google Registry (.app .dev), CentralNic (.xyz …), Radix (.tech …); .co/.me have no public RDAP and stay with the server. A test pins every browser-lane base to the edge pipeline's `FAST_RDAP` table.
+- The headline card is asked at +80 ms with the fast lane (also for short labels, where the server lane waits: the browser can show *taken* at once and never *available*); the other popular TLDs with the authoritative wave, one registry query each.
+- **Stopwatch honesty fix (fast lane).** Whether a DNS pre-check actually flipped a card was decided by a flag set inside React's state updater but read outside it; React only runs the updater eagerly when nothing else is pending, so the clock sometimes kept running past the first visible answer and reported a later, worse time. Both lanes now stop the clock from inside the updater.
+- /privacy says that for the popular extensions the browser talks to the registry and the DoH resolvers directly, so they see the visitor's IP address with the name.
+
 ## 2026-09-10 — One price source instead of five scrapers (edge: fetch-registrar-prices)
 
 ### Changed

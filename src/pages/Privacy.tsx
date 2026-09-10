@@ -63,7 +63,7 @@ const Privacy = () => (
       <Section title="Searching a domain">
         <div className="surface-card p-6">
           <ul className="list-body">
-            <li>The names you type are sent to our availability service and to public registry and DNS resolvers (RDAP servers, Cloudflare, Google and AdGuard DNS-over-HTTPS, Fastly Domain Research, Porkbun's price catalog) to answer the query. They are not linked to you and are not kept beyond the short-lived response cache described below.</li>
+            <li>The names you type are sent to our availability service and to public registry and DNS resolvers (RDAP servers, Cloudflare, Google and AdGuard DNS-over-HTTPS, Fastly Domain Research, Porkbun's price catalog) to answer the query. For the popular extensions your browser also asks the registry's public RDAP server and Cloudflare / Google DNS-over-HTTPS directly, so those services see your IP address together with the name, as they would for any website you visit. None of it is linked to you by us, and nothing is kept beyond the short-lived response cache described below.</li>
             <li>Confident answers are cached for up to 60 seconds at the edge so a repeat lookup is fast. The cache key is the domain name only. Unverified answers are never cached.</li>
             <li>There are no advertising trackers and no third-party analytics scripts on this site.</li>
           </ul>

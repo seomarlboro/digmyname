@@ -10,6 +10,7 @@ import LiveStopwatch from "@/components/LiveStopwatch";
 import { deriveCardFacts } from "@/lib/cardFacts";
 import { matchesFilters, type ResultFilters } from "@/lib/resultFilters";
 import { earlyHeadline } from "@/lib/searchLanes";
+import { applyBrowserVerdict, browserLaneEligible, checkInBrowser, warmRegistries, type BrowserVerdict } from "@/lib/browserLane";
 
 const StarsIcon = ({ className, active }: { className?: string; active?: boolean }) => (
   <svg
@@ -203,6 +204,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
     typingStopRef.current = performance.now();
     setFirstAnswerMs(null);
     setStopwatch("running");
+    warmRegistries();
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
     }, FAST_DEBOUNCE_MS);
@@ -253,21 +255,25 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       // already left Checking (a fast chunk can land AFTER the authoritative
       // batch) and never surfaces an uncertain DNS answer as a verdict.
       const FAST_CHUNK = 10;
+      // Only stop the stopwatch if a card actually left "Checking" with a real
+      // verdict the user can see. Whether a row flipped is only known inside the
+      // state updater, which React runs eagerly only when nothing else is
+      // pending — so the flag is read there and the stop is queued as a
+      // microtask (markFirstAnswer is idempotent: a double-run updater is harmless).
       const applyFast = (fastMap: Map<string, FastInfo>) => {
         if (job.cancelled || !fastMap.size) return;
-        let anyConfident = false;
-        setResults((prev) =>
-          prev.map((r) => {
+        setResults((prev) => {
+          let anyConfident = false;
+          const next = prev.map((r) => {
             const info = fastMap.get(r.domain);
             if (!info) return r;
-            const next = applyFastVerdict(r, info);
-            if (next !== r) anyConfident = true;
-            return next;
-          })
-        );
-        // Only stop the stopwatch if a card actually left "Checking" with a real
-        // verdict the user can see. Provisional/uncertain results keep it running.
-        if (anyConfident) markFirstAnswer();
+            const updated = applyFastVerdict(r, info);
+            if (updated !== r) anyConfident = true;
+            return updated;
+          });
+          if (anyConfident && !job.cancelled) queueMicrotask(markFirstAnswer);
+          return next;
+        });
       };
 
       // Rows hydrated from the session cache already show their verdict — a
@@ -277,6 +283,35 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         const chunk = fastTargets.slice(i, i + FAST_CHUNK);
         void checkDomainsFast(chunk, job.ctl.signal).then(applyFast).catch(() => {});
       }
+
+      // Step 2b: Browser lane — the registry answers the visitor directly.
+      // Registry RDAP + DoH from the browser's own (pre-opened) connections,
+      // the same two base signals the edge checks first, under the same rules
+      // (src/lib/browserLane.ts). Like the fast lane it only fills rows still
+      // Checking, and the authoritative wave overwrites it when it lands.
+      const checkingNow = new Set(hydrated.filter((d) => d.checking).map((d) => d.domain));
+      const applyBrowser = (v: BrowserVerdict) => {
+        if (job.cancelled || v.state === "unknown") return;
+        setResults((prev) => {
+          let flipped = false;
+          const next = prev.map((r) => {
+            if (r.domain !== v.domain) return r;
+            const updated = applyBrowserVerdict(r, v);
+            if (updated !== r) flipped = true;
+            return updated;
+          });
+          // A registry answer the user can see is a real first answer (same
+          // updater-side flag as the fast lane above).
+          if (flipped && !job.cancelled) queueMicrotask(markFirstAnswer);
+          return next;
+        });
+      };
+      const browserLane = (targets: string[]) => {
+        for (const d of targets) {
+          if (!checkingNow.has(d) || !browserLaneEligible(d)) continue;
+          void checkInBrowser(d, job.ctl.signal).then(applyBrowser).catch(() => {});
+        }
+      };
 
       // Step 3: Authoritative availability + pricing.
       // Strategy: the ~10 most popular TLDs are each sent as their OWN request so
@@ -358,12 +393,20 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       const headline = earlyHeadline(solo);
       const headlineDone = headline ? runBatch([headline]) : Promise.resolve();
       const laterSolo = headline ? solo.filter((d) => d !== headline) : solo;
+      // The browser lane asks the registry for the headline card NOW — also for
+      // a short (premium-suspect) label, which the server lane holds back: the
+      // browser can still show "taken" at once, and never "available" for it.
+      if (solo[0]) browserLane([solo[0]]);
 
       // Debounce, lane two: wait out the rest of AUTH_DEBOUNCE_MS before the
       // full authoritative wave. If the query moves on meanwhile, this search is
       // cancelled and the wave for the superseded prefix is never sent.
       await new Promise<void>((resolve) => setTimeout(resolve, AUTH_DEBOUNCE_MS - FAST_DEBOUNCE_MS));
       if (job.cancelled) return;
+
+      // The other popular TLDs get their browser answer with the wave, one
+      // registry query each, so the whole top row flips at registry speed.
+      browserLane(solo.slice(1));
 
       const restBatches: string[][] = [];
       for (let i = 0; i < rest.length; i += BATCH_SIZE) {
@@ -474,6 +517,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        onFocus={() => warmRegistries()}
         placeholder="Enter domain name..."
         autoFocus
         aria-label="Search domain name"
