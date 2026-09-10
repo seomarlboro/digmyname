@@ -2,6 +2,11 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-11 — The shared cache is read alongside the probes (edge: check-domains, public-api)
+
+### Changed
+- `checkDomains` no longer waits for the `domain_cache` round trip before asking the registries. The probes for every name the in-isolate cache missed start at once and the DB is read alongside them; a valid cached row still wins for its name (it may carry pass-2 enrichment a raw probe lacks) and never goes on to the third signal or the cache write. Base verdicts still publish the moment they land, unless the cache has already answered for that name. Cache rules, TTLs and the cache-version guard are unchanged; the cost is one extra registry/DoH probe for a name that turns out to be cached. Covered by a pipeline test with a gated DB stub. Measured 2026-08 at 10–30 ms per request in-region, 100+ ms from another region.
+
 ## 2026-09-11 — /speed claim panel (frontend)
 
 ### Changed

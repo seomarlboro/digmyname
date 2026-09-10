@@ -1100,6 +1100,45 @@ export async function checkDomains(
     } else missAfterL1.push(d);
   }
 
+  // ---- Pass 1 + L2, side by side ---------------------------------------
+  // The shared DB cache used to be awaited BEFORE any probe left — one REST
+  // round trip (10–30 ms in-region, 100+ ms from elsewhere) paid on every
+  // miss, which is nearly every fresh name typed. Now the probes for every L1
+  // miss start at once and the cache is read alongside them. A valid cached row
+  // still wins (it may carry pass-2 enrichment a raw probe lacks) and its name
+  // never goes on to pass 2 or the cache write; the extra probe for a hit is
+  // the price of never waiting for the round trip. Each domain publishes its
+  // base verdict the moment it lands, so a caller whose budget expires mid-batch
+  // can still serve the ones that finished — unless the cache has already
+  // answered for that name, in which case the cached verdict stays.
+  // The brand-block safeguard is applied here too — a preliminary read must never
+  // be weaker than the final one.
+  const publishBase = (r: DomainCheckResult) => {
+    if (r.available && !r.uncertain && isLikelyBlocked(r.domain)) {
+      publish({ domain: r.domain, available: false, checkedVia: r.checkedVia, uncertain: true, uncertainReason: "brand_protected" });
+    } else if (r.uncertain && isLikelyBlocked(r.domain)) {
+      publish({ ...r, uncertainReason: "brand_protected" });
+    } else if (r.available && willEscalateToThirdSignal(r)) {
+      // Pass 2 exists for this name precisely because Pass 1 cannot settle it
+      // (registry-reserved / premium suspect). A caller whose budget expires
+      // reads `partial` as the FINAL answer, so the preliminary read has to be
+      // the cautious one — publishing available:true here sold reserved names
+      // (`test.dev`, `mail.dev`) whenever Pass 2 missed the 900ms API budget.
+      publish({ domain: r.domain, available: false, checkedVia: r.checkedVia, uncertain: true });
+    } else {
+      publish(r);
+    }
+  };
+  let l2Settled = false;
+  const probeResults = new Map<string, DomainCheckResult>();
+  const pass1 = pMap(missAfterL1, 25, (d) =>
+    resolveDomain(d).then((r) => {
+      probeResults.set(d, r);
+      if (!(l2Settled && cachedMap.has(d))) publishBase(r);
+      return r;
+    })
+  );
+
   // ---- L2: shared DB cache --------------------------------------------
   if (missAfterL1.length > 0) {
     const { data: cached } = await supabase
@@ -1135,7 +1174,9 @@ export async function checkDomains(
       hotCache.set(c.domain, { result, expiresAt: nowMs + HOT_CACHE_TTL_MS });
     }
   }
+  l2Settled = true;
 
+  // Cached verdicts are published last, over any provisional probe verdict for the same name.
   for (const c of cachedMap.values()) publish(c);
 
   const uncached = batch.filter((d) => !cachedMap.has(d));
@@ -1152,35 +1193,9 @@ export async function checkDomains(
     );
   }
 
-  // ---- Pass 1: free authoritative sources (RDAP + DNS) -----------------
-  // Each domain publishes its own base verdict the moment it lands, so a caller
-  // whose budget expires mid-batch can still serve the ones that finished.
-  // The brand-block safeguard is applied here too — a preliminary read must never
-  // be weaker than the final one.
-  const baseResults = await pMap(uncached, 25, (d) =>
-    resolveDomain(d).then((r) => {
-      if (r.available && !r.uncertain && isLikelyBlocked(r.domain)) {
-        publish({ domain: r.domain, available: false, checkedVia: r.checkedVia, uncertain: true, uncertainReason: "brand_protected" });
-      } else if (r.uncertain && isLikelyBlocked(r.domain)) {
-        publish({ ...r, uncertainReason: "brand_protected" });
-      } else if (r.available && willEscalateToThirdSignal(r)) {
-        // Pass 2 exists for this name precisely because Pass 1 cannot settle it
-        // (registry-reserved / premium suspect). A caller whose budget expires
-        // reads `partial` as the FINAL answer, so the preliminary read has to be
-        // the cautious one — publishing available:true here sold reserved names
-        // (`test.dev`, `mail.dev`) whenever Pass 2 missed the 900ms API budget.
-        publish({ domain: r.domain, available: false, checkedVia: r.checkedVia, uncertain: true });
-      } else {
-        publish(r);
-      }
-      return r;
-    })
-  );
+  await pass1;
+  const baseResults = uncached.map((d) => probeResults.get(d)!);
 
-
-  // ---- Pass 2: third signal, only where it adds value ------------------
-  // Same predicate the Pass-1 publish uses, so the preliminary verdict and the
-  // escalation set can never drift apart.
   const needsThirdSignal = baseResults
     .filter(willEscalateToThirdSignal)
     .map((r) => r.domain);

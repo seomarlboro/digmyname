@@ -2,7 +2,7 @@
 // Run with: deno test supabase/functions/_shared/pipeline_test.ts
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { interpretDomainr, isLikelyBlocked } from "./availability-rules.ts";
-import { isLikelyPremium, trustsAggregator404, willEscalateToThirdSignal } from "./pipeline.ts";
+import { checkDomains, isLikelyPremium, trustsAggregator404, willEscalateToThirdSignal, type DomainCheckResult } from "./pipeline.ts";
 
 // ---- interpretDomainr -------------------------------------------------------
 
@@ -306,3 +306,73 @@ Deno.test("doh: records win over everything", () => {
 Deno.test("doh: no resolver answered → error", () => {
   assertEquals(dohVerdict([null, null]), "error");
 });
+
+// ---- checkDomains: the shared cache is read alongside pass 1, not before it ----
+
+/** Minimal supabase-js stand-in: every query chain is thenable and resolves to `answer(table)`. */
+function stubSupabase(answer: (table: string) => Promise<{ data: unknown; error: null }>) {
+  const chain = (table: string): Record<string, unknown> => {
+    const q: Record<string, unknown> = {};
+    const self = () => q;
+    for (const m of ["select", "in", "gt", "eq", "order", "limit", "upsert", "update", "lt"]) q[m] = self;
+    q.then = (res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) => answer(table).then(res, rej);
+    return q;
+  };
+  return { from: chain } as unknown as NonNullable<Parameters<typeof checkDomains>[1]>["supabase"];
+}
+
+// The pipeline's hedge / timeout timers are unref'd and outlive the request on purpose, so the timer sanitizer is off here.
+Deno.test({ name: "checkDomains: probes leave before the DB cache answers; a cached row still wins for its name", sanitizeOps: false, sanitizeResources: false, fn: async () => {
+  const realFetch = globalThis.fetch;
+  const probed: string[] = [];
+  let probeStartedBeforeCache = false;
+  let releaseCache!: () => void;
+  const cacheGate = new Promise<void>((r) => (releaseCache = r));
+  let cacheSettled = false;
+
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url.includes("/domain/")) {
+      probed.push(url);
+      if (!cacheSettled) probeStartedBeforeCache = true;
+      return new Response("", { status: 404 }); // registry: not registered
+    }
+    if (url.includes("dns-query") || url.includes("dns.google") || url.includes("adguard")) return json({ Status: 3, Answer: [] }); // NXDOMAIN
+    if (url.includes("data.iana.org")) return json({ services: [] });
+    if (url.includes("porkbun.com")) return json({ status: "SUCCESS", pricing: {} });
+    return new Response("", { status: 404 });
+  }) as typeof fetch;
+
+  const supabase = stubSupabase(async (table) => {
+    if (table === "domain_cache") {
+      await cacheGate;
+      cacheSettled = true;
+      return {
+        data: [{ domain: "cachedname.com", available: true, checked_via: "domainr", rdap_data: { cache_version: 4, reg_price: 9.99, premium: false } }],
+        error: null,
+      };
+    }
+    return { data: [], error: null };
+  });
+
+  try {
+    const sink = new Map<string, DomainCheckResult>();
+    const run = checkDomains(["freshname.com", "cachedname.com"], { supabase, partialSink: sink, thirdSignalDeadlineAt: Date.now() + 1000 });
+    // Let the probes start while the cache read is still pending, then release it.
+    await new Promise((r) => setTimeout(r, 50));
+    assert(probed.some((u) => u.includes("freshname.com")), "the fresh name was probed while the cache read was pending");
+    assert(probeStartedBeforeCache, "probes must not wait for the DB round trip");
+    releaseCache();
+    const results = await run;
+
+    const fresh = results.find((r) => r.domain === "freshname.com")!;
+    const cached = results.find((r) => r.domain === "cachedname.com")!;
+    assertEquals([fresh.available, fresh.uncertain ?? false, fresh.checkedVia], [true, false, "rdap"]);
+    // The cached row wins for its name — with the enrichment a raw probe cannot know.
+    assertEquals([cached.available, cached.checkedVia, cached.price], [true, "domainr", 9.99]);
+    assertEquals(sink.get("cachedname.com")?.checkedVia, "domainr");
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+} });
