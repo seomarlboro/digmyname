@@ -78,14 +78,14 @@ const Api = () => {
         >
           <StatGrid cols={3}>
             <Stat value="60/min" label="Requests per IP" accent="mint" icon={NetworkIcon} />
-            <Stat value="~170ms" label="Typical first answer" icon={StopwatchIcon} />
+            <Stat value="≈0.5s" label="First-time check, median" icon={StopwatchIcon} />
             <Stat value="$0" label="No key, no auth" accent="violet" icon={LicenseIcon} />
           </StatGrid>
         </PageHeader>
 
         <Section
           title="Quick start"
-          lede="Copy, paste, ship. Same endpoint from a terminal, a browser or an agent. Requests go through a global Cloudflare edge cache — a repeat lookup for the same domain within 60 seconds comes back in ~70 ms, while a first-time lookup runs the full live check."
+          lede="Copy, paste, ship. Same endpoint from a terminal, a browser or an agent. Requests go through a global Cloudflare edge cache — a repeat lookup for the same domain within 60 seconds comes back in about 0.1 s, while a first-time lookup runs the full live check (about half a second)."
         >
           <CodeBlock
             tabs={[
@@ -217,9 +217,9 @@ print(res.json()["result"]["available"])`,
               <li>60 requests per 60 seconds per IP.</li>
               <li>No key, no account, no tracking beyond rate-limit counters.</li>
               <li>
-                Repeat lookups within 60 seconds are served from a Cloudflare edge cache (~70 ms);
-                first-time lookups run the full live check (~170 ms first answer, ~370 ms typical
-                full pipeline).
+                Repeat lookups within 60 seconds are served from a Cloudflare edge cache (~0.1 s);
+                first-time lookups run the full live check (about half a second, under 0.9 s at p95 —
+                measured from the US and the EU, September 2026).
               </li>
               <li>
                 Please link back to{" "}

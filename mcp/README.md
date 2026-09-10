@@ -7,13 +7,13 @@
 
 ## ⚡ The fastest domain availability MCP server — or the second
 
-The fastest domain availability MCP — or the second. **~170 ms** cache-warm; a cold first answer runs the full live check, hard-capped so it never hangs. The pipeline (debounce → parallel authoritative DNS → RDAP → hot cache) is published openly. Found something faster? [Dispute it](https://digmyname.com/speed) and we'll put it on the page ourselves.
+The fastest domain availability MCP — or the second. A first-time check lands in **about half a second** (under 0.9 s at p95, measured from the US and the EU, September 2026); a repeat within 60 s is **~0.1 s** from the edge cache. Hard-capped so it never hangs. The pipeline (debounce → registry RDAP + DNS → third signal → edge cache) is published openly. Found something faster? [Dispute it](https://digmyname.com/speed).
 
 MCP server to check domain availability from any LLM — Claude, Cursor, Windsurf, Continue, Zed. 6 registrars, 50+ TLDs. Powered by [DigMyName](https://digmyname.com).
 
 | | |
 | --- | --- |
-| Typical latency | **~170 ms** cache-warm · **~370 ms typical** full pipeline (availability + premium + pricing) — everyday numbers, not a lab result; the on-screen timer is the live proof |
+| Typical latency | **about half a second** first-time check (p50 0.4–0.5 s, under 0.9 s at p95) · **~0.1 s** cache-warm — everyday numbers measured from the US and the EU in September 2026, not a lab result; the on-screen timer is the live proof |
 | Method | Published at [digmyname.com/speed](https://digmyname.com/speed) |
 | Coverage | 6 registrars · 50+ TLDs |
 | Cost | Free — no API key, no account |
@@ -101,7 +101,7 @@ Pricing comes from DigMyName's registrar price cache across 6 registrars and 50+
 
 Domain age is read from registry RDAP endpoints.
 
-Rate limit: 60 requests / minute / IP. Repeat lookups are served from the Cloudflare edge cache in ~10ms.
+Rate limit: 60 requests / minute / IP. Repeat lookups are served from the Cloudflare edge cache in about 0.1 s.
 
 ## Configuration
 

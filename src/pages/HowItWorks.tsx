@@ -115,7 +115,7 @@ const faqs = [
   },
   {
     q: "Is it fast, or accurate?",
-    a: "Both, these days. We prioritise accuracy — and after recent work it's fast too: ~170 ms to the first answer and ~370 ms typical for the full check, usually under a second — the on-screen timer proves it live. When sources disagree we still say Unverified rather than guess.",
+    a: "Both, these days. We prioritise accuracy — and it's fast too: first answer under 0.5 s at the 95th percentile for a cold visitor (measured from the US and the EU, September 2026), full check with pricing usually within a second — the on-screen timer proves it live. When sources disagree we still say Unverified rather than guess.",
   },
 ];
 

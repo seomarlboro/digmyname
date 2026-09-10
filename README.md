@@ -23,7 +23,7 @@ On top of availability you get side-by-side registrar pricing for 6 registrars, 
 
 ## Speed
 
-**~170 ms** typical first answer · **~370 ms typical** full pipeline (availability + premium + pricing). Everyday numbers from a single datacenter, Aug 2026 — not a lab result, the on-screen stopwatch is the live proof; your numbers vary by network/TLD/cache — see [digmyname.com/speed](https://digmyname.com/speed).
+**Under 0.5 s** to the first answer at the 95th percentile for a cold visitor — 386 ms from the US, 485 ms from the EU, 150 fresh browsers each, September 2026 · the full check with pricing lands in about half a second (median). Everyday numbers, not a lab result — the on-screen stopwatch is the live proof; your numbers vary by network, TLD and cache — see [digmyname.com/speed](https://digmyname.com/speed).
 
 ## Tech stack
 

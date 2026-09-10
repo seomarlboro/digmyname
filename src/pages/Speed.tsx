@@ -22,56 +22,65 @@ const pipeline = [
   {
     step: "02",
     icon: Network,
-    title: "Parallel DNS pre-check",
+    title: "The registry answers you directly",
     detail:
-      "One edge call resolves NS/A records for every candidate at once, typically 30–80 ms.",
+      "For the popular extensions your browser asks the registry's public RDAP server and DNS-over-HTTPS itself, over connections opened while you were still typing. No cold server in the way: median 0.2 s from the US, 0.3 s from the EU.",
   },
   {
     step: "03",
     icon: ShieldCheck,
     title: "Authoritative pass, per card",
     detail:
-      "RDAP against each TLD registry in parallel. No card waits for a slower sibling.",
+      "Our edge re-checks every card — RDAP, DNS and a third signal for the tricky ones — and overwrites the browser's answer. Nothing is cached until this pass agrees. Median 0.4–0.5 s per card.",
   },
   {
     step: "04",
     icon: Gauge,
-    title: "Cloudflare edge cache",
+    title: "Edge cache for the API",
     detail:
-      "Repeat lookups inside a 60-second window are served from a real Cloudflare edge cache in ~70 ms, bypassing the origin entirely. First-time lookups still run the full live pipeline.",
+      "API and MCP lookups repeated within 60 seconds come from a Cloudflare edge cache in about 0.1 s. First-time lookups run the full live check. Uncertain results are never cached.",
   },
 ];
 
 // Bar lengths are computed from `ms` by BenchmarkChart (fastest row = 100 %),
 // never typed by hand.
+// Measured 10 September 2026 (scripts/bench/first-answer.mjs): 150 cold
+// visitors from Dallas and 150 from Vienna, each a fresh browser.
 const benchmark = [
   {
-    name: "DigMyName /fast",
-    note: "Availability signal across the full TLD set",
-    ms: "~170 ms",
+    name: "DigMyName first answer · US",
+    note: "Cold visitor, fresh name, 95th percentile of 150 · Dallas",
+    ms: "386 ms",
     us: true,
-    tag: "Ours",
+    tag: "Ours · p95",
+  },
+  {
+    name: "DigMyName first answer · EU",
+    note: "Cold visitor, fresh name, 95th percentile of 150 · Vienna",
+    ms: "485 ms",
+    us: true,
+    tag: "Ours · p95",
   },
   {
     name: "Raw registry RDAP",
-    note: "Verisign .com — one TLD, no pricing, no UI. The physical floor.",
-    ms: "~47 ms",
+    note: "Verisign .com from a US client, median — one TLD, no pricing, no UI. The physical floor.",
+    ms: "107 ms",
     us: false,
     tag: "Theoretical floor",
   },
   {
-    name: "DigMyName cached (repeat)",
-    note: "Repeat lookup within 60s — served from the Cloudflare edge cache, not a first-time check",
-    ms: "~70 ms",
+    name: "DigMyName full check",
+    note: "Availability + premium detection + registrar pricing, per card, median (US 472 ms · EU 358 ms)",
+    ms: "472 ms",
     us: true,
-    tag: "Ours · cached",
+    tag: "Ours · median",
   },
   {
-    name: "DigMyName full check",
-    note: "Availability + premium detection + registrar pricing · typically under 1s",
-    ms: "~370 ms",
+    name: "API, repeat within 60 s",
+    note: "Cloudflare edge cache hit — not a first-time check",
+    ms: "~110 ms",
     us: true,
-    tag: "Ours",
+    tag: "Ours · cached",
   },
 ];
 
@@ -92,12 +101,12 @@ const Speed = () => {
               <span className="text-aurora-gradient">Or the second.</span>
             </>
           }
-          lede="We are not going to pretend we measured every tool on every planet. So here is the deal: every search on DigMyName runs a stopwatch. It starts on your last keystroke and stops the moment the first answer hits the screen. Find something faster and we will put it at the top of this page ourselves."
+          lede="We are not going to pretend we measured every tool on every planet. So here is the deal: every search on DigMyName runs a stopwatch. It starts on your last keystroke and stops the moment the first answer hits the screen. The number we quote is the 95th percentile of 300 cold visits from two continents, not our best run. Find something faster and we will put it at the top of this page ourselves."
         >
           <StatGrid cols={3}>
-            <Stat value="~170" label="ms · first answer" accent="mint" icon={StopwatchIcon} />
+            <Stat value="<0.5" label="s · first answer, p95" accent="mint" icon={StopwatchIcon} />
             <Stat value="80" label="ms · debounce (ours)" accent="violet" icon={KeyboardIcon} />
-            <Stat value="~370" label="ms · full pipeline (median)" icon={BoltIcon} />
+            <Stat value="≈0.5" label="s · full check, median" icon={BoltIcon} />
           </StatGrid>
 
         </PageHeader>
@@ -114,8 +123,9 @@ const Speed = () => {
             <>
               Show us a faster public lookup and we'll feature your time here with full credit and a link back.
               <span className="mt-2 block">
-                As of August 2026: ~370 ms typical full check from our single datacenter. These are everyday
-                numbers, not a lab result — the stopwatch on your screen is the real proof, and it keeps us honest.
+                As of September 2026: first answer under 0.5 s at the 95th percentile for a cold visitor — 386 ms
+                from the US, 485 ms from the EU, 300 of 300 under a second. These are everyday numbers, not a lab
+                result — the stopwatch on your screen is the real proof, and it keeps us honest.
               </span>
             </>
           }
@@ -131,7 +141,7 @@ const Speed = () => {
         {/* What the timer includes */}
         <Section
           title="What the timer includes"
-          lede="The stopwatch starts at your final keystroke and stops when the first card paints."
+          lede="The stopwatch starts at your final keystroke and stops when the first card paints — whichever lane delivers it."
         >
           <div className="grid gap-4 sm:grid-cols-2">
             {pipeline.map((step) => (
@@ -153,7 +163,7 @@ const Speed = () => {
         <Section
 
           title="Reference numbers"
-          lede="Single datacenter connection, August 2026. Lower is better. Repeat lookups within a 60-second window are served from a global edge cache in ~70 ms — first-time lookups run the full live pipeline (~370 ms typical)."
+          lede="150 cold visitors from Dallas and 150 from Vienna, 10 September 2026 — each a fresh browser with no cache and no open connections. Lower is better. API lookups repeated within 60 seconds come from the edge cache in about 0.1 s; first-time API lookups run the full live check (about half a second, under 0.9 s at p95)."
         >
           <BenchmarkChart rows={benchmark} />
 

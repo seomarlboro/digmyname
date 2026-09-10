@@ -36,7 +36,7 @@ const Index = () => {
           operatingSystem: "Any (web-based)",
           browserRequirements: "Requires JavaScript and a modern browser",
           description:
-            "Domain availability search verified against three independent signals, with registrar price comparison and a free no-auth JSON API. First answer in ~170 ms.",
+            "Domain availability search verified against three independent signals, with registrar price comparison and a free no-auth JSON API. First answer under 0.5 s (p95).",
           offers: {
             "@type": "Offer",
             price: "0",
@@ -44,7 +44,7 @@ const Index = () => {
             availability: "https://schema.org/InStock",
           },
           featureList: [
-            "Real-time domain availability checks with ~170 ms first answer",
+            "Real-time domain availability checks — first answer under 0.5 s (p95)",
             "Three-signal verification with an honest Unverified state",
             "Registrar price comparison including renewal traps",
             "AI-powered alternative name suggestions",

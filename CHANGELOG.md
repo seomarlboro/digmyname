@@ -2,6 +2,14 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-11 — Latency copy states what was measured (frontend, MCP package copy)
+
+### Changed
+- The home-page chip reads **"First answer under 0.5 s · p95"** (was "~170 ms"), per the owner's decision after the cold-visitor benchmark (US p95 386 ms, EU p95 485 ms, 150 fresh browsers each).
+- /speed: the three stats, the four pipeline cards and the reference chart now describe the current pipeline (browser registry lane → authoritative edge pass → API edge cache) with the benchmark numbers: first answer p95 US 386 / EU 485 ms, raw Verisign RDAP floor 107 ms (US median), full check per card median US 472 / EU 358 ms, API repeat-within-60 s ~110 ms. The lede says the quoted number is a 95th percentile of 300 cold visits, not a best run.
+- /api and /mcp, the /mcp meta description and JSON-LD, the how-it-works FAQ, the home JSON-LD, `llms.txt` and the README no longer say "~170 ms typical" or "~70 ms cached": the API's first-time check is "about half a second, under 0.9 s at p95" (measured US p50 536 / p95 868, EU p50 382 / p95 515) and a repeat within 60 s "about 0.1 s" (edge-cache hits measured 91–169 ms).
+- MCP package (`mcp/`): README and description carry the same figures; version 1.2.10 → 1.2.11 for the owner's next npm publish (the site badge reads the published version from npm, so nothing shows 1.2.11 until then).
+
 ## 2026-09-10 — Cold-visitor benchmark, US and EU (frontend)
 
 ### Added

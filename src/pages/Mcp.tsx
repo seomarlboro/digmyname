@@ -110,7 +110,7 @@ const Mcp = () => {
           downloadUrl: NPM_URL,
           codeRepository: GITHUB_URL,
           license: "https://opensource.org/licenses/MIT",
-          description: "The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs.",
+          description: "The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. Checks in about half a second, ~0.1 s cached, from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs.",
         })}</script>
       </RouteHead>
 
@@ -143,12 +143,12 @@ const Mcp = () => {
             }
             lede={
               <>
-                One install. Live answers in ~170 ms from DNS → RDAP → registrar APIs — straight into
+                One install. Live answers in about half a second from DNS → RDAP → registrar APIs — straight into
                 Claude, Cursor, ChatGPT and any MCP-compatible client. Fastest on the internet —{" "}
                 <Link to="/speed" className="text-aurora hover:underline">dispute it</Link>. The server
                 now calls <code className="font-mono text-foreground/80">api.digmyname.com</code>, a
-                Cloudflare edge cache: repeat domain lookups return in ~70 ms, first-time lookups run
-                the full live check (~170 ms first answer, ~370 ms typical full pipeline).
+                Cloudflare edge cache: repeat domain lookups return in about 0.1 s, first-time lookups run
+                the full live check (about half a second, under 0.9 s at p95 — measured from the US and the EU, September 2026).
                 <span className="mt-5 flex flex-wrap items-center gap-2">
                   {/* Live figures stay as shields.io images; the three static badges are plain markup (three fewer third-party requests).
                       width/height reserve the badge's footprint before it loads — without them the row re-wrapped on
@@ -195,7 +195,7 @@ const Mcp = () => {
             <StatGrid>
               <Stat value="50+" label="TLDs covered" accent="mint" icon={NetworkIcon} />
               <Stat value="6" label="Registrars compared" accent="violet" icon={StoreIcon} />
-              <Stat value="~170ms" label="Typical response" icon={StopwatchIcon} />
+              <Stat value="≈0.5s" label="First-time check, median" icon={StopwatchIcon} />
               <Stat value="MIT" label="Open source" icon={LicenseIcon} />
             </StatGrid>
 

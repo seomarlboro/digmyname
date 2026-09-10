@@ -147,7 +147,7 @@ export const ROUTES: RouteMeta[] = [
     aliases: ["/skill", "/gpt"],
     title: "MCP Server, Claude Skill & Custom GPT — DigMyName",
     description:
-      "The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. ~170 ms checks from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs.",
+      "The fastest domain availability MCP server we've measured — dispute it at digmyname.com/speed. Checks in about half a second, ~0.1 s cached, from any LLM: Claude, Cursor, Windsurf, Continue. 6 registrars, 50+ TLDs.",
     ogTitle: "Domain Check Skills — MCP / Claude Skill / Custom GPT",
     changefreq: "weekly",
     priority: "0.7",

@@ -567,7 +567,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
           <div className="mx-auto w-full max-w-5xl text-center">
             <div className="hero-chip hero-chip-text mb-5 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] sm:text-xs">
               <Zap className="hero-chip-pulse h-3.5 w-3.5 shrink-0 text-aurora-mint" />
-              <span className="whitespace-nowrap">First answer in ~170 ms<span className="hidden sm:inline"> — timed live, no asterisks</span></span>
+              <span className="whitespace-nowrap">First answer under 0.5 s · p95<span className="hidden sm:inline"> — timed live, no asterisks</span></span>
             </div>
 
             <h1 className="text-gradient mx-auto w-full px-1 text-[clamp(2.25rem,10.5vw,5.7rem)] font-extrabold leading-[1.05] tracking-[-0.04em] sm:leading-[1] sm:tracking-[-0.045em]">
