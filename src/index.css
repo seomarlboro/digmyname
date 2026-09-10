@@ -571,15 +571,46 @@
   }
 
   /* Mint-glow elevation — reusable at-rest glow for STATIC surfaces only (never search/results) */
-  /* The aurora gradient the logo uses, as a surface: fixed vivid stops so dark ink reads in both themes. */
-  .surface-aurora {
-    background-image: linear-gradient(120deg, hsl(165 80% 58%) 0%, hsl(210 85% 66%) 48%, hsl(258 92% 74%) 100%);
+  /* Accent panel (the /speed claim): dark glass with the aurora glowing behind it,
+     a luminous top edge and a soft violet drop glow. Light mode keeps the same
+     composition at lower intensity. */
+  .claim-panel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 32px;
+    border: 1px solid hsl(var(--aurora-mint) / 0.22);
+    background-color: hsl(var(--card));
+    box-shadow: 0 30px 80px -30px hsl(var(--aurora-violet) / 0.35);
   }
-  .aurora-glow {
-    box-shadow:
-      0 0 0 1px hsl(165 80% 58% / 0.25),
-      0 24px 70px -20px hsl(258 92% 74% / 0.55),
-      0 12px 40px -10px hsl(165 80% 58% / 0.45);
+  .dark .claim-panel {
+    background-color: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 40px 100px -30px hsl(var(--aurora-violet) / 0.5), 0 0 60px -20px hsl(var(--aurora-mint) / 0.25);
+  }
+  .claim-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(70% 60% at 0% 0%, hsl(var(--aurora-mint) / 0.16), transparent 62%),
+      radial-gradient(65% 70% at 100% 100%, hsl(var(--aurora-violet) / 0.2), transparent 62%);
+  }
+  .dark .claim-panel::before {
+    background:
+      radial-gradient(70% 60% at 0% 0%, hsl(var(--aurora-mint) / 0.28), transparent 62%),
+      radial-gradient(65% 70% at 100% 100%, hsl(var(--aurora-violet) / 0.36), transparent 62%);
+  }
+  .claim-panel::after {
+    content: "";
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    top: 0;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, hsl(var(--aurora-mint) / 0.7), hsl(var(--aurora-violet) / 0.7), transparent);
   }
   .mint-glow    { box-shadow: 0 10px 40px -12px hsl(var(--aurora-mint) / 0.22); }
   .mint-glow-sm { box-shadow: 0 6px 24px -10px hsl(var(--aurora-mint) / 0.20); }
@@ -770,16 +801,7 @@
   animation: benchmark-bar-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* TrophyIcon: a single highlight sweeps across the cup every few seconds. */
-@keyframes trophy-shine {
-  0%, 70% { transform: translateX(0) skewX(-18deg); }
-  100%    { transform: translateX(150px) skewX(-18deg); }
-}
-.trophy-shine {
-  animation: trophy-shine 4.5s ease-in-out infinite;
-}
 @media (prefers-reduced-motion: reduce) {
   .benchmark-bar-grow { animation: none; }
-  .trophy-shine { animation: none; }
 }
 

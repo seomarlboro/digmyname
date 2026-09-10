@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { Timer, Network, Gauge, ShieldCheck, ArrowRight } from "lucide-react";
-import { TrophyIcon } from "@/components/TrophyIcon";
 import Header from "@/components/Header";
 import RouteHead from "@/seo/RouteHead";
 import { Button } from "@/components/ui/button";
-import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section, CalloutBlock } from "@/components/PageKit";
+import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section } from "@/components/PageKit";
+import { SpeedClaim } from "@/components/SpeedClaim";
 import { StopwatchIcon, KeyboardIcon, BoltIcon } from "@/components/StatIcons";
 import LiveBenchmark from "@/components/LiveBenchmark";
 import { BenchmarkChart } from "@/components/BenchmarkChart";
@@ -113,37 +113,10 @@ const Speed = () => {
 
 
         {/* Claim */}
-        <CalloutBlock
-          variant="accent"
-          tone="gradient"
-          className="!mt-6"
-          icon={() => <TrophyIcon className="h-full w-full" />}
-          iconVariant="hero"
-          title="Beat our number, take the crown"
-          body={
-            <>
-              Show us a faster public lookup and we'll feature your time here with full credit and a link back.
-              <span className="mt-2 block">
-                As of September 2026: first answer under 0.5 s at the 95th percentile for a cold visitor — 386 ms
-                from the US, 485 ms from the EU, 300 of 300 under a second. These are everyday numbers, not a lab
-                result — the stopwatch on your screen is the real proof, and it keeps us honest.
-              </span>
-            </>
-          }
-          action={
-            <Button
-              asChild
-              size="lg"
-              className="w-full shrink-0 rounded-full bg-ink-on-aurora px-8 text-lg text-white shadow-[0_8px_24px_-8px_hsl(232_28%_8%/0.6)] hover:-translate-y-0.5 hover:bg-ink-on-aurora/90 md:w-auto"
-            >
-              <Link to="/">Run the timer</Link>
-            </Button>
-          }
-        />
-
-
+        <SpeedClaim />
 
         {/* What the timer includes */}
+        <div id="how-we-measure" className="scroll-mt-24" />
         <Section
           title="What the timer includes"
           lede="The stopwatch starts at your final keystroke and stops when the first card paints — whichever lane delivers it."

@@ -99,8 +99,6 @@ export default {
         },
         mint: "hsl(var(--aurora-mint))",
         violet: "hsl(var(--aurora-violet))",
-        /* Text and wells on the aurora gradient surface (same ink the gradient button uses). */
-        "ink-on-aurora": "hsl(232 28% 8% / <alpha-value>)",
         hero: "hsl(var(--hero-bg))",
         "search-bg": "hsl(var(--search-bg))",
         sidebar: {
