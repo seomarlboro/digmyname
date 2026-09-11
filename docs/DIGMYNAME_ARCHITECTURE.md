@@ -55,7 +55,7 @@ This is the single most important invariant. An uncertain result is NEVER cached
 1. L1 hot cache (per-isolate, in-memory, 10 min). **Measured dead** (2026-08-12, three ways: 0–6 % of requests reach a warm isolate), so in practice it never fires; same for the in-isolate response cache in public-api.
 2. L2 DB cache (domain_cache table, tiered TTL) — skips network probes. Awaited BEFORE the probes start (100–115 ms from another region, ~10–30 in-region); running it in parallel with the probes is a known free win, not yet applied (owner go pending).
 3. Pass 1 — free authoritative sources (RDAP + DNS) run in parallel per domain; each publishes its verdict into partialSink the moment it lands.
-4. Pass 2 — the third signal (Fastly) fires ONLY where it adds value (premium suspects, brand-blocked names).
+4. Pass 2 — the third signal (Fastly) fires ONLY where it adds value (premium suspects, brand-blocked names, .co/.me) — plus, since 2026-09-12, the ONE name the visitor typed: the site sends a `verifyPremium` request for the headline card after the wave settles (800 ms), which bypasses the cache for that name and forces pass 2 whenever pass 1 says available. Registry-premium names outside the suspect heuristics (`reputation.dev`, $174 at Porkbun) used to ship with the standard TLD price. Porkbun's checkDomain prefers that name for the confirmed price. One paid call per settled search, cached 24 h; kill switch `HEADLINE_PREMIUM_CHECK=off`; API/MCP unchanged.
 5. Aftermarket NS detection — registered names on Sedo/Dan/Afternic/etc. get a resale listing link.
 6. Price enrichment — Porkbun public catalog + registrar_prices DB rows.
 7. Cache write — only trustworthy verdicts, background via EdgeRuntime.waitUntil.

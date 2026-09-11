@@ -35,6 +35,7 @@ Before editing any file that outsiders can see (this repo is public), check:
 ## Availability logic (ground truth)
 
 - Availability is cross-checked against three independent signals: RDAP (resolved via the IANA bootstrap registry, with a fast-path table for popular TLDs and the public aggregator as fallback), DNS-over-HTTPS (Cloudflare primary, hedged with Google), and Domainr (Fastly Domain Research). For the popular TLDs the visitor's browser runs the first two itself as a provisional first answer; the edge stays the authority.
+- The third signal (paid) runs only where it is load-bearing: premium suspects, brand-blocked labels, .co/.me, and the one name the visitor typed (`verifyPremium` on `check-domains`, site only, after the wave settles). Do not widen it to every card without the owner's decision — it is metered.
 - Pricing is separate. The weekly `fetch-registrar-prices` run reads tld-list.com's API when `TLDLIST_API_PUBLIC` / `TLDLIST_API_PRIVATE` are configured; otherwise the registrars' own catalogs and pages (Porkbun catalog, OVHcloud pages, GoDaddy pages via Firecrawl, tldspy) fill the table. Rows not re-verified within 30 days are quarantined; the API stops showing prices older than 60 days.
 - Never conflate pricing sources with availability sources when describing how the product works.
 
