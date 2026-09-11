@@ -277,4 +277,49 @@ describe("DomainSearch lanes", () => {
     expect((invoke.mock.calls[0] as unknown[])[1]).toMatchObject({ body: { domains: ["acmeforge.tech"] } });
     expect(fetchMock.mock.calls.some((c) => String(c[0]).includes("rdap.radix.host/rdap/domain/acmeforge.tech"))).toBe(true);
   });
+
+  it("after the wave settles, the typed card gets one premium-verify request; suspects and taken names don't", async () => {
+    invoke.mockImplementation(async (_name: unknown, options: unknown) => {
+      const body = (options as { body: { domains: string[]; verifyPremium?: boolean } }).body;
+      return { data: { results: body.domains.map((d) => ({ domain: d, available: !d.startsWith("takenname") })) }, error: null };
+    });
+    const { default: DomainSearch } = await import("@/components/DomainSearch");
+    const { DEFAULT_FILTERS } = await import("@/lib/resultFilters");
+    const qc = new QueryClient();
+    const { container } = render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter>
+          <DomainSearch selectedTlds={new Set()} filters={DEFAULT_FILTERS} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const input = container.querySelector('input[aria-label="Search domain name"]') as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    const type = async (text: string) => {
+      await act(async () => {
+        setter.call(input, text);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    };
+    const verifyCalls = () => invoke.mock.calls.filter((c) => (c[1] as { body: { verifyPremium?: boolean } }).body.verifyPremium === true);
+    const settle = async () => {
+      // fast debounce, authoritative wave, then the verify delay — flushing promises between timer hops
+      for (const step of [80, 170, 50, 800, 50]) await act(async () => { vi.advanceTimersByTime(step); for (let i = 0; i < 8; i++) await Promise.resolve(); });
+    };
+
+    await type("reputation");
+    await settle();
+    expect(verifyCalls()).toHaveLength(1);
+    expect((verifyCalls()[0][1] as { body: unknown }).body).toEqual({ domains: ["reputation.com"], verifyPremium: true });
+
+    invoke.mockClear();
+    await type("acme"); // a premium suspect: the wave already escalated it, no second ask
+    await settle();
+    expect(verifyCalls()).toHaveLength(0);
+
+    invoke.mockClear();
+    await type("takenname"); // taken: nothing to price
+    await settle();
+    expect(verifyCalls()).toHaveLength(0);
+  });
 });

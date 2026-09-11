@@ -59,4 +59,14 @@ describe("deriveCardFacts", () => {
     expect(deriveCardFacts(result({ uncertain: true }), cheapest).verdict).toBe("unverified");
     expect(deriveCardFacts(result({ available: false, uncertain: true, provisional: true }), cheapest).verdict).toBe("taken");
   });
+
+  it("a registrar-confirmed premium price is exposed only for a premium verdict", () => {
+    const base = { domain: "reputation.dev", tld: { extension: "dev" }, available: true, checking: false } as unknown as Parameters<typeof deriveCardFacts>[0];
+    const premium = deriveCardFacts({ ...base, premium: true, gdPrice: 164.57 }, undefined);
+    expect([premium.isPremium, premium.premiumPrice, premium.showCheckPrice]).toEqual([true, 164.57, false]);
+    const unpriced = deriveCardFacts({ ...base, premium: true }, undefined);
+    expect(unpriced.premiumPrice).toBeNull();
+    const standard = deriveCardFacts({ ...base, gdPrice: 8.48 }, undefined);
+    expect([standard.isPremium, standard.premiumPrice]).toEqual([false, null]);
+  });
 });

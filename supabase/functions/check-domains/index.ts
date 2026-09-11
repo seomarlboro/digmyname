@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { domains } = (await req.json()) as { domains: string[] };
+    const { domains, verifyPremium } = (await req.json()) as { domains: string[]; verifyPremium?: boolean };
     if (!Array.isArray(domains) || domains.length === 0) {
       return new Response(JSON.stringify({ error: "domains array required" }), {
         status: 400,
@@ -88,9 +88,16 @@ Deno.serve(async (req) => {
 
     const partialSink = new Map<string, DomainCheckResult>();
 
+    // `verifyPremium`: the site asks for the registry-premium status of the card
+    // the visitor typed (one name, after the wave settled). Costs one third-signal
+    // call, so it is capped at three names and can be switched off with
+    // HEADLINE_PREMIUM_CHECK=off without a deploy.
+    const premiumCheckOn = Deno.env.get("HEADLINE_PREMIUM_CHECK") !== "off";
+    const verify = verifyPremium === true && premiumCheckOn && validOrder.length <= 3 ? new Set(validOrder) : undefined;
     const pipeline = checkDomains(domains, {
       partialSink,
       thirdSignalDeadlineAt: Date.now() + THIRD_SIGNAL_WINDOW_MS,
+      verifyPremium: verify,
     });
 
     const budget = new Promise<"timeout">((resolve) => {

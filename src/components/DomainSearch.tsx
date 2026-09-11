@@ -9,7 +9,7 @@ import AuthDialog from "@/components/LazyAuthDialog";
 import LiveStopwatch from "@/components/LiveStopwatch";
 import { deriveCardFacts } from "@/lib/cardFacts";
 import { matchesFilters, type ResultFilters } from "@/lib/resultFilters";
-import { earlyHeadline } from "@/lib/searchLanes";
+import { earlyHeadline, isPremiumSuspectSld, sldOf } from "@/lib/searchLanes";
 import { applyBrowserVerdict, browserLaneEligible, checkInBrowser, warmRegistries, type BrowserVerdict } from "@/lib/browserLane";
 
 const StarsIcon = ({ className, active }: { className?: string; active?: boolean }) => (
@@ -67,6 +67,10 @@ const FAST_DEBOUNCE_MS = 80;
  *  lane keep the instant feel while the authoritative wave fires once per
  *  pause. The honest stopwatch counts this delay against us. */
 const AUTH_DEBOUNCE_MS = 250;
+/** After the authoritative wave lands, the card the visitor typed gets one more
+ *  question — is it registry-premium? — provided the visitor is still on it. One
+ *  paid third-signal call per settled search, never per keystroke. */
+const PREMIUM_VERIFY_DELAY_MS = 800;
 
 const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChange }: DomainSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -81,6 +85,8 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const resultCacheRef = useRef<Map<string, { result: DomainResult; expiresAt: number }>>(new Map());
   /** The search currently in flight; cancelled on the very next keystroke (see the search effect). */
   const activeJobRef = useRef<{ cancelled: boolean; ctl: AbortController } | null>(null);
+  /** Latest rows, readable from async lanes without closing over stale state. */
+  const resultsRef = useRef<DomainResult[]>([]);
   const cacheResult = useCallback((r: DomainResult) => {
     // Honesty guardrail: only remember confident, authoritative verdicts.
     if (r.checking || r.uncertain || r.provisional || r.reachFailed) return;
@@ -101,6 +107,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<DomainResult[]>([]);
+  resultsRef.current = results;
   const [aiSuggestions, setAiSuggestions] = useState(false);
   const [viewMode, setViewMode] = useState<"cards" | "compact">("cards");
   const [scrolled, setScrolled] = useState(false);
@@ -423,6 +430,28 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         ...laterSolo.map((d) => runBatch([d])),
         ...restBatches.map(runBatch),
       ]);
+
+      // Step 4: the real price of the card the visitor typed. RDAP + DNS say
+      // "registerable", not "at the standard price": registries mark names
+      // premium and only the third signal sees it. The base pass escalates
+      // short / dictionary suspects; everything else would ship with the TLD's
+      // standard price. So once the wave has settled and the visitor is still
+      // on this query, the headline card gets one verifying request (cache
+      // bypassed for it, pass 2 forced). Skipped when the card is not
+      // available, already flagged, or a suspect the wave escalated anyway.
+      const headlineCard = solo[0];
+      if (headlineCard && !job.cancelled) {
+        await new Promise<void>((resolve) => setTimeout(resolve, PREMIUM_VERIFY_DELAY_MS));
+        if (job.cancelled) return;
+        const row = resultsRef.current.find((r) => r.domain === headlineCard);
+        const worthAsking =
+          row && !row.checking && row.available && !row.uncertain && !row.provisional &&
+          !row.premium && !row.premiumUnverified && !row.likelyPremium && !isPremiumSuspectSld(sldOf(headlineCard));
+        if (worthAsking) {
+          const resp = await checkDomainsAvailability([headlineCard], job.ctl.signal, { verifyPremium: true });
+          if (!job.cancelled && resp.ok) applyBatch([headlineCard], resp);
+        }
+      }
     };
 
     run();

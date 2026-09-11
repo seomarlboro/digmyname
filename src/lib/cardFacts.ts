@@ -33,6 +33,8 @@ export interface CardFacts {
   hasHighRenewal: boolean;
   /** Available but no price can be shown — the CTA reads "Check price". */
   showCheckPrice: boolean;
+  /** A registry-premium name whose price a registrar confirmed (server `price`), else null. */
+  premiumPrice: number | null;
   registrarName: string | null;
   promoCode: string | null;
   whoisPrivacy: boolean;
@@ -55,6 +57,7 @@ export function deriveCardFacts(result: DomainResult, cheapest: CheapestRegistra
   const hasHighRenewal =
     !isPremium && !isLikelyPremium && hasTrustedPrice && renewPrice != null && renewPrice > trustedPrice * RENEWAL_TRAP_RATIO;
   const showCheckPrice = available && (isPremiumUnverified || !hasTrustedPrice) && !isPremium;
+  const premiumPrice = isPremium && typeof result.gdPrice === "number" && result.gdPrice > 0 ? result.gdPrice : null;
   // Mirrors the three result sections: an uncertain row is "Couldn't verify"
   // unless it is a brand-protected or provisional row, which the UI files under Taken.
   const verdict: Verdict =
@@ -75,6 +78,7 @@ export function deriveCardFacts(result: DomainResult, cheapest: CheapestRegistra
     renewPrice,
     hasHighRenewal,
     showCheckPrice,
+    premiumPrice,
     registrarName: hasTrustedPrice ? (cheapest?.registrar ?? null) : null,
     promoCode: hasTrustedPrice ? (cheapest?.promoCode ?? null) : null,
     whoisPrivacy: hasTrustedPrice ? (cheapest?.whoisPrivacy ?? false) : false,

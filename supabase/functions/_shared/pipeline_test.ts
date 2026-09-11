@@ -376,3 +376,45 @@ Deno.test({ name: "checkDomains: probes leave before the DB cache answers; a cac
     globalThis.fetch = realFetch;
   }
 } });
+
+Deno.test({ name: "checkDomains: verifyPremium forces the third signal for a plain available name and takes the registrar's premium price", sanitizeOps: false, sanitizeResources: false, fn: async () => {
+  const realFetch = globalThis.fetch;
+  const envBefore = { fastly: Deno.env.get("FASTLY_API_TOKEN"), pk: Deno.env.get("PORKBUN_API_KEY"), ps: Deno.env.get("PORKBUN_SECRET_KEY") };
+  Deno.env.set("FASTLY_API_TOKEN", "test-token");
+  Deno.env.set("PORKBUN_API_KEY", "pk");
+  Deno.env.set("PORKBUN_SECRET_KEY", "sk");
+  const calls: string[] = [];
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input);
+    calls.push(url);
+    if (url.includes("api.fastly.com")) {
+      const domain = new URL(url).searchParams.get("domain") ?? "";
+      return json({ domain, zone: "dev", status: "undelegated inactive premium", summary: "premium" });
+    }
+    if (url.includes("api.porkbun.com/api/json/v3/domain/checkDomain/")) return json({ status: "SUCCESS", response: { avail: "yes", premium: "yes", price: "164.57", regularPrice: "164.57" } });
+    if (url.includes("/domain/")) return new Response("", { status: 404 }); // registry RDAP: not registered
+    if (url.includes("dns-query") || url.includes("dns.google") || url.includes("adguard")) return json({ Status: 3, Answer: [] });
+    if (url.includes("data.iana.org")) return json({ services: [] });
+    if (url.includes("porkbun.com")) return json({ status: "SUCCESS", pricing: { dev: { registration: "8.48", renewal: "18.48" } } });
+    return new Response("", { status: 404 });
+  }) as typeof fetch;
+  const supabase = stubSupabase(async () => ({ data: [], error: null }));
+  try {
+    // Without the flag: a 10-letter label is no suspect, the third signal is never asked, the standard price ships.
+    const plain = await checkDomains(["reputation.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 3000 });
+    assertEquals(calls.filter((u) => u.includes("api.fastly.com")).length, 0);
+    assertEquals([plain[0].available, plain[0].premium ?? false], [true, false]);
+
+    // With the flag: Fastly says premium, Porkbun confirms the price, the row is premium + priced.
+    const verified = await checkDomains(["reputation.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 3000, verifyPremium: new Set(["reputation.dev"]) });
+    assertEquals(calls.filter((u) => u.includes("api.fastly.com")).length, 1);
+    const r = verified[0];
+    assertEquals([r.available, r.premium, r.price, r.checkedVia], [true, true, 164.57, "porkbun"]);
+  } finally {
+    globalThis.fetch = realFetch;
+    for (const [k, v] of [["FASTLY_API_TOKEN", envBefore.fastly], ["PORKBUN_API_KEY", envBefore.pk], ["PORKBUN_SECRET_KEY", envBefore.ps]] as const) {
+      if (v == null) Deno.env.delete(k); else Deno.env.set(k, v);
+    }
+  }
+} });

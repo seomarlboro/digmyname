@@ -261,13 +261,14 @@ export interface AvailabilityResponse {
  *  of an eternal spinner. */
 export async function checkDomainsAvailability(
   domains: string[],
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  opts?: { /** Ask for the registry-premium status of these names (one third-signal call each). */ verifyPremium?: boolean }
 ): Promise<AvailabilityResponse> {
   const results = new Map<string, AvailabilityInfo>();
 
   try {
     const { data, error } = await supabase.functions.invoke("check-domains", {
-      body: { domains },
+      body: opts?.verifyPremium ? { domains, verifyPremium: true } : { domains },
       signal,
     });
 

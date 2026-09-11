@@ -52,6 +52,7 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
     renewPrice: displayRenew,
     hasHighRenewal,
     showCheckPrice,
+    premiumPrice,
     registrarName,
     promoCode,
     whoisPrivacy,
@@ -235,7 +236,10 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
             <>
               <div className="flex items-center gap-2">
                 {isPremium ? (
-                  <span className="text-lg font-bold text-foreground">Premium</span>
+                  <span className="text-lg font-bold text-foreground">
+                    {premiumPrice != null ? `$${premiumPrice}` : "Premium"}
+                    {premiumPrice != null && <span className="ml-1.5 text-xs font-semibold text-amber-500">Premium</span>}
+                  </span>
                 ) : isLikelyPremium || showCheckPrice ? (
                   <span className="text-sm font-semibold text-amber-500">
                     {isPremiumUnverified ? "Premium" : isLikelyPremium ? "Likely premium" : "Check price"}
@@ -346,11 +350,23 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
               <div className="sm:text-right">
                 {isPremium ? (
                   <>
-                    <p className="text-2xl font-bold text-foreground">Premium</p>
-                    {displayRenew != null && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        renews ${displayRenew}/yr
-                      </p>
+                    {premiumPrice != null ? (
+                      <>
+                        <p className="text-2xl font-bold text-foreground">
+                          ${premiumPrice}
+                          <span className="text-sm font-normal text-muted-foreground">/year</span>
+                        </p>
+                        <p className="text-xs text-amber-500 mt-0.5">Premium · registrar-confirmed price</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold text-foreground">Premium</p>
+                        {displayRenew != null && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            renews ${displayRenew}/yr
+                          </p>
+                        )}
+                      </>
                     )}
                   </>
                 ) : isLikelyPremium || showCheckPrice ? (

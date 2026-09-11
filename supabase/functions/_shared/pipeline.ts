@@ -1060,6 +1060,11 @@ export async function checkDomains(
     supabase?: SupabaseClient;
     thirdSignalDeadlineAt?: number;
     partialSink?: Map<string, DomainCheckResult>;
+    /** Names whose registry-premium status is wanted even though the base pass
+     *  would not escalate them (the card the visitor actually typed). The cache
+     *  is bypassed for them and pass 2 runs whenever pass 1 says available, so
+     *  a registry-premium name never ships with the standard TLD price. */
+    verifyPremium?: ReadonlySet<string>;
   } = {}
 ): Promise<DomainCheckResult[]> {
   const supabase = deps.supabase ?? getServiceClient();
@@ -1074,6 +1079,7 @@ export async function checkDomains(
 
   const batch = domains.slice(0, 50).filter(isValidDomain);
   if (batch.length === 0) return [];
+  const forced = deps.verifyPremium ?? new Set<string>();
 
   const porkbunKey = Deno.env.get("PORKBUN_API_KEY");
   const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
@@ -1092,7 +1098,7 @@ export async function checkDomains(
   const missAfterL1: string[] = [];
   for (const d of batch) {
     const hot = hotCache.get(d);
-    if (hot && hot.expiresAt > nowMs) {
+    if (!forced.has(d) && hot && hot.expiresAt > nowMs) {
       // LRU touch: re-insert so the most recently used key moves to the end.
       hotCache.delete(d);
       hotCache.set(d, hot);
@@ -1139,12 +1145,13 @@ export async function checkDomains(
     })
   );
 
-  // ---- L2: shared DB cache --------------------------------------------
-  if (missAfterL1.length > 0) {
+  // ---- L2: shared DB cache (forced names skip it: a cached base verdict has no premium answer) ----
+  const l2Lookup = missAfterL1.filter((d) => !forced.has(d));
+  if (l2Lookup.length > 0) {
     const { data: cached } = await supabase
       .from("domain_cache")
       .select("domain, available, checked_via, rdap_data")
-      .in("domain", missAfterL1)
+      .in("domain", l2Lookup)
       .gt("expires_at", new Date().toISOString());
 
     for (const c of cached ?? []) {
@@ -1197,7 +1204,7 @@ export async function checkDomains(
   const baseResults = uncached.map((d) => probeResults.get(d)!);
 
   const needsThirdSignal = baseResults
-    .filter(willEscalateToThirdSignal)
+    .filter((r) => willEscalateToThirdSignal(r) || (forced.has(r.domain) && r.available && !r.uncertain))
     .map((r) => r.domain);
 
   // Cost telemetry: each escalated domain = one paid Fastly "Precise Status" call.
@@ -1351,8 +1358,8 @@ export async function checkDomains(
   if (porkbun && porkbunBudgetReady()) {
     const candidates = fresh
       .filter((r) => r.available && (r.premium || r.likelyPremium) && r.checkedVia !== "porkbun")
-      // Prefer shortest SLD (most likely premium).
-      .sort((a, b) => a.domain.split(".")[0].length - b.domain.split(".")[0].length);
+      // The name the visitor asked about first, then the shortest SLD (most likely premium).
+      .sort((a, b) => Number(forced.has(b.domain)) - Number(forced.has(a.domain)) || a.domain.split(".")[0].length - b.domain.split(".")[0].length);
     const target = candidates[0];
     if (target) {
       consumePorkbunBudget();
@@ -1387,6 +1394,10 @@ export async function checkDomains(
     }
   }
 
+  if (forced.size > 0) {
+    const line = [...forced].map((d) => { const r = fresh.find((x) => x.domain === d); return `${d}=${r?.checkedVia ?? "?"}/${r?.premium ? "premium" : "standard"}/${r?.price ?? "-"}`; });
+    console.log(`premium-verify ${line.join(" ")}`);
+  }
   // Telemetry (visible in edge logs).
   if (fresh.length > 0) {
     const dist: Record<string, number> = {};
