@@ -424,34 +424,35 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         restBatches.push(rest.slice(i, i + BATCH_SIZE));
       }
 
-      await Promise.all([
-        headlineDone,
-        // one request per top TLD → each card flips as soon as its own lookup lands
-        ...laterSolo.map((d) => runBatch([d])),
-        ...restBatches.map(runBatch),
-      ]);
-
       // Step 4: the real price of the card the visitor typed. RDAP + DNS say
       // "registerable", not "at the standard price": registries mark names
       // premium and only the third signal sees it. The base pass escalates
       // short / dictionary suspects; everything else would ship with the TLD's
-      // standard price. So once the wave has settled and the visitor is still
-      // on this query, the headline card gets one verifying request (cache
-      // bypassed for it, pass 2 forced). Skipped when the card is not
+      // standard price. So once the headline's OWN authoritative answer has
+      // landed (not the whole wave — a .co/.me batch can take seconds) and the
+      // visitor is still on this query, that card gets one verifying request
+      // (cache bypassed for it, pass 2 forced). Skipped when the card is not
       // available, already flagged, or a suspect the wave escalated anyway.
-      const headlineCard = solo[0];
-      if (headlineCard && !job.cancelled) {
+      const verifyHeadline = headlineDone.then(async () => {
+        if (!headline || job.cancelled) return;
         await new Promise<void>((resolve) => setTimeout(resolve, PREMIUM_VERIFY_DELAY_MS));
         if (job.cancelled) return;
-        const row = resultsRef.current.find((r) => r.domain === headlineCard);
+        const row = resultsRef.current.find((r) => r.domain === headline);
         const worthAsking =
           row && !row.checking && row.available && !row.uncertain && !row.provisional &&
-          !row.premium && !row.premiumUnverified && !row.likelyPremium && !isPremiumSuspectSld(sldOf(headlineCard));
-        if (worthAsking) {
-          const resp = await checkDomainsAvailability([headlineCard], job.ctl.signal, { verifyPremium: true });
-          if (!job.cancelled && resp.ok) applyBatch([headlineCard], resp);
-        }
-      }
+          !row.premium && !row.premiumUnverified && !row.likelyPremium && !isPremiumSuspectSld(sldOf(headline));
+        if (!worthAsking) return;
+        const resp = await checkDomainsAvailability([headline], job.ctl.signal, { verifyPremium: true });
+        if (!job.cancelled && resp.ok) applyBatch([headline], resp);
+      });
+
+      await Promise.all([
+        headlineDone,
+        verifyHeadline,
+        // one request per top TLD → each card flips as soon as its own lookup lands
+        ...laterSolo.map((d) => runBatch([d])),
+        ...restBatches.map(runBatch),
+      ]);
     };
 
     run();

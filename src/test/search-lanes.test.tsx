@@ -281,6 +281,8 @@ describe("DomainSearch lanes", () => {
   it("after the wave settles, the typed card gets one premium-verify request; suspects and taken names don't", async () => {
     invoke.mockImplementation(async (_name: unknown, options: unknown) => {
       const body = (options as { body: { domains: string[]; verifyPremium?: boolean } }).body;
+      // A batch that holds .co never answers: the verify must not wait for the whole wave.
+      if (body.domains.some((d) => d.endsWith(".co"))) return new Promise(() => {});
       return { data: { results: body.domains.map((d) => ({ domain: d, available: !d.startsWith("takenname") })) }, error: null };
     });
     const { default: DomainSearch } = await import("@/components/DomainSearch");
