@@ -9,7 +9,8 @@ All notable changes to DigMyName.
 
 ### Changed
 - **Headline premium verification.** After the authoritative wave settles and the visitor is still on the query (800 ms), the card they typed gets one verifying request: `check-domains` with `verifyPremium: true`. For that name the cache is bypassed and pass 2 always runs when pass 1 says available; Fastly's `premium` status flips the card to *Premium*, and Porkbun's `checkDomain` — preferring that name — attaches the registrar-confirmed price when its rate gate allows, else the card says *Premium · check price*. Skipped for taken, uncertain, already-flagged and short (already-escalated) names; never per keystroke; site only (API and MCP unchanged). Kill switch: `HEADLINE_PREMIUM_CHECK=off` on the edge. Cost: at most one third-signal call per settled search, and a verified verdict is cached for 24 h for everyone.
-- Cards show a registrar-confirmed premium price (`$164.57 /year · Premium`) instead of the bare word.
+- Cards show a registrar-confirmed premium price (`$174.10 /year · Premium`) instead of the bare word, attributed to Porkbun (the registrar that confirmed it) with the buy link pointing there; the cheapest standard-price registrar's promo and privacy badges do not apply to a premium name.
+- The verify request follows the headline's own authoritative answer plus 800 ms, not the whole wave (a .co/.me batch can take seconds, and the first cut waited for it).
 - Tests: pipeline (the flag forces Fastly and takes Porkbun's price; without it a plain name is never escalated), search lanes (one verify request after the wave; none for suspects or taken names), card facts (premium price only on a premium verdict).
 
 ## 2026-09-11 — The shared cache is read alongside the probes (edge: check-domains, public-api)
