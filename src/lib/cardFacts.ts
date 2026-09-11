@@ -79,8 +79,11 @@ export function deriveCardFacts(result: DomainResult, cheapest: CheapestRegistra
     hasHighRenewal,
     showCheckPrice,
     premiumPrice,
-    registrarName: hasTrustedPrice ? (cheapest?.registrar ?? null) : null,
-    promoCode: hasTrustedPrice ? (cheapest?.promoCode ?? null) : null,
-    whoisPrivacy: hasTrustedPrice ? (cheapest?.whoisPrivacy ?? false) : false,
+    // A confirmed premium price is Porkbun's (the only registrar the pipeline
+    // asks per name), so the card names Porkbun and links there — not the
+    // cheapest standard-price registrar, whose promo and privacy do not apply.
+    registrarName: premiumPrice != null ? "Porkbun" : hasTrustedPrice ? (cheapest?.registrar ?? null) : null,
+    promoCode: premiumPrice != null ? null : hasTrustedPrice ? (cheapest?.promoCode ?? null) : null,
+    whoisPrivacy: premiumPrice != null ? false : hasTrustedPrice ? (cheapest?.whoisPrivacy ?? false) : false,
   };
 }

@@ -64,6 +64,9 @@ describe("deriveCardFacts", () => {
     const base = { domain: "reputation.dev", tld: { extension: "dev" }, available: true, checking: false } as unknown as Parameters<typeof deriveCardFacts>[0];
     const premium = deriveCardFacts({ ...base, premium: true, gdPrice: 164.57 }, undefined);
     expect([premium.isPremium, premium.premiumPrice, premium.showCheckPrice]).toEqual([true, 164.57, false]);
+    // The confirmed price is Porkbun's, so the card is attributed to Porkbun, not to the cheapest standard-price row.
+    const withCheapest = deriveCardFacts({ ...base, premium: true, gdPrice: 164.57 }, { tld: "dev", registrar: "Spaceship", regPrice: 8.48, renewPrice: 25, promoCode: "SPSR86", whoisPrivacy: true } as unknown as Parameters<typeof deriveCardFacts>[1]);
+    expect([withCheapest.registrarName, withCheapest.promoCode, withCheapest.whoisPrivacy]).toEqual(["Porkbun", null, false]);
     const unpriced = deriveCardFacts({ ...base, premium: true }, undefined);
     expect(unpriced.premiumPrice).toBeNull();
     const standard = deriveCardFacts({ ...base, gdPrice: 8.48 }, undefined);
