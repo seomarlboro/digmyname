@@ -2,7 +2,7 @@
 
 All notable changes to DigMyName.
 
-## 2026-09-16 — Light theme: glass filter bar, visible search field, hero title on short screens (frontend)
+## 2026-09-15 — Light theme: glass filter bar, visible search field, hero title on short screens (frontend)
 
 ### Changed
 - **Filter bar and its popovers are real glass in the light theme.** They were solid white with no backdrop blur (the blur existed only in dark). Now 35% white (popovers 60% for text), `blur(24px) saturate(1.8)` so the colour of the cards underneath shows through as soft light, a 7% dark hairline and a white inner top highlight. The coloured glow behind the bar is dark-theme only (through light glass it smeared). Dark theme unchanged.
@@ -11,7 +11,7 @@ All notable changes to DigMyName.
 - **Search placeholder** in the light theme is lighter (`foreground` at 35% instead of `muted-foreground`), so it reads as a hint on the grey field; dark theme unchanged. Mirrored in `index.html`.
 - **Hero chip** ("First answer under 0.5 s") in the light theme: a mint-tinted badge (7% mint fill, 45% mint border, dark mint text; with a 10% fill and a 30% border the 1px edge melted into the fill and read as blurry — measured at DPR 2 the edge is exactly 2 device pixels either way, so it was contrast, not sub-pixel placement) instead of a grey foreground tint that read as mud; a frosted-white version was tried first and vanished on the pale hero. Dark theme unchanged.
 
-## 2026-09-16 — Honest buy-link copy, retention, CTR impressions, /contact (frontend + migration)
+## 2026-09-15 — Honest buy-link copy, retention, CTR impressions, /contact (frontend + migration)
 
 ### Fixed
 - Every public surface said buy links "may earn us a commission". No buy link carries an affiliate tag and no price row has an affiliate URL, so the search disclosure, footer, How it works, Terms, the prerendered crawler text, llms.txt, llms-full.txt and ai-plugin.json now say what is true: buy links go straight to the registrar with no affiliate tag. A test fails if "commission" comes back.

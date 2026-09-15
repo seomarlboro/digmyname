@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import RouteHead from "@/seo/RouteHead";
 import { PageMain, PageHeader, Eyebrow, Section } from "@/components/PageKit";
 
-const UPDATED = "September 16, 2026";
+const UPDATED = "September 15, 2026";
 
 /** What is stored, keyed by the feature that stores it. Retention is stated per row so nothing is open-ended. */
 const records = [
