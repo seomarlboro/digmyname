@@ -398,23 +398,17 @@
   /* Hero eyebrow chip — subtle tokenized fill + hairline border in both themes.
      Text uses a mode-aware mint so it stays readable on the light hero bg. */
   .hero-chip {
-    /* Light: frosted white with a mint edge (the grey foreground tint read as mud on the pale hero). */
-    background-color: hsl(0 0% 100% / 0.6);
-    border-color: hsl(165 70% 35% / 0.22);
-    box-shadow: inset 0 1px 0 0 hsl(0 0% 100% / 0.8), 0 1px 3px 0 hsl(222 47% 11% / 0.06);
-    backdrop-filter: blur(12px) saturate(1.6);
-    -webkit-backdrop-filter: blur(12px) saturate(1.6);
+    /* Light: a mint-tinted badge. A grey foreground tint read as mud and frosted white vanished on the pale hero. */
+    background-color: hsl(165 70% 40% / 0.1);
+    border-color: hsl(165 70% 32% / 0.3);
   }
   .dark .hero-chip {
     background-color: hsl(var(--foreground) / 0.12);
     border-color: hsl(var(--foreground) / 0.20);
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
   }
 
   .hero-chip-text {
-    color: hsl(165 85% 26%);
+    color: hsl(165 85% 24%);
   }
   .dark .hero-chip-text {
     color: hsl(var(--aurora-mint));
