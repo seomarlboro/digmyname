@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import RouteHead from "@/seo/RouteHead";
 import NotFound from "@/pages/NotFound";
 import { Badge } from "@/components/ui/badge";
+import { PromoCode } from "@/components/PromoCode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable, Eyebrow, PageHeader, PageMain, Section, Stat, StatGrid, type DataColumn } from "@/components/PageKit";
@@ -60,11 +61,7 @@ const columns: DataColumn<TldPriceRow>[] = [
                 WHOIS privacy
               </Badge>
             )}
-            {r.promo && (
-              <Badge variant="secondary" className="font-mono text-xs font-normal" title="Promo code published by the registrar">
-                {r.promo}
-              </Badge>
-            )}
+            {r.promo && <PromoCode code={r.promo} title="Promo code published by the registrar — click to copy" />}
           </div>
         )}
       </div>

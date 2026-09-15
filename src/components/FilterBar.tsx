@@ -80,7 +80,7 @@ const ExtensionsPopover = ({ selectedTlds, onToggle, priceByTld, mobile }: Exten
         <button
           type="button"
           onClick={() => setShowAll((v) => !v)}
-          className="mt-4 mx-auto flex w-fit items-center gap-1.5 rounded-full border border-violet/30 bg-violet/[0.08] px-4 py-1.5 text-sm font-semibold text-violet transition-all duration-200 hover:border-violet/60 hover:bg-violet/15"
+          className="mt-4 mx-auto flex w-fit items-center gap-1.5 rounded-full border border-violet/30 bg-violet/[0.08] px-4 py-1.5 font-display text-sm font-bold tracking-tight text-violet transition-all duration-200 hover:border-violet/60 hover:bg-violet/15"
         >
           {showAll ? "Show less" : `Show all ${TLD_LIST.length} extensions`}
         </button>

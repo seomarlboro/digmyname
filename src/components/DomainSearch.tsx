@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Link } from "react-router-dom";
 import { Search, X, Loader2, CheckCircle2, LayoutGrid, List, AlertCircle, Zap } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
@@ -611,7 +610,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const searchBar = (
     <div className="flex w-full min-w-0 flex-1 items-center gap-0.5 rounded-[100px] border border-black/[0.08] bg-black/[0.04] py-[14px] pl-4 pr-4 sm:pl-5 sm:pr-6 [backdrop-filter:blur(64px)] dark:border-white/10 dark:bg-white/[0.05]">
       <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
-        <Search className="h-7 w-7 text-primary" />
+        <Search className="h-7 w-7 text-mint" />
       </div>
       <input
         ref={inputRef}
@@ -625,8 +624,8 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         className="w-full min-w-0 flex-1 bg-transparent pl-1 pr-2 text-lg sm:pr-10 sm:text-2xl font-semibold text-foreground/60 dark:text-foreground placeholder:text-foreground/35 dark:placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
       />
       {query && (
-        <button onClick={() => setQuery("")} aria-label="Clear search" className="p-1 text-muted-foreground hover:text-foreground">
-          <X className="h-4 w-4" />
+        <button onClick={() => setQuery("")} aria-label="Clear search" className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground">
+          <X className="h-6 w-6" />
         </button>
       )}
       <button
@@ -738,12 +737,6 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                 )}
               </p>
             )}
-
-            {/* What a buy link is, stated where the buy buttons are. Keep it true: change it the day affiliate tags exist. */}
-            <p className="mb-6 text-center text-xs text-muted-foreground">
-              Buy links go straight to the registrar, with no affiliate tag. Prices are the registrar's own, never marked up.{" "}
-              <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms</Link>
-            </p>
 
             {/* Available */}
             {availableCount > 0 && (

@@ -149,7 +149,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
               type="button"
-              className="font-medium text-primary hover:underline"
+              className="font-display font-bold tracking-tight text-primary hover:underline"
               onClick={() => setMode(mode === "login" ? "signup" : "login")}
             >
               {mode === "login" ? "Sign up" : "Sign in"}

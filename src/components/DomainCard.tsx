@@ -2,6 +2,7 @@ import { memo } from "react";
 import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle, Tag, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PromoCode } from "@/components/PromoCode";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDomainAge, formatRegisteredSince } from "@/hooks/useDomainAge";
 import { getRegistrarColor, getRegistrarUrl } from "@/lib/registrarColors";
@@ -339,11 +340,7 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                   WHOIS privacy
                 </Badge>
               )}
-              {available && promoCode && (
-                <Badge variant="secondary" className="font-mono text-xs font-normal" title="Promo code at the cheapest registrar">
-                  {promoCode}
-                </Badge>
-              )}
+              {available && promoCode && <PromoCode code={promoCode} title="Promo code at the cheapest registrar — click to copy" />}
               {/* Only for extensions with tracked prices; a plain link, so the card needs no router. */}
               {available && cheapest && (
                 <a href={`/tld/${ext}`} className="text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline">

@@ -94,7 +94,7 @@ export function CodeBlock({
                 aria-controls={panelId}
                 tabIndex={idx === active ? 0 : -1}
                 onClick={() => setActive(idx)}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                className={`rounded-md px-3 py-1 font-display text-xs font-bold tracking-tight transition-colors ${
                   idx === active
                     ? "bg-muted/40 text-foreground"
                     : "text-muted-foreground hover:text-foreground"

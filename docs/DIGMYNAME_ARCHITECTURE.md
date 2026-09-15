@@ -131,7 +131,7 @@ These are product identity, not preferences. Breaking any is a defect:
 - Never show a price without a fresh, trusted DB row (supported=true, within 60 days).
 - Brand-protected / sldBlocked names -> uncertain:true, uncertainReason:"brand_protected" on all paths; never fall through to available.
 - Never log search queries or domain names in analytics (§12). /privacy lists every stored thing and must match the code.
-- No commission / affiliate claims while buy links carry no affiliate tag (`registrarColors.ts` builds plain registrar URLs; `registrar_prices.affiliate_url` is empty). Adding affiliate links means updating Terms, Privacy, HowItWorks, the search disclosure, the footer, `routes.ts`, llms.txt, llms-full.txt and ai-plugin.json first; `public-claims.test.ts` fails on "commission" until then.
+- No commission / affiliate claims while buy links carry no affiliate tag (`registrarColors.ts` builds plain registrar URLs; `registrar_prices.affiliate_url` is empty). Adding affiliate links means updating Terms, Privacy, HowItWorks, the footer, `routes.ts`, llms.txt, llms-full.txt and ai-plugin.json first; `public-claims.test.ts` fails on "commission" until then.
 
 ## 7. Cross-surface consistency rule (owner-mandated)
 

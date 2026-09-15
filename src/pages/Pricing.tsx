@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import RouteHead from "@/seo/RouteHead";
 import { Loader2, Shield, ShieldOff, Search, AlertTriangle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { PromoCode } from "@/components/PromoCode";
 import { Input } from "@/components/ui/input";
 import { getRegistrarColor } from "@/lib/registrarColors";
 import { NetworkIcon, StoreIcon, CertificateIcon } from "@/components/StatIcons";
@@ -310,11 +310,7 @@ const PriceTag = ({
         ) : (
           <span className="text-xs text-muted-foreground">same registrar</span>
         )}
-        {promo && (
-          <Badge variant="secondary" className="text-[10px] font-mono px-1.5 py-0">
-            {promo}
-          </Badge>
-        )}
+        {promo && <PromoCode code={promo} size="sm" />}
       </div>
 
       <p className="mt-0.5 flex items-baseline gap-1">
