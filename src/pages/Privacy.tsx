@@ -32,12 +32,6 @@ const records = [
     keep: "13 months, then deleted by a daily job. Nothing in these rows identifies you, so there is nothing to delete on request.",
   },
   {
-    feature: "Earlier MCP page usage",
-    data: "Before the usage counts above, the MCP page recorded which install buttons and links were clicked, the referring page and the user-agent string, in a separate table. No IP address, no cookie, no user ID — the rows cannot be linked back to a person. Nothing new is written there.",
-    why: "It was used to learn which install path people use.",
-    keep: "The existing rows stay until that table is deleted; there is nothing in them to delete on request because nothing identifies you.",
-  },
-  {
     feature: "Answer cache",
     data: "Checked domain names with their verdict (taken or available, and how it was confirmed). The row holds the name only — nothing about who searched it.",
     why: "So a repeat lookup of the same name is fast and does not hit the registries again.",

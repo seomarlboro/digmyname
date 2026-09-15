@@ -12,7 +12,7 @@ const terms = [
   },
   {
     q: "Availability and prices are provided as-is",
-    a: "Answers come from public registry data (RDAP), DNS and third-party lookups, and prices from registrars' own catalogs and pages and from third-party price listings. We cross-check three availability signals and label a result Unverified when they disagree, but no lookup is a guarantee: a domain can be registered by someone else between our answer and your checkout, and a registrar can change a price at any time. Confirm on the registrar before relying on a result.",
+    a: "Answers come from public registry data (RDAP), DNS and third-party lookups, and prices from registrars' own catalogs and pages and from third-party price listings. We check up to three availability signals — registry data and DNS for every name, plus a paid third lookup where those two cannot settle it (premium and trademark-protected names, extensions without public registry data, and the name you typed) — and label a result Unverified when they disagree, but no lookup is a guarantee: a domain can be registered by someone else between our answer and your checkout, and a registrar can change a price at any time. Confirm on the registrar before relying on a result.",
   },
   {
     q: "Buy links",
@@ -20,7 +20,7 @@ const terms = [
   },
   {
     q: "Fair use of the API and MCP server",
-    a: "The public API is free without a key, limited to 60 requests per 60 seconds per IP address. Use it for your own product or agent, cache responsibly, and link back to digmyname.com when you show our data to users. Don't circumvent the rate limit, scrape the site instead of the API, or resell the data as a standalone feed. The MCP server is MIT-licensed; the license file in its repository applies to the code.",
+    a: "The public API is free without a key, for up to 60 requests per 60 seconds per IP address. Use it for your own product or agent, cache responsibly, and link back to digmyname.com when you show our data to users. Don't circumvent the rate limit, scrape the site instead of the API, or resell the data as a standalone feed. The MCP server is MIT-licensed; the license file in its repository applies to the code.",
   },
   {
     q: "Accounts",
