@@ -622,7 +622,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         placeholder="Enter domain name..."
         autoFocus
         aria-label="Search domain name"
-        className="w-full min-w-0 flex-1 bg-transparent pl-1 pr-2 text-lg sm:pr-10 sm:text-2xl font-semibold text-foreground/60 dark:text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
+        className="w-full min-w-0 flex-1 bg-transparent pl-1 pr-2 text-lg sm:pr-10 sm:text-2xl font-semibold text-foreground/60 dark:text-foreground placeholder:text-foreground/35 dark:placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
       />
       {query && (
         <button onClick={() => setQuery("")} aria-label="Clear search" className="p-1 text-muted-foreground hover:text-foreground">
