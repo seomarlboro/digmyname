@@ -8,6 +8,7 @@ import { getRegistrarColor, getRegistrarUrl } from "@/lib/registrarColors";
 
 import type { DomainResult } from "@/lib/domainData";
 import { deriveCardFacts, type CheapestRegistrar } from "@/lib/cardFacts";
+import type { CardActionKind } from "@/lib/cardClickEvent";
 
 interface DomainCardProps {
   result: DomainResult;
@@ -18,6 +19,8 @@ interface DomainCardProps {
   favorited: boolean;
   /** The list decides whether to toggle or to ask for sign-in first. */
   onToggleFavorite: (domain: string) => void;
+  /** Analytics for outbound links (src/lib/siteEvents.ts). Only observes the click; the link goes where it always went. */
+  onAction?: (kind: CardActionKind, domain: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -37,7 +40,7 @@ const CARD_BODY_MIN = "sm:min-h-[56px]";
  * One result row. Pure function of its props (memoised): no store subscriptions
  * of its own, so an answer landing on one card does not re-render the other 52.
  */
-const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onToggleFavorite }: DomainCardProps) => {
+const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onToggleFavorite, onAction }: DomainCardProps) => {
   const { domain, available, checking } = result;
   const isUncertain = result.uncertain === true;
   const isBrand = result.sldBlocked === true;
@@ -249,7 +252,7 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                 )}
               </div>
               <Button size="sm" className="h-9 gap-1.5 rounded-3xl btn-gradient text-sm border-0 px-4" asChild>
-                <a href={actionUrl} target="_blank" rel="noopener noreferrer">
+                <a href={actionUrl} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("buy", domain)}>
                   <ExternalLink className="h-3.5 w-3.5" />
                   {showCheckPrice ? "Check price" : "Buy"}
                 </a>
@@ -273,21 +276,21 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
               <div className="flex items-center gap-1">
                 {result.forSale && result.listingUrl ? (
                   <Button size="sm" className="h-9 gap-1.5 rounded-3xl btn-gradient text-sm border-0 px-4" asChild>
-                    <a href={result.listingUrl} target="_blank" rel="noopener noreferrer">
+                    <a href={result.listingUrl} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("aftermarket", domain)}>
                       <ExternalLink className="h-3.5 w-3.5" />
                       {result.forSaleVia ?? "View"}
                     </a>
                   </Button>
                 ) : (
                   <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-3xl text-sm text-muted-foreground hover:text-foreground" asChild>
-                    <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
+                    <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("whois", domain)}>
                       <ExternalLink className="h-3.5 w-3.5" />
                       Whois
                     </a>
                   </Button>
                 )}
                 <Button variant="ghost" size="icon" className="h-9 w-9 rounded-3xl text-muted-foreground hover:text-primary" asChild aria-label={`Open ${domain}`}>
-                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("visit", domain)}>
                     <ArrowUpRight className="h-4 w-4" />
                   </a>
                 </Button>
@@ -413,7 +416,7 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
 
             {available ? (
               <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
-                <a href={actionUrl} target="_blank" rel="noopener noreferrer">
+                <a href={actionUrl} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("buy", domain)}>
                   <ExternalLink className="h-4 w-4" />
                   {showCheckPrice ? "Check price" : "Buy Now"}
                 </a>
@@ -421,13 +424,13 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
             ) : result.forSale && result.listingUrl ? (
               <div className="flex items-center gap-2">
                 <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
-                  <a href={result.listingUrl} target="_blank" rel="noopener noreferrer">
+                  <a href={result.listingUrl} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("aftermarket", domain)}>
                     <ExternalLink className="h-4 w-4" />
                     View listing
                   </a>
                 </Button>
                 <Button variant="outline" size="icon" className="rounded-3xl" asChild aria-label={`Open ${domain}`}>
-                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("visit", domain)}>
                     <ArrowUpRight className="h-4 w-4" />
                   </a>
                 </Button>
@@ -435,13 +438,13 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="outline" className="gap-1.5 rounded-3xl" asChild>
-                  <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("whois", domain)}>
                     <ExternalLink className="h-4 w-4" />
                     Whois
                   </a>
                 </Button>
                 <Button variant="outline" size="icon" className="rounded-3xl" asChild aria-label={`Open ${domain}`}>
-                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("visit", domain)}>
                     <ArrowUpRight className="h-4 w-4" />
                   </a>
                 </Button>

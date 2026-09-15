@@ -35,7 +35,8 @@ interface CodeBlockProps {
   code?: string;
   /** Text to place on the clipboard (defaults to the rendered code) */
   copyText?: string;
-  onCopy?: () => void;
+  /** Called after a successful copy with the label of the copied tab. */
+  onCopy?: (label: string) => void;
 }
 
 export function CodeBlock({
@@ -58,7 +59,7 @@ export function CodeBlock({
   const copy = async () => {
     await navigator.clipboard.writeText(copyText ?? current.code);
     setCopied(true);
-    onCopy?.();
+    onCopy?.(current.label);
     setTimeout(() => setCopied(false), 1500);
   };
 

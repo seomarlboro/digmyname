@@ -11,6 +11,8 @@ import { deriveCardFacts } from "@/lib/cardFacts";
 import { matchesFilters, type ResultFilters } from "@/lib/resultFilters";
 import { earlyHeadline, isPremiumSuspectSld, sldOf } from "@/lib/searchLanes";
 import { applyBrowserVerdict, browserLaneEligible, checkInBrowser, warmRegistries, type BrowserVerdict } from "@/lib/browserLane";
+import { trackSiteEvent, type FirstAnswerLane } from "@/lib/siteEvents";
+import { CARD_ACTION_EVENT, cardClickProps, type CardActionKind } from "@/lib/cardClickEvent";
 
 const StarsIcon = ({ className, active }: { className?: string; active?: boolean }) => (
   <svg
@@ -44,6 +46,16 @@ const byTldAuthority = (a: DomainResult, b: DomainResult) => {
   const rb = TLD_RANK[b.tld.extension] ?? Number.MAX_SAFE_INTEGER;
   if (ra !== rb) return ra - rb;
   return a.tld.extension.localeCompare(b.tld.extension);
+};
+
+/** The exact TLD the user typed (e.g. "xyz" from "asdsdfsdas.xyz"), if it is one we track. */
+const typedTldOf = (query: string): string | null => {
+  const raw = query.toLowerCase().trim();
+  if (!raw.includes(".")) return null;
+  const parts = raw.split(".").filter(Boolean);
+  if (parts.length < 2) return null;
+  const ext = parts.slice(1).join(".");
+  return TLD_RANK[ext] != null ? ext : null;
 };
 
 interface DomainSearchProps {
@@ -87,6 +99,12 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const activeJobRef = useRef<{ cancelled: boolean; ctl: AbortController } | null>(null);
   /** Latest rows, readable from async lanes without closing over stale state. */
   const resultsRef = useRef<DomainResult[]>([]);
+  /** The rendered sections, in on-screen order — read at click time for card positions (analytics only). */
+  const sectionsRef = useRef<{ available: DomainResult[]; taken: DomainResult[]; layout: "cards" | "compact" }>({
+    available: [],
+    taken: [],
+    layout: "cards",
+  });
   const cacheResult = useCallback((r: DomainResult) => {
     // Honesty guardrail: only remember confident, authoritative verdicts.
     if (r.checking || r.uncertain || r.provisional || r.reachFailed) return;
@@ -119,11 +137,20 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const { user } = useAuth();
   const { favorites, toggleFavorite } = useFavorites();
   const favoritedSet = useMemo(() => new Set(favorites), [favorites]);
+  const favoritedRef = useRef(favoritedSet);
+  favoritedRef.current = favoritedSet;
   const [authOpen, setAuthOpen] = useState(false);
   const toggleFavoriteRef = useRef(toggleFavorite);
   toggleFavoriteRef.current = toggleFavorite;
   const handleToggleFavorite = useCallback(
     (domain: string) => {
+      if (!favoritedRef.current.has(domain)) {
+        const { available, taken } = sectionsRef.current;
+        const section = available.some((r) => r.domain === domain) ? available : taken;
+        const index = section.findIndex((r) => r.domain === domain);
+        const row = section[index] ?? resultsRef.current.find((r) => r.domain === domain);
+        if (row) trackSiteEvent("favorite_add", { tld: row.tld.extension, position: index >= 0 ? index + 1 : undefined, signedIn: !!user });
+      }
       if (!user) {
         setAuthOpen(true);
         return;
@@ -181,11 +208,14 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const [stopwatch, setStopwatch] = useState<"idle" | "running" | "done">("idle");
   const [firstAnswerMs, setFirstAnswerMs] = useState<number | null>(null);
 
-  const markFirstAnswer = useCallback(() => {
+  const markFirstAnswer = useCallback((lane: FirstAnswerLane) => {
     if (typingStopRef.current == null) return;
-    setFirstAnswerMs(Math.round(performance.now() - typingStopRef.current));
+    const ms = Math.round(performance.now() - typingStopRef.current);
+    setFirstAnswerMs(ms);
     typingStopRef.current = null;
     setStopwatch("done");
+    // Queued only; the analytics request leaves seconds later (siteEvents.ts).
+    trackSiteEvent("first_answer", { ms, lane });
   }, []);
 
   // Debounce, lane one: the DNS pre-check fires FAST_DEBOUNCE_MS after the last
@@ -252,6 +282,12 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       if (job.cancelled) return;
       setResults(hydrated);
       setLoading(false);
+      // Shape of the search only — never the text (siteEvents.ts). Queued, sent later.
+      trackSiteEvent("search_started", {
+        queryLength: debouncedQuery.trim().length,
+        tldTyped: typedTldOf(debouncedQuery) != null,
+        tldCount: domains.length,
+      });
 
       const domainNames = domains.map((d) => d.domain);
 
@@ -278,7 +314,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
             if (updated !== r) anyConfident = true;
             return updated;
           });
-          if (anyConfident && !job.cancelled) queueMicrotask(markFirstAnswer);
+          if (anyConfident && !job.cancelled) queueMicrotask(() => markFirstAnswer("fast"));
           return next;
         });
       };
@@ -309,7 +345,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
           });
           // A registry answer the user can see is a real first answer (same
           // updater-side flag as the fast lane above).
-          if (flipped && !job.cancelled) queueMicrotask(markFirstAnswer);
+          if (flipped && !job.cancelled) queueMicrotask(() => markFirstAnswer("browser"));
           return next;
         });
       };
@@ -355,7 +391,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         // The honest stopwatch stops on the first ANSWER. A batch that never
         // reached the backend (503 / network error) only turns rows into
         // "couldn't reach — Retry"; that is not an answer and must not stop it.
-        if (resp.results.size > 0) markFirstAnswer();
+        if (resp.results.size > 0) markFirstAnswer("edge");
         const sliceSet = new Set(slice);
         setResults((prev) =>
           prev.map((r) => {
@@ -519,14 +555,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   // The exact TLD the user typed (e.g. "xyz" from "asdsdfsdas.xyz"), if any.
   // That TLD sorts to the very top of each result group so a user searching a
   // full domain sees their exact match first, not buried under .com/.net.
-  const typedTld = useMemo(() => {
-    const raw = debouncedQuery.toLowerCase().trim();
-    if (!raw.includes(".")) return null;
-    const parts = raw.split(".").filter(Boolean);
-    if (parts.length < 2) return null;
-    const ext = parts.slice(1).join(".");
-    return TLD_RANK[ext] != null ? ext : null;
-  }, [debouncedQuery]);
+  const typedTld = useMemo(() => typedTldOf(debouncedQuery), [debouncedQuery]);
 
   // Query-aware ordering: the exact typed TLD first (rank -1), then normal
   // TLD authority. Still stable — never sorts on available/price/uncertain.
@@ -540,6 +569,32 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       return byTldAuthority(a, b);
     };
   }, [typedTld]);
+
+  // The three result sections exactly as rendered below.
+  const availableList = useMemo(
+    () => checkedResults.filter((r) => r.available && !r.uncertain).sort(orderResults),
+    [checkedResults, orderResults],
+  );
+  const uncertainList = useMemo(
+    () => checkedResults.filter((r) => r.uncertain && !r.sldBlocked && !r.provisional).sort(orderResults).slice(0, 10),
+    [checkedResults, orderResults],
+  );
+  const takenList = useMemo(
+    () => checkedResults.filter((r) => !r.available && (!r.uncertain || r.sldBlocked || r.provisional)).sort(orderResults).slice(0, 10),
+    [checkedResults, orderResults],
+  );
+  sectionsRef.current = { available: availableList, taken: takenList, layout: viewMode };
+  const cheapestRef = useRef(cheapestByTld);
+  cheapestRef.current = cheapestByTld;
+
+  // Outbound card clicks → analytics. Stable identity so memoised cards do not re-render.
+  const handleCardAction = useCallback((kind: CardActionKind, domain: string) => {
+    const { available, taken, layout } = sectionsRef.current;
+    const section = kind === "buy" ? available : taken;
+    const row = section.find((r) => r.domain === domain) ?? resultsRef.current.find((r) => r.domain === domain);
+    if (!row) return;
+    trackSiteEvent(CARD_ACTION_EVENT[kind], cardClickProps(kind, row, section, (r) => cheapestRef.current.get(r.tld.extension), layout));
+  }, []);
 
   const searchBar = (
     <div className="flex w-full min-w-0 flex-1 items-center gap-0.5 rounded-[100px] border border-white/40 bg-white/25 py-[14px] pl-4 pr-4 sm:pl-5 sm:pr-6 [backdrop-filter:blur(64px)] dark:border-white/10 dark:bg-white/[0.05]">
@@ -704,10 +759,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
               </div>
             )}
             <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
-              {checkedResults
-                .filter((r) => r.available && !r.uncertain)
-                .sort(orderResults)
-                .map((r) => (
+              {availableList.map((r) => (
                   <DomainCard
                       key={r.domain}
                       result={r}
@@ -716,6 +768,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                       cheapest={cheapestByTld.get(r.tld.extension)}
                       favorited={favoritedSet.has(r.domain)}
                       onToggleFavorite={handleToggleFavorite}
+                      onAction={handleCardAction}
                     />
                 ))}
             </div>
@@ -739,6 +792,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                       cheapest={cheapestByTld.get(r.tld.extension)}
                       favorited={favoritedSet.has(r.domain)}
                       onToggleFavorite={handleToggleFavorite}
+                      onAction={handleCardAction}
                     />
                     ))}
                 </div>
@@ -753,11 +807,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                   <h2 className="text-lg font-bold text-foreground">Couldn't verify</h2>
                 </div>
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
-                  {checkedResults
-                    .filter((r) => r.uncertain && !r.sldBlocked && !r.provisional)
-                    .sort(orderResults)
-                    .slice(0, 10)
-                    .map((r) => (
+                  {uncertainList.map((r) => (
                       <DomainCard
                       key={r.domain}
                       result={r}
@@ -766,6 +816,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                       cheapest={cheapestByTld.get(r.tld.extension)}
                       favorited={favoritedSet.has(r.domain)}
                       onToggleFavorite={handleToggleFavorite}
+                      onAction={handleCardAction}
                     />
                     ))}
                 </div>
@@ -780,11 +831,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                   <h2 className="text-lg font-bold text-foreground">Taken Domains</h2>
                 </div>
                 <div className={viewMode === "compact" ? "list-surface rounded-xl border border-border overflow-hidden" : "space-y-3"}>
-                  {checkedResults
-                    .filter((r) => !r.available && (!r.uncertain || r.sldBlocked || r.provisional))
-                    .sort(orderResults)
-                    .slice(0, 10)
-                    .map((r) => (
+                  {takenList.map((r) => (
                       <DomainCard
                       key={r.domain}
                       result={r}
@@ -793,6 +840,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
                       cheapest={cheapestByTld.get(r.tld.extension)}
                       favorited={favoritedSet.has(r.domain)}
                       onToggleFavorite={handleToggleFavorite}
+                      onAction={handleCardAction}
                     />
                     ))}
                 </div>

@@ -5,6 +5,7 @@ import RouteHead from "@/seo/RouteHead";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
+import { trackSiteEvent } from "@/lib/siteEvents";
 import WaitlistSection from "@/components/WaitlistSection";
 import { NetworkIcon, StopwatchIcon, LicenseIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid, FeatureCard, DataTable } from "@/components/PageKit";
@@ -88,6 +89,7 @@ const Api = () => {
           lede="Copy, paste, ship. Same endpoint from a terminal, a browser or an agent. Requests go through a global Cloudflare edge cache — a repeat lookup for the same domain within 60 seconds comes back in about 0.1 s, while a first-time lookup runs the full live check (about half a second)."
         >
           <CodeBlock
+            onCopy={(label) => trackSiteEvent("api_copy", { target: label })}
             tabs={[
               {
                 label: "cURL",
@@ -215,7 +217,7 @@ print(res.json()["result"]["available"])`,
           <div className="surface-card p-6">
             <ul className="list-body">
               <li>60 requests per 60 seconds per IP.</li>
-              <li>No key, no account, no tracking beyond rate-limit counters.</li>
+              <li>No key, no account, no tracking of API callers beyond rate-limit counters.</li>
               <li>
                 Repeat lookups within 60 seconds are served from a Cloudflare edge cache (~0.1 s);
                 first-time lookups run the full live check (about half a second, under 0.9 s at p95 —

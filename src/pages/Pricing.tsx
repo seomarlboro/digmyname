@@ -11,6 +11,7 @@ import { getRegistrarColor } from "@/lib/registrarColors";
 import { NetworkIcon, StoreIcon, CertificateIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid, DataTable } from "@/components/PageKit";
 import { cn } from "@/lib/utils";
+import { trackSiteEvent } from "@/lib/siteEvents";
 import {
   bestThreeYear,
   cheapestRegister,
@@ -195,7 +196,7 @@ const Pricing = () => {
                     header: "Domain",
                     width: "1.1fr",
                     cell: (s) => (
-                      <a href={`#tld-${s.tld}`} className="font-display text-3xl font-extrabold tracking-tight text-mint hover:underline">
+                      <a href={`#tld-${s.tld}`} onClick={() => trackSiteEvent("pricing_tld_view", { tld: s.tld })} className="font-display text-3xl font-extrabold tracking-tight text-mint hover:underline">
                         .{s.tld}
                       </a>
                     ),
@@ -359,7 +360,13 @@ const DetailedTldTable = ({ summary: s, defaultOpen = false }: { summary: TldSum
   const cheapest = sorted[0];
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
+    <Collapsible
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) trackSiteEvent("pricing_tld_view", { tld: s.tld });
+      }}
+    >
       <div id={`tld-${s.tld}`} className="surface-card-lg scroll-mt-32 overflow-hidden">
         <CollapsibleTrigger className="group flex w-full flex-wrap items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/10">
           <span className="font-display text-2xl font-extrabold tracking-tight text-mint">.{s.tld}</span>

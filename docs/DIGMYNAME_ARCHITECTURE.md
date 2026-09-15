@@ -1,6 +1,6 @@
 # DigMyName — Architecture & State Protocol
 
-> **This is the living source-of-truth for DigMyName.** It must be kept current: any architectural change, new decision, or shift in what we're building gets reflected here in the SAME commit. Read it in full at the start of any work session. It is written so a human OR an AI agent with zero prior knowledge can understand how the system works, why it's built this way, what's live, and where the weak spots are — enough that a fresh chat can run a full review from this document alone. Last verified: 2026-09-11.
+> **This is the living source-of-truth for DigMyName.** It must be kept current: any architectural change, new decision, or shift in what we're building gets reflected here in the SAME commit. Read it in full at the start of any work session. It is written so a human OR an AI agent with zero prior knowledge can understand how the system works, why it's built this way, what's live, and where the weak spots are — enough that a fresh chat can run a full review from this document alone. Last verified: 2026-09-15.
 
 ## 1. What the product is
 
@@ -121,6 +121,7 @@ These are product identity, not preferences. Breaking any is a defect:
 - Uncertain availability: never cached, never shown as available.
 - Never show a price without a fresh, trusted DB row (supported=true, within 60 days).
 - Brand-protected / sldBlocked names -> uncertain:true, uncertainReason:"brand_protected" on all paths; never fall through to available.
+- Never log search queries or domain names in analytics (§12). /privacy lists every stored thing and must match the code.
 
 ## 7. Cross-surface consistency rule (owner-mandated)
 
@@ -223,3 +224,35 @@ Owner goal: first answer ≤ 1 s "under any conditions", honest number, free mea
 4. Batch edits into one send_message; typecheck with bunx tsgo; tests are vitest under src/.
 5. After every landed change: verify with get_diff, smoke-test live, then journal (STATE + CHANGELOG + BACKLOG) AND update this document if the change is architectural — immediately, in the same session. Sessions can die mid-way.
 6. Respect the honesty rules and cross-surface consistency rule above — they're identity, not style.
+
+## 12. Product analytics — `site_events` (shipped 2026-09-15)
+
+Goal: measure the funnel before monetisation (searches → first answer → registrar click). First-party, no third-party scripts, no cookies, no consent banner.
+
+**The rule: never log search queries or domain names.** Nothing in the client takes a free-text field; there is no column that could hold a name. Also never stored: IP, user agent, referrer, user id. A new event or property has to keep that true, and `/privacy` ("Site usage counts") changes in the same commit.
+
+**Client** — `src/lib/siteEvents.ts`. `trackSiteEvent(event, props)` whitelists props per event, validates each to a closed shape (`tld` = `^[a-z0-9-]{2,24}$`, no dot; `registrar`, `lane`, `offer`, `layout`, `target`, `marketplace` = fixed lists, unknown → null / `other`), and only pushes the row onto an in-memory queue. One batched `POST /rest/v1/site_events` leaves 2 s after the first queued event, or at once on `visibilitychange: hidden` / `pagehide`, via `fetch` with `keepalive`, `credentials: "omit"`, `referrerPolicy: "no-referrer"` (the page URL carries `?q=<name>`) and only the anon key — never the signed-in user's token. Every failure is swallowed. Nothing is sent on the critical path: `markFirstAnswer` only enqueues, and the stopwatch / lane timings are unchanged (`search-lanes.test.tsx` green; the benchmark waits on the stopwatch DOM, which analytics does not touch). Automated browsers (`navigator.webdriver`) are skipped outside localhost, so `scripts/bench/first-answer.mjs` runs do not pollute the funnel. Card rows: `src/lib/cardClickEvent.ts` derives the click properties from the same `deriveCardFacts` the card renders.
+
+Common columns: `session_id` (random UUID in `sessionStorage` key `dmn_sid`, one tab; in memory if storage is blocked), `page` (`search`/`pricing`/`api`/`mcp`/`favorites`/`other`, never the raw path), `device` (window < 768 px = `mobile`), `env` (`prod` = digmyname.com, `dev` = localhost, `preview` = anything else).
+
+| Event | Where | Properties |
+|---|---|---|
+| `search_started` | DomainSearch, when a search's first requests leave (80 ms after the last keystroke) | `query_length`, `tld_typed` (ended in a tracked TLD), `tld_count` (names in the wave) |
+| `first_answer` | `markFirstAnswer` | `ms` (the on-page stopwatch), `lane` (`browser` / `fast` / `edge`) |
+| `buy_click` | Buy / Check price button | `registrar` (the link's destination; Spaceship for Check price), `tld`, `position` (1-based in the Available section), `cheapest` (lowest first-year price among the available cards on screen; null when the card shows no price), `offer` (`available` / `premium` / `check_price`), `layout` |
+| `aftermarket_click` | For-sale listing button | `marketplace` (`sedo`/`dan`/`afternic`/`aftermarket`/`other`), `tld`, `position`, `layout` |
+| `whois_click` / `visit_click` | Taken cards | `tld`, `position`, `layout` |
+| `favorite_add` | Heart on a not-yet-saved card | `tld`, `position`, `signed_in` (false = the click opened sign-in) |
+| `api_copy` / `mcp_copy` | CodeBlock copy on /api, /mcp | `target` (tab: `curl`, `javascript`, `python`, `response`, `claude_code`, `claude_desktop_config_json`) |
+| `pricing_tld_view` | /pricing: TLD anchor click or opening a TLD's table | `tld` |
+
+**Database** — migration `20260915120000_site_events.sql` (idempotent). CHECK constraints mirror the client validation. RLS on; anon/authenticated get `INSERT` on the listed columns only (no SELECT/UPDATE/DELETE; Supabase's default grants are revoked). Reports are views in the `analytics` schema, which PostgREST does not expose and the public roles cannot use — read them from the SQL editor / `query_database`:
+
+- `analytics.site_events_prod` — `env = 'prod'` rows plus a UTC `day`.
+- `analytics.funnel_daily` — searches, search / answered / buy-click / aftermarket / favourite sessions, `search_to_buy_pct`, stopwatch p50/p95 of real visitors (NOT a benchmark — never quote publicly; public latency figures come only from §3's benchmark).
+- `analytics.buy_clicks_by_registrar_tld` — clicks per registrar × TLD × day, split by offer, and `clicks_per_100_search_sessions`.
+- `analytics.cheapest_click_share` — share of priced buy clicks on the cheapest card.
+- `analytics.device_daily` — mobile vs desktop sessions, searches, buy clicks, conversion, stopwatch p95.
+
+Known limits: there is no card-impression event, so "CTR" is clicks per 100 search sessions, not per impression; the funnel is per session-day, not strictly ordered; a session is a tab (a new tab = a new session); the insert endpoint is public, so rows can be spammed (same as `mcp_events`); retention is not bounded yet (owner decision). `mcp_events` (/mcp page, stores referrer + full user agent) is left as it was.
+

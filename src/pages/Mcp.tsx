@@ -14,6 +14,7 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trackMcpEvent } from "@/lib/trackMcpEvent";
+import { trackSiteEvent } from "@/lib/siteEvents";
 import WaitlistSection from "@/components/WaitlistSection";
 import { CodeBlock } from "@/components/CodeBlock";
 import { NetworkIcon, StoreIcon, StopwatchIcon, LicenseIcon } from "@/components/StatIcons";
@@ -254,7 +255,10 @@ const Mcp = () => {
                 { label: "Claude Code", language: "bash", code: oneLineCommand },
                 { label: "claude_desktop_config.json", language: "json", code: configSnippet },
               ]}
-              onCopy={() => trackMcpEvent("copy_config", "mcp_quickstart")}
+              onCopy={(label) => {
+                trackMcpEvent("copy_config", "mcp_quickstart");
+                trackSiteEvent("mcp_copy", { target: label });
+              }}
             />
 
 

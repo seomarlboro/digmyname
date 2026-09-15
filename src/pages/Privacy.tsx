@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import RouteHead from "@/seo/RouteHead";
 import { PageMain, PageHeader, Eyebrow, Section } from "@/components/PageKit";
 
-const UPDATED = "September 10, 2026";
+const UPDATED = "September 15, 2026";
 
 /** What is stored, keyed by the feature that stores it. Retention is stated per row so nothing is open-ended. */
 const records = [
@@ -26,10 +26,22 @@ const records = [
     keep: "Until the launch email is sent, or until you ask to be removed — whichever comes first.",
   },
   {
+    feature: "Site usage counts",
+    data: "Anonymous events: a search started (only how many characters were typed, whether they ended in an extension we track, and how many names were checked — never the text itself), how long the first answer took and which check delivered it, clicks on Buy, marketplace, Whois and open-site links (the registrar, the extension, the card's position, whether it showed the lowest price on screen, standard or premium), saving a domain, copying an API or MCP snippet (which tab), and opening an extension on the pricing page. Each event also records the page, mobile or desktop (from the window width) and a random ID kept in this tab's session storage, which is gone when the tab closes. Never the domain name or the text you search, no IP address, no user-agent string, no cookie, no account ID.",
+    why: "To learn whether the comparison is useful — how many searches end in a visit to a registrar, and which — before building anything paid.",
+    keep: "For as long as the site runs, as usage history. Nothing in these rows identifies you, so there is nothing to delete on request.",
+  },
+  {
     feature: "MCP page usage",
     data: "Which install buttons and links were clicked on the MCP page, the referring page, and the user-agent string. No IP address, no cookie, no user ID — the rows cannot be linked back to a person.",
     why: "To learn which install path people use, so the docs improve.",
     keep: "For as long as the MCP page exists; there is nothing in them to delete on request because nothing identifies you.",
+  },
+  {
+    feature: "Answer cache",
+    data: "Checked domain names with their verdict (taken or available, and how it was confirmed). The row holds the name only — nothing about who searched it.",
+    why: "So a repeat lookup of the same name is fast and does not hit the registries again.",
+    keep: "An answer is used for 10 minutes to 24 hours, depending on the verdict. Expired rows are not yet deleted automatically, so a name can remain in the table after its answer has expired.",
   },
   {
     feature: "API and site rate limiting",
@@ -57,15 +69,15 @@ const Privacy = () => (
             What we store, <span className="text-aurora-gradient">and what we don't.</span>
           </>
         }
-        lede={`DigMyName is a free domain search. Searching stores nothing about you. The few things that are stored — an optional account, a waitlist email, a per-IP rate-limit counter — are listed below with the reason and how long they last. Last updated ${UPDATED}.`}
+        lede={`DigMyName is a free domain search. Nothing we store links a name you searched to you, and the text you type is never logged. What is stored — an optional account, a waitlist email, anonymous usage counts, a cache of answers keyed by domain name, a per-IP rate-limit counter — is listed below with the reason and how long it lasts. Last updated ${UPDATED}.`}
       />
 
       <Section title="Searching a domain">
         <div className="surface-card p-6">
           <ul className="list-body">
-            <li>The names you type are sent to our availability service and to public registry and DNS resolvers (RDAP servers, Cloudflare, Google and AdGuard DNS-over-HTTPS, Fastly Domain Research, Porkbun's price catalog) to answer the query. For the popular extensions your browser also asks the registry's public RDAP server and Cloudflare / Google DNS-over-HTTPS directly, so those services see your IP address together with the name, as they would for any website you visit. None of it is linked to you by us, and nothing is kept beyond the short-lived response cache described below.</li>
-            <li>Confident answers are cached for up to 60 seconds at the edge so a repeat lookup is fast. The cache key is the domain name only. Unverified answers are never cached.</li>
-            <li>There are no advertising trackers and no third-party analytics scripts on this site.</li>
+            <li>The names you type are sent to our availability service and to public registry and DNS resolvers (RDAP servers, Cloudflare, Google and AdGuard DNS-over-HTTPS, Fastly Domain Research, Porkbun's price catalog) to answer the query. For the popular extensions your browser also asks the registry's public RDAP server and Cloudflare / Google DNS-over-HTTPS directly, so those services see your IP address together with the name, as they would for any website you visit. None of it is linked to you by us.</li>
+            <li>Confident answers are cached so a repeat lookup is fast: for up to 60 seconds at the edge, and in our database as described under "Answer cache" below. Both caches are keyed by the domain name only. Unverified answers are never cached.</li>
+            <li>There are no advertising trackers and no third-party analytics scripts on this site. The usage counts below are our own, go to our own database, and never include the names you check or the text you type.</li>
           </ul>
         </div>
       </Section>
@@ -91,11 +103,11 @@ const Privacy = () => (
       <Section title="Who processes it" lede="The services that run DigMyName. Each acts under a data-processing agreement and only on our instructions.">
         <div className="surface-card p-6">
           <ul className="list-body">
-            <li><span className="font-semibold text-foreground">Supabase</span> (via Lovable Cloud) hosts the database, authentication and the availability functions.</li>
+            <li><span className="font-semibold text-foreground">Supabase</span> (via Lovable Cloud) hosts the database, authentication and the availability functions. Like any web host, it keeps request logs that include the IP address of each request; nothing from those logs is copied into the tables above.</li>
             <li><span className="font-semibold text-foreground">Cloudflare</span> serves the site and the API edge cache and provides DNS-over-HTTPS answers.</li>
             <li><span className="font-semibold text-foreground">Google</span> and <span className="font-semibold text-foreground">Apple</span> handle sign-in only if you choose them; they receive nothing from us beyond the sign-in request.</li>
             <li>Two directory badges in the footer (CodeTrendy, Sell With Boost) are images loaded from those sites, so they see the IP address that fetched them, as any image host does. They set no cookies here.</li>
-            <li>Buy links open the registrar's own site. Some carry an affiliate tag that tells the registrar the visit came from DigMyName; the registrar's privacy policy applies from that point on. The tag never changes the price you pay.</li>
+            <li>Buy links open the registrar's own site. Today they carry no affiliate tag and no referrer, so the registrar is not told the visit came from DigMyName; the registrar's privacy policy applies from that point on. If that changes, this line changes with it.</li>
           </ul>
         </div>
       </Section>
