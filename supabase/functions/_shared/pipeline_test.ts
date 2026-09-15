@@ -2,7 +2,7 @@
 // Run with: deno test supabase/functions/_shared/pipeline_test.ts
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { interpretDomainr, isLikelyBlocked } from "./availability-rules.ts";
-import { checkDomains, isLikelyPremium, trustsAggregator404, willEscalateToThirdSignal, type DomainCheckResult } from "./pipeline.ts";
+import { checkDomains, isLikelyPremium, porkbunRenewalPrice, trustsAggregator404, willEscalateToThirdSignal, type DomainCheckResult } from "./pipeline.ts";
 
 // ---- interpretDomainr -------------------------------------------------------
 
@@ -446,4 +446,20 @@ Deno.test("premium renewal is additive: availability, uncertainty and third-sign
   assertEquals(willEscalateToThirdSignal(withRenewal), willEscalateToThirdSignal(base));
   const taken = { domain: "x.com", available: false, checkedVia: "rdap" };
   assertEquals(willEscalateToThirdSignal({ ...taken, premiumRenewPrice: 99 }), willEscalateToThirdSignal(taken));
+});
+
+// Porkbun documents `additional.renewal` as an object; a bare number has also been seen.
+// Reading only the number form silently dropped every premium renewal in production (2026-09-16).
+Deno.test("porkbunRenewalPrice: object form, bare number, strings — and nothing else", () => {
+  assertEquals(porkbunRenewalPrice({ type: "year", price: "174.10", regularPrice: "174.10" }), 174.1);
+  assertEquals(porkbunRenewalPrice({ price: 273.44 }), 273.44);
+  assertEquals(porkbunRenewalPrice({ regularPrice: "76.94" }), 76.94);
+  assertEquals(porkbunRenewalPrice("51.80"), 51.8);
+  assertEquals(porkbunRenewalPrice(51.8), 51.8);
+  assertEquals(porkbunRenewalPrice(undefined), undefined);
+  assertEquals(porkbunRenewalPrice(null), undefined);
+  assertEquals(porkbunRenewalPrice({}), undefined);
+  assertEquals(porkbunRenewalPrice({ price: "" }), undefined);
+  assertEquals(porkbunRenewalPrice({ price: "n/a" }), undefined);
+  assertEquals(porkbunRenewalPrice(0), undefined);
 });

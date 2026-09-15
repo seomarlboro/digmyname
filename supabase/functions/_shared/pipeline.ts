@@ -596,6 +596,18 @@ interface PorkbunResult {
   renewPrice?: number;
 }
 
+/** `additional.renewal` is documented as an object ({type, price, regularPrice}) but has also been
+ *  seen as a bare number; read both, and nothing else. A missing/unusable quote → undefined. */
+export function porkbunRenewalPrice(renewal: unknown): number | undefined {
+  const raw =
+    typeof renewal === "object" && renewal !== null
+      ? ((renewal as { price?: unknown; regularPrice?: unknown }).price ?? (renewal as { regularPrice?: unknown }).regularPrice)
+      : renewal;
+  if (raw == null || raw === "") return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : undefined;
+}
+
 async function checkPorkbun(domain: string, apiKey: string, secretKey: string): Promise<PorkbunResult | null> {
   try {
     const resp = await fetch(
@@ -620,13 +632,13 @@ async function checkPorkbun(domain: string, apiKey: string, secretKey: string): 
     const r = data.response;
     const price = r.price != null ? Number(r.price) : undefined;
     const regular = r.regularPrice != null ? Number(r.regularPrice) : undefined;
-    const renewal = r.additional?.renewal != null ? Number(r.additional.renewal) : undefined;
+    const renewal = porkbunRenewalPrice(r.additional?.renewal);
     return {
       available: r.avail === "yes",
       premium: r.premium === "yes",
       price: Number.isFinite(price) ? price : undefined,
       regularPrice: Number.isFinite(regular) ? regular : undefined,
-      renewPrice: Number.isFinite(renewal) ? renewal : undefined,
+      renewPrice: renewal,
     };
   } catch (e) {
     console.warn(`porkbun error for ${domain}: ${e instanceof Error ? e.message : String(e)}`);
