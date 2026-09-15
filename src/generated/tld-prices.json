@@ -1,0 +1,2416 @@
+{
+  "tlds": [
+    {
+      "tld": "com",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 10.46,
+          "renew": 10.46,
+          "transfer": 10.46,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 5.19,
+          "renew": 23.19,
+          "transfer": 13.19,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": false,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 10.98,
+          "renew": 18.48,
+          "transfer": 11.48,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 9.2,
+          "renew": 14.69,
+          "transfer": 9.2,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 11.08,
+          "renew": 11.08,
+          "transfer": 11.08,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 9.08,
+          "renew": 10.18,
+          "transfer": 9.68,
+          "icannFee": 0.18,
+          "promo": "COM67",
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.verisign.com",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "net",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 11.86,
+          "renew": 11.86,
+          "transfer": 11.86,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 15.19,
+          "renew": 25.19,
+          "transfer": 25.19,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": false,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 11.98,
+          "renew": 18.58,
+          "transfer": 12.98,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 12.19,
+          "renew": 16.89,
+          "transfer": 15.59,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 12.52,
+          "renew": 12.52,
+          "transfer": 12.52,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 11.4,
+          "renew": 11.4,
+          "transfer": 11.4,
+          "icannFee": 0.18,
+          "promo": "NET19",
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.verisign.com",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "org",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 8.5,
+          "renew": 11.2,
+          "transfer": 11.2,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 10.19,
+          "renew": 24.19,
+          "transfer": 24.19,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": false,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 7.98,
+          "renew": 18.98,
+          "transfer": 12.28,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 9.24,
+          "renew": 14.49,
+          "transfer": 10.49,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 7.98,
+          "renew": 11.84,
+          "transfer": 11.84,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 6.85,
+          "renew": 11.59,
+          "transfer": 11.29,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.publicinterestregistry.org",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "io",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 50,
+          "renew": 50,
+          "transfer": 50,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 59.99,
+          "renew": 89.99,
+          "transfer": 89.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": false,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 34.98,
+          "renew": 75.98,
+          "transfer": 65.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 35.82,
+          "renew": 62.69,
+          "transfer": 50.69,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 28.12,
+          "renew": 51.8,
+          "transfer": 51.8,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 31.98,
+          "renew": 51.75,
+          "transfer": 51.75,
+          "icannFee": 0,
+          "promo": "IO85",
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": false
+    },
+    {
+      "tld": "ai",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 80,
+          "renew": 80,
+          "transfer": 80,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 104.99,
+          "renew": 159.99,
+          "transfer": 159.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": false,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 89.98,
+          "renew": 114.98,
+          "transfer": 99.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 77.39,
+          "renew": 130.79,
+          "transfer": 143.56,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 82.7,
+          "renew": 82.7,
+          "transfer": 165.09,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 79.98,
+          "renew": 79.98,
+          "transfer": 79.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "co",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 30,
+          "renew": 30,
+          "transfer": 30,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 17.99,
+          "renew": 59.99,
+          "transfer": 59.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": false,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 7.98,
+          "renew": 45.48,
+          "transfer": 38.48,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 36.24,
+          "renew": 35.69,
+          "transfer": 35.69,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 15.76,
+          "renew": 31.2,
+          "transfer": 31.2,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 4.98,
+          "renew": 31.05,
+          "transfer": 31.05,
+          "icannFee": 0,
+          "promo": "DOM80",
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": null,
+      "inIanaBootstrap": false
+    },
+    {
+      "tld": "xyz",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 12.3,
+          "renew": 11.2,
+          "transfer": 11.2,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 2.19,
+          "renew": 26.19,
+          "transfer": 26.19,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": false,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 2,
+          "renew": 21.48,
+          "transfer": 17.58,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 1.98,
+          "renew": 15.79,
+          "transfer": 15.49,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 2.04,
+          "renew": 14.21,
+          "transfer": 14.21,
+          "icannFee": 0.18,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 2.06,
+          "renew": 13.97,
+          "transfer": 13.97,
+          "icannFee": 0.18,
+          "promo": "XYZ52",
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.centralnic.com",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "me",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 16.56,
+          "renew": 16.56,
+          "transfer": 16.56,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 1.99,
+          "renew": 29.99,
+          "transfer": 29.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 1.98,
+          "renew": 23.98,
+          "transfer": 17.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 8.89,
+          "renew": 22.19,
+          "transfer": 22.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 17.27,
+          "renew": 17.27,
+          "transfer": 17.27,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 1.48,
+          "renew": 15.53,
+          "transfer": 15.53,
+          "icannFee": 0,
+          "promo": "SPSR86",
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": null,
+      "inIanaBootstrap": false
+    },
+    {
+      "tld": "app",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 14.2,
+          "renew": 14.2,
+          "transfer": 14.2,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 16.19,
+          "renew": 28.19,
+          "transfer": 28.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": false,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 6.98,
+          "renew": 22.98,
+          "transfer": 17.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 9.91,
+          "renew": 20.09,
+          "transfer": 20.09,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 8.75,
+          "renew": 14.93,
+          "transfer": 14.93,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 6.41,
+          "renew": 14.69,
+          "transfer": 14.69,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "pubapi.registry.google",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "dev",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 12.2,
+          "renew": 12.2,
+          "transfer": 12.2,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 16.19,
+          "renew": 24.19,
+          "transfer": 24.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 10.98,
+          "renew": 20.98,
+          "transfer": 15.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 9.91,
+          "renew": 17.19,
+          "transfer": 17.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 8.75,
+          "renew": 12.87,
+          "transfer": 12.87,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 6.41,
+          "renew": 12.62,
+          "transfer": 12.62,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "pubapi.registry.google",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "tech",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 9.99,
+          "renew": 49.2,
+          "transfer": 49.2,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 10.19,
+          "renew": 98.19,
+          "transfer": 98.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 5.98,
+          "renew": 58.98,
+          "transfer": 59.88,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 7.98,
+          "renew": 61.39,
+          "transfer": 59.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 6.99,
+          "renew": 50.98,
+          "transfer": 50.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 7.42,
+          "renew": 50.92,
+          "transfer": 50.92,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.radix.host",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "shop",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 30.2,
+          "renew": 30.2,
+          "transfer": 30.2,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 1.19,
+          "renew": 60.19,
+          "transfer": 60.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 0.98,
+          "renew": 48.98,
+          "transfer": 38.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 3.19,
+          "renew": 42.99,
+          "transfer": 34.29,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 2.06,
+          "renew": 31.41,
+          "transfer": 31.41,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 0.9,
+          "renew": 31.25,
+          "transfer": 31.25,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.gmoregistry.net",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "site",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 4.99,
+          "renew": 27.7,
+          "transfer": 27.7,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 1.19,
+          "renew": 55.19,
+          "transfer": 55.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 0.98,
+          "renew": 31.98,
+          "transfer": 32.48,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 2.29,
+          "renew": 34.39,
+          "transfer": 29.39,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 1.96,
+          "renew": 28.84,
+          "transfer": 28.84,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 1.18,
+          "renew": 21.58,
+          "transfer": 28.66,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.radix.host",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "online",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 4.99,
+          "renew": 27.7,
+          "transfer": 27.7,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 1.19,
+          "renew": 55.19,
+          "transfer": 55.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 0.98,
+          "renew": 34.98,
+          "transfer": 32.48,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 2.29,
+          "renew": 35.69,
+          "transfer": 35.69,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 1.96,
+          "renew": 28.84,
+          "transfer": 28.84,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 1.18,
+          "renew": 21.58,
+          "transfer": 28.66,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.radix.host",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "club",
+      "prices": [
+        {
+          "registrar": "GoDaddy",
+          "reg": 4.99,
+          "renew": 29.99,
+          "transfer": null,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 14.99,
+          "renew": 17.99,
+          "transfer": 17.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 4.12,
+          "renew": 15.96,
+          "transfer": 15.96,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Spaceship",
+          "lastVerifiedAt": "2026-02-14T15:10:36.491093+00:00"
+        }
+      ],
+      "registryHost": "rdap.nic.club",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "agency",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 6.92,
+          "renew": 30.09,
+          "transfer": 29.49,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 3.6,
+          "renew": 25.23,
+          "transfer": 25.23,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "art",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 4.03,
+          "renew": 30.99,
+          "transfer": 30.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 3.6,
+          "renew": 21.11,
+          "transfer": 21.11,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.centralnic.com",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "biz",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 18.2,
+          "renew": 18.2,
+          "transfer": 18.2,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 2.19,
+          "renew": 36.19,
+          "transfer": 36.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 1.98,
+          "renew": 28.98,
+          "transfer": 21.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 1.74,
+          "renew": 22.19,
+          "transfer": 22.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 6.69,
+          "renew": 19.05,
+          "transfer": 19.05,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 1.24,
+          "renew": 18.83,
+          "transfer": 18.83,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.nic.biz",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "build",
+      "prices": [
+        {
+          "registrar": "Porkbun",
+          "reg": 26.26,
+          "renew": 26.26,
+          "transfer": 26.26,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": null,
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "capital",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 9.24,
+          "renew": 70.09,
+          "transfer": 65.39,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 5.66,
+          "renew": 57.16,
+          "transfer": 57.16,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "cc",
+      "prices": [
+        {
+          "registrar": "GoDaddy",
+          "reg": 5.99,
+          "renew": 15.99,
+          "transfer": null,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 11.49,
+          "renew": 12.49,
+          "transfer": 11.49,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 3.4,
+          "renew": 8.55,
+          "transfer": 8.55,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "tld-rdap.verisign.com",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "cloud",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 2.33,
+          "renew": 21.39,
+          "transfer": 19.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 3.88,
+          "renew": 21.11,
+          "transfer": 21.11,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.registry.cloud",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "community",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 31.39,
+          "renew": 39.99,
+          "transfer": 39.29,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 8.24,
+          "renew": 36.56,
+          "transfer": 36.56,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "company",
+      "prices": [
+        {
+          "registrar": "GoDaddy",
+          "reg": 31.99,
+          "renew": 31.99,
+          "transfer": null,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 15.59,
+          "renew": 19.09,
+          "transfer": 17.59,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 2.57,
+          "renew": 16.99,
+          "transfer": 16.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "design",
+      "prices": [
+        {
+          "registrar": "GoDaddy",
+          "reg": 4.99,
+          "renew": 89.99,
+          "transfer": null,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 52.59,
+          "renew": 56.39,
+          "transfer": 56.39,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 10.81,
+          "renew": 46.86,
+          "transfer": 46.86,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.nic.design",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "digital",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 2.3,
+          "renew": 41.49,
+          "transfer": 40.59,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 2.57,
+          "renew": 33.47,
+          "transfer": 33.47,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "finance",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 17.91,
+          "renew": 64.29,
+          "transfer": 61.79,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 6.69,
+          "renew": 52.01,
+          "transfer": 52.01,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "fund",
+      "prices": [
+        {
+          "registrar": "GoDaddy",
+          "reg": 19.99,
+          "renew": 121.99,
+          "transfer": null,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 12.13,
+          "renew": 70.09,
+          "transfer": 67.09,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 8.75,
+          "renew": 57.16,
+          "transfer": 57.16,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "gg",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 70.99,
+          "renew": 76.99,
+          "transfer": 70.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 51.8,
+          "renew": 51.8,
+          "transfer": 51.8,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": null,
+      "inIanaBootstrap": false
+    },
+    {
+      "tld": "group",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 22.39,
+          "renew": 27.79,
+          "transfer": 26.29,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 6.18,
+          "renew": 21.11,
+          "transfer": 21.11,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "inc",
+      "prices": [
+        {
+          "registrar": "Porkbun",
+          "reg": 257.98,
+          "renew": 257.98,
+          "transfer": null,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.centralnic.com",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "info",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 21.2,
+          "renew": 21.2,
+          "transfer": 21.2,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 6.19,
+          "renew": 42.19,
+          "transfer": 42.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 3.98,
+          "renew": 35.98,
+          "transfer": 26.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 4.03,
+          "renew": 25.89,
+          "transfer": 25.89,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 3.6,
+          "renew": 22.14,
+          "transfer": 22.14,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 3.31,
+          "renew": 21.94,
+          "transfer": 21.94,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "life",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 2.3,
+          "renew": 37.19,
+          "transfer": 36.49,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 2.57,
+          "renew": 29.35,
+          "transfer": 29.35,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "link",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 10.49,
+          "renew": 10.49,
+          "transfer": 10.49,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 7.72,
+          "renew": 7.72,
+          "transfer": 7.72,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": null,
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "lol",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 1.46,
+          "renew": 31.49,
+          "transfer": 30.79,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 1.54,
+          "renew": 26.26,
+          "transfer": 26.26,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.centralnic.com",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "market",
+      "prices": [
+        {
+          "registrar": "GoDaddy",
+          "reg": 67.99,
+          "renew": 67.99,
+          "transfer": null,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 37.39,
+          "renew": 45.79,
+          "transfer": 44.89,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 35.53,
+          "renew": 35.53,
+          "transfer": 35.53,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "media",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 9.81,
+          "renew": 45.79,
+          "transfer": 44.89,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 4.63,
+          "renew": 36.56,
+          "transfer": 36.56,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "money",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 14.44,
+          "renew": 38.59,
+          "transfer": 37.89,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 10.81,
+          "renew": 28.32,
+          "transfer": 28.32,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "one",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 17.79,
+          "renew": 19.99,
+          "transfer": 9.49,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 6.69,
+          "renew": 20.08,
+          "transfer": 20.08,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.nic.one",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "page",
+      "prices": [
+        {
+          "registrar": "GoDaddy",
+          "reg": 19.99,
+          "renew": 19.99,
+          "transfer": null,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 10.99,
+          "renew": 14.29,
+          "transfer": 14.29,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 10.81,
+          "renew": 10.81,
+          "transfer": 10.81,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "pubapi.registry.google",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "pro",
+      "prices": [
+        {
+          "registrar": "GoDaddy",
+          "reg": 4.99,
+          "renew": 41.99,
+          "transfer": null,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 3.46,
+          "renew": 28.69,
+          "transfer": 28.69,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 3.09,
+          "renew": 22.14,
+          "transfer": 22.14,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "run",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 4.61,
+          "renew": 25.79,
+          "transfer": 25.29,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 4.12,
+          "renew": 22.14,
+          "transfer": 22.14,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": null,
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "so",
+      "prices": [
+        {
+          "registrar": "Namecheap",
+          "reg": 64.98,
+          "renew": 68.98,
+          "transfer": 128.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 62.99,
+          "renew": 68.99,
+          "transfer": 69.29,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": null,
+      "inIanaBootstrap": false
+    },
+    {
+      "tld": "social",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 8.66,
+          "renew": 38.59,
+          "transfer": 37.89,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 6.69,
+          "renew": 33.47,
+          "transfer": 33.47,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "software",
+      "prices": [
+        {
+          "registrar": "GoDaddy",
+          "reg": 11.99,
+          "renew": 63.99,
+          "transfer": null,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 15.02,
+          "renew": 38.59,
+          "transfer": 37.89,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 15.96,
+          "renew": 33.47,
+          "transfer": 33.47,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "space",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 2.29,
+          "renew": 26.79,
+          "transfer": 23.49,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 1.96,
+          "renew": 26.26,
+          "transfer": 26.26,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.radix.host",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "store",
+      "prices": [
+        {
+          "registrar": "Cloudflare",
+          "reg": 4.99,
+          "renew": 42.2,
+          "transfer": 42.2,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "GoDaddy",
+          "reg": 1.19,
+          "renew": 84.19,
+          "transfer": 84.19,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Namecheap",
+          "reg": 0.98,
+          "renew": 43.98,
+          "transfer": 49.98,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "OVHcloud",
+          "reg": 2.29,
+          "renew": 55.99,
+          "transfer": 55.99,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 2.57,
+          "renew": 43.77,
+          "transfer": 43.77,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Spaceship",
+          "reg": 1.18,
+          "renew": 32.88,
+          "transfer": 43.67,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": "rdap.radix.host",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "studio",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 13.28,
+          "renew": 44.39,
+          "transfer": 43.49,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 11.84,
+          "renew": 32.44,
+          "transfer": 32.44,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "systems",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 16.17,
+          "renew": 34.29,
+          "transfer": 33.69,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 11.84,
+          "renew": 28.32,
+          "transfer": 28.32,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "tools",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 16.17,
+          "renew": 35.69,
+          "transfer": 35.09,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 9.78,
+          "renew": 29.35,
+          "transfer": 29.35,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [],
+      "registryHost": null,
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "tv",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 25.99,
+          "renew": 34.99,
+          "transfer": 35.69,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 26.26,
+          "renew": 26.26,
+          "transfer": 26.26,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.nic.tv",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "ventures",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 12.13,
+          "renew": 58.59,
+          "transfer": 56.89,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 5.66,
+          "renew": 47.89,
+          "transfer": 47.89,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "world",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 4.03,
+          "renew": 41.49,
+          "transfer": 40.79,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 2.57,
+          "renew": 33.47,
+          "transfer": 33.47,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    },
+    {
+      "tld": "wtf",
+      "prices": [
+        {
+          "registrar": "OVHcloud",
+          "reg": 6.35,
+          "renew": 35.69,
+          "transfer": 35.09,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        },
+        {
+          "registrar": "Porkbun",
+          "reg": 2.57,
+          "renew": 29.35,
+          "transfer": 29.35,
+          "icannFee": 0,
+          "promo": null,
+          "whoisPrivacy": true,
+          "verifiedAt": "2026-09-13T04:01:41.084+00:00"
+        }
+      ],
+      "quarantined": [
+        {
+          "registrar": "Namecheap",
+          "lastVerifiedAt": "2026-02-16T01:02:01.300828+00:00"
+        }
+      ],
+      "registryHost": "rdap.identitydigital.services",
+      "inIanaBootstrap": true
+    }
+  ]
+}

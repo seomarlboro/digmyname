@@ -344,6 +344,12 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                   {promoCode}
                 </Badge>
               )}
+              {/* Only for extensions with tracked prices; a plain link, so the card needs no router. */}
+              {available && cheapest && (
+                <a href={`/tld/${ext}`} className="text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline">
+                  All .{ext} prices
+                </a>
+              )}
             </div>
           </div>
 

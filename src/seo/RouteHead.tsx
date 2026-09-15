@@ -1,16 +1,17 @@
 import { ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
-import { canonicalUrl, getRouteMeta } from "./routes";
+import { canonicalUrl, getRouteMeta, type RouteMeta } from "./routes";
 import { robotsDirective } from "./prerender";
 
 /**
  * Per-route <head> from the shared route table. Renders exactly the tag set
  * that the build-time prerender writes (see src/seo/prerender.ts), so Helmet
  * adopts the static tags on mount instead of duplicating them. Page-specific
- * JSON-LD goes in as children.
+ * JSON-LD goes in as children. Generated routes (/tld/*) pass their meta as
+ * `route`, since they are not in the static table.
  */
-export const RouteHead = ({ path, children }: { path: string; children?: ReactNode }) => {
-  const route = getRouteMeta(path);
+export const RouteHead = ({ path, route: given, children }: { path?: string; route?: RouteMeta; children?: ReactNode }) => {
+  const route = given ?? getRouteMeta(path ?? "");
   const url = canonicalUrl(route);
   const ogTitle = route.ogTitle ?? route.title;
   const ogDescription = route.ogDescription ?? route.description;

@@ -7,6 +7,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join, resolve } from "path";
 import type { Plugin, ResolvedConfig } from "vite";
 import { REDIRECTS, ROUTES } from "../src/seo/routes";
+import { buildTldRoutes } from "../src/seo/tldRoutes";
 import { outputPathsFor, renderRedirectHtml, renderRouteHtml } from "../src/seo/prerender";
 
 export function prerenderRoutes(): Plugin {
@@ -23,8 +24,10 @@ export function prerenderRoutes(): Plugin {
       if (!existsSync(templatePath)) return;
       const template = readFileSync(templatePath, "utf8");
 
+      // Static pages plus the per-extension price pages from the prebuild snapshot.
+      const routes = [...ROUTES, ...buildTldRoutes()];
       let written = 0;
-      for (const route of ROUTES) {
+      for (const route of routes) {
         const html = renderRouteHtml(template, route);
         for (const path of [route.path, ...(route.aliases ?? [])]) {
           for (const rel of outputPathsFor(path)) {
@@ -43,7 +46,7 @@ export function prerenderRoutes(): Plugin {
           written++;
         }
       }
-      config.logger.info(`prerender: ${written} route files written for ${ROUTES.length} routes and ${REDIRECTS.length} redirects`);
+      config.logger.info(`prerender: ${written} route files written for ${routes.length} routes and ${REDIRECTS.length} redirects`);
     },
   };
 }

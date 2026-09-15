@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
 import ShovelLogo from "@/components/ShovelLogo";
+import { FOOTER_TLDS } from "@/generated/tld-links";
 
 const GITHUB_URL = "https://github.com/seomarlboro/domain-check-skills";
 const API_BASE = "https://api.digmyname.com/functions/v1/public-api";
@@ -150,6 +151,26 @@ const Footer = () => (
           </ul>
         </div>
       </div>
+
+      <nav aria-label="Domain prices by extension" className="mt-10 border-t border-border/60 pt-6">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          Domain prices
+        </h2>
+        <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+          {FOOTER_TLDS.map((tld) => (
+            <li key={tld}>
+              <Link to={`/tld/${tld}`} className="font-mono text-muted-foreground transition-colors hover:text-foreground">
+                .{tld}
+              </Link>
+            </li>
+          ))}
+          <li>
+            <Link to="/tld" className="font-medium text-foreground transition-colors hover:text-mint">
+              All extensions
+            </Link>
+          </li>
+        </ul>
+      </nav>
 
       <div className="mt-10 flex flex-col gap-4 border-t border-border/60 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <span>Built in Ukraine 🇺🇦 · MIT licensed · © 2026 DigMyName</span>

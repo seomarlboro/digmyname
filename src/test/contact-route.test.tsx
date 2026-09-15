@@ -4,6 +4,7 @@ import { HelmetProvider } from "react-helmet-async";
 import App from "@/App";
 import { REDIRECTS, ROUTES, SITEMAP_ROUTES, getRouteMeta } from "@/seo/routes";
 import { outputPathsFor, renderRedirectHtml } from "@/seo/prerender";
+import { buildTldRoutes } from "@/seo/tldRoutes";
 import sitemapXml from "../../public/sitemap.xml?raw";
 
 describe("/contact and /imprint", () => {
@@ -22,7 +23,9 @@ describe("/contact and /imprint", () => {
 
   it("the sitemap file lists every sitemap route and nothing else", () => {
     const locs = [...sitemapXml.matchAll(/<loc>https:\/\/digmyname\.com([^<]*)<\/loc>/g)].map((m) => m[1] || "/");
-    expect(locs).toEqual(SITEMAP_ROUTES.map((r) => r.path));
+    // Static routes, then the indexable per-extension price pages (src/seo/tldRoutes.ts).
+    const tldPaths = buildTldRoutes().filter((r) => !r.noindex).map((r) => r.path);
+    expect(locs).toEqual([...SITEMAP_ROUTES.map((r) => r.path), ...tldPaths]);
   });
 
   it("the prerendered /imprint page redirects to /contact, canonicalises there and is not indexed", () => {

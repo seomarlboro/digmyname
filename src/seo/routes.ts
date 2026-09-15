@@ -33,6 +33,8 @@ export interface RouteMeta {
   noindex?: boolean;
   changefreq?: ChangeFreq;
   priority?: string;
+  /** Sitemap <lastmod> (YYYY-MM-DD). Only set where a real date exists, e.g. a price's verification day. */
+  lastmod?: string;
   /**
    * Crawler-visible summary written into the prerendered HTML. React replaces the
    * whole #root on mount, so real users never see it; it exists so no-JS crawlers
@@ -52,13 +54,14 @@ const staticHome = `
   <li>Free no-auth JSON API and MCP server for AI agents</li>
   <li>AI-powered alternative name suggestions</li>
 </ul>
-<p><a href="/pricing">Pricing</a> · <a href="/how-it-works">How it works</a> · <a href="/speed">Speed</a> · <a href="/mcp">MCP server</a> · <a href="/api">API</a></p>`;
+<p><a href="/pricing">Pricing</a> · <a href="/tld">Domain prices by extension</a> · <a href="/how-it-works">How it works</a> · <a href="/speed">Speed</a> · <a href="/mcp">MCP server</a> · <a href="/api">API</a></p>`;
 
 const staticPricing = `
 <h1>Domain pricing, side by side</h1>
 <p>Registration, renewal and transfer prices compared across 6 registrars (Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, OVHcloud) for 50+ extensions, including ICANN fees, promo codes and WHOIS privacy. Every column names its own registrar; the best 3-year value is registration plus two renewals, so renewal traps are visible before you buy.</p>
 <p>Extensions tracked at a single registrar are shown separately from the ones compared across all six. Prices are refreshed from the registrars' own catalogs and flagged when older than two weeks.</p>
-<p><a href="/">Search a domain</a> · <a href="/how-it-works">How availability is verified</a></p>`;
+<p>Every extension also has its own page with each registrar's price and the date it was verified.</p>
+<p><a href="/tld">Domain prices by extension</a> · <a href="/">Search a domain</a> · <a href="/how-it-works">How availability is verified</a></p>`;
 
 const staticHowItWorks = `
 <h1>How DigMyName works — honest domain availability checks</h1>

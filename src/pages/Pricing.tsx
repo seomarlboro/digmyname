@@ -1,17 +1,17 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import RouteHead from "@/seo/RouteHead";
-import { Loader2, Shield, ShieldOff, Award, Search, ChevronDown, AlertTriangle } from "lucide-react";
+import { Loader2, Shield, ShieldOff, Search, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getRegistrarColor } from "@/lib/registrarColors";
 import { NetworkIcon, StoreIcon, CertificateIcon } from "@/components/StatIcons";
-import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid, DataTable } from "@/components/PageKit";
-import { cn } from "@/lib/utils";
+import { PageMain, PageHeader, Section, Eyebrow, Stat, StatGrid, DataTable, type DataRowGroup } from "@/components/PageKit";
 import { trackSiteEvent } from "@/lib/siteEvents";
+import { TLD_HUB_PATH, legacyTldHash, tldPath } from "@/lib/tldPages";
 import {
   bestThreeYear,
   cheapestRegister,
@@ -24,11 +24,7 @@ import {
   splitByComparison,
   summarize,
   type RegistrarPrice,
-  type TldSummary,
 } from "@/lib/pricing";
-
-/** With this few extensions on screen the detailed tables open by default. */
-const AUTO_EXPAND_AT_OR_BELOW = 3;
 
 const NoMatches = ({ query }: { query: string }) => (
   <p className="surface-card p-6 text-sm text-muted-foreground">
@@ -38,6 +34,15 @@ const NoMatches = ({ query }: { query: string }) => (
 
 const Pricing = () => {
   const [query, setQuery] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Per-extension tables moved to /tld/<tld>. Old deep links (/pricing#tld-io,
+  // still out there in shared links and old structured data) land on the new page.
+  useEffect(() => {
+    const tld = legacyTldHash(location.hash);
+    if (tld) navigate(tldPath(tld), { replace: true });
+  }, [location.hash, navigate]);
 
   const { data: prices, isLoading } = useQuery({
     queryKey: ["registrar-prices"],
@@ -67,14 +72,19 @@ const Pricing = () => {
   const standard = filtered.filter((s) => !s.isEnterprise);
   const enterprise = filtered.filter((s) => s.isEnterprise);
   const { compared, single } = splitByComparison(standard);
-  const summaryRows = [...compared, ...single];
-  const summaryGroups =
-    compared.length > 0 && single.length > 0
-      ? [
-          { label: `Compared across registrars · ${compared.length}`, startIndex: 0 },
-          { label: `Tracked at one registrar so far — no comparison yet · ${single.length}`, startIndex: compared.length },
-        ]
-      : undefined;
+  const summaryRows = [...compared, ...single, ...enterprise];
+  const groupList = [
+    { label: `Compared across registrars · ${compared.length}`, size: compared.length },
+    { label: `Tracked at one registrar so far — no comparison yet · ${single.length}`, size: single.length },
+    { label: `Premium / enterprise — above $500/yr · ${enterprise.length}`, size: enterprise.length },
+  ];
+  let start = 0;
+  const allGroups: DataRowGroup[] = [];
+  for (const g of groupList) {
+    if (g.size > 0) allGroups.push({ label: g.label, startIndex: start });
+    start += g.size;
+  }
+  const summaryGroups = allGroups.length > 1 ? allGroups : undefined;
 
   const registrars = useMemo(() => {
     if (!prices) return [];
@@ -82,7 +92,6 @@ const Pricing = () => {
   }, [prices]);
 
   const totals = useMemo(() => splitByComparison(allSummaries), [allSummaries]);
-  const detailsOpenByDefault = standard.length <= AUTO_EXPAND_AT_OR_BELOW;
 
   return (
     <div className="min-h-screen bg-background">
@@ -103,9 +112,9 @@ const Pricing = () => {
           ]
         })}</script>
         {allSummaries.length > 0 && (
-          // A plain list of the extensions on the page. No Product/Offer markup:
-          // DigMyName sells nothing here, and Google's merchant-listing rules
-          // expect Offer only on the page where the thing is actually sold.
+          // A plain list of the extensions on the page, each pointing at its own
+          // price page. No Product/Offer markup: DigMyName sells nothing here, and
+          // Google's merchant-listing rules expect Offer only where the thing is sold.
           <script type="application/ld+json">{JSON.stringify({
             "@context": "https://schema.org",
             "@type": "ItemList",
@@ -115,7 +124,7 @@ const Pricing = () => {
               "@type": "ListItem",
               position: i + 1,
               name: `.${s.tld}`,
-              url: `https://digmyname.com/pricing#tld-${s.tld}`,
+              url: `https://digmyname.com${tldPath(s.tld)}`,
             })),
           })}</script>
         )}
@@ -180,7 +189,7 @@ const Pricing = () => {
             {/* Summary table — one row per TLD, cheapest registrar for each action */}
             <Section
               title="Cheapest per extension"
-              lede="One row per TLD — the cheapest registrar we found for each action. Each column can be a different registrar. Extensions tracked at only one registrar are listed separately: one price is not a comparison."
+              lede="One row per TLD — the cheapest registrar we found for each action. Each column can be a different registrar. Open an extension for every registrar's price and the date it was verified. Extensions tracked at only one registrar are listed separately: one price is not a comparison."
               aside={pricesAreStale ? `Prices last verified ${formatAbsolute(lastUpdated)}` : `Prices updated ${formatUpdated(lastUpdated)}`}
             >
               {summaryRows.length === 0 ? (
@@ -196,9 +205,9 @@ const Pricing = () => {
                     header: "Domain",
                     width: "1.1fr",
                     cell: (s) => (
-                      <a href={`#tld-${s.tld}`} onClick={() => trackSiteEvent("pricing_tld_view", { tld: s.tld })} className="font-display text-3xl font-extrabold tracking-tight text-mint hover:underline">
+                      <Link to={tldPath(s.tld)} onClick={() => trackSiteEvent("pricing_tld_view", { tld: s.tld })} className="font-display text-3xl font-extrabold tracking-tight text-mint hover:underline">
                         .{s.tld}
-                      </a>
+                      </Link>
                     ),
                   },
                   {
@@ -248,46 +257,14 @@ const Pricing = () => {
               />
 
               )}
+              <p className="mt-4 text-sm text-muted-foreground">
+                Every registrar's price for one extension, with the date each was verified:{" "}
+                <Link to={TLD_HUB_PATH} className="font-medium text-foreground hover:underline">
+                  domain prices by extension
+                </Link>
+                .
+              </p>
             </Section>
-
-            {/* Premium / enterprise TLDs */}
-            {enterprise.length > 0 && (
-              <Section
-                title="Premium / enterprise extensions"
-                lede="Extensions above $500/yr. Collapsed by default so they don't distort the normal prices."
-              >
-                <Collapsible>
-                  <CollapsibleTrigger className="surface-card group flex w-full items-center justify-between p-5 text-left">
-                    <span className="text-base font-bold text-foreground">
-                      {enterprise.length} enterprise-priced {enterprise.length === 1 ? "extension" : "extensions"}
-                      <span className="ml-2 font-normal text-muted-foreground">
-                        ({enterprise.map((s) => `.${s.tld}`).join(", ")})
-                      </span>
-                    </span>
-                    <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-4 space-y-4">
-                    {enterprise.map((s) => (
-                      <DetailedTldTable key={s.tld} summary={s} defaultOpen />
-                    ))}
-                  </CollapsibleContent>
-                </Collapsible>
-              </Section>
-            )}
-
-            {/* Full comparison by TLD — collapsed rows, so the page is not 53 tables tall */}
-            <Section title="Detailed price comparison" lede="Every registrar we track, per extension. Cheapest first. Open an extension to see all of its rows." aside="Lower is better">
-              {standard.length === 0 ? (
-                <NoMatches query={query} />
-              ) : (
-                <div className="space-y-3">
-                  {standard.map((s) => (
-                    <DetailedTldTable key={`${s.tld}-${detailsOpenByDefault}`} summary={s} defaultOpen={detailsOpenByDefault} />
-                  ))}
-                </div>
-              )}
-            </Section>
-
           </>
         )}
       </PageMain>
@@ -347,128 +324,6 @@ const PriceTag = ({
         <span className="text-sm text-muted-foreground">{suffix}</span>
       </p>
     </div>
-  );
-};
-
-/* ─── Detailed TLD Table ───────────────────────────────── */
-
-const DetailedTldTable = ({ summary: s, defaultOpen = false }: { summary: TldSummary; defaultOpen?: boolean }) => {
-  const [open, setOpen] = useState(defaultOpen);
-  // Sort by registration price — cheapest first.
-  const sorted = [...s.prices].sort((a, b) => a.reg_price - b.reg_price);
-  const newestUpdated = newestUpdate(sorted);
-  const cheapest = sorted[0];
-
-  return (
-    <Collapsible
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (next) trackSiteEvent("pricing_tld_view", { tld: s.tld });
-      }}
-    >
-      <div id={`tld-${s.tld}`} className="surface-card-lg scroll-mt-32 overflow-hidden">
-        <CollapsibleTrigger className="group flex w-full flex-wrap items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/10">
-          <span className="font-display text-2xl font-extrabold tracking-tight text-mint">.{s.tld}</span>
-          <span className="text-sm text-muted-foreground">
-            {s.prices.length === 1 ? "1 registrar" : `${s.prices.length} registrars`}
-          </span>
-          {!open && cheapest && (
-            <span className="text-sm text-muted-foreground">
-              from <span className="font-mono font-semibold tabular-nums text-foreground">${cheapest.reg_price.toFixed(2)}</span>/yr at{" "}
-              <span className={cn("font-medium", getRegistrarColor(cheapest.registrar).text)}>{cheapest.registrar}</span>
-            </span>
-          )}
-          <span className={cn("ml-auto text-xs", isStale(newestUpdated) ? "text-warning" : "text-muted-foreground")}>
-            Updated {formatUpdated(newestUpdated)}
-          </span>
-          <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" aria-hidden="true" />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="overflow-x-auto border-t border-border/50">
-            <table className="w-full min-w-[720px] text-left">
-              <thead>
-                <tr className="border-b border-border/50">
-                  <th className="w-1/4 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Registrar</th>
-                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Register</th>
-                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Renew</th>
-                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Transfer</th>
-                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">ICANN Fee</th>
-                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Promo</th>
-                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">WHOIS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sorted.map((p, i) => {
-                  const c = getRegistrarColor(p.registrar);
-                  // Award the cheapest registration only when there is something to beat.
-                  const isCheapest = i === 0 && sorted.length > 1;
-                  const renewHigher = p.renew_price > p.reg_price * 1.8;
-
-                  return (
-                    <tr key={p.id} className={cn("border-b border-border/40 transition-colors last:border-0 hover:bg-muted/10", isCheapest && "bg-mint/[0.04]")}>
-                      <td className="px-5 py-4">
-                        <span className={`text-base font-bold ${c.text}`}>
-                          {p.registrar}
-                        </span>
-                        {isCheapest && <Award className="ml-1.5 inline h-4 w-4 text-mint" aria-label="Cheapest registration" />}
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className={`font-mono text-base font-extrabold tabular-nums ${isCheapest ? "text-mint" : "text-foreground"}`}>
-                          ${p.reg_price.toFixed(2)}
-                        </span>
-                        <span className="text-sm text-muted-foreground">/yr</span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span
-                          className={cn(
-                            "font-mono text-base font-extrabold tabular-nums",
-                            renewHigher ? "text-warning" : "text-foreground",
-                          )}
-                          title={renewHigher ? "Renews at more than 1.8× the first-year price" : undefined}
-                        >
-                          ${p.renew_price.toFixed(2)}
-                        </span>
-                        <span className="text-sm text-muted-foreground">/yr</span>
-                      </td>
-                      <td className="px-5 py-4">
-                        {p.transfer_price != null ? (
-                          <>
-                            <span className="font-mono text-base font-extrabold tabular-nums text-foreground">${p.transfer_price.toFixed(2)}</span>
-                            <span className="text-sm text-muted-foreground">/yr</span>
-                          </>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">—</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="text-sm font-medium tabular-nums text-muted-foreground">${(p.icann_fee ?? 0).toFixed(2)}</span>
-                      </td>
-                      <td className="px-5 py-4">
-                        {p.promo_code ? (
-                          <Badge variant="secondary" className="text-xs font-mono px-2 py-0.5">
-                            {p.promo_code}
-                          </Badge>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">—</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-4">
-                        {p.whois_privacy ? (
-                          <Shield className="h-5 w-5 text-mint" aria-label="WHOIS privacy included" />
-                        ) : (
-                          <ShieldOff className="h-5 w-5 text-muted-foreground/70" aria-label="No WHOIS privacy" />
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </CollapsibleContent>
-      </div>
-    </Collapsible>
   );
 };
 

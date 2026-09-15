@@ -9,6 +9,8 @@ import Footer from "@/components/Footer";
 import Index from "./pages/Index";
 
 const Pricing = lazy(() => import("./pages/Pricing"));
+const TldHub = lazy(() => import("./pages/TldHub"));
+const TldPrices = lazy(() => import("./pages/TldPrices"));
 const Favorites = lazy(() => import("./pages/Favorites"));
 const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const Mcp = lazy(() => import("./pages/Mcp"));
@@ -39,6 +41,9 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/pricing" element={<Pricing />} />
+                  {/* Per-extension price pages: meta and prerender come from src/seo/tldRoutes.ts. */}
+                  <Route path="/tld" element={<TldHub />} />
+                  <Route path="/tld/:tld" element={<TldPrices />} />
                   <Route path="/favorites" element={<Favorites />} />
                   <Route path="/how-it-works" element={<HowItWorks />} />
                   <Route path="/about" element={<HowItWorks />} />

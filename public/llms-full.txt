@@ -44,7 +44,7 @@ Community / social: community, social, club, group
 Finance: finance, money, fund
 Other: life, world, site, online, space, pro, one, wtf, lol
 
-(The home page filter and /pricing show the current list with live prices.)
+(The home page filter, /pricing and /tld show the current list with live prices.)
 
 ## Registrars compared on /pricing
 
@@ -58,6 +58,8 @@ Six registrars: Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, OVHcloud. Pr
 - Active promo codes
 
 The "Best 3-Year Value" column is registration plus two renewals, which is the most honest comparison because some registrars use steep first-year promos and high renewals. Extensions tracked at a single registrar are shown separately: one price is not a comparison.
+
+Each extension also has its own page at https://digmyname.com/tld/<extension> (index at https://digmyname.com/tld): every tracked registrar's registration, renewal and transfer price, 3-year cost, which registrars renew at more than 1.8× the first-year price, the date each price was verified, and how availability is checked for that extension. Prices older than 14 days are marked stale; a registrar whose price was not re-verified is named with its last verification date, without the old number.
 
 ## Frequently asked questions
 
