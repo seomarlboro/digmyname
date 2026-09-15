@@ -2,6 +2,13 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-16 — Light theme: glass filter bar, visible search field, hero title on short screens (frontend)
+
+### Changed
+- **Filter bar and its popovers are real glass in the light theme.** They were solid white with no backdrop blur (the blur existed only in dark). Now 35% white (popovers 60% for text), `blur(24px) saturate(1.8)` so the colour of the cards underneath shows through as soft light, a 7% dark hairline and a white inner top highlight. The coloured glow behind the bar is dark-theme only (through light glass it smeared). Dark theme unchanged.
+- **Search field in the light theme** gets a light grey fill (`black/4%`, border `black/8%`) instead of `white/25%`, which disappeared on the light hero. Same change in the pre-hydration shell in `index.html`.
+- **Hero title** scales with the smaller of width and height (`clamp(2.25rem, min(10.5vw, 10vh), 5.7rem)`): 64 px instead of 91 px on a 1000×640 window; phones in portrait unchanged (width still decides). Mirrored in `index.html`.
+
 ## 2026-09-16 — Honest buy-link copy, retention, CTR impressions, /contact (frontend + migration)
 
 ### Fixed

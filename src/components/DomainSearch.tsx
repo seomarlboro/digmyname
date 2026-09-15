@@ -609,7 +609,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   }, [loading, results.length, stillChecking, availableList]);
 
   const searchBar = (
-    <div className="flex w-full min-w-0 flex-1 items-center gap-0.5 rounded-[100px] border border-white/40 bg-white/25 py-[14px] pl-4 pr-4 sm:pl-5 sm:pr-6 [backdrop-filter:blur(64px)] dark:border-white/10 dark:bg-white/[0.05]">
+    <div className="flex w-full min-w-0 flex-1 items-center gap-0.5 rounded-[100px] border border-black/[0.08] bg-black/[0.04] py-[14px] pl-4 pr-4 sm:pl-5 sm:pr-6 [backdrop-filter:blur(64px)] dark:border-white/10 dark:bg-white/[0.05]">
       <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
         <Search className="h-7 w-7 text-primary" />
       </div>
@@ -667,7 +667,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
               <span className="whitespace-nowrap">First answer under 0.5 s · p95<span className="hidden sm:inline"> — timed live, no asterisks</span></span>
             </div>
 
-            <h1 className="text-gradient mx-auto w-full px-1 text-[clamp(2.25rem,10.5vw,5.7rem)] font-extrabold leading-[1.05] tracking-[-0.04em] sm:leading-[1] sm:tracking-[-0.045em]">
+            <h1 className="text-gradient mx-auto w-full px-1 text-[clamp(2.25rem,min(10.5vw,10vh),5.7rem)] font-extrabold leading-[1.05] tracking-[-0.04em] sm:leading-[1] sm:tracking-[-0.045em]">
               <span className="block sm:hidden">World's fastest</span>
               <span className="block sm:hidden">domain search.</span>
               <span className="block sm:hidden">Fight us.</span>

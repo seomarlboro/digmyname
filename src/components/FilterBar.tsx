@@ -304,8 +304,8 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange, filters, onFiltersChang
   return (
     <div ref={barRef} className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
       {/* Gradient glow behind */}
-      <div className="absolute inset-0 -z-10 rounded-[28px] blur-xl opacity-60" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(225 85% 55% / 0.35), hsl(270 80% 58% / 0.3), hsl(30 90% 50% / 0.25), hsl(225 85% 55% / 0.2))" }} />
-      <div className="absolute inset-0 -z-10 rounded-[28px] blur-2xl opacity-40 scale-105" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(225 85% 55% / 0.25), hsl(270 80% 58% / 0.2))" }} />
+      <div className="absolute inset-0 -z-10 hidden rounded-[28px] blur-xl opacity-60 dark:block" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.3), hsl(225 85% 55% / 0.35), hsl(270 80% 58% / 0.3), hsl(30 90% 50% / 0.25), hsl(225 85% 55% / 0.2))" }} />
+      <div className="absolute inset-0 -z-10 hidden rounded-[28px] blur-2xl opacity-40 scale-105 dark:block" style={{ background: "linear-gradient(90deg, hsl(152 60% 45% / 0.2), hsl(225 85% 55% / 0.25), hsl(270 80% 58% / 0.2))" }} />
 
       {/* Popovers — rendered as siblings of the bar so their backdrop-blur isn't killed by the bar's own backdrop-filter */}
       {openFilter && openFilter !== "extensions" && (
@@ -316,21 +316,21 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange, filters, onFiltersChang
             left: `${(buttonRefs.current[openFilter]?.offsetLeft ?? 0) + (buttonRefs.current[openFilter]?.offsetWidth ?? 0) / 2}px`,
           }}
         >
-          <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0.7)] dark:backdrop-blur-2xl">
+          <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-black/[0.07] bg-white/60 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.75),0_24px_60px_-20px_rgba(15,23,42,0.3)] backdrop-blur-xl backdrop-saturate-[1.8] dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0.7)] dark:backdrop-blur-2xl dark:backdrop-saturate-100">
             <PopoverContent id={openFilter} filters={filterState} />
           </div>
         </div>
       )}
       {openFilter === "extensions" && (
         <div className="absolute left-1/2 z-50 w-[720px] max-w-[92vw] -translate-x-1/2" style={{ bottom: "calc(100% + 16px)" }}>
-          <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-transparent bg-white p-5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0.7)] dark:backdrop-blur-2xl">
+          <div className="animate-popover max-h-[60vh] overflow-y-auto overflow-x-hidden no-scrollbar rounded-2xl border border-black/[0.07] bg-white/60 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.75),0_24px_60px_-20px_rgba(15,23,42,0.3)] backdrop-blur-xl backdrop-saturate-[1.8] dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_30px_80px_-24px_rgba(0,0,0,0.7)] dark:backdrop-blur-2xl dark:backdrop-saturate-100">
             <ExtensionsPopover selectedTlds={selectedTlds} onToggle={toggleTld} priceByTld={priceByTld} />
           </div>
         </div>
       )}
 
       {/* Floating bar */}
-      <div className="relative flex items-stretch gap-3 rounded-[28px] border border-transparent bg-white p-3.5 shadow-2xl dark:border-white/[0.16] dark:bg-white/[0.06] dark:backdrop-blur-2xl" role="group" aria-label="Result filters">
+      <div className="relative flex items-stretch gap-3 rounded-[28px] border border-black/[0.07] bg-white/35 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.75),0_16px_48px_-16px_rgba(15,23,42,0.28)] backdrop-blur-xl backdrop-saturate-[1.8] dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-2xl dark:backdrop-blur-2xl dark:backdrop-saturate-100" role="group" aria-label="Result filters">
         {filterConfigs.map((f) => (
           <div
             key={f.id}
@@ -345,7 +345,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange, filters, onFiltersChang
                   ? "border-primary/40 bg-primary/10 shadow-lg"
                   : isControlActive(f.id)
                     ? "border-mint/40 bg-mint/10 dark:border-mint/40 dark:bg-mint/10"
-                    : "border-border/60 bg-muted/10 hover:bg-muted/20 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
+                    : "border-black/[0.06] bg-white/40 hover:bg-white/65 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
               }`}
             >
               <div>
