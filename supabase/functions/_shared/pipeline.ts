@@ -45,6 +45,10 @@ export interface DomainCheckResult {
   checkedVia: string;
   price?: number;
   premium?: boolean;
+  /** Renewal the registrar quoted for a confirmed premium name (Porkbun checkDomain).
+   *  Only set together with `premium` + `price`; premium renewals vary by registry
+   *  (same as year one, higher, or lower), so it is never guessed from the catalog. */
+  premiumRenewPrice?: number;
   uncertain?: boolean;
   /** Why the result is uncertain, when the cause is deterministic (not a probe failure).
    *  `budget_timeout` = OUR request budget expired before this domain resolved —
@@ -1013,6 +1017,7 @@ function buildCacheRow(r: DomainCheckResult, ttl: number) {
       cache_version: CACHE_VERSION,
       reg_price: r.price ?? null,
       premium: r.premium ?? false,
+      premium_renew_price: r.premiumRenewPrice ?? null,
       likely_premium: r.likelyPremium ?? false,
       premium_unverified: r.premiumUnverified ?? false,
       for_sale: r.forSale ?? false,
@@ -1039,6 +1044,15 @@ export function willEscalateToThirdSignal(r: DomainCheckResult): boolean {
     shouldEscalateToDomainr({ ...r, likelyPremium: r.likelyPremium ?? isLikelyPremium(r.domain) }) ||
     (r.available && isLikelyBlocked(r.domain))
   );
+}
+
+/** A confirmed premium's renewal exactly as the registrar quoted it; nothing for standard, taken or unpriced names. */
+export function confirmedPremiumRenewal(
+  pb: { available: boolean; renewPrice?: number },
+  isPremium: boolean,
+  price: number | undefined,
+): number | undefined {
+  return pb.available && isPremium && price != null && pb.renewPrice != null && pb.renewPrice > 0 ? pb.renewPrice : undefined;
 }
 
 /**
@@ -1166,6 +1180,8 @@ export async function checkDomains(
         // Accept the legacy key so rows cached before the rename still resolve.
         price: (meta.reg_price ?? meta.godaddy_price) as number | undefined,
         premium: meta.premium as boolean | undefined,
+        // Additive: rows cached before this field existed simply show no premium renewal until they refresh.
+        premiumRenewPrice: typeof meta.premium_renew_price === "number" ? meta.premium_renew_price : undefined,
         likelyPremium: meta.likely_premium as boolean | undefined,
         premiumUnverified: meta.premium_unverified as boolean | undefined,
         // Additive; absent on rows written before Phase 2 → undefined → the MCP
@@ -1381,6 +1397,7 @@ export async function checkDomains(
             checkedVia: "porkbun",
             price,
             premium: pb.available ? (isPremium || undefined) : undefined,
+            premiumRenewPrice: confirmedPremiumRenewal(pb, isPremium, price),
             likelyPremium: isPremium || undefined,
             uncertain: undefined,
             // Porkbun IS the registrar check `premiumUnverified` was waiting for.

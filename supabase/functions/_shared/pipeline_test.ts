@@ -418,3 +418,32 @@ Deno.test({ name: "checkDomains: verifyPremium forces the third signal for a pla
     }
   }
 } });
+
+// ---- Premium renewal: the registrar's quote, never a catalog guess ----------
+import { confirmedPremiumRenewal } from "./pipeline.ts";
+
+Deno.test("confirmedPremiumRenewal: confirmed priced premium → the quoted renewal, whatever its size", () => {
+  // Real Porkbun quotes 2026-09-16: same as year one, higher, and lower.
+  assertEquals(confirmedPremiumRenewal({ available: true, renewPrice: 174.1 }, true, 174.1), 174.1);
+  assertEquals(confirmedPremiumRenewal({ available: true, renewPrice: 273.44 }, true, 68.75), 273.44);
+  assertEquals(confirmedPremiumRenewal({ available: true, renewPrice: 76.94 }, true, 348.17), 76.94);
+});
+
+Deno.test("confirmedPremiumRenewal: standard, taken, unpriced or missing quote → nothing", () => {
+  assertEquals(confirmedPremiumRenewal({ available: true, renewPrice: 20 }, false, 10), undefined);
+  assertEquals(confirmedPremiumRenewal({ available: false, renewPrice: 200 }, true, 200), undefined);
+  assertEquals(confirmedPremiumRenewal({ available: true, renewPrice: 200 }, true, undefined), undefined);
+  assertEquals(confirmedPremiumRenewal({ available: true }, true, 200), undefined);
+  assertEquals(confirmedPremiumRenewal({ available: true, renewPrice: 0 }, true, 200), undefined);
+});
+
+Deno.test("premium renewal is additive: availability, uncertainty and third-signal escalation do not change", () => {
+  const base = { domain: "reputation.space", available: true, checkedVia: "porkbun", price: 68.75, premium: true, likelyPremium: true };
+  const withRenewal = { ...base, premiumRenewPrice: confirmedPremiumRenewal({ available: true, renewPrice: 273.44 }, true, 68.75) };
+  assertEquals(withRenewal.premiumRenewPrice, 273.44);
+  assertEquals(withRenewal.available, base.available);
+  assertEquals((withRenewal as { uncertain?: boolean }).uncertain, (base as { uncertain?: boolean }).uncertain);
+  assertEquals(willEscalateToThirdSignal(withRenewal), willEscalateToThirdSignal(base));
+  const taken = { domain: "x.com", available: false, checkedVia: "rdap" };
+  assertEquals(willEscalateToThirdSignal({ ...taken, premiumRenewPrice: 99 }), willEscalateToThirdSignal(taken));
+});

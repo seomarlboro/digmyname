@@ -239,6 +239,7 @@ export interface AvailabilityInfo {
   available: boolean;
   price?: number;
   premium?: boolean;
+  premiumRenewPrice?: number;
   likelyPremium?: boolean;
   premiumUnverified?: boolean;
   uncertain?: boolean;
@@ -286,6 +287,7 @@ export async function checkDomainsAvailability(
           available: r.available,
           price: r.price,
           premium: r.premium,
+          premiumRenewPrice: r.premiumRenewPrice,
           likelyPremium: r.likelyPremium,
           premiumUnverified: r.premiumUnverified,
           uncertain: r.uncertain,
