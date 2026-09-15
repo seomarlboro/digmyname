@@ -170,6 +170,78 @@ export type Database = {
         }
         Relationships: []
       }
+      site_events: {
+        Row: {
+          cheapest: boolean | null
+          created_at: string
+          device: string
+          env: string
+          event: string
+          id: string
+          lane: string | null
+          layout: string | null
+          marketplace: string | null
+          ms: number | null
+          offer: string | null
+          page: string
+          position: number | null
+          query_length: number | null
+          registrar: string | null
+          session_id: string
+          signed_in: boolean | null
+          target: string | null
+          tld: string | null
+          tld_count: number | null
+          tld_typed: boolean | null
+        }
+        Insert: {
+          cheapest?: boolean | null
+          created_at?: string
+          device: string
+          env: string
+          event: string
+          id?: string
+          lane?: string | null
+          layout?: string | null
+          marketplace?: string | null
+          ms?: number | null
+          offer?: string | null
+          page: string
+          position?: number | null
+          query_length?: number | null
+          registrar?: string | null
+          session_id: string
+          signed_in?: boolean | null
+          target?: string | null
+          tld?: string | null
+          tld_count?: number | null
+          tld_typed?: boolean | null
+        }
+        Update: {
+          cheapest?: boolean | null
+          created_at?: string
+          device?: string
+          env?: string
+          event?: string
+          id?: string
+          lane?: string | null
+          layout?: string | null
+          marketplace?: string | null
+          ms?: number | null
+          offer?: string | null
+          page?: string
+          position?: number | null
+          query_length?: number | null
+          registrar?: string | null
+          session_id?: string
+          signed_in?: boolean | null
+          target?: string | null
+          tld?: string | null
+          tld_count?: number | null
+          tld_typed?: boolean | null
+        }
+        Relationships: []
+      }
       waitlist: {
         Row: {
           created_at: string
