@@ -1,15 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import migrationSql from "../../supabase/migrations/20260915120000_site_events.sql?raw";
+import retentionSql from "../../supabase/migrations/20260916090000_retention_ctr_mcp_events.sql?raw";
 import {
   buildSiteEventRow,
   flushSiteEvents,
   resetSiteEventsForTests,
+  sourceOf,
   trackSiteEvent,
   SITE_EVENT_COLUMNS,
   type SiteEventName,
   type SiteEventProps,
 } from "@/lib/siteEvents";
-import { cardClickProps } from "@/lib/cardClickEvent";
+import { cardClickProps, shownOffers } from "@/lib/cardClickEvent";
 import type { CheapestRegistrar } from "@/lib/cardFacts";
 import type { DomainResult } from "@/lib/domainData";
 
@@ -24,6 +26,10 @@ const EVENTS: SiteEventName[] = [
   "api_copy",
   "mcp_copy",
   "pricing_tld_view",
+  "results_shown",
+  "mcp_page_view",
+  "mcp_click",
+  "waitlist_signup",
 ];
 
 /** Everything a careless caller might hand over. None of it may reach a row. */
@@ -43,6 +49,9 @@ const LEAKY = {
   offer: "acmeforge",
   layout: "acmeforge",
   queryLength: "acmeforge",
+  shownTlds: ["acmeforge.com"],
+  shownRegistrars: ["acmeforge.com"],
+  source: "https://acmeforge.com/",
 } as unknown as SiteEventProps;
 
 const FORBIDDEN_COLUMNS = ["domain", "name", "query", "q", "url", "ip", "ip_address", "user_agent", "referrer", "user_id", "email"];
@@ -67,6 +76,7 @@ describe("site events — what a row may contain", () => {
   beforeEach(() => resetSiteEventsForTests());
 
   it("never carries a domain name, the query, an IP, a user agent or a referrer, whatever the caller passes", () => {
+    Object.defineProperty(document, "referrer", { configurable: true, get: () => "https://github.com/acmeforge/repo?q=acmeforge.com" });
     for (const event of EVENTS) {
       const r = buildSiteEventRow(event, LEAKY)!;
       const json = JSON.stringify(r);
@@ -75,6 +85,37 @@ describe("site events — what a row may contain", () => {
       expect(json).not.toContain("Mozilla");
       expect(Object.keys(r).sort()).toEqual([...SITE_EVENT_COLUMNS].sort());
     }
+    expect(buildSiteEventRow("mcp_page_view")!.source).toBe("github");
+    Object.defineProperty(document, "referrer", { configurable: true, get: () => "" });
+  });
+
+  it("records the referrer only as a category from a fixed list, and only on mcp_page_view", () => {
+    expect(sourceOf("")).toBe("direct");
+    expect(sourceOf("https://glama.ai/mcp/servers/abc")).toBe("glama");
+    expect(sourceOf("https://www.google.co.uk/search?q=acmeforge")).toBe("google");
+    expect(sourceOf("https://registry.modelcontextprotocol.io/")).toBe("mcp_registry");
+    expect(sourceOf("https://notgithub.com/")).toBe("other");
+    expect(sourceOf("https://acmeforge.com/")).toBe("other");
+    expect(sourceOf("not a url")).toBe("other");
+    expect(buildSiteEventRow("mcp_click", { target: "github_hero" })).toMatchObject({ target: "github_hero", source: null });
+    expect(buildSiteEventRow("mcp_click", { target: "https://acmeforge.com" })!.target).toBe("other");
+  });
+
+  it("keeps an impression list only when both lists are aligned and well-formed", () => {
+    const ok = buildSiteEventRow("results_shown", { shownTlds: ["com", "io"], shownRegistrars: ["Porkbun", "Spaceship"] })!;
+    expect(ok).toMatchObject({ shown_tlds: ["com", "io"], shown_registrars: ["Porkbun", "Spaceship"] });
+    expect(buildSiteEventRow("results_shown", { shownTlds: [], shownRegistrars: [] })!.shown_tlds).toEqual([]);
+    for (const bad of [
+      { shownTlds: ["com"], shownRegistrars: [] },
+      { shownTlds: ["acmeforge.com"], shownRegistrars: ["Porkbun"] },
+      { shownTlds: ["com"], shownRegistrars: ["Acme Registrar"] },
+    ]) {
+      const r = buildSiteEventRow("results_shown", bad)!;
+      expect(r.shown_tlds).toBeNull();
+      expect(r.shown_registrars).toBeNull();
+    }
+    // Only results_shown may carry the lists.
+    expect(buildSiteEventRow("buy_click", { shownTlds: ["com"], shownRegistrars: ["Porkbun"] })!.shown_tlds).toBeNull();
   });
 
   it("keeps only the fields that belong to the event", () => {
@@ -94,18 +135,26 @@ describe("site events — what a row may contain", () => {
   });
 
   it("the migration grants INSERT on exactly these columns, and no column can hold a name", () => {
-    const sql = migrationSql;
-    const grant = sql.match(/GRANT INSERT \(([\s\S]*?)\) ON public\.site_events TO anon, authenticated;/);
-    expect(grant).not.toBeNull();
-    const granted = grant![1].split(",").map((c) => c.trim());
+    const sqls = [migrationSql, retentionSql];
+    const granted = sqls.flatMap((sql) =>
+      [...sql.matchAll(/GRANT INSERT \(([\s\S]*?)\) ON public\.site_events TO anon, authenticated;/g)].flatMap((m) =>
+        m[1].split(",").map((c) => c.trim()),
+      ),
+    );
     expect(granted.sort()).toEqual([...SITE_EVENT_COLUMNS].sort());
 
-    const table = sql.match(/CREATE TABLE IF NOT EXISTS public\.site_events \(([\s\S]*?)\n\);/)![1];
-    const columns = [...table.matchAll(/^ {2}([a-z_]+) [A-Z]/gm)].map((m) => m[1]);
+    const table = migrationSql.match(/CREATE TABLE IF NOT EXISTS public\.site_events \(([\s\S]*?)\n\);/)![1];
+    const columns = [
+      ...[...table.matchAll(/^ {2}([a-z_]+) [A-Z]/gm)].map((m) => m[1]),
+      ...[...retentionSql.matchAll(/ADD COLUMN IF NOT EXISTS ([a-z_]+)/g)].map((m) => m[1]),
+    ];
     expect(columns).toContain("session_id");
+    expect(columns).toContain("shown_tlds");
     for (const bad of FORBIDDEN_COLUMNS) expect(columns).not.toContain(bad);
-    expect(sql).not.toMatch(/GRANT (SELECT|ALL)[^;]*TO (anon|authenticated)/);
-    expect(sql).not.toMatch(/FOR SELECT/);
+    for (const sql of sqls) {
+      expect(sql).not.toMatch(/GRANT (SELECT|ALL)[^;]*TO (anon|authenticated)/);
+      expect(sql).not.toMatch(/FOR SELECT/);
+    }
   });
 });
 
@@ -210,6 +259,13 @@ describe("cardClickProps", () => {
     expect(unpriced).toMatchObject({ registrar: "Spaceship", offer: "check_price" });
     expect(unpriced.cheapest).toBeUndefined();
     expect(JSON.stringify(buildSiteEventRow("buy_click", props))).not.toContain("acmeforge");
+  });
+
+  it("impressions list every Available card with its Buy destination, in order, without names", () => {
+    const section = [row("acmeforge.com"), row("acmeforge.xyz"), row("acmeforge.io")];
+    const props = shownOffers(section, cheapestFor);
+    expect(props).toEqual({ shownTlds: ["com", "xyz", "io"], shownRegistrars: ["Spaceship", "Porkbun", "Spaceship"] });
+    expect(JSON.stringify(buildSiteEventRow("results_shown", props))).not.toContain("acmeforge");
   });
 
   it("a confirmed premium is Porkbun's premium offer", () => {

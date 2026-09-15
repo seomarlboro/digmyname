@@ -63,7 +63,7 @@ const staticPricing = `
 const staticHowItWorks = `
 <h1>How DigMyName works — honest domain availability checks</h1>
 <p>Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks three independent availability signals — Fastly Domain Research, RDAP resolved through the IANA bootstrap registry, and DNS-over-HTTPS across three resolvers — and only commits to Available or Taken when they agree. Otherwise it shows an Unverified state with a Retry button instead of a guess.</p>
-<p>Pricing is a separate step: premium prices come from Porkbun's live catalog and the registrar comparison covers 6 registrars. DigMyName is not a registrar and does not sell domains; buy links may earn a small commission, which never changes the price you see.</p>
+<p>Pricing is a separate step: premium prices come from Porkbun's live catalog and the registrar comparison covers 6 registrars. DigMyName is not a registrar and does not sell domains; buy links go straight to the registrar with no affiliate tag.</p>
 <p><a href="/">Try an honest search</a> · <a href="/api">Free JSON API</a></p>`;
 
 const staticSpeed = `
@@ -86,11 +86,16 @@ const staticApi = `
 
 const staticPrivacy = `
 <h1>Privacy policy</h1>
-<p>What DigMyName stores and why: account email for sign-in and saved domains, waitlist email addresses, and short-lived per-IP rate-limit counters on the API. No advertising trackers, no third-party analytics cookies. Full details, retention periods and your rights under the GDPR are on this page.</p>`;
+<p>What DigMyName stores and why: account email for sign-in and saved domains, waitlist email addresses, anonymous usage counts that never include what you search (kept 13 months), a cache of answers keyed by domain name (deleted daily once expired), and short-lived per-IP rate-limit counters on the API. No advertising trackers, no third-party analytics scripts, no cookies for analytics. Full details, retention periods and your rights under the GDPR are on this page.</p>`;
 
 const staticTerms = `
 <h1>Terms of use</h1>
-<p>DigMyName is a free domain-availability search and price-comparison tool. It is not a registrar; purchases happen on the registrar's own site under its terms. Availability and prices are provided as-is from third-party sources; Unverified results are exactly that. Buy links may earn a commission that never changes the price shown.</p>`;
+<p>DigMyName is a free domain-availability search and price-comparison tool. It is not a registrar; purchases happen on the registrar's own site under its terms. Availability and prices are provided as-is from third-party sources; Unverified results are exactly that. Buy links carry no affiliate tag.</p>`;
+
+const staticContact = `
+<h1>Contact DigMyName</h1>
+<p>Email hello@digmyname.com for questions, feedback and privacy requests. To report a wrong availability status or price, send the domain name, what DigMyName showed, and what the registrar or registry shows — by email, or as a public issue at github.com/seomarlboro/digmyname/issues. Problems with the MCP server go to github.com/seomarlboro/domain-check-skills/issues.</p>
+<p><a href="/privacy">Privacy policy</a> · <a href="/terms">Terms of use</a></p>`;
 
 const staticFavorites = `
 <h1>Saved domains</h1>
@@ -167,7 +172,7 @@ export const ROUTES: RouteMeta[] = [
     path: "/privacy",
     title: "Privacy Policy — DigMyName",
     description:
-      "What DigMyName stores (account email, saved domains, waitlist email, short-lived rate-limit counters), for how long, and your rights under the GDPR.",
+      "What DigMyName stores (account email, saved domains, waitlist email, anonymous usage counts, a domain-keyed answer cache, short-lived rate-limit counters), for how long, and your rights under the GDPR.",
     changefreq: "yearly",
     priority: "0.3",
     staticHtml: staticPrivacy,
@@ -176,10 +181,19 @@ export const ROUTES: RouteMeta[] = [
     path: "/terms",
     title: "Terms of Use — DigMyName",
     description:
-      "Terms for using DigMyName's free domain search, price comparison, API and MCP server. Not a registrar; results as-is; affiliate links disclosed.",
+      "Terms for using DigMyName's free domain search, price comparison, API and MCP server. Not a registrar; results as-is; no affiliate links.",
     changefreq: "yearly",
     priority: "0.3",
     staticHtml: staticTerms,
+  },
+  {
+    path: "/contact",
+    title: "Contact — DigMyName",
+    description:
+      "How to reach DigMyName, and how to report a wrong availability status or price: what to send and where.",
+    changefreq: "yearly",
+    priority: "0.3",
+    staticHtml: staticContact,
   },
   {
     path: "/favorites",
@@ -189,6 +203,13 @@ export const ROUTES: RouteMeta[] = [
     staticHtml: staticFavorites,
   },
 ];
+
+/**
+ * Paths that point at another route. The host has no server-side redirects, so
+ * the build writes a tiny page per path (canonical + meta refresh + noindex) and
+ * the SPA answers with <Navigate replace>. `/imprint` waits for the operator's details.
+ */
+export const REDIRECTS: { from: string; to: string }[] = [{ from: "/imprint", to: "/contact" }];
 
 /** Routes that belong in the sitemap: indexable canonical paths only. */
 export const SITEMAP_ROUTES = ROUTES.filter((r) => !r.noindex);

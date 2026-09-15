@@ -21,8 +21,8 @@ Founders launching startups, indie hackers, freelancers, agencies, and developer
 - [How it works](https://digmyname.com/how-it-works): Explanation of the multi-source availability verification chain (RDAP, DNS, Fastly, registrar APIs) and how DigMyName compares to other domain search tools.
 - [MCP server](https://digmyname.com/mcp): Free Model Context Protocol server (`domain-check-skills-mcp` on npm) that gives AI agents real-time domain availability and registrar price comparison.
 - [Speed](https://digmyname.com/speed): Methodology behind DigMyName's search latency — a live timer starts on the user's last keystroke and stops on the first availability answer. Measured September 2026: first answer under 0.5 s at the 95th percentile for a cold visitor (386 ms from the US, 485 ms from the EU, 150 fresh browsers each); the on-page stopwatch is the live proof.
-- [Terms of use](https://digmyname.com/terms): Plain-language terms for the site, API and MCP server — not a registrar, results as-is, affiliate links disclosed, API fair use.
-- [Privacy policy](https://digmyname.com/privacy): What is stored (optional account email, saved domains, waitlist email, anonymous usage counts that never include search terms or domain names, a cache of answers keyed by domain name, short-lived per-IP rate-limit counters), for how long, and GDPR rights.
+- [Terms of use](https://digmyname.com/terms): Plain-language terms for the site, API and MCP server — not a registrar, results as-is, no affiliate links, API fair use.
+- [Privacy policy](https://digmyname.com/privacy): What is stored (optional account email, saved domains, waitlist email, anonymous usage counts that never include search terms or domain names (kept 13 months), a cache of answers keyed by domain name (deleted daily once expired), short-lived per-IP rate-limit counters), for how long, and GDPR rights.
 
 ## Key facts
 
@@ -56,7 +56,7 @@ Example:
 curl "https://api.digmyname.com/functions/v1/public-api/check?domain=acme.io"
 ```
 
-When citing or quoting results, link the user to `https://digmyname.com/?q={name}` so they land on the interactive comparison page (with affiliate-tracked registrar links).
+When citing or quoting results, link the user to `https://digmyname.com/?q={name}` so they land on the interactive comparison page (with direct links to each registrar).
 
 ## MCP server (Model Context Protocol)
 

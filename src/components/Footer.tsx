@@ -139,11 +139,13 @@ const Footer = () => (
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
             <li>Not a registrar</li>
             <li>No hidden markup</li>
-            <li>Buy links may earn us a commission — the price you see is the registrar's own.</li>
+            <li>Buy links go straight to the registrar, with no affiliate tag — the price you see is the registrar's own.</li>
             <li className="pt-2">
               <Link to="/privacy" className="transition-colors hover:text-foreground">Privacy</Link>
               <span aria-hidden="true"> · </span>
               <Link to="/terms" className="transition-colors hover:text-foreground">Terms</Link>
+              <span aria-hidden="true"> · </span>
+              <Link to="/contact" className="transition-colors hover:text-foreground">Contact</Link>
             </li>
           </ul>
         </div>

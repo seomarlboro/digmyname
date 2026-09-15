@@ -13,6 +13,10 @@
  * wave), or right away when the tab is hidden (a buy link opening a new tab).
  * No referrer is sent (the page URL carries `?q=<name>`), no cookie, no user
  * token — only the public anon key. Every failure is swallowed.
+ *
+ * One narrow exception to "no referrer": `mcp_page_view` records where the
+ * visitor came from as a category from a fixed list of hosts (`sourceOf`) —
+ * never the URL, its path or query, and "other" for anything unlisted.
  */
 
 export type SiteEventName =
@@ -25,7 +29,11 @@ export type SiteEventName =
   | "favorite_add"
   | "api_copy"
   | "mcp_copy"
-  | "pricing_tld_view";
+  | "pricing_tld_view"
+  | "results_shown"
+  | "mcp_page_view"
+  | "mcp_click"
+  | "waitlist_signup";
 
 /** Which lane stopped the stopwatch: registry from the browser, DNS pre-check, or the edge. */
 export type FirstAnswerLane = "browser" | "fast" | "edge";
@@ -54,6 +62,10 @@ export interface SiteEventProps {
   target?: string;
   signedIn?: boolean;
   layout?: "cards" | "compact";
+  /** Extensions of the cards shown in the Available section, in on-screen order. */
+  shownTlds?: string[];
+  /** The registrar each of those cards' Buy button goes to (same index as shownTlds). */
+  shownRegistrars?: string[];
 }
 
 /** Exactly the columns anon may insert (the migration grants INSERT on these and nothing else). */
@@ -77,9 +89,12 @@ export const SITE_EVENT_COLUMNS = [
   "target",
   "signed_in",
   "layout",
+  "source",
+  "shown_tlds",
+  "shown_registrars",
 ] as const;
 
-export type SiteEventRow = Record<(typeof SITE_EVENT_COLUMNS)[number], string | number | boolean | null>;
+export type SiteEventRow = Record<(typeof SITE_EVENT_COLUMNS)[number], string | number | boolean | string[] | null>;
 
 const ALLOWED: Record<SiteEventName, (keyof SiteEventProps)[]> = {
   search_started: ["queryLength", "tldTyped", "tldCount"],
@@ -92,6 +107,10 @@ const ALLOWED: Record<SiteEventName, (keyof SiteEventProps)[]> = {
   api_copy: ["target"],
   mcp_copy: ["target"],
   pricing_tld_view: ["tld"],
+  results_shown: ["shownTlds", "shownRegistrars"],
+  mcp_page_view: [],
+  mcp_click: ["target"],
+  waitlist_signup: [],
 };
 
 const REGISTRARS = new Set(["Namecheap", "Cloudflare", "Porkbun", "GoDaddy", "Spaceship", "OVHcloud"]);
@@ -100,8 +119,33 @@ const LANES = new Set(["browser", "fast", "edge"]);
 const OFFERS = new Set(["available", "premium", "check_price"]);
 const LAYOUTS = new Set(["cards", "compact"]);
 const TLD_RE = /^[a-z0-9-]{2,24}$/;
-/** Snippet tabs on /api and /mcp, slugified. Anything else becomes "other". */
-const TARGETS = new Set(["curl", "javascript", "python", "response", "claude_code", "claude_desktop_config_json"]);
+/** Snippet tabs on /api and /mcp, and the links on /mcp, slugified. Anything else becomes "other". */
+const TARGETS = new Set([
+  "curl", "javascript", "python", "response", "claude_code", "claude_desktop_config_json",
+  "npm_pill", "github_hero", "try_live_search", "format_mcp_server", "format_claude_skill", "format_custom_gpt", "github_footer",
+]);
+/** Referrer host → source category for mcp_page_view. First match wins; unlisted hosts are "other". */
+const SOURCES: [RegExp, string][] = [
+  [/(^|\.)glama\.ai$/, "glama"],
+  [/(^|\.)npmjs\.(com|org)$/, "npm"],
+  [/(^|\.)github\.com$/, "github"],
+  [/(^|\.)modelcontextprotocol\.io$/, "mcp_registry"],
+  [/(^|\.)pulsemcp\.com$/, "pulsemcp"],
+  [/(^|\.)mcpservers\.org$/, "mcpservers"],
+  [/(^|\.)smithery\.ai$/, "smithery"],
+  [/(^|\.)cursor\.directory$/, "cursor_directory"],
+  [/(^|\.)google\.[a-z.]+$/, "google"],
+  [/(^|\.)bing\.com$/, "bing"],
+  [/(^|\.)duckduckgo\.com$/, "duckduckgo"],
+  [/(^|\.)(chatgpt|openai)\.com$/, "chatgpt"],
+  [/(^|\.)claude\.ai$/, "claude"],
+  [/(^|\.)perplexity\.ai$/, "perplexity"],
+  [/(^|\.)reddit\.com$/, "reddit"],
+  [/(^|\.)(x|twitter)\.com$|^t\.co$/, "x"],
+  [/(^|\.)ycombinator\.com$/, "hackernews"],
+  [/(^|\.)digmyname\.com$|^localhost$/, "digmyname"],
+];
+const MAX_SHOWN = 400;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 /** Mirrors useIsMobile's breakpoint. */
@@ -122,9 +166,32 @@ function target(v: unknown): string | null {
   return TARGETS.has(s) ? s : "other";
 }
 
+/** Category of the referring site, never the URL. Empty referrer = "direct". */
+export function sourceOf(referrer: string): string {
+  if (!referrer) return "direct";
+  let host: string;
+  try {
+    host = new URL(referrer).hostname.toLowerCase();
+  } catch {
+    return "other";
+  }
+  for (const [re, name] of SOURCES) if (re.test(host)) return name;
+  return "other";
+}
+
+/** Aligned TLD / registrar lists, or null when either is malformed. */
+function shown(tlds: unknown, registrars: unknown): [string[], string[]] | null {
+  if (!Array.isArray(tlds) || !Array.isArray(registrars)) return null;
+  if (tlds.length !== registrars.length || tlds.length > MAX_SHOWN) return null;
+  if (!tlds.every((t) => typeof t === "string" && TLD_RE.test(t))) return null;
+  if (!registrars.every((r) => typeof r === "string" && REGISTRARS.has(r))) return null;
+  return [tlds as string[], registrars as string[]];
+}
+
 function pageOf(pathname: string): string {
   const p = pathname.replace(/\/+$/, "") || "/";
   if (p === "/") return "search";
+  if (p === "/skill" || p === "/gpt") return "mcp";
   const known = ["/pricing", "/api", "/mcp", "/favorites"];
   return known.includes(p) ? p.slice(1) : "other";
 }
@@ -180,6 +247,7 @@ export function buildSiteEventRow(event: SiteEventName, props: SiteEventProps = 
   if (!allowed) return null;
   const has = (k: keyof SiteEventProps) => allowed.includes(k) ? props[k] : undefined;
   const marketplace = has("marketplace");
+  const lists = shown(has("shownTlds"), has("shownRegistrars"));
   return {
     session_id: sessionId(),
     event,
@@ -200,6 +268,9 @@ export function buildSiteEventRow(event: SiteEventName, props: SiteEventProps = 
     target: target(has("target")),
     signed_in: bool(has("signedIn")),
     layout: oneOf(has("layout"), LAYOUTS),
+    source: event === "mcp_page_view" ? sourceOf(typeof document !== "undefined" ? document.referrer : "") : null,
+    shown_tlds: lists ? lists[0] : null,
+    shown_registrars: lists ? lists[1] : null,
   };
 }
 

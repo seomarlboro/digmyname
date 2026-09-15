@@ -13,7 +13,6 @@ import { useEffect } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { trackMcpEvent } from "@/lib/trackMcpEvent";
 import { trackSiteEvent } from "@/lib/siteEvents";
 import WaitlistSection from "@/components/WaitlistSection";
 import { CodeBlock } from "@/components/CodeBlock";
@@ -92,7 +91,8 @@ const oneLineCommand = `claude mcp add domain-check -- npx -y domain-check-skill
 
 const Mcp = () => {
   useEffect(() => {
-    trackMcpEvent("page_view", "mcp");
+    // The referring site is recorded only as a category from a fixed list (siteEvents.ts sourceOf).
+    trackSiteEvent("mcp_page_view");
   }, []);
 
 
@@ -125,7 +125,7 @@ const Mcp = () => {
                 href={NPM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => trackMcpEvent("click", "npm_pill")}
+                onClick={() => trackSiteEvent("mcp_click", { target: "npm_pill" })}
                 className="eyebrow transition-colors hover:bg-aurora/20"
               >
                 <span className="relative flex h-2 w-2">
@@ -179,14 +179,14 @@ const Mcp = () => {
                     href={GITHUB_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => trackMcpEvent("click", "github_hero")}
+                    onClick={() => trackSiteEvent("mcp_click", { target: "github_hero" })}
                   >
                     <Github className="h-5 w-5" />
                     View on GitHub
                   </a>
                 </Button>
                 <Button asChild size="lg" variant="outline">
-                  <Link to="/?q=example.com" onClick={() => trackMcpEvent("click", "try_live_search")}>
+                  <Link to="/?q=example.com" onClick={() => trackSiteEvent("mcp_click", { target: "try_live_search" })}>
                     Try a live search
                   </Link>
                 </Button>
@@ -217,7 +217,7 @@ const Mcp = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() =>
-                    trackMcpEvent("click", `format_${f.title.toLowerCase().replace(/\s+/g, "_")}`)
+                    trackSiteEvent("mcp_click", { target: `format_${f.title.toLowerCase().replace(/\s+/g, "_")}` })
                   }
                   footer={
                     <>
@@ -255,10 +255,7 @@ const Mcp = () => {
                 { label: "Claude Code", language: "bash", code: oneLineCommand },
                 { label: "claude_desktop_config.json", language: "json", code: configSnippet },
               ]}
-              onCopy={(label) => {
-                trackMcpEvent("copy_config", "mcp_quickstart");
-                trackSiteEvent("mcp_copy", { target: label });
-              }}
+              onCopy={(label) => trackSiteEvent("mcp_copy", { target: label })}
             />
 
 
@@ -308,7 +305,7 @@ const Mcp = () => {
                   href={GITHUB_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => trackMcpEvent("click", "github_footer")}
+                  onClick={() => trackSiteEvent("mcp_click", { target: "github_footer" })}
                 >
                   <Github className="w-5 h-5" />
                   Star on GitHub

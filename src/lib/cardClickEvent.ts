@@ -26,6 +26,19 @@ function shownPrice(r: DomainResult, cheapestFor: CheapestFor): number | null {
   return f.trustedPrice;
 }
 
+/** Where a card's Buy button goes: the named registrar, or Spaceship's search when no price is known. */
+export function buyRegistrar(r: DomainResult, cheapest: CheapestRegistrar | undefined): string {
+  return deriveCardFacts(r, cheapest).registrarName ?? "Spaceship";
+}
+
+/** The impression side of CTR: every card of the Available section with its Buy destination. No names. */
+export function shownOffers(section: DomainResult[], cheapestFor: CheapestFor): SiteEventProps {
+  return {
+    shownTlds: section.map((r) => r.tld.extension),
+    shownRegistrars: section.map((r) => buyRegistrar(r, cheapestFor(r))),
+  };
+}
+
 export function buyOffer(r: DomainResult, cheapest: CheapestRegistrar | undefined): BuyOffer {
   const f = deriveCardFacts(r, cheapest);
   if (f.isPremium || f.isLikelyPremium) return "premium";
@@ -51,9 +64,7 @@ export function cardClickProps(
   };
   if (kind === "buy") {
     const cheapest = cheapestFor(row);
-    const facts = deriveCardFacts(row, cheapest);
-    // The button links to the named registrar, or to Spaceship's search when no price is known.
-    props.registrar = facts.registrarName ?? "Spaceship";
+    props.registrar = buyRegistrar(row, cheapest);
     props.offer = buyOffer(row, cheapest);
     const price = shownPrice(row, cheapestFor);
     if (price != null) {

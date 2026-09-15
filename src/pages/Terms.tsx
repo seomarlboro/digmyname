@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import RouteHead from "@/seo/RouteHead";
 import { PageMain, PageHeader, Eyebrow, Section, FaqList } from "@/components/PageKit";
 
-const UPDATED = "September 10, 2026";
+const UPDATED = "September 16, 2026";
 
 const terms = [
   {
@@ -12,11 +12,11 @@ const terms = [
   },
   {
     q: "Availability and prices are provided as-is",
-    a: "Answers come from public registry data (RDAP), DNS and third-party lookups, and prices from registrar catalogs. We cross-check three availability signals and label a result Unverified when they disagree, but no lookup is a guarantee: a domain can be registered by someone else between our answer and your checkout, and a registrar can change a price at any time. Confirm on the registrar before relying on a result.",
+    a: "Answers come from public registry data (RDAP), DNS and third-party lookups, and prices from registrars' own catalogs and pages and from third-party price listings. We cross-check three availability signals and label a result Unverified when they disagree, but no lookup is a guarantee: a domain can be registered by someone else between our answer and your checkout, and a registrar can change a price at any time. Confirm on the registrar before relying on a result.",
   },
   {
-    q: "Affiliate links",
-    a: "Some buy links carry an affiliate tag and may earn DigMyName a commission from the registrar. The tag never changes the price you pay, and the comparison ranks registrars by their price alone — including when a partner is not the cheapest.",
+    q: "Buy links",
+    a: "Buy links open the registrar's own site and carry no affiliate tag, so DigMyName earns nothing from a purchase. The comparison ranks registrars by their price alone. If affiliate links are ever added, this section will say so before they go live.",
   },
   {
     q: "Fair use of the API and MCP server",
@@ -32,7 +32,7 @@ const terms = [
   },
   {
     q: "Changes and contact",
-    a: `We may update these terms; the date at the top says when. Continued use after a change means you accept it. Questions go to hello@digmyname.com. These terms are governed by the law of the operator's country of establishment in the European Union, without affecting the mandatory consumer protections of the country you live in. Last updated ${UPDATED}.`,
+    a: `We may update these terms; the date at the top says when. Continued use after a change means you accept it. Questions go to hello@digmyname.com (see the contact page). These terms are governed by the law of the operator's country of establishment in the European Union, without affecting the mandatory consumer protections of the country you live in. Last updated ${UPDATED}.`,
   },
 ];
 

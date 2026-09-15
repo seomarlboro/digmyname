@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import RouteHead from "@/seo/RouteHead";
 import { PageMain, PageHeader, Eyebrow, Section } from "@/components/PageKit";
 
-const UPDATED = "September 15, 2026";
+const UPDATED = "September 16, 2026";
 
 /** What is stored, keyed by the feature that stores it. Retention is stated per row so nothing is open-ended. */
 const records = [
@@ -27,21 +27,21 @@ const records = [
   },
   {
     feature: "Site usage counts",
-    data: "Anonymous events: a search started (only how many characters were typed, whether they ended in an extension we track, and how many names were checked — never the text itself), how long the first answer took and which check delivered it, clicks on Buy, marketplace, Whois and open-site links (the registrar, the extension, the card's position, whether it showed the lowest price on screen, standard or premium), saving a domain, copying an API or MCP snippet (which tab), and opening an extension on the pricing page. Each event also records the page, mobile or desktop (from the window width) and a random ID kept in this tab's session storage, which is gone when the tab closes. Never the domain name or the text you search, no IP address, no user-agent string, no cookie, no account ID.",
+    data: "Anonymous events: a search started (only how many characters were typed, whether they ended in an extension we track, and how many names were checked — never the text itself), how long the first answer took and which check delivered it, clicks on Buy, marketplace, Whois and open-site links (the registrar, the extension, the card's position, whether it showed the lowest price on screen, standard or premium), which extensions a finished search listed as available and which registrar each Buy button pointed to, saving a domain, copying an API or MCP snippet (which tab), opening an extension on the pricing page, and on the MCP page: page views with the kind of site you came from (a category from a fixed list such as GitHub, npm or a search engine — never the address), clicks on its links, and paid-tier waitlist sign-ups (that one happened, not the email). Each event also records the page, mobile or desktop (from the window width) and a random ID kept in this tab's session storage, which is gone when the tab closes. Never the domain name or the text you search, no IP address, no user-agent string, no cookie, no account ID.",
     why: "To learn whether the comparison is useful — how many searches end in a visit to a registrar, and which — before building anything paid.",
-    keep: "For as long as the site runs, as usage history. Nothing in these rows identifies you, so there is nothing to delete on request.",
+    keep: "13 months, then deleted by a daily job. Nothing in these rows identifies you, so there is nothing to delete on request.",
   },
   {
-    feature: "MCP page usage",
-    data: "Which install buttons and links were clicked on the MCP page, the referring page, and the user-agent string. No IP address, no cookie, no user ID — the rows cannot be linked back to a person.",
-    why: "To learn which install path people use, so the docs improve.",
-    keep: "For as long as the MCP page exists; there is nothing in them to delete on request because nothing identifies you.",
+    feature: "Earlier MCP page usage",
+    data: "Before the usage counts above, the MCP page recorded which install buttons and links were clicked, the referring page and the user-agent string, in a separate table. No IP address, no cookie, no user ID — the rows cannot be linked back to a person. Nothing new is written there.",
+    why: "It was used to learn which install path people use.",
+    keep: "The existing rows stay until that table is deleted; there is nothing in them to delete on request because nothing identifies you.",
   },
   {
     feature: "Answer cache",
     data: "Checked domain names with their verdict (taken or available, and how it was confirmed). The row holds the name only — nothing about who searched it.",
     why: "So a repeat lookup of the same name is fast and does not hit the registries again.",
-    keep: "An answer is used for 10 minutes to 24 hours, depending on the verdict. Expired rows are not yet deleted automatically, so a name can remain in the table after its answer has expired.",
+    keep: "An answer is used for 10 minutes to 24 hours, depending on the verdict, and a daily job deletes it once it has expired — so a checked name stays in the table for at most about two days.",
   },
   {
     feature: "API and site rate limiting",

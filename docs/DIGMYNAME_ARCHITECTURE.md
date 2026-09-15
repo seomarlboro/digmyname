@@ -1,6 +1,6 @@
 # DigMyName — Architecture & State Protocol
 
-> **This is the living source-of-truth for DigMyName.** It must be kept current: any architectural change, new decision, or shift in what we're building gets reflected here in the SAME commit. Read it in full at the start of any work session. It is written so a human OR an AI agent with zero prior knowledge can understand how the system works, why it's built this way, what's live, and where the weak spots are — enough that a fresh chat can run a full review from this document alone. Last verified: 2026-09-15.
+> **This is the living source-of-truth for DigMyName.** It must be kept current: any architectural change, new decision, or shift in what we're building gets reflected here in the SAME commit. Read it in full at the start of any work session. It is written so a human OR an AI agent with zero prior knowledge can understand how the system works, why it's built this way, what's live, and where the weak spots are — enough that a fresh chat can run a full review from this document alone. Last verified: 2026-09-16.
 
 ## 1. What the product is
 
@@ -53,7 +53,7 @@ This is the single most important invariant. An uncertain result is NEVER cached
 ### Pass structure inside checkDomains()
 
 1. L1 hot cache (per-isolate, in-memory, 10 min). **Measured dead** (2026-08-12, three ways: 0–6 % of requests reach a warm isolate), so in practice it never fires; same for the in-isolate response cache in public-api.
-2. L2 DB cache (domain_cache table, tiered TTL) — skips network probes. Awaited BEFORE the probes start (100–115 ms from another region, ~10–30 in-region); running it in parallel with the probes is a known free win, not yet applied (owner go pending).
+2. L2 DB cache (domain_cache table, tiered TTL) — skips network probes. Readers only use rows with `expires_at > now()`; since 2026-09-16 the pg_cron job `domain-cache-purge-expired` (daily 03:17 UTC) deletes expired rows, so a checked name is kept at most ~48 h (max TTL 24 h + up to a day until the job). TTLs unchanged. Awaited BEFORE the probes start (100–115 ms from another region, ~10–30 in-region); running it in parallel with the probes is a known free win, not yet applied (owner go pending).
 3. Pass 1 — free authoritative sources (RDAP + DNS) run in parallel per domain; each publishes its verdict into partialSink the moment it lands.
 4. Pass 2 — the third signal (Fastly) fires ONLY where it adds value (premium suspects, brand-blocked names, .co/.me) — plus, since 2026-09-12, the ONE name the visitor typed: the site sends a `verifyPremium` request for the headline card after the wave settles (800 ms), which bypasses the cache for that name and forces pass 2 whenever pass 1 says available. Registry-premium names outside the suspect heuristics (`reputation.dev`, $174 at Porkbun) used to ship with the standard TLD price. Porkbun's checkDomain prefers that name for the confirmed price. One paid call per settled search, cached 24 h; kill switch `HEADLINE_PREMIUM_CHECK=off`; API/MCP unchanged.
 5. Aftermarket NS detection — registered names on Sedo/Dan/Afternic/etc. get a resale listing link.
@@ -122,6 +122,7 @@ These are product identity, not preferences. Breaking any is a defect:
 - Never show a price without a fresh, trusted DB row (supported=true, within 60 days).
 - Brand-protected / sldBlocked names -> uncertain:true, uncertainReason:"brand_protected" on all paths; never fall through to available.
 - Never log search queries or domain names in analytics (§12). /privacy lists every stored thing and must match the code.
+- No commission / affiliate claims while buy links carry no affiliate tag (`registrarColors.ts` builds plain registrar URLs; `registrar_prices.affiliate_url` is empty). Adding affiliate links means updating Terms, Privacy, HowItWorks, the search disclosure, the footer, `routes.ts`, llms.txt, llms-full.txt and ai-plugin.json first; `public-claims.test.ts` fails on "commission" until then.
 
 ## 7. Cross-surface consistency rule (owner-mandated)
 
@@ -229,7 +230,7 @@ Owner goal: first answer ≤ 1 s "under any conditions", honest number, free mea
 
 Goal: measure the funnel before monetisation (searches → first answer → registrar click). First-party, no third-party scripts, no cookies, no consent banner.
 
-**The rule: never log search queries or domain names.** Nothing in the client takes a free-text field; there is no column that could hold a name. Also never stored: IP, user agent, referrer, user id. A new event or property has to keep that true, and `/privacy` ("Site usage counts") changes in the same commit.
+**The rule: never log search queries or domain names.** Nothing in the client takes a free-text field; there is no column that could hold a name. Also never stored: IP, user agent, referrer, user id. One narrow exception, decided by the owner 2026-09-16: `mcp_page_view` stores `source`, the referring host mapped to a category from a fixed list (`sourceOf`: glama, npm, github, mcp_registry, …, `direct`, `other`) — never the URL, path or query. A new event or property has to keep that true, and `/privacy` ("Site usage counts") changes in the same commit.
 
 **Client** — `src/lib/siteEvents.ts`. `trackSiteEvent(event, props)` whitelists props per event, validates each to a closed shape (`tld` = `^[a-z0-9-]{2,24}$`, no dot; `registrar`, `lane`, `offer`, `layout`, `target`, `marketplace` = fixed lists, unknown → null / `other`), and only pushes the row onto an in-memory queue. One batched `POST /rest/v1/site_events` leaves 2 s after the first queued event, or at once on `visibilitychange: hidden` / `pagehide`, via `fetch` with `keepalive`, `credentials: "omit"`, `referrerPolicy: "no-referrer"` (the page URL carries `?q=<name>`) and only the anon key — never the signed-in user's token. Every failure is swallowed. Nothing is sent on the critical path: `markFirstAnswer` only enqueues, and the stopwatch / lane timings are unchanged (`search-lanes.test.tsx` green; the benchmark waits on the stopwatch DOM, which analytics does not touch). Automated browsers (`navigator.webdriver`) are skipped outside localhost, so `scripts/bench/first-answer.mjs` runs do not pollute the funnel. Card rows: `src/lib/cardClickEvent.ts` derives the click properties from the same `deriveCardFacts` the card renders.
 
@@ -245,14 +246,21 @@ Common columns: `session_id` (random UUID in `sessionStorage` key `dmn_sid`, one
 | `favorite_add` | Heart on a not-yet-saved card | `tld`, `position`, `signed_in` (false = the click opened sign-in) |
 | `api_copy` / `mcp_copy` | CodeBlock copy on /api, /mcp | `target` (tab: `curl`, `javascript`, `python`, `response`, `claude_code`, `claude_desktop_config_json`) |
 | `pricing_tld_view` | /pricing: TLD anchor click or opening a TLD's table | `tld` |
+| `results_shown` | DomainSearch, once per search when no row is checking any more (effect after render) | `shown_tlds[]`, `shown_registrars[]` — aligned: every card of the Available section and where its Buy button goes. The impression side of CTR |
+| `mcp_page_view` | /mcp mount (also /skill, /gpt → `page = mcp`) | `source` |
+| `mcp_click` | /mcp links | `target` (`npm_pill`, `github_hero`, `try_live_search`, `format_mcp_server`, `format_claude_skill`, `format_custom_gpt`, `github_footer`) |
+| `waitlist_signup` | Paid-tier waitlist form (on /mcp and /api) after a successful insert | — |
 
-**Database** — migration `20260915120000_site_events.sql` (idempotent). CHECK constraints mirror the client validation. RLS on; anon/authenticated get `INSERT` on the listed columns only (no SELECT/UPDATE/DELETE; Supabase's default grants are revoked). Reports are views in the `analytics` schema, which PostgREST does not expose and the public roles cannot use — read them from the SQL editor / `query_database`:
+**Database** — migrations `20260915120000_site_events.sql` and `20260916090000_retention_ctr_mcp_events.sql` (both idempotent; the second adds `source`, `shown_tlds`, `shown_registrars`, the new event/target lists and the retention jobs). CHECK constraints mirror the client validation. RLS on; anon/authenticated get `INSERT` on the listed columns only (no SELECT/UPDATE/DELETE; Supabase's default grants are revoked). Reports are views in the `analytics` schema, which PostgREST does not expose and the public roles cannot use — read them from the SQL editor / `query_database`:
 
 - `analytics.site_events_prod` — `env = 'prod'` rows plus a UTC `day`.
 - `analytics.funnel_daily` — searches, search / answered / buy-click / aftermarket / favourite sessions, `search_to_buy_pct`, stopwatch p50/p95 of real visitors (NOT a benchmark — never quote publicly; public latency figures come only from §3's benchmark).
-- `analytics.buy_clicks_by_registrar_tld` — clicks per registrar × TLD × day, split by offer, and `clicks_per_100_search_sessions`.
+- `analytics.buy_ctr_by_registrar_tld` — impressions (unnested `results_shown`) and buy clicks per registrar × TLD × day, clicks split by offer, `ctr_pct` = clicks / impressions. Rollups: `analytics.buy_ctr_by_registrar`, `analytics.buy_ctr_by_tld`. (Replaced `buy_clicks_by_registrar_tld`, which could only divide by search sessions.)
 - `analytics.cheapest_click_share` — share of priced buy clicks on the cheapest card.
 - `analytics.device_daily` — mobile vs desktop sessions, searches, buy clicks, conversion, stopwatch p95.
+- `analytics.mcp_page_daily` — /mcp sessions by `source` of their first view that day, with page views, config copies, link clicks and waitlist sign-ups.
 
-Known limits: there is no card-impression event, so "CTR" is clicks per 100 search sessions, not per impression; the funnel is per session-day, not strictly ordered; a session is a tab (a new tab = a new session); the insert endpoint is public, so rows can be spammed (same as `mcp_events`); retention is not bounded yet (owner decision). `mcp_events` (/mcp page, stores referrer + full user agent) is left as it was.
+**Retention** (pg_cron, same mechanism as keep-warm / prewarm / price refresh): `site-events-retention` daily 03:27 UTC deletes `site_events` older than 13 months; `domain-cache-purge-expired` (§3). /privacy states both.
+
+Known limits: an impression is counted once per search, when it settles — a Buy click on an early (provisional) card before the wave settles, or after filters change, has no matching impression row, so treat per-cell CTR on tiny numbers with care; the funnel is per session-day, not strictly ordered; a session is a tab (a new tab = a new session); `source` comes from `document.referrer` of the page load, so an in-site navigation to /mcp inherits the landing referrer; the insert endpoint is public, so rows can be spammed. `mcp_events` (the old /mcp table: referrer URL + full user agent) is no longer written by the site; `supabase/pending/drop_mcp_events.sql` drops it once the owner approves (kept out of `supabase/migrations` on purpose).
 

@@ -14,7 +14,7 @@ DigMyName helps users find an available domain name and buy it from the cheapest
 
 URL: https://digmyname.com
 Primary user: founders, indie hackers, freelancers, agencies, developers.
-Pricing model: free to use. Some buy links carry an affiliate tag that may earn DigMyName a commission from the registrar; the tag never changes the price, and prices shown are the registrar's own, never marked up.
+Pricing model: free to use. Buy links go straight to the registrar with no affiliate tag, so DigMyName earns nothing from a purchase; prices shown are the registrar's own, never marked up.
 
 ## How availability checking works
 

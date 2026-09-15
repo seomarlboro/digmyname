@@ -2,6 +2,18 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-16 — Honest buy-link copy, retention, CTR impressions, /contact (frontend + migration)
+
+### Fixed
+- Every public surface said buy links "may earn us a commission". No buy link carries an affiliate tag and no price row has an affiliate URL, so the search disclosure, footer, How it works, Terms, the prerendered crawler text, llms.txt, llms-full.txt and ai-plugin.json now say what is true: buy links go straight to the registrar with no affiliate tag. A test fails if "commission" comes back.
+- /terms: prices are described as coming from registrars' catalogs and pages and third-party price listings (not registrar catalogs alone).
+
+### Added
+- **Retention jobs** (pg_cron, migration `20260916090000`): expired `domain_cache` rows are deleted daily (the pipeline never reads them; TTLs unchanged), and `site_events` rows older than 13 months. /privacy states both periods.
+- **CTR impressions:** one `results_shown` event per settled search lists the extensions of the Available cards and the registrar each Buy button goes to (no name, no query). `analytics.buy_ctr_by_registrar_tld` (+ per-registrar and per-TLD rollups) divides buy clicks by impressions.
+- **/mcp tracking moved to `site_events`:** `mcp_page_view` (referring site as a category from a fixed list, never the URL), `mcp_click`, `mcp_copy`, `waitlist_signup`. `trackMcpEvent` is gone; the old table is untouched, with a drop script waiting in `supabase/pending/`.
+- **/contact:** email, what to include when reporting a wrong status or price, the public issue trackers. `/imprint` redirects there until legal details are published (SPA redirect plus a prerendered redirect page). Footer and sitemap link it.
+
 ## 2026-09-12 — The typed name gets its real price (frontend + edge: check-domains)
 
 ### Fixed

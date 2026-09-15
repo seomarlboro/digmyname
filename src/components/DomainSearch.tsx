@@ -12,7 +12,7 @@ import { matchesFilters, type ResultFilters } from "@/lib/resultFilters";
 import { earlyHeadline, isPremiumSuspectSld, sldOf } from "@/lib/searchLanes";
 import { applyBrowserVerdict, browserLaneEligible, checkInBrowser, warmRegistries, type BrowserVerdict } from "@/lib/browserLane";
 import { trackSiteEvent, type FirstAnswerLane } from "@/lib/siteEvents";
-import { CARD_ACTION_EVENT, cardClickProps, type CardActionKind } from "@/lib/cardClickEvent";
+import { CARD_ACTION_EVENT, cardClickProps, shownOffers, type CardActionKind } from "@/lib/cardClickEvent";
 
 const StarsIcon = ({ className, active }: { className?: string; active?: boolean }) => (
   <svg
@@ -105,6 +105,8 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
     taken: [],
     layout: "cards",
   });
+  /** Set when a search starts; cleared once its settled Available section has been counted as shown. */
+  const impressionPendingRef = useRef(false);
   const cacheResult = useCallback((r: DomainResult) => {
     // Honesty guardrail: only remember confident, authoritative verdicts.
     if (r.checking || r.uncertain || r.provisional || r.reachFailed) return;
@@ -283,6 +285,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       setResults(hydrated);
       setLoading(false);
       // Shape of the search only — never the text (siteEvents.ts). Queued, sent later.
+      impressionPendingRef.current = true;
       trackSiteEvent("search_started", {
         queryLength: debouncedQuery.trim().length,
         tldTyped: typedTldOf(debouncedQuery) != null,
@@ -596,6 +599,15 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
     trackSiteEvent(CARD_ACTION_EVENT[kind], cardClickProps(kind, row, section, (r) => cheapestRef.current.get(r.tld.extension), layout));
   }, []);
 
+  // Impressions for CTR: one "results_shown" row per search, once nothing is
+  // checking any more — which extensions the Available section showed and where
+  // each Buy button goes. After the wave has settled; queued, sent later.
+  useEffect(() => {
+    if (!impressionPendingRef.current || loading || results.length === 0 || stillChecking) return;
+    impressionPendingRef.current = false;
+    trackSiteEvent("results_shown", shownOffers(availableList, (r) => cheapestRef.current.get(r.tld.extension)));
+  }, [loading, results.length, stillChecking, availableList]);
+
   const searchBar = (
     <div className="flex w-full min-w-0 flex-1 items-center gap-0.5 rounded-[100px] border border-white/40 bg-white/25 py-[14px] pl-4 pr-4 sm:pl-5 sm:pr-6 [backdrop-filter:blur(64px)] dark:border-white/10 dark:bg-white/[0.05]">
       <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
@@ -727,9 +739,9 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
               </p>
             )}
 
-            {/* Affiliate disclosure sits where the buy buttons are, not on a page nobody reads first. */}
+            {/* What a buy link is, stated where the buy buttons are. Keep it true: change it the day affiliate tags exist. */}
             <p className="mb-6 text-center text-xs text-muted-foreground">
-              Buy links may earn us a commission. Prices are the registrar's own, never marked up.{" "}
+              Buy links go straight to the registrar, with no affiliate tag. Prices are the registrar's own, never marked up.{" "}
               <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms</Link>
             </p>
 

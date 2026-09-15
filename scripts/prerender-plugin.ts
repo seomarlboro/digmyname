@@ -6,8 +6,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join, resolve } from "path";
 import type { Plugin, ResolvedConfig } from "vite";
-import { ROUTES } from "../src/seo/routes";
-import { outputPathsFor, renderRouteHtml } from "../src/seo/prerender";
+import { REDIRECTS, ROUTES } from "../src/seo/routes";
+import { outputPathsFor, renderRedirectHtml, renderRouteHtml } from "../src/seo/prerender";
 
 export function prerenderRoutes(): Plugin {
   let config: ResolvedConfig;
@@ -35,7 +35,15 @@ export function prerenderRoutes(): Plugin {
           }
         }
       }
-      config.logger.info(`prerender: ${written} route files written for ${ROUTES.length} routes`);
+      for (const { from, to } of REDIRECTS) {
+        for (const rel of outputPathsFor(from)) {
+          const target = join(outDir, rel);
+          mkdirSync(dirname(target), { recursive: true });
+          writeFileSync(target, renderRedirectHtml(to));
+          written++;
+        }
+      }
+      config.logger.info(`prerender: ${written} route files written for ${ROUTES.length} routes and ${REDIRECTS.length} redirects`);
     },
   };
 }

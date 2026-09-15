@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { trackMcpEvent } from "@/lib/trackMcpEvent";
+import { trackSiteEvent } from "@/lib/siteEvents";
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 
@@ -44,7 +44,7 @@ const WaitlistForm = () => {
       return;
     }
 
-    trackMcpEvent("click", "waitlist_signup");
+    trackSiteEvent("waitlist_signup");
     setStatus("success");
     setEmail("");
   };

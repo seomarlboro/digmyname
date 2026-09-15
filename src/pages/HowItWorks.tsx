@@ -111,7 +111,7 @@ const faqs = [
   },
   {
     q: "Is DigMyName free?",
-    a: "Yes — search, verification, premium pricing and registrar comparison are all free. We earn a small commission only when you choose to register through one of the buy links. That's it.",
+    a: "Yes — search, verification, premium pricing and registrar comparison are all free. Buy links go straight to the registrar with no affiliate tag, so we earn nothing when you register a domain.",
   },
   {
     q: "Is it fast, or accurate?",
@@ -282,8 +282,8 @@ const HowItWorks = () => {
               registrar you prefer.
             </FeatureCard>
             <FeatureCard icon={() => <Heart className="text-muted-foreground" />} title="Not an affiliate farm">
-              Yes, buy links pay us a small commission. But the price comparison is honest —
-              including when our partners aren't the cheapest.
+              Buy links carry no affiliate tag and pay us nothing. Registrars are ranked by
+              their price alone.
             </FeatureCard>
           </div>
         </Section>

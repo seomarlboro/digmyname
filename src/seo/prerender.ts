@@ -12,7 +12,7 @@
  *
  * Pure function, no fs — the Vite plugin in scripts/prerender-plugin.ts does the I/O.
  */
-import { canonicalUrl, type RouteMeta } from "./routes";
+import { SITE_URL, canonicalUrl, type RouteMeta } from "./routes";
 
 export const HEAD_START = "<!-- route-head:start -->";
 export const HEAD_END = "<!-- route-head:end -->";
@@ -80,4 +80,23 @@ export function outputPathsFor(path: string): string[] {
   if (path === "/") return ["index.html"];
   const slug = path.replace(/^\/+/, "");
   return [`${slug}/index.html`, `${slug}.html`];
+}
+
+/** A static redirect page for hosts without server redirects: canonical to the target, noindex, meta refresh, JS fallback keeps query and hash. */
+export function renderRedirectHtml(to: string): string {
+  const url = `${SITE_URL}${to}`;
+  return [
+    `<!doctype html>`,
+    `<html lang="en">`,
+    `<head>`,
+    `<meta charset="utf-8" />`,
+    `<title>Redirecting to ${escapeText(url)}</title>`,
+    `<link rel="canonical" href="${escapeAttr(url)}" />`,
+    `<meta name="robots" content="noindex" />`,
+    `<meta http-equiv="refresh" content="0; url=${escapeAttr(to)}" />`,
+    `<script>location.replace(${JSON.stringify(to)} + location.search + location.hash);</script>`,
+    `</head>`,
+    `<body><p>Moved to <a href="${escapeAttr(to)}">${escapeText(url)}</a>.</p></body>`,
+    `</html>`,
+  ].join("\n");
 }
