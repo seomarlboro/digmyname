@@ -399,8 +399,9 @@
      Text uses a mode-aware mint so it stays readable on the light hero bg. */
   .hero-chip {
     /* Light: a mint-tinted badge. A grey foreground tint read as mud and frosted white vanished on the pale hero. */
-    background-color: hsl(165 70% 40% / 0.1);
-    border-color: hsl(165 70% 32% / 0.3);
+    /* Fill and edge far apart, or the 1px edge melts into the fill and reads blurry. */
+    background-color: hsl(165 70% 40% / 0.07);
+    border-color: hsl(165 65% 30% / 0.45);
   }
   .dark .hero-chip {
     background-color: hsl(var(--foreground) / 0.12);
