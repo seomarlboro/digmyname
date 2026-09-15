@@ -53,11 +53,15 @@ export function deriveCardFacts(result: DomainResult, cheapest: CheapestRegistra
   // the price-less "Check price" state instead of a static seed price.
   const trustedPrice = resolveDisplayPrice(cheapest?.regPrice);
   const hasTrustedPrice = trustedPrice != null;
-  const renewPrice = hasTrustedPrice ? (cheapest?.renewPrice ?? null) : null;
-  const hasHighRenewal =
-    !isPremium && !isLikelyPremium && hasTrustedPrice && renewPrice != null && renewPrice > trustedPrice * RENEWAL_TRAP_RATIO;
   const showCheckPrice = available && (isPremiumUnverified || !hasTrustedPrice) && !isPremium;
   const premiumPrice = isPremium && typeof result.gdPrice === "number" && result.gdPrice > 0 ? result.gdPrice : null;
+  // A premium name renews at the registrar's quoted premium renewal, never the catalog's standard one.
+  const premiumRenew =
+    premiumPrice != null && typeof result.premiumRenewPrice === "number" && result.premiumRenewPrice > 0 ? result.premiumRenewPrice : null;
+  const renewPrice = isPremium ? premiumRenew : hasTrustedPrice ? (cheapest?.renewPrice ?? null) : null;
+  const firstYear = isPremium ? premiumPrice : trustedPrice;
+  const hasHighRenewal =
+    (isPremium || (!isLikelyPremium && hasTrustedPrice)) && firstYear != null && renewPrice != null && renewPrice > firstYear * RENEWAL_TRAP_RATIO;
   // Mirrors the three result sections: an uncertain row is "Couldn't verify"
   // unless it is a brand-protected or provisional row, which the UI files under Taken.
   const verdict: Verdict =

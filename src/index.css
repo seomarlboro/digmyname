@@ -81,6 +81,10 @@
 
     /* Modern aurora accents: electric cyan + vivid violet */
     --aurora-mint: 165 80% 42%;
+    /* Mint as TEXT (domain extensions, links) = the `--available` green. Owner decision 2026-09-16:
+       the 4.5:1 dark green (165 80% 26%) was rejected; this is ~2.7:1 on white, an accepted contrast
+       exception. Gradients/glows keep --aurora-mint. */
+    --mint-text: 160 65% 42%;
     --aurora-violet: 258 75% 58%;
     --aurora: 258 75% 58%;
 
@@ -143,6 +147,7 @@
 
     /* Modern aurora accents: electric cyan + vivid violet */
     --aurora-mint: 165 80% 58%;
+    --mint-text: 165 80% 58%;
     --aurora-violet: 258 92% 74%;
     --aurora: 258 92% 74%;
     --logo-filter: invert(46%) sepia(98%) saturate(2060%) hue-rotate(212deg) brightness(100%) contrast(97%);
@@ -763,6 +768,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hero-blob, .hero-tld { animation: none !important; }
+  /* Decorative only: hidden rather than frozen mid-flight (spotlight starts at opacity 0). */
+  .animate-meteor, .animate-spotlight { display: none !important; }
+  .card-hover, .btn-gradient { transition: none !important; }
+  .card-hover:hover, .btn-gradient:hover { transform: none !important; }
 }
 
 /* HeroBackground sets data-paused while the hero is scrolled out of view:

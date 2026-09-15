@@ -26,6 +26,10 @@ export default {
     },
     extend: {
 
+      // `text-mint` reads the contrast-safe text token; bg-/border-mint and gradients keep the brand mint.
+      textColor: {
+        mint: "hsl(var(--mint-text))",
+      },
       fontFamily: {
         sans: ["Manrope", "system-ui", "sans-serif"],
         display: ["Sora", "system-ui", "sans-serif"],

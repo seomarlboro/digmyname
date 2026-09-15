@@ -269,12 +269,16 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange, filters, onFiltersChang
 
   const activeCount = activeFilterCount(filters, selectedTlds.size);
 
+  /** The floating filter glass — one surface for the desktop bar and the mobile button. */
+  const glass =
+    "border border-black/[0.07] bg-white/35 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.75),0_16px_48px_-16px_rgba(15,23,42,0.28)] backdrop-blur-xl backdrop-saturate-[1.8] dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-2xl dark:backdrop-blur-2xl dark:backdrop-saturate-100";
+
   /* ── Mobile: FAB + Drawer ── */
   if (isMobile) {
     return (
       <Drawer>
         <DrawerTrigger asChild>
-          <button type="button" aria-label="Open filters" className="fixed bottom-6 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-2xl btn-gradient shadow-2xl active:scale-95 transition-transform">
+          <button type="button" aria-label="Open filters" className={`fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-[16px] text-foreground active:scale-95 transition-transform motion-reduce:transition-none ${glass}`}>
             <SlidersHorizontal className="h-6 w-6" />
             {activeCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-warning text-[11px] font-bold text-warning-foreground">
@@ -287,7 +291,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange, filters, onFiltersChang
           <div className="flex items-center justify-between px-5 pt-4 pb-2">
             <DrawerTitle className="text-lg font-bold text-foreground">Filters</DrawerTitle>
             <DrawerClose asChild>
-              <button type="button" aria-label="Close filters" className="rounded-full p-1.5 hover:bg-muted/10 transition-colors">
+              <button type="button" aria-label="Close filters" className="rounded-full p-3 hover:bg-muted/10 transition-colors">
                 <X className="h-5 w-5 text-muted-foreground" />
               </button>
             </DrawerClose>
@@ -330,7 +334,7 @@ const FilterBar = ({ selectedTlds, onSelectedTldsChange, filters, onFiltersChang
       )}
 
       {/* Floating bar */}
-      <div className="relative flex items-stretch gap-3 rounded-[28px] border border-black/[0.07] bg-white/35 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.75),0_16px_48px_-16px_rgba(15,23,42,0.28)] backdrop-blur-xl backdrop-saturate-[1.8] dark:border-white/[0.16] dark:bg-white/[0.06] dark:shadow-2xl dark:backdrop-blur-2xl dark:backdrop-saturate-100" role="group" aria-label="Result filters">
+      <div className={`relative flex items-stretch gap-3 rounded-[28px] p-3.5 ${glass}`} role="group" aria-label="Result filters">
         {filterConfigs.map((f) => (
           <div
             key={f.id}

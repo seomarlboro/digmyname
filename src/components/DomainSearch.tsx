@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, X, Loader2, CheckCircle2, LayoutGrid, List, AlertCircle, Zap } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useCheapestRegistrars } from "@/hooks/useCheapestRegistrars";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -130,7 +129,6 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const [aiSuggestions, setAiSuggestions] = useState(false);
   const [viewMode, setViewMode] = useState<"cards" | "compact">("cards");
   const [scrolled, setScrolled] = useState(false);
-  const isMobile = useIsMobile();
 
   // Auth, favourites and the price table are read ONCE here and handed to the
   // cards as props: 53 cards each subscribing to react-query themselves meant
@@ -608,7 +606,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   }, [loading, results.length, stillChecking, availableList]);
 
   const searchBar = (
-    <div className="flex w-full min-w-0 flex-1 items-center gap-0.5 rounded-[100px] border border-black/[0.08] bg-black/[0.04] py-[14px] pl-4 pr-4 sm:pl-5 sm:pr-6 [backdrop-filter:blur(64px)] dark:border-white/10 dark:bg-white/[0.05]">
+    <div className="flex w-full min-w-0 flex-1 items-center gap-0.5 rounded-[100px] border border-black/[0.08] bg-black/[0.04] focus-within:border-mint/60 dark:focus-within:border-mint/50 h-[60px] sm:h-20 pl-4 pr-4 sm:pl-5 sm:pr-6 [backdrop-filter:blur(64px)] dark:border-white/10 dark:bg-white/[0.05]">
       <div className="hidden md:flex h-14 w-14 shrink-0 items-center justify-center rounded-xl">
         <Search className="h-7 w-7 text-mint" />
       </div>
@@ -621,10 +619,10 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         placeholder="Enter domain name..."
         autoFocus
         aria-label="Search domain name"
-        className="w-full min-w-0 flex-1 bg-transparent pl-1 pr-2 text-lg sm:pr-10 sm:text-2xl font-semibold text-foreground/60 dark:text-foreground placeholder:text-foreground/35 dark:placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
+        className="w-full min-w-0 flex-1 bg-transparent pl-1 pr-2 text-lg sm:pr-10 sm:text-2xl font-semibold text-foreground placeholder:text-muted-foreground placeholder:font-normal focus:outline-none"
       />
       {query && (
-        <button onClick={() => setQuery("")} aria-label="Clear search" className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground">
+        <button onClick={() => { setQuery(""); inputRef.current?.focus(); }} aria-label="Clear search" className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground">
           <X className="h-6 w-6" />
         </button>
       )}
@@ -690,7 +688,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       )}
 
       {/* Always-rendered sticky search bar */}
-      <div ref={stickySearchRef} className="sticky top-16 z-40 py-4">
+      <div ref={stickySearchRef} className="sticky top-16 z-40 pb-4 sm:pb-5 sm:pt-2">
         {scrolled && (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 -top-16 bg-background/80 backdrop-blur-xl" aria-hidden="true" />
         )}
@@ -701,6 +699,12 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
 
       {/* Results */}
       <section className={`content-wrap pb-20 ${results.length > 0 ? "results-shell" : ""}`}>
+        {/* One polite announcement per settled search. Always mounted, so screen readers hear the change instead of a fresh node. */}
+        <p className="sr-only" role="status" aria-live="polite">
+          {!loading && results.length > 0 && !stillChecking
+            ? `${query.trim()}: ${availableCount} available, ${takenCount} taken${uncertainCount > 0 ? `, ${uncertainCount} unverified` : ""}.`
+            : ""}
+        </p>
         {loading && (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -711,12 +715,12 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         {!loading && results.length > 0 && (
           <>
             {/* Stats */}
-            <div className="mb-6 mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm sm:gap-8 sm:text-base">
-              <span className="text-muted-foreground"><span className="inline-block min-w-[2.5ch] text-right tabular-nums text-xl font-extrabold text-foreground sm:text-2xl">{results.length}</span> found</span>
-              <span className="text-muted-foreground"><span className="inline-block min-w-[2.5ch] text-right tabular-nums text-xl font-extrabold text-available sm:text-2xl">{availableCount}</span> available</span>
-              <span className="text-muted-foreground"><span className="inline-block min-w-[2.5ch] text-right tabular-nums text-xl font-extrabold text-muted-foreground/60 sm:text-2xl">{takenCount}</span> taken</span>
+            <div className="mb-6 mt-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs sm:gap-8 sm:text-base">
+              <span className="text-muted-foreground"><span className="inline-block text-right tabular-nums text-lg font-extrabold sm:min-w-[2.5ch] text-foreground sm:text-2xl">{results.length}</span> found</span>
+              <span className="text-muted-foreground"><span className="inline-block text-right tabular-nums text-lg font-extrabold sm:min-w-[2.5ch] text-available sm:text-2xl">{availableCount}</span> available</span>
+              <span className="text-muted-foreground"><span className="inline-block text-right tabular-nums text-lg font-extrabold sm:min-w-[2.5ch] text-muted-foreground sm:text-2xl">{takenCount}</span> taken</span>
               {uncertainCount > 0 && (
-                <span className="text-muted-foreground"><span className="inline-block min-w-[2.5ch] text-right tabular-nums text-xl font-extrabold text-amber-500 sm:text-2xl">{uncertainCount}</span> unverified</span>
+                <span className="text-muted-foreground"><span className="inline-block text-right tabular-nums text-lg font-extrabold sm:min-w-[2.5ch] text-amber-700 dark:text-amber-400 sm:text-2xl">{uncertainCount}</span> unverified</span>
               )}
 
               {stopwatch !== "idle" && (

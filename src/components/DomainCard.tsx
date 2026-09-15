@@ -1,8 +1,9 @@
 import { memo } from "react";
-import { ExternalLink, Heart, Loader2, ArrowUpRight, RefreshCw, AlertCircle, Tag, CalendarClock } from "lucide-react";
+import { ExternalLink, Gem, Heart, Loader2, RefreshCw, AlertCircle, Tag, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PromoCode } from "@/components/PromoCode";
+import { CtaLink } from "@/components/CtaLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDomainAge, formatRegisteredSince } from "@/hooks/useDomainAge";
 import { getRegistrarColor, getRegistrarUrl } from "@/lib/registrarColors";
@@ -34,6 +35,36 @@ interface DomainCardProps {
 // ---------------------------------------------------------------------------
 const COMPACT_ROW_MIN = "min-h-[68px]";
 const CARD_BODY_MIN = "sm:min-h-[56px]";
+
+/**
+ * Compact row grid — a table: every row is its own grid, so every track is fixed
+ * or a fraction of the same width, never content-sized.
+ *   Desktop, 4 cells in every row variant: name · tags · renewal · [price + actions].
+ *   Phone, 4 visible cells: name · price · like · open (the rest is `hidden sm:*`).
+ * Price and actions share the last cell, packed against the right edge: the button
+ * sits at the row edge and the price one gap before it, in every row.
+ */
+const COMPACT_GRID =
+  "grid-cols-[minmax(0,1fr)_96px_40px_40px] items-center gap-x-1 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_140px_360px] sm:gap-x-4 [&>*:nth-child(4)]:justify-self-end sm:[&>*:nth-child(3)]:justify-self-end";
+
+/** The right-hand cell of a compact row: price (or status) then actions, packed right. */
+const COMPACT_END = "flex items-center justify-end gap-4";
+
+/** Prices always carry cents: "$11.40", never "$11.4". */
+const usd = (n: number) => `$${n.toFixed(2)}`;
+
+/** Amber that passes AA on white (amber-500 was ~2:1); dark keeps the lighter tone. */
+const AMBER_TEXT = "text-amber-700 dark:text-amber-400";
+
+/** Card roots take focus only programmatically (after Retry); the ring shows for keyboard users. */
+const FOCUS_RING = "outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+/**
+ * Retry moves a card between sections (unverified → checking → its verdict) and each
+ * move remounts it, which used to drop keyboard focus on <body>. The domain being
+ * retried keeps focus on its card through those remounts until a settled card mounts.
+ */
+let pendingRetryFocus: string | null = null;
 
 
 
@@ -72,9 +103,35 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
   // so it never delays the availability check.
   const age = useDomainAge(domain, !checking && result.uncertain !== true && !available);
   const sinceLabel = formatRegisteredSince(age);
+  /** One taken-state label for cards and compact rows. */
+  const registeredText = sinceLabel ? `Registered ${sinceLabel.toLowerCase()}` : "Registered";
 
 
   const handleFavorite = () => onToggleFavorite(domain);
+
+  const focusRoot = (el: HTMLElement | null) => {
+    if (!el || pendingRetryFocus !== domain) return;
+    el.focus({ preventScroll: true });
+    if (!checking) pendingRetryFocus = null;
+  };
+  const retry = () => {
+    pendingRetryFocus = domain;
+    onRetry?.(domain);
+  };
+
+  // The desktop favourite control — the same button the full card uses, shared by the compact rows.
+  const desktopHeart = (
+    <Button
+      variant="ghost"
+      size="icon"
+      className={`hidden h-9 w-9 rounded-full sm:flex ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
+      onClick={handleFavorite}
+      aria-label={favorited ? `Remove ${domain} from favorites` : `Save ${domain} to favorites`}
+      aria-pressed={favorited}
+    >
+      <Heart className={`h-4 w-4 ${favorited ? "fill-current" : ""}`} />
+    </Button>
+  );
 
   const parts = domain.split(".");
   const name = parts.slice(0, -1).join(".");
@@ -95,23 +152,25 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
   if (checking) {
     if (compact) {
       return (
-        <div className={`grid border-b border-border px-4 py-4 transition-colors ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+        <div className={`grid ${COMPACT_GRID} border-b border-border px-3 py-3 sm:px-4 sm:py-4 transition-colors ${COMPACT_ROW_MIN} ${FOCUS_RING}`} ref={focusRoot} tabIndex={-1}>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-foreground">
+            <h3 className="min-w-0 truncate text-base font-semibold text-foreground sm:text-lg">
               {name}.<span className="text-mint">{ext}</span>
             </h3>
             <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
           </div>
           {/* Reserved slots: same footprint as the resolved row so nothing reflows. */}
-          <Skeleton className="h-4 w-16 min-w-[80px] max-w-[80px]" />
-          <Skeleton className="h-4 w-14 min-w-[80px] max-w-[80px]" />
-          <Skeleton className="h-5 w-14" />
-          <Skeleton className="h-9 w-20 rounded-3xl" />
+          <span className="hidden sm:block" />
+          <Skeleton className="hidden h-4 w-14 min-w-[80px] max-w-[80px] sm:block" />
+          <div className={COMPACT_END}>
+            <Skeleton className="h-5 w-14" />
+            <Skeleton className="hidden h-10 w-24 rounded-full sm:block" />
+          </div>
         </div>
       );
     }
     return (
-      <div className="card-hover rounded-xl border border-border p-4 sm:p-5">
+      <div className={`card-hover rounded-xl border border-border p-4 sm:p-5 ${FOCUS_RING}`} ref={focusRoot} tabIndex={-1}>
         <div className={`flex flex-col gap-3 sm:flex-row sm:items-center ${CARD_BODY_MIN}`}>
           {/* Left slot: domain + reserved badge line (matches resolved layout). */}
           <div className="flex-1 min-w-0 pr-8">
@@ -144,30 +203,27 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
     const stillChecking = result.uncertainReason === "budget_timeout" || result.reachFailed;
     if (compact) {
       return (
-        <div className={`grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+        <div className={`grid ${COMPACT_GRID} border-b border-border px-3 py-3 sm:px-4 sm:py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN} ${FOCUS_RING}`} ref={focusRoot} tabIndex={-1}>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-foreground">
+            <h3 className="min-w-0 truncate text-base font-semibold text-foreground sm:text-lg">
               {name}.<span className="text-mint">{ext}</span>
             </h3>
             <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
           </div>
           {brandProtected ? (
-            <Badge variant="outline" className="w-fit border-amber-500/40 bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400">
+            <Badge variant="outline" className="hidden w-fit border-amber-500/40 bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400 sm:inline-flex">
               Trademark
             </Badge>
           ) : (
-            <span className="text-xs text-muted-foreground min-w-[80px]">{stillChecking ? "Still checking" : "Couldn't verify"}</span>
+            <span className="hidden text-xs text-muted-foreground min-w-[80px] sm:inline">{result.reachFailed ? "No connection" : stillChecking ? "Still checking" : "Couldn't verify"}</span>
           )}
-          <span className="min-w-[80px]" />
-          <span />
+          <span className="hidden sm:block" />
           {brandProtected ? (
             <span />
           ) : (
             <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 gap-1.5 rounded-3xl text-sm text-muted-foreground hover:text-foreground"
-              onClick={() => onRetry?.(domain)}
+              variant="outline"
+              onClick={retry}
               disabled={!onRetry}
             >
               <RefreshCw className="h-3.5 w-3.5" />
@@ -178,7 +234,7 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
       );
     }
     return (
-      <div className="card-hover rounded-xl border border-amber-500/30 p-4 sm:p-5">
+      <div className={`card-hover rounded-xl border border-amber-500/30 p-4 sm:p-5 ${FOCUS_RING}`} ref={focusRoot} tabIndex={-1}>
         <div className={`flex flex-col gap-3 sm:flex-row sm:items-center ${CARD_BODY_MIN}`}>
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
@@ -196,17 +252,18 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
               </>
             ) : (
               <p className="text-xs text-muted-foreground mt-1.5">
-                {stillChecking
-                  ? "Still checking — this one's slow. Retry."
-                  : "Couldn't verify availability — sources disagreed. Try again."}
+                {result.reachFailed
+                  ? "Couldn't reach our server — check your connection and retry."
+                  : stillChecking
+                    ? "Still checking — this one's slow. Retry."
+                    : "Couldn't verify availability — sources disagreed. Try again."}
               </p>
             )}
           </div>
           {!brandProtected && (
             <Button
               variant="outline"
-              className="gap-1.5 rounded-3xl border-amber-500/40 text-amber-600 hover:text-amber-600 dark:text-amber-400"
-              onClick={() => onRetry?.(domain)}
+              onClick={retry}
               disabled={!onRetry}
             >
               <RefreshCw className="h-4 w-4" />
@@ -223,80 +280,106 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
   if (compact) {
     return (
       <>
-        <div className={`grid border-b border-border px-4 py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN}`} style={{ gridTemplateColumns: '2fr 1fr 1fr auto auto', alignItems: 'center', gap: '0 1.5rem' }}>
+        <div className={`grid ${COMPACT_GRID} border-b border-border px-3 py-3 sm:px-4 sm:py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN} ${FOCUS_RING}`} ref={focusRoot} tabIndex={-1}>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-foreground">
+            <h3 className="min-w-0 truncate text-base font-semibold text-foreground sm:text-lg">
               {name}.<span className="text-mint">{ext}</span>
             </h3>
-            {isBrand && brandChip}
           </div>
-          {available && registrarName ? (
-            <span className={`text-xs font-medium min-w-[80px] ${getRegistrarColor(registrarName).text}`}>{registrarName}</span>
-          ) : (
-            <span className="min-w-[80px]" />
-          )}
-          <span className="text-xs text-muted-foreground min-w-[80px]">{available ? (displayRenew != null ? `renews $${displayRenew}` : '') : ''}</span>
+          {/* Tags column: starts at the same x in every row, whatever the name length. */}
+          <div className="hidden min-w-0 flex-wrap items-center gap-1.5 sm:flex">
+            {isBrand && brandChip}
+            {available && registrarName && (
+              <Badge
+                variant="outline"
+                className={`shrink-0 text-xs font-medium ${getRegistrarColor(registrarName).text} ${getRegistrarColor(registrarName).bg} ${getRegistrarColor(registrarName).border}`}
+              >
+                {registrarName}
+              </Badge>
+            )}
+          </div>
+          {/* For a premium name this is the registrar-quoted premium renewal (or nothing), never the standard one. */}
+          <span className="hidden text-xs text-muted-foreground min-w-[80px] sm:inline">{available && displayRenew != null ? `renews ${usd(displayRenew)}` : ""}</span>
           {available ? (
             <>
-              <div className="flex items-center gap-2">
-                {isPremium ? (
-                  <span className="text-lg font-bold text-foreground">
-                    {premiumPrice != null ? `$${premiumPrice}` : "Premium"}
-                    {premiumPrice != null && <span className="ml-1.5 text-xs font-semibold text-amber-500">Premium</span>}
+              <div className={COMPACT_END}>
+                {/* Price (or "Check price"), with the premium mark right before it. */}
+                <span className="inline-flex items-center gap-1.5">
+                {(isPremium || isLikelyPremium) && (
+                  <span className="inline-flex shrink-0" title={isPremium || isPremiumUnverified ? "Premium" : "Likely premium"}>
+                    <Gem className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                    <span className="sr-only">{isPremium || isPremiumUnverified ? "Premium" : "Likely premium"}</span>
                   </span>
-                ) : isLikelyPremium || showCheckPrice ? (
-                  <span className="text-sm font-semibold text-amber-500">
-                    {isPremiumUnverified ? "Premium" : isLikelyPremium ? "Likely premium" : "Check price"}
-                  </span>
-                ) : (
-                  <span className="text-lg font-bold text-foreground">${trustedPrice}</span>
                 )}
+                {isPremium && premiumPrice != null ? (
+                  <span className="text-lg font-bold text-foreground">{usd(premiumPrice)}</span>
+                ) : isPremium || isLikelyPremium || showCheckPrice ? (
+                  <span className={`text-sm font-semibold ${AMBER_TEXT}`}>Check price</span>
+                ) : (
+                  <span className="text-lg font-bold text-foreground">{usd(trustedPrice!)}</span>
+                )}
+                </span>
+                {/* Always "Buy": the price cell already says "Check price", and one label keeps every price at the same x. */}
+                <CtaLink href={actionUrl} onClick={() => onAction?.("buy", domain)} ariaLabel={`Buy ${domain} at ${registrarName ?? "Spaceship"}`} className="hidden sm:inline-flex">
+                  Buy
+                </CtaLink>
+                {desktopHeart}
               </div>
-              <Button size="sm" className="h-9 gap-1.5 rounded-3xl btn-gradient text-sm border-0 px-4" asChild>
-                <a href={actionUrl} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("buy", domain)}>
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  {showCheckPrice ? "Check price" : "Buy"}
+              {/* Phone compact row: like + open, nothing else. */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`h-10 w-10 rounded-full sm:hidden ${favorited ? "text-destructive" : "text-muted-foreground"}`}
+                onClick={handleFavorite}
+                aria-label={favorited ? `Remove ${domain} from favorites` : `Save ${domain} to favorites`}
+                aria-pressed={favorited}
+              >
+                <Heart className={`h-4 w-4 ${favorited ? "fill-current" : ""}`} />
+              </Button>
+              <Button variant="ghost" size="icon" className="text-muted-foreground sm:hidden" asChild>
+                <a
+                  href={actionUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${showCheckPrice ? "Check price for" : "Buy"} ${domain} at ${registrarName ?? "Spaceship"}`}
+                  onClick={() => onAction?.("buy", domain)}
+                >
+                  <ExternalLink className="h-4 w-4" />
                 </a>
               </Button>
             </>
           ) : (
-            <>
+            <div className={COMPACT_END}>
               {result.forSale ? (
-                <span className="text-sm font-semibold text-amber-500 flex items-center gap-1">
+                <span className={`hidden text-sm font-semibold items-center gap-1 sm:flex ${AMBER_TEXT}`}>
                   <Tag className="h-3.5 w-3.5" />
                   For sale
                 </span>
-              ) : sinceLabel ? (
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <CalendarClock className="h-3 w-3" />
-                  {sinceLabel}
-                </span>
               ) : (
-                <span />
+                <span className="hidden whitespace-nowrap text-xs text-muted-foreground items-center gap-1 sm:flex">
+                  <CalendarClock className="h-3 w-3" />
+                  {registeredText}
+                </span>
               )}
               <div className="flex items-center gap-1">
                 {result.forSale && result.listingUrl ? (
-                  <Button size="sm" className="h-9 gap-1.5 rounded-3xl btn-gradient text-sm border-0 px-4" asChild>
-                    <a href={result.listingUrl} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("aftermarket", domain)}>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      {result.forSaleVia ?? "View"}
-                    </a>
-                  </Button>
+                  <CtaLink href={result.listingUrl} onClick={() => onAction?.("aftermarket", domain)} className="hidden sm:inline-flex">
+                    {result.forSaleVia ?? "View"}
+                  </CtaLink>
                 ) : (
-                  <Button variant="ghost" size="sm" className="h-9 gap-1.5 rounded-3xl text-sm text-muted-foreground hover:text-foreground" asChild>
-                    <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("whois", domain)}>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Whois
-                    </a>
-                  </Button>
+                  <CtaLink tone="secondary" href={`https://www.whois.com/whois/${domain}`} onClick={() => onAction?.("whois", domain)} className="hidden sm:inline-flex">
+                    Whois
+                  </CtaLink>
                 )}
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-3xl text-muted-foreground hover:text-primary" asChild aria-label={`Open ${domain}`}>
+                {/* Phones: one open-site arrow, same control as the available row's. Desktop: the single button above. */}
+                <Button variant="ghost" size="icon" className="text-muted-foreground sm:hidden" asChild aria-label={`Open ${domain}`}>
                   <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("visit", domain)}>
-                    <ArrowUpRight className="h-4 w-4" />
+                    <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>
               </div>
-            </>
+              {desktopHeart}
+            </div>
           )}
         </div>
       </>
@@ -305,11 +388,11 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
 
   return (
     <>
-      <div className="card-hover relative rounded-xl border border-border p-4 sm:p-5">
+      <div className={`card-hover relative rounded-xl border border-border p-4 sm:p-5 ${FOCUS_RING}`} ref={focusRoot} tabIndex={-1}>
         <Button
           variant="ghost"
           size="icon"
-          className={`absolute right-2 top-2 h-9 w-9 rounded-full sm:hidden ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
+          className={`absolute right-1 top-1 h-11 w-11 rounded-full sm:hidden ${favorited ? "text-destructive" : "text-muted-foreground hover:text-primary"}`}
           onClick={handleFavorite}
           aria-label={favorited ? `Remove ${domain} from favorites` : `Save ${domain} to favorites`}
           aria-pressed={favorited}
@@ -353,54 +436,70 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
           {/* Right: price + actions */}
           <div className="flex items-center gap-3 sm:gap-4">
             {available ? (
-              <div className="sm:text-right">
+              // Desktop: renewal then price in one fixed-width cell packed against the button — every button lines up,
+              // the price never runs under it, and the renewal sits one gap before the price. Phones keep renewal under the price.
+              <div className="flex items-center justify-end gap-4 sm:w-[340px]">
+              <p className={`hidden whitespace-nowrap text-right text-xs sm:block sm:w-[140px] ${hasHighRenewal ? AMBER_TEXT : "text-muted-foreground"}`}>
+                {displayRenew != null ? `renews ${usd(displayRenew)}/yr` : ""}
+              </p>
+              <div className="sm:flex sm:w-[180px] sm:flex-col sm:items-end sm:whitespace-nowrap">
                 {isPremium ? (
                   <>
                     {premiumPrice != null ? (
                       <>
-                        <p className="text-2xl font-bold text-foreground">
-                          ${premiumPrice}
-                          <span className="text-sm font-normal text-muted-foreground">/year</span>
+                        {/* One line: premium mark right before the price, as in compact rows. */}
+                        <p className="flex items-center gap-1.5 text-2xl font-bold text-foreground" title="Registrar-confirmed premium price">
+                          <Gem className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                          <span>
+                            <span className="sr-only">Premium </span>
+                            {usd(premiumPrice)}
+                            <span className="text-sm font-normal text-muted-foreground">/year</span>
+                          </span>
                         </p>
-                        <p className="text-xs text-amber-500 mt-0.5">Premium · registrar-confirmed price</p>
+                        {displayRenew != null && (
+                          <p className={`text-xs mt-0.5 sm:hidden ${hasHighRenewal ? AMBER_TEXT : "text-muted-foreground"}`}>
+                            renews {usd(displayRenew)}/yr
+                          </p>
+                        )}
                       </>
                     ) : (
                       <>
-                        <p className="text-2xl font-bold text-foreground">Premium</p>
-                        {displayRenew != null && (
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            renews ${displayRenew}/yr
-                          </p>
-                        )}
+                        {/* The standard registrar's renewal does not apply to a premium name. */}
+                        <p className="flex items-center gap-1.5 text-2xl font-bold text-foreground">
+                          <Gem className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                          Premium
+                        </p>
                       </>
                     )}
                   </>
                 ) : isLikelyPremium || showCheckPrice ? (
                   <>
-                    <p className="text-base font-semibold whitespace-nowrap text-amber-500">
+                    <p className={`text-base font-semibold whitespace-nowrap ${AMBER_TEXT}`}>
                       {isPremiumUnverified ? "Premium" : isLikelyPremium ? "Likely premium" : "Check price"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {isPremiumUnverified ? "price confirmed at checkout" : "Verify on registrar"}
+                      {isPremiumUnverified ? "price at checkout" : "Verify on registrar"}
                     </p>
                   </>
                 ) : (
                   <>
                     <p className="text-2xl font-bold text-foreground">
-                      ${trustedPrice}
+                      {usd(trustedPrice!)}
                       <span className="text-sm font-normal text-muted-foreground">/year</span>
                     </p>
-                    {hasHighRenewal && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        renews ${displayRenew}/yr
+                    {/* Renewal always sits under the first-year price; a renewal trap is highlighted, not hidden-until-bad. */}
+                    {displayRenew != null && (
+                      <p className={`text-xs mt-0.5 sm:hidden ${hasHighRenewal ? AMBER_TEXT : "text-muted-foreground"}`}>
+                        renews {usd(displayRenew)}/yr
                       </p>
                     )}
                   </>
                 )}
               </div>
+              </div>
             ) : result.forSale ? (
               <div className="sm:text-right">
-                <p className="text-xl font-bold text-amber-500 flex items-center gap-1.5 sm:justify-end">
+                <p className={`text-xl font-bold flex items-center gap-1.5 sm:justify-end ${AMBER_TEXT}`}>
                   <Tag className="h-4 w-4" />
                   For sale
                 </p>
@@ -408,47 +507,40 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                   Listed on {result.forSaleVia ?? "marketplace"}
                 </p>
               </div>
-            ) : sinceLabel ? (
+            ) : (
+              // A taken card said only "Since 1997" (or nothing): the word "Taken" lived in the section heading, off-screen once you scroll.
               <div className="sm:text-right">
                 <p className="text-sm text-muted-foreground flex items-center gap-1.5 sm:justify-end">
                   <CalendarClock className="h-3.5 w-3.5 text-muted-foreground" />
-                  {sinceLabel}
+                  {registeredText}
                 </p>
               </div>
-            ) : null}
+            )}
 
             {available ? (
-              <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
-                <a href={actionUrl} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("buy", domain)}>
-                  <ExternalLink className="h-4 w-4" />
-                  {showCheckPrice ? "Check price" : "Buy Now"}
-                </a>
-              </Button>
+              // One label and width everywhere; the registrar is the badge on the left and in the accessible name.
+              <CtaLink href={actionUrl} onClick={() => onAction?.("buy", domain)} ariaLabel={`Buy ${domain} at ${registrarName ?? "Spaceship"}`}>
+                Buy
+              </CtaLink>
             ) : result.forSale && result.listingUrl ? (
               <div className="flex items-center gap-2">
-                <Button className="gap-1.5 rounded-3xl btn-gradient border-0" asChild>
-                  <a href={result.listingUrl} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("aftermarket", domain)}>
-                    <ExternalLink className="h-4 w-4" />
-                    View listing
-                  </a>
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-3xl" asChild aria-label={`Open ${domain}`}>
+                <CtaLink href={result.listingUrl} onClick={() => onAction?.("aftermarket", domain)}>
+                  View listing
+                </CtaLink>
+                <Button variant="outline" size="icon" asChild aria-label={`Open ${domain}`}>
                   <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("visit", domain)}>
-                    <ArrowUpRight className="h-4 w-4" />
+                    <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Button variant="outline" className="gap-1.5 rounded-3xl" asChild>
-                  <a href={`https://www.whois.com/whois/${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("whois", domain)}>
-                    <ExternalLink className="h-4 w-4" />
-                    Whois
-                  </a>
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-3xl" asChild aria-label={`Open ${domain}`}>
+                <CtaLink tone="secondary" href={`https://www.whois.com/whois/${domain}`} onClick={() => onAction?.("whois", domain)}>
+                  Whois
+                </CtaLink>
+                <Button variant="outline" size="icon" asChild aria-label={`Open ${domain}`}>
                   <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("visit", domain)}>
-                    <ArrowUpRight className="h-4 w-4" />
+                    <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>
               </div>

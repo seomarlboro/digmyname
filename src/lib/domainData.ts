@@ -96,6 +96,8 @@ export interface DomainResult {
   gdPrice?: number;
   /** Confirmed premium / aftermarket via GoDaddy pricing */
   premium?: boolean;
+  /** Registrar-quoted renewal for a confirmed premium name (with `premium` + `gdPrice`). */
+  premiumRenewPrice?: number;
   /** Heuristic: likely registered or aftermarket even if APIs say otherwise */
   likelyPremium?: boolean;
   /** Backend split-state: registerable (RDAP-404 + NXDOMAIN agree) but premium-tier
