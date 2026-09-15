@@ -188,7 +188,10 @@ export type Database = {
           query_length: number | null
           registrar: string | null
           session_id: string
+          shown_registrars: string[] | null
+          shown_tlds: string[] | null
           signed_in: boolean | null
+          source: string | null
           target: string | null
           tld: string | null
           tld_count: number | null
@@ -211,7 +214,10 @@ export type Database = {
           query_length?: number | null
           registrar?: string | null
           session_id: string
+          shown_registrars?: string[] | null
+          shown_tlds?: string[] | null
           signed_in?: boolean | null
+          source?: string | null
           target?: string | null
           tld?: string | null
           tld_count?: number | null
@@ -234,7 +240,10 @@ export type Database = {
           query_length?: number | null
           registrar?: string | null
           session_id?: string
+          shown_registrars?: string[] | null
+          shown_tlds?: string[] | null
           signed_in?: boolean | null
+          source?: string | null
           target?: string | null
           tld?: string | null
           tld_count?: number | null
