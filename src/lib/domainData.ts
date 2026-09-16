@@ -126,30 +126,47 @@ export interface DomainResult {
 
 const tldMap = new Map(TLD_LIST.map((t) => [t.extension, t]));
 
-/** Generate domain list with placeholder availability (all unknown/checking) */
-export function generateDomainList(query: string, withVariations = false, allowedTlds?: Set<string>): DomainResult[] {
-  if (!query.trim()) return [];
-  const raw = query.toLowerCase().trim();
+/** What a raw query actually resolves to. Exported because the UI has to say so:
+ *  typing `acme.zone` searches `acme` across the curated list and checks nothing
+ *  at all for `.zone`, and a result summary that still calls itself "acme.zone"
+ *  is a claim about a name nobody looked up. */
+export interface ParsedQuery {
+  /** The label that is searched, e.g. `acme` for `acme.zone`. Empty when there is nothing to search. */
+  base: string;
+  /** A typed extension we do track: pinned to the top of the results. */
+  typedTld: TLD | null;
+  /** A typed extension we do NOT track, verbatim and without the dot. Nothing is checked for it. */
+  unsupportedTld: string | null;
+}
+
+export function parseQuery(query: string): ParsedQuery {
+  const empty: ParsedQuery = { base: "", typedTld: null, unsupportedTld: null };
+  if (!query.trim()) return empty;
 
   // Detect if user typed a full domain like "jitr.com" — extract SLD + TLD.
-  let baseName = raw.replace(/[^a-z0-9.-]/g, "");
+  let baseName = query.toLowerCase().trim().replace(/[^a-z0-9.-]/g, "");
   let typedTld: TLD | null = null;
+  let unsupportedTld: string | null = null;
   if (baseName.includes(".")) {
     const parts = baseName.split(".").filter(Boolean);
     if (parts.length >= 2) {
       const maybeTld = parts.slice(1).join(".");
       const match = tldMap.get(maybeTld);
-      if (match) {
-        baseName = parts[0];
-        typedTld = match;
-      } else {
-        baseName = parts[0];
-      }
+      baseName = parts[0];
+      if (match) typedTld = match;
+      else unsupportedTld = maybeTld;
     } else {
       baseName = parts[0] ?? "";
     }
   }
-  const q = baseName.replace(/[^a-z0-9-]/g, "");
+  const base = baseName.replace(/[^a-z0-9-]/g, "");
+  if (!base) return empty;
+  return { base, typedTld, unsupportedTld };
+}
+
+/** Generate domain list with placeholder availability (all unknown/checking) */
+export function generateDomainList(query: string, withVariations = false, allowedTlds?: Set<string>): DomainResult[] {
+  const { base: q, typedTld } = parseQuery(query);
   if (!q) return [];
 
   const names = withVariations

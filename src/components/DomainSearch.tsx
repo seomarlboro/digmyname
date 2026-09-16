@@ -34,7 +34,7 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
 );
 import DomainCard from "@/components/DomainCard";
 
-import { generateDomainList, checkDomainsAvailability, checkDomainsFast, applyFastVerdict, TLD_RANK, type DomainResult, type AvailabilityResponse, type FastInfo } from "@/lib/domainData";
+import { generateDomainList, parseQuery, checkDomainsAvailability, checkDomainsFast, applyFastVerdict, TLD_RANK, type DomainResult, type AvailabilityResponse, type FastInfo } from "@/lib/domainData";
 
 /** Stable ordering key: TLD authority only. Never sort on available/uncertain/
  *  provisional/price — those mutate over a row's lifecycle and would reorder
@@ -44,16 +44,6 @@ const byTldAuthority = (a: DomainResult, b: DomainResult) => {
   const rb = TLD_RANK[b.tld.extension] ?? Number.MAX_SAFE_INTEGER;
   if (ra !== rb) return ra - rb;
   return a.tld.extension.localeCompare(b.tld.extension);
-};
-
-/** The exact TLD the user typed (e.g. "xyz" from "asdsdfsdas.xyz"), if it is one we track. */
-const typedTldOf = (query: string): string | null => {
-  const raw = query.toLowerCase().trim();
-  if (!raw.includes(".")) return null;
-  const parts = raw.split(".").filter(Boolean);
-  if (parts.length < 2) return null;
-  const ext = parts.slice(1).join(".");
-  return TLD_RANK[ext] != null ? ext : null;
 };
 
 interface DomainSearchProps {
@@ -285,7 +275,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       impressionPendingRef.current = true;
       trackSiteEvent("search_started", {
         queryLength: debouncedQuery.trim().length,
-        tldTyped: typedTldOf(debouncedQuery) != null,
+        tldTyped: parseQuery(debouncedQuery).typedTld != null,
         tldCount: domains.length,
       });
 
@@ -554,10 +544,14 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
 
   const hasQuery = query.trim().length > 0;
 
-  // The exact TLD the user typed (e.g. "xyz" from "asdsdfsdas.xyz"), if any.
-  // That TLD sorts to the very top of each result group so a user searching a
-  // full domain sees their exact match first, not buried under .com/.net.
-  const typedTld = useMemo(() => typedTldOf(debouncedQuery), [debouncedQuery]);
+  // One parse of the raw query, shared by the sorting, the summary and the
+  // "we did not check that extension" notice. `typedTld` sorts to the very top
+  // of each result group so a user searching a full domain sees their exact
+  // match first, not buried under .com/.net; `unsupportedTld` is the opposite
+  // case — an extension we do not track, where the answer is "we didn't look".
+  const parsed = useMemo(() => parseQuery(debouncedQuery), [debouncedQuery]);
+  const typedTld = parsed.typedTld?.extension ?? null;
+  const { base: searchedLabel, unsupportedTld } = parsed;
 
   // Query-aware ordering: the exact typed TLD first (rank -1), then normal
   // TLD authority. Still stable — never sorts on available/price/uncertain.
@@ -686,7 +680,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
 
         </div>
       ) : (
-        <h1 className="sr-only">Domain search results for {query}</h1>
+        <h1 className="sr-only">Domain search results for {searchedLabel || query}</h1>
       )}
 
       {/* Always-rendered sticky search bar */}
@@ -704,7 +698,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         {/* One polite announcement per settled search. Always mounted, so screen readers hear the change instead of a fresh node. */}
         <p className="sr-only" role="status" aria-live="polite">
           {!loading && results.length > 0 && !stillChecking
-            ? `${query.trim()}: ${availableCount} available, ${takenCount} taken${uncertainCount > 0 ? `, ${uncertainCount} unverified` : ""}.`
+            ? `${searchedLabel || query.trim()}: ${availableCount} available, ${takenCount} taken${uncertainCount > 0 ? `, ${uncertainCount} unverified` : ""}.${unsupportedTld ? ` .${unsupportedTld} is not an extension we check, so ${searchedLabel}.${unsupportedTld} was not looked up.` : ""}`
             : ""}
         </p>
         {loading && (
@@ -716,8 +710,19 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
 
         {!loading && results.length > 0 && (
           <>
+            {/* The typed extension is not one we track: the counts below are about
+                the label alone, and the exact name the visitor asked for was never
+                checked. Saying so is the whole point — same amber as "unverified". */}
+            {unsupportedTld && (
+              <p className="mt-8 text-center text-xs text-amber-700 dark:text-amber-400" role="status">
+                We don't check <span className="font-semibold">.{unsupportedTld}</span>, so{" "}
+                <span className="font-semibold">{searchedLabel}.{unsupportedTld}</span> was not looked up. Below is{" "}
+                <span className="font-semibold">{searchedLabel}</span> across the extensions we do check.
+              </p>
+            )}
+
             {/* Stats */}
-            <div className="mb-6 mt-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs sm:gap-8 sm:text-base">
+            <div className={`mb-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs sm:gap-8 sm:text-base ${unsupportedTld ? "mt-3" : "mt-8"}`}>
               <span className="text-muted-foreground"><span className="inline-block text-right tabular-nums text-lg font-extrabold sm:min-w-[2.5ch] text-foreground sm:text-2xl">{results.length}</span> found</span>
               <span className="text-muted-foreground"><span className="inline-block text-right tabular-nums text-lg font-extrabold sm:min-w-[2.5ch] text-available sm:text-2xl">{availableCount}</span> available</span>
               <span className="text-muted-foreground"><span className="inline-block text-right tabular-nums text-lg font-extrabold sm:min-w-[2.5ch] text-muted-foreground sm:text-2xl">{takenCount}</span> taken</span>
