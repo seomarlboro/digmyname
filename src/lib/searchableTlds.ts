@@ -58,7 +58,11 @@ export const SEARCHABLE_TLDS: string[] = [
   "shop",
   "store",
   "market",
-  "buy",
+  // .buy removed 2026-09-16: not one of the six registrars we track sells it
+  // (zero rows in registrar_prices, ever), so every search put a `<name>.buy`
+  // card on screen that could never show a price and whose Buy button pointed
+  // at a registrar search for a TLD that registrar does not carry. Availability
+  // for .buy is verifiable — re-add it the moment a tracked registrar lists it.
   // Community / Social
   "community",
   "social",
