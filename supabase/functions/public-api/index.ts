@@ -58,22 +58,47 @@ const spendApiBudget = createBudget({ windowMs: 60_000, maxRequests: LIMIT, maxC
 const FAST_LIMIT = { windowMs: 60_000, maxRequests: 1200, maxCost: 10_000 };
 const spendFastBudget = createBudget(FAST_LIMIT);
 
-// ---------- registrar deeplinks (domain prefilled) ----------
-const REGISTRAR_LINKS: Record<string, (d: string) => string> = {
-  GoDaddy: (d) => `https://www.godaddy.com/domainsearch/find?domainToCheck=${encodeURIComponent(d)}`,
-  Porkbun: (d) => `https://porkbun.com/checkout/search?q=${encodeURIComponent(d)}`,
-  Namecheap: (d) => `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(d)}`,
-  Spaceship: (d) => `https://www.spaceship.com/domain-search/?query=${encodeURIComponent(d)}`,
-  Cloudflare: () => `https://www.cloudflare.com/products/registrar/`,
-  OVHcloud: (d) =>
-    `https://order.ca.ovhcloud.com/us/order/webcloud/?#/webCloud/domain/select?selection=~()&domain=${encodeURIComponent(d)}`,
+// ---------- registrar deeplinks ----------
+// Two forms per registrar, because /registrars answers for a TLD and may have no
+// domain to prefill. Calling the search form with an empty value produced links
+// like `...find?domainToCheck=` — a dangling parameter that lands the visitor on
+// an empty search. `landing` is where to send them when there is no name yet;
+// every one of these was opened and confirmed to resolve on 2026-09-16
+// (godaddy.com/domains/domain-name-search, the obvious guess, is a 404).
+const REGISTRAR_LINKS: Record<string, { search: (d: string) => string; landing: string }> = {
+  GoDaddy: {
+    search: (d) => `https://www.godaddy.com/domainsearch/find?domainToCheck=${encodeURIComponent(d)}`,
+    landing: `https://www.godaddy.com/domains`,
+  },
+  Porkbun: {
+    search: (d) => `https://porkbun.com/checkout/search?q=${encodeURIComponent(d)}`,
+    landing: `https://porkbun.com/products/domains`,
+  },
+  Namecheap: {
+    search: (d) => `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(d)}`,
+    landing: `https://www.namecheap.com/domains/`,
+  },
+  Spaceship: {
+    search: (d) => `https://www.spaceship.com/domain-search/?query=${encodeURIComponent(d)}`,
+    landing: `https://www.spaceship.com/domain-search/`,
+  },
+  Cloudflare: {
+    search: () => `https://www.cloudflare.com/products/registrar/`,
+    landing: `https://www.cloudflare.com/products/registrar/`,
+  },
+  OVHcloud: {
+    search: (d) =>
+      `https://order.ca.ovhcloud.com/us/order/webcloud/?#/webCloud/domain/select?selection=~()&domain=${encodeURIComponent(d)}`,
+    landing: `https://www.ovhcloud.com/en/domains/`,
+  },
 };
 
 function registerUrl(registrar: string, domain?: string | null): string {
-  const fn = REGISTRAR_LINKS[registrar];
-  if (fn && domain) return fn(domain);
-  if (fn) return fn("");
-  return `https://www.google.com/search?q=${encodeURIComponent(`${domain ?? ""} ${registrar} register`)}`;
+  const link = REGISTRAR_LINKS[registrar];
+  if (link) return domain ? link.search(domain) : link.landing;
+  return domain
+    ? `https://www.google.com/search?q=${encodeURIComponent(`${domain} ${registrar} register`)}`
+    : `https://www.google.com/search?q=${encodeURIComponent(`${registrar} register domain`)}`;
 }
 
 const UTM = "utm_source=mcp&utm_medium=api&utm_campaign=domain-check-skills";
