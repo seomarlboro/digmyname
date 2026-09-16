@@ -1,0 +1,94 @@
+# Health monitor (docs/DIGMYNAME_ARCHITECTURE.md §13): catches breakage before
+# visitors do — home page / /tld route up, the API's verdict on a handful of
+# reference domains is honest, registrar prices haven't gone stale, and the
+# two nightly cleanup cron jobs actually ran. Read-only against public,
+# no-auth surfaces plus two anon-key SELECTs; creates NO load worth mentioning
+# (a handful of requests every 20 min) and does not touch the separate
+# keep-warm / edge-cache-prewarm cron jobs.
+#
+# Secrets used (optional — the DB-backed checks skip themselves with a warning
+# if these aren't set; nothing else in this workflow needs them):
+#   VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY — the same anon
+#   (RLS-scoped, publicly embeddable) key the frontend and
+#   scripts/generate-tld-prices.ts already use. Never a service-role key.
+name: monitor
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: monitor
+  cancel-in-progress: false
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run health checks
+        id: health
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          RESULT_OUT: monitor-result.json
+        run: node scripts/monitor/site-health.mjs
+        continue-on-error: true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monitor-result
+          path: monitor-result.json
+          retention-days: 14
+
+      - name: Open/update/close tracking issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const result = JSON.parse(fs.readFileSync("monitor-result.json", "utf8"));
+            const label = "automated-monitor";
+            const title = "🔴 Site/API health check failing";
+
+            try {
+              await github.rest.issues.createLabel({ ...context.repo, name: label, color: "d73a4a", description: "Opened/updated by .github/workflows/monitor.yml" });
+            } catch (e) { /* already exists */ }
+
+            const open = await github.rest.issues.listForRepo({ ...context.repo, state: "open", labels: label });
+            const existing = open.data[0];
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            if (!result.ok) {
+              const body = [
+                `Run: ${runUrl}`,
+                `Generated: ${result.generatedAt}`,
+                "",
+                "| Check | Result | ms | Detail |",
+                "|---|---|---|---|",
+                ...result.results.map(r => `| ${r.check} | ${r.ok === null ? "⚠️ skipped" : r.ok ? "✅" : "❌"} | ${r.ms} | ${r.detail} |`),
+              ].join("\n");
+
+              if (existing) {
+                await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body });
+              } else {
+                await github.rest.issues.create({ ...context.repo, title, labels: [label], body });
+              }
+            } else if (existing) {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body: `Resolved: ${runUrl} — all checks passed.` });
+              await github.rest.issues.update({ ...context.repo, issue_number: existing.number, state: "closed" });
+            }
+
+      - name: Fail the job if any check failed
+        if: steps.health.outcome == 'failure'
+        run: exit 1
