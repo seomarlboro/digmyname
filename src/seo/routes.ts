@@ -89,7 +89,7 @@ const staticApi = `
 
 const staticPrivacy = `
 <h1>Privacy policy</h1>
-<p>What DigMyName stores and why: account email for sign-in and saved domains, waitlist email addresses, anonymous usage counts that never include what you search (kept 13 months), a cache of answers keyed by domain name (deleted daily once expired), and short-lived per-IP rate-limit counters on the API. No advertising trackers, no third-party analytics scripts, no cookies for analytics. Full details, retention periods and your rights under the GDPR are on this page.</p>`;
+<p>What DigMyName stores and why: account email for sign-in and saved domains, waitlist email addresses, anonymous usage counts that never include what you search (kept 13 months), a cache of answers keyed by domain name (deleted daily once expired), and short-lived per-IP rate-limit counters on the API. No advertising trackers and nothing that follows you to other sites. One measurement is not ours: the host's own visitor-analytics script, which sends the page address, referrer, user-agent and a time-zone country and sets one cookie — it is described in full on this page. Full details, retention periods and your rights under the GDPR are on this page.</p>`;
 
 const staticTerms = `
 <h1>Terms of use</h1>
@@ -175,7 +175,7 @@ export const ROUTES: RouteMeta[] = [
     path: "/privacy",
     title: "Privacy Policy — DigMyName",
     description:
-      "What DigMyName stores (account email, saved domains, waitlist email, anonymous usage counts, a domain-keyed answer cache, short-lived rate-limit counters), for how long, and your rights under the GDPR.",
+      "What DigMyName stores (account email, saved domains, waitlist email, anonymous usage counts, a domain-keyed answer cache, short-lived rate-limit counters) plus the host's own visitor analytics, for how long, and your rights under the GDPR.",
     changefreq: "yearly",
     priority: "0.3",
     staticHtml: staticPrivacy,
