@@ -2,7 +2,7 @@
 // The package ships no `exports` map or types; Vite resolves these paths at
 // build time, and these declarations satisfy typecheckers (tsc, Deno).
 declare module "react-syntax-highlighter/dist/esm/styles/prism/index.js" {
-  export const vscDarkPlus: Record<string, string>;
+  export const vscDarkPlus: { [key: string]: import("react").CSSProperties };
 }
 declare module "react-syntax-highlighter/dist/esm/languages/prism/bash" {
   const grammar: unknown;
