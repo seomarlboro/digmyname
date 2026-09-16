@@ -214,12 +214,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://digmyname.com/tld/gg</loc>
-    <lastmod>2026-09-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://digmyname.com/tld/group</loc>
     <lastmod>2026-09-13</lastmod>
     <changefreq>weekly</changefreq>
@@ -287,12 +281,6 @@
   </url>
   <url>
     <loc>https://digmyname.com/tld/run</loc>
-    <lastmod>2026-09-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://digmyname.com/tld/so</loc>
     <lastmod>2026-09-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>

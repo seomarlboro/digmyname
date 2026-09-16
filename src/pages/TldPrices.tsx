@@ -14,6 +14,7 @@ import { DataTable, Eyebrow, PageHeader, PageMain, Section, Stat, StatGrid, type
 import { NetworkIcon, StoreIcon, CertificateIcon } from "@/components/StatIcons";
 import { getRegistrarColor } from "@/lib/registrarColors";
 import { cn } from "@/lib/utils";
+import { isSearchableTld } from "@/lib/searchableTlds";
 import { FOOTER_TLDS } from "@/generated/tld-links";
 import { TLD_SNAPSHOT, breadcrumbJsonLd, tldPageRoute } from "@/seo/tldRoutes";
 import {
@@ -140,6 +141,8 @@ const TldPrices = () => {
   }
 
   const dot = `.${tld}`;
+  /** Does the search offer this extension at all? .gg and .so have price pages but no answer. */
+  const searchable = isSearchableTld(tld);
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const label = name.trim().toLowerCase().replace(/\s+/g, "").replace(new RegExp(`\\.${tld}$`), "");
@@ -222,10 +225,13 @@ const TldPrices = () => {
           </Section>
         )}
 
-        <Section title={`How availability of ${dot} is checked`}>
+        <Section title={searchable ? `How availability of ${dot} is checked` : `Availability of ${dot} names`}>
           <Prose>{page.checkLines.join(" ")}</Prose>
         </Section>
 
+        {/* No search box for an extension the search cannot answer for: the form
+            would hand the visitor a result page about a different extension. */}
+        {searchable && (
         <Section title={`Check a ${dot} name`}>
           <form role="search" onSubmit={submit} className="flex max-w-xl flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
@@ -244,6 +250,7 @@ const TldPrices = () => {
             <Button type="submit">Check availability</Button>
           </form>
         </Section>
+        )}
 
         <Section title="Other extensions">
           <ul className="flex flex-wrap gap-2">

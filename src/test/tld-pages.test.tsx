@@ -193,6 +193,23 @@ describe("how availability is checked (facts from the pipeline tables)", () => {
     expect(lines).not.toContain("your browser");
   });
 
+  it("an extension the search does not offer describes no check, and is never indexed", () => {
+    // .gg and .so were dropped from SEARCHABLE_TLDS in August: no bootstrap RDAP
+    // server, so a name there cannot be confirmed free. Their price pages used to
+    // rank while promising "how availability of .gg is checked".
+    for (const ext of ["gg", "so"]) {
+      const page = buildTldPage(tld(ext, [price("A", 1, 1), price("B", 2, 2)], { inIanaBootstrap: false }), NOW);
+      const lines = page.checkLines.join(" ");
+      expect(lines).toContain(`DigMyName does not check availability for .${ext}`);
+      expect(lines).not.toContain("your browser");
+      expect(page.indexable).toBe(false);
+    }
+  });
+
+  it("a searchable extension with two registrars is still indexed", () => {
+    expect(buildTldPage(tld("io", [price("A", 1, 1), price("B", 2, 2)], { registryHost: "rdap.identitydigital.services" }), NOW).indexable).toBe(true);
+  });
+
   it("snapshot RDAP hosts match the edge pipeline's FAST_RDAP table", async () => {
     const pipeline = (await import("../../supabase/functions/_shared/pipeline.ts?raw")).default as string;
     const fast = parseFastRdap(pipeline);

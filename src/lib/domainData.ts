@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { SEARCHABLE_TLDS } from "./searchableTlds";
 
 /** A curated extension. Deliberately nothing else: prices come from the live
  *  registrar table (`registrar_prices`) and card attributes from real verdicts,
@@ -8,75 +9,10 @@ export interface TLD {
   extension: string;
 }
 
-export const TLD_LIST: TLD[] = [
-  // Classic
-  { extension: "com" },
-  { extension: "net" },
-  { extension: "org" },
-  { extension: "info" },
-  { extension: "biz" },
-  // Tech
-  { extension: "io" },
-  { extension: "ai" },
-  { extension: "app" },
-  { extension: "dev" },
-  { extension: "tech" },
-  { extension: "digital" },
-  { extension: "cloud" },
-  { extension: "software" },
-  { extension: "systems" },
-  { extension: "build" },
-  { extension: "run" },
-  { extension: "page" },
-  { extension: "link" },
-  { extension: "tools" },
-  // Startup / Business
-  { extension: "co" },
-  { extension: "agency" },
-  { extension: "company" },
-  { extension: "ventures" },
-  { extension: "capital" },
-  { extension: "inc" },
-  // Creative
-  { extension: "design" },
-  { extension: "studio" },
-  { extension: "art" },
-  { extension: "media" },
-  // Short / Brandable
-  { extension: "xyz" },
-  { extension: "me" },
-  { extension: "cc" },
-  { extension: "tv" },
-  // .gg and .so were removed 2026-08-15 — neither zone has an RDAP server (both
-  // absent from the IANA bootstrap), so availability there rests on DNS plus a
-  // 404 from an aggregator that cannot route the zone. That combination sold
-  // registered names (`gaming.gg`, registered 2020, was shown available $51.80).
-  // Re-add them only together with a paid third signal, if the demand appears.
-  // E-commerce
-  { extension: "shop" },
-  { extension: "store" },
-  { extension: "market" },
-  { extension: "buy" },
-  // Community / Social
-  { extension: "community" },
-  { extension: "social" },
-  { extension: "club" },
-  { extension: "group" },
-  // Finance
-  { extension: "finance" },
-  { extension: "money" },
-  { extension: "fund" },
-  // Other popular
-  { extension: "life" },
-  { extension: "world" },
-  { extension: "site" },
-  { extension: "online" },
-  { extension: "space" },
-  { extension: "pro" },
-  { extension: "one" },
-  { extension: "wtf" },
-  { extension: "lol" },
-];
+/** The curated extensions, in authority order. The list itself lives in
+ *  searchableTlds.ts so Node-side build code can read it without pulling in
+ *  the Supabase client this module imports. */
+export const TLD_LIST: TLD[] = SEARCHABLE_TLDS.map((extension) => ({ extension }));
 
 /** Authority rank per TLD = its index in the curated TLD_LIST (lower = more
  *  authoritative). Immutable for a given extension, so sorting on it never

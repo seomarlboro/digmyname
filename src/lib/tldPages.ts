@@ -8,12 +8,16 @@
  *
  * Honesty rules encoded here (guarded by src/test/tld-pages.test.ts):
  *   - one registrar is a price, not a comparison: no "comparison" wording, noindex;
+ *   - an extension the search cannot answer for (not in SEARCHABLE_TLDS, e.g. .gg
+ *     and .so, dropped in August because no RDAP server can confirm a name there)
+ *     is noindex too, and says so instead of describing a check it never runs;
  *   - no "cheapest" / "best": the lowest price is "lowest of the N registrars we track";
  *   - a row older than 60 days is not shown (the API's limit); a quarantined or
  *     too-old row names the registrar and its last verification date, never the number;
  *   - every price carries its own verification date; older than 14 days is marked stale.
  */
 import { BROWSER_RDAP } from "./browserLane";
+import { isSearchableTld } from "./searchableTlds";
 import { STALE_AFTER_DAYS, TLD_ORDER } from "./pricing";
 import { RENEWAL_TRAP_RATIO } from "./resultFilters";
 
@@ -242,6 +246,14 @@ export function shortRange(oldest: string | null, newest: string | null): string
 /** How the pipeline checks availability for this TLD — facts from FAST_RDAP, the browser lane table and IANA's bootstrap file. */
 export function checkLines(t: RdapFacts & { tld: string }): string[] {
   const dot = `.${t.tld}`;
+  // Not in the curated list: the search does not offer this extension, so there
+  // is no check to describe. Saying "how availability of .gg is checked" on a
+  // page for an extension we refuse to answer for is the lie this prevents.
+  if (!isSearchableTld(t.tld)) {
+    return [
+      `DigMyName does not check availability for ${dot}. No RDAP server for this zone is listed in IANA's bootstrap registry, so a name here cannot be confirmed free, and the search offers only extensions it can answer for. This page is prices only — check the name itself at a registrar.`,
+    ];
+  }
   const thirdSignal =
     "Premium suspects (such as very short names) and brand-protected labels also get a third signal, Fastly Domain Research, before they are shown as available.";
   if (t.registryHost) {
@@ -367,7 +379,9 @@ export function buildTldPage(t: SnapshotTld, now = Date.now()): TldPage {
     hidden,
     registrarCount: n,
     single,
-    indexable: n >= 2,
+    // Two registrars make it a comparison; a searchable extension makes the page
+    // something we can stand behind. Both, or it stays out of the index.
+    indexable: n >= 2 && isSearchableTld(t.tld),
     lowestReg,
     lowestRenew,
     threeYearLow,

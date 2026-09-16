@@ -12,6 +12,7 @@
  */
 import snapshotJson from "../generated/tld-prices.json";
 import { SITE_URL, type RouteMeta } from "./routes";
+import { isSearchableTld } from "../lib/searchableTlds";
 import {
   TLD_HUB_PATH,
   buildHub,
@@ -45,7 +46,7 @@ export function renderTldStatic(page: TldPage): string {
       : "",
     page.trapLine ? `<h2>Renewal price</h2>\n<p>${esc(page.trapLine)}</p>` : "",
     page.hiddenLines.length ? `<h2>Not shown</h2>\n<ul>${page.hiddenLines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : "",
-    `<h2>How availability of .${esc(page.tld)} is checked</h2>\n<p>${esc(page.checkLines.join(" "))}</p>`,
+    `<h2>${page.indexable || isSearchableTld(page.tld) ? `How availability of .${esc(page.tld)} is checked` : `Availability of .${esc(page.tld)} names`}</h2>\n<p>${esc(page.checkLines.join(" "))}</p>`,
     `<p><a href="${TLD_HUB_PATH}">All domain extensions</a> · <a href="/pricing">Pricing overview</a> · <a href="/">Search a domain</a></p>`,
   ]
     .filter(Boolean)
