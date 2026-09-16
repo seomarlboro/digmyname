@@ -344,6 +344,11 @@ const OPENAPI = {
     "/check": {
       get: {
         summary: "Check availability of a single domain",
+        description:
+          "Returns availability, a premium flag and the standard-tier registration price with the cheapest registrar. " +
+          "A registry-premium name answers `premium: true` with `price_usd: null`: confirming the premium figure costs " +
+          "a paid per-name lookup, which runs for the name a visitor types on digmyname.com and not for API traffic. " +
+          "`uncertain: true` means the signals did not agree — it is never reported as available.",
         parameters: [
           { name: "domain", in: "query", required: true, schema: { type: "string", example: "myname.com" } },
         ],

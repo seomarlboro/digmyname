@@ -16,7 +16,7 @@ const endpoints = [
   {
     method: "GET",
     path: "/check?domain=acmeforge.io",
-    desc: "Single domain availability, premium flag and real price.",
+    desc: "Single domain availability, premium flag and the standard-tier price. A confirmed premium price is site-only.",
   },
   {
     method: "GET",
@@ -62,7 +62,7 @@ const Api = () => {
               <span className="text-aurora-gradient">agents and humans.</span>
             </>
           }
-          lede="One HTTP GET tells you whether a domain is free, what it really costs, and which registrar is cheapest. No signup, no API key, no scraping — ChatGPT, Claude, Perplexity and your own scripts can call it directly."
+          lede="One HTTP GET tells you whether a domain is free, what a standard registration costs, and which registrar is cheapest. No signup, no API key, no scraping — ChatGPT, Claude, Perplexity and your own scripts can call it directly."
           actions={
             <>
               <Button asChild size="lg">
@@ -218,6 +218,12 @@ print(res.json()["result"]["available"])`,
             <ul className="list-body">
               <li>60 requests per 60 seconds per IP.</li>
               <li>No key, no account, no tracking of API callers beyond rate-limit counters.</li>
+              <li>
+                A registry-premium name comes back as <code className="font-mono text-xs">premium: true</code> with{" "}
+                <code className="font-mono text-xs">price_usd: null</code>. Confirming the premium figure costs a paid
+                lookup per name, so it runs for the name a visitor types on the site, not for every API call — the flag
+                is the honest answer, an invented number would not be.
+              </li>
               <li>
                 Repeat lookups within 60 seconds are served from a Cloudflare edge cache (~0.1 s);
                 first-time lookups run the full live check (about half a second, under 0.9 s at p95 —

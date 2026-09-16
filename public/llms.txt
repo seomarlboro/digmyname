@@ -48,7 +48,7 @@ No auth required. Rate limit: 60 requests / 60 seconds / IP.
 Served behind a Cloudflare edge cache: repeat lookups within 60 seconds return in about 0.1 s; first-time lookups run the full live check (about half a second, under 0.9 s at p95 — measured from the US and the EU, September 2026).
 
 Endpoints:
-- `GET /check?domain=myname.com` — single-domain availability. Returns `available`, `uncertain`, `premium`, `for_sale`, `price_usd`, `cheapest_registrar`, `search_url`, `buy_url`, `register_url`.
+- `GET /check?domain=myname.com` — single-domain availability. Returns `available`, `uncertain`, `premium`, `for_sale`, `price_usd`, `cheapest_registrar`, `search_url`, `buy_url`, `register_url`. `price_usd` is the standard-tier price; a registry-premium name returns `premium: true` with `price_usd: null`, because confirming a premium figure costs a paid per-name lookup that runs only for the name typed on the site.
 - `GET /search?q=myname&tlds=com,io,ai` — multi-TLD lookup (max 12 TLDs; defaults to com,io,ai,app,dev,co,net,org,xyz,me,tech).
 - `GET /registrars?tld=com` — sorted registrar pricing (reg, renew, transfer, promo, WHOIS privacy, `three_year_total_usd`).
 
