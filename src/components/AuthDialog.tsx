@@ -1,4 +1,3 @@
-/// <reference types="../../node_modules/vite/client.d.ts" />
 import { useState } from "react";
 import {
   Dialog,

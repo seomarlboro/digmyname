@@ -1,4 +1,3 @@
-/// <reference types="../../node_modules/vite/client.d.ts" />
 /**
  * Private, first-party product analytics — table `public.site_events`
  * (schema and rules: docs/DIGMYNAME_ARCHITECTURE.md §12).
