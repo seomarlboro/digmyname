@@ -8,7 +8,7 @@
   "unstable": ["sloppy-imports"],
   "nodeModulesDir": "auto",
   "compilerOptions": {
-    "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
+    "lib": ["deno.ns", "ES2020", "DOM", "DOM.Iterable", "WebWorker"],
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "strict": false,
