@@ -1,3 +1,4 @@
+/// <reference path="../types/syntax-highlighter.d.ts" />
 import { useId, useState } from "react";
 import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import bash from "react-syntax-highlighter/dist/esm/languages/prism/bash";
