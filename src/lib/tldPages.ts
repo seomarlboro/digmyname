@@ -440,6 +440,14 @@ export function buildHub(snapshot: TldSnapshot, now = Date.now()): TldHub {
   const compared = entries.length - single;
   const newestVerifiedAt = entries.map((e) => e.newestVerifiedAt).filter((d): d is string => !!d).sort().pop() ?? null;
   const count = entries.length;
+  // The head is what a searcher and a social card actually read, so it may not
+  // promise more than the body delivers: "54 TLDs, 6 registrars" reads as 54 × 6,
+  // while most extensions are tracked at two. Quote the real range instead.
+  const counts = entries.map((e) => e.registrarCount);
+  const minRegistrars = Math.min(...counts);
+  const maxRegistrars = Math.max(...counts);
+  const range = minRegistrars === maxRegistrars ? `${maxRegistrars}` : `${minRegistrars}\u2013${maxRegistrars}`;
+  const full = entries.filter((e) => e.registrarCount === registrars.length).length;
   return {
     entries,
     registrars,
@@ -447,9 +455,9 @@ export function buildHub(snapshot: TldSnapshot, now = Date.now()): TldHub {
     single,
     newestVerifiedAt,
     h1: `Domain prices by extension`,
-    lede: `Registration and renewal prices for ${count} extensions. Each one has its own page with every tracked registrar's price, renewal traps and verification dates. ${compared} are tracked at two or more registrars, ${single} at one only.`,
-    title: `Domain prices by extension: ${count} TLDs, ${registrars.length} registrars`,
-    description: `Register and renew prices for ${count} domain extensions at ${registrars.length} registrars. Each has a page with every registrar's price, renewal traps and verification date.`,
+    lede: `Registration and renewal prices for ${count} extensions, each tracked at ${range} of the ${registrars.length} registrars we follow — ${full} at all ${registrars.length}. Each one has its own page with every tracked registrar's price, renewal traps and verification dates. ${compared} are tracked at two or more registrars, ${single} at one only.`,
+    title: `Domain prices by extension: ${count} TLDs, ${range} registrars each`,
+    description: `Register and renew prices for ${count} domain extensions, each tracked at ${range} of ${registrars.length} registrars \u2014 ${full} at all ${registrars.length}. Each has its own page with prices and dates.`,
   };
 }
 
