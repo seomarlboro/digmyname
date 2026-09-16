@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { TLD_FACTS, operatorBlock, eligibilityBlock, eligibilityQuotes, priceFaq, listOf, hostOf } from "@/lib/tldFacts";
+import { TLD_FACTS, operatorBlock, eligibilityBlock, eligibilityQuotes, usageBlock, priceFaq, listOf, hostOf } from "@/lib/tldFacts";
 import { buildTldPage, type SnapshotPrice, type SnapshotTld, type TldPriceRow } from "@/lib/tldPages";
 import { TLD_SNAPSHOT } from "@/seo/tldRoutes";
 import { parseIana } from "../../scripts/tld-facts/fetch-iana.mjs";
 import { parseIcann } from "../../scripts/tld-facts/fetch-icann.mjs";
+import { tallyRanking } from "../../scripts/tld-facts/fetch-tranco.mjs";
 
 const COLLECTED = TLD_FACTS.ianaCollectedAt ?? "";
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -106,6 +107,19 @@ describe("coverage", () => {
       expect(eligibilityBlock(t), t).not.toBeNull();
     }
   });
+
+  it("every extension is counted against the same ranking, .so included", () => {
+    const ids = new Set<string>();
+    for (const t of priced) {
+      const u = TLD_FACTS.tlds[t]?.usage;
+      expect(u, `${t} was never counted`).toBeTruthy();
+      expect(u!.rankedTotal, t).toBeGreaterThan(900_000);
+      ids.add(`${u!.listId}/${u!.listDate}`);
+      expect(usageBlock(t), t).not.toBeNull();
+    }
+    // One list for all of them, or the counts are not comparable.
+    expect([...ids]).toHaveLength(1);
+  });
 });
 
 describe("rendered prose", () => {
@@ -113,7 +127,7 @@ describe("rendered prose", () => {
 
   it("carries no evaluation — the registries' marketing does not survive the trip", () => {
     for (const name of Object.keys(TLD_FACTS.tlds)) {
-      const text = [operatorBlock(name), eligibilityBlock(name)]
+      const text = [operatorBlock(name), usageBlock(name), eligibilityBlock(name)]
         .filter(Boolean)
         .flatMap((b) => b!.sentences)
         .join(" ");
@@ -123,7 +137,7 @@ describe("rendered prose", () => {
 
   it("every rendered block shows at least one source the reader can open", () => {
     for (const name of Object.keys(TLD_FACTS.tlds)) {
-      for (const block of [operatorBlock(name), eligibilityBlock(name)]) {
+      for (const block of [operatorBlock(name), usageBlock(name), eligibilityBlock(name)]) {
         if (!block) continue;
         expect(block.sources.length, `${name}/${block.title}`).toBeGreaterThan(0);
         for (const src of block.sources) {
@@ -136,7 +150,7 @@ describe("rendered prose", () => {
 
   it("each block is 2–4 sentences", () => {
     for (const name of Object.keys(TLD_FACTS.tlds)) {
-      for (const block of [operatorBlock(name), eligibilityBlock(name)]) {
+      for (const block of [operatorBlock(name), usageBlock(name), eligibilityBlock(name)]) {
         if (!block) continue;
         expect(block.sentences.length, `${name}/${block.title}`).toBeGreaterThanOrEqual(2);
         expect(block.sentences.length, `${name}/${block.title}`).toBeLessThanOrEqual(4);
@@ -146,6 +160,7 @@ describe("rendered prose", () => {
 
   it("an extension with no facts renders nothing rather than filler", () => {
     expect(operatorBlock("no-such-tld")).toBeNull();
+    expect(usageBlock("no-such-tld")).toBeNull();
     expect(eligibilityBlock("no-such-tld")).toBeNull();
     expect(eligibilityQuotes("no-such-tld")).toEqual([]);
   });
@@ -290,6 +305,60 @@ describe("the ICANN parser", () => {
 
   it("omits what it cannot find", () => {
     expect(parseIcann("<div>nothing here</div>")).toEqual({});
+  });
+});
+
+describe("the ranking tally", () => {
+  const lines = [
+    "1,google.com",
+    "2,alpha.io",
+    "9999,beta.io",
+    "10001,gamma.io",
+    "150000,delta.io",
+    "500,pornhub.io",      // counted, never printed
+    "7,notatld.example",
+    "bad line",
+  ];
+
+  it("counts each band and ignores extensions we do not track", () => {
+    const t = tallyRanking(lines, ["io", "com"]);
+    expect(t.get("io")).toMatchObject({ inMillion: 5, in100k: 4, in10k: 3 });
+    expect(t.get("com")).toMatchObject({ inMillion: 1, in10k: 1 });
+  });
+
+  it("counts an adult label but does not offer it as an example", () => {
+    const io = tallyRanking(lines, ["io"]).get("io")!;
+    expect(io.inMillion).toBe(5);
+    expect(io.examples.map((e) => e.domain)).toEqual(["alpha.io", "beta.io", "gamma.io", "delta.io"]);
+  });
+
+  it("gives an untouched extension a zero row rather than no row", () => {
+    expect(tallyRanking(lines, ["wtf"]).get("wtf")).toEqual({ inMillion: 0, in100k: 0, in10k: 0, examples: [] });
+  });
+});
+
+describe("the usage block", () => {
+  it("leads with the count, then the split, then real names", () => {
+    const io = usageBlock("io")!;
+    expect(io.title).toBe("How .io is used");
+    expect(io.sentences[0]).toMatch(/names are among the 1,000,000 most-visited sites/);
+    expect(io.sentences[1]).toMatch(/top ten thousand/);
+    expect(io.sentences[2]).toMatch(/include/);
+    expect(io.sources[0].url).toMatch(/^https:\/\/tranco-list\.eu\/list\//);
+  });
+
+  it("says plainly when an extension has no high-traffic sites at all", () => {
+    // .run: 283 names in the million, none in the top ten thousand.
+    expect(usageBlock("run")!.sentences[1]).toMatch(/None of them reaches the top ten thousand/);
+  });
+
+  it("prints no adult or piracy label as an example on any page", () => {
+    const bad = /(xxx|porn|sex|hentai|escort|filmyzilla|redecanais|isaidub|tamilprint|lk21|manga18|bokep)/i;
+    for (const t of Object.keys(TLD_FACTS.tlds)) {
+      const block = usageBlock(t);
+      if (!block) continue;
+      expect(block.sentences.join(" "), t).not.toMatch(bad);
+    }
   });
 });
 

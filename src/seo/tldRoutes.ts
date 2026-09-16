@@ -55,6 +55,7 @@ export function renderTldStatic(page: TldPage): string {
       : "",
     page.trapLine ? `<h2>Renewal price</h2>\n<p>${esc(page.trapLine)}</p>` : "",
     page.operator ? factBlockStatic(page.operator) : "",
+    page.usage ? factBlockStatic(page.usage) : "",
     page.eligibility ? factBlockStatic(page.eligibility) : "",
     page.hiddenLines.length ? `<h2>Not shown</h2>\n<ul>${page.hiddenLines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : "",
     `<h2>${page.indexable || isSearchableTld(page.tld) ? `How availability of .${esc(page.tld)} is checked` : `Availability of .${esc(page.tld)} names`}</h2>\n<p>${esc(page.checkLines.join(" "))}</p>`,

@@ -48,6 +48,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 70,
+        "in100k": 3,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "ftd.agency",
+            "rank": 20279
+          },
+          {
+            "domain": "nic.agency",
+            "rank": 63888
+          },
+          {
+            "domain": "plat.agency",
+            "rank": 90714
+          },
+          {
+            "domain": "mrg.agency",
+            "rank": 129901
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "ai": {
@@ -77,6 +105,34 @@
           "sourceLabel": "NIC.AI, the official .ai registry operator site",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 3575,
+        "in100k": 461,
+        "in10k": 41,
+        "examples": [
+          {
+            "domain": "claude.ai",
+            "rank": 441
+          },
+          {
+            "domain": "perplexity.ai",
+            "rank": 686
+          },
+          {
+            "domain": "character.ai",
+            "rank": 957
+          },
+          {
+            "domain": "polybuzz.ai",
+            "rank": 1296
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "app": {
@@ -118,6 +174,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 3752,
+        "in100k": 409,
+        "in10k": 30,
+        "examples": [
+          {
+            "domain": "bsky.app",
+            "rank": 401
+          },
+          {
+            "domain": "run.app",
+            "rank": 510
+          },
+          {
+            "domain": "shop.app",
+            "rank": 555
+          },
+          {
+            "domain": "vercel.app",
+            "rank": 660
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "art": {
@@ -153,6 +237,34 @@
           "sourceLabel": "art.art, the registry's own site",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 373,
+        "in100k": 39,
+        "in10k": 1,
+        "examples": [
+          {
+            "domain": "pixai.art",
+            "rank": 5378
+          },
+          {
+            "domain": "a2t.art",
+            "rank": 23530
+          },
+          {
+            "domain": "az8.art",
+            "rank": 24714
+          },
+          {
+            "domain": "tensor.art",
+            "rank": 27082
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "biz": {
@@ -188,6 +300,34 @@
           "sourceLabel": "GoDaddy Registry universal terms of service",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 2193,
+        "in100k": 200,
+        "in10k": 9,
+        "examples": [
+          {
+            "domain": "gtld.biz",
+            "rank": 3030
+          },
+          {
+            "domain": "siteground.biz",
+            "rank": 3718
+          },
+          {
+            "domain": "adtarget.biz",
+            "rank": 4151
+          },
+          {
+            "domain": "dailyinnovation.biz",
+            "rank": 4752
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "build": {
@@ -229,6 +369,34 @@
         "agreementDate": "7 November 2013",
         "agreementType": "Base, Non-Sponsored",
         "sourceUrl": "https://www.icann.org/en/registry-agreements/details/build",
+        "checkedAt": "2026-09-16"
+      },
+      "usage": {
+        "inMillion": 46,
+        "in100k": 12,
+        "in10k": 1,
+        "examples": [
+          {
+            "domain": "gist.build",
+            "rank": 4489
+          },
+          {
+            "domain": "neon.build",
+            "rank": 15695
+          },
+          {
+            "domain": "astro.build",
+            "rank": 17986
+          },
+          {
+            "domain": "lineascan.build",
+            "rank": 45316
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
         "checkedAt": "2026-09-16"
       }
     },
@@ -279,6 +447,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 24,
+        "in100k": 2,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "scalable.capital",
+            "rank": 29217
+          },
+          {
+            "domain": "nic.capital",
+            "rank": 111255
+          },
+          {
+            "domain": "alenka.capital",
+            "rank": 169002
+          },
+          {
+            "domain": "po2.capital",
+            "rank": 171003
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "cc": {
@@ -307,6 +503,34 @@
           "sourceLabel": "Verisign, registry operator",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 6278,
+        "in100k": 369,
+        "in10k": 28,
+        "examples": [
+          {
+            "domain": "ptt.cc",
+            "rank": 1509
+          },
+          {
+            "domain": "netis.cc",
+            "rank": 2990
+          },
+          {
+            "domain": "admaster.cc",
+            "rank": 3835
+          },
+          {
+            "domain": "arduino.cc",
+            "rank": 3878
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "cloud": {
@@ -341,6 +565,34 @@
           "sourceLabel": "get.cloud, the registry's own site",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 2446,
+        "in100k": 348,
+        "in10k": 24,
+        "examples": [
+          {
+            "domain": "skyhigh.cloud",
+            "rank": 463
+          },
+          {
+            "domain": "nexthink.cloud",
+            "rank": 1006
+          },
+          {
+            "domain": "oath.cloud",
+            "rank": 2489
+          },
+          {
+            "domain": "scw.cloud",
+            "rank": 2931
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "club": {
@@ -376,6 +628,34 @@
           "sourceLabel": "GoDaddy Registry universal terms of service",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 1483,
+        "in100k": 110,
+        "in10k": 6,
+        "examples": [
+          {
+            "domain": "uxzw.club",
+            "rank": 10765
+          },
+          {
+            "domain": "earnbitmoon.club",
+            "rank": 16030
+          },
+          {
+            "domain": "litmir.club",
+            "rank": 17971
+          },
+          {
+            "domain": "nic.club",
+            "rank": 21119
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "co": {
@@ -412,6 +692,34 @@
           "sourceLabel": ".CO registration policies",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 6996,
+        "in100k": 817,
+        "in10k": 61,
+        "examples": [
+          {
+            "domain": "t.co",
+            "rank": 241
+          },
+          {
+            "domain": "gcdn.co",
+            "rank": 462
+          },
+          {
+            "domain": "scdn.co",
+            "rank": 651
+          },
+          {
+            "domain": "g.co",
+            "rank": 748
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "com": {
@@ -447,6 +755,34 @@
           "sourceLabel": "Verisign, registry operator",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 425810,
+        "in100k": 45558,
+        "in10k": 5001,
+        "examples": [
+          {
+            "domain": "google.com",
+            "rank": 1
+          },
+          {
+            "domain": "cloudflare.com",
+            "rank": 2
+          },
+          {
+            "domain": "facebook.com",
+            "rank": 3
+          },
+          {
+            "domain": "gstatic.com",
+            "rank": 4
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "community": {
@@ -496,6 +832,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 65,
+        "in100k": 3,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "caddy.community",
+            "rank": 14568
+          },
+          {
+            "domain": "blender.community",
+            "rank": 47224
+          },
+          {
+            "domain": "nothing.community",
+            "rank": 67484
+          },
+          {
+            "domain": "gettogether.community",
+            "rank": 104309
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "company": {
@@ -545,6 +909,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 84,
+        "in100k": 9,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "vk.company",
+            "rank": 26806
+          },
+          {
+            "domain": "ironlogic.company",
+            "rank": 35699
+          },
+          {
+            "domain": "webhost.company",
+            "rank": 43806
+          },
+          {
+            "domain": "nic.company",
+            "rank": 62541
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "design": {
@@ -580,6 +972,34 @@
           "sourceLabel": "GoDaddy Registry universal terms of service",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 101,
+        "in100k": 10,
+        "in10k": 2,
+        "examples": [
+          {
+            "domain": "iconify.design",
+            "rank": 9006
+          },
+          {
+            "domain": "spline.design",
+            "rank": 40166
+          },
+          {
+            "domain": "html.design",
+            "rank": 64164
+          },
+          {
+            "domain": "ant.design",
+            "rank": 66370
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "dev": {
@@ -621,6 +1041,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 1505,
+        "in100k": 208,
+        "in10k": 19,
+        "examples": [
+          {
+            "domain": "workers.dev",
+            "rank": 79
+          },
+          {
+            "domain": "aws.dev",
+            "rank": 113
+          },
+          {
+            "domain": "amazon.dev",
+            "rank": 135
+          },
+          {
+            "domain": "pages.dev",
+            "rank": 229
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "digital": {
@@ -670,6 +1118,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 397,
+        "in100k": 36,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "cariad.digital",
+            "rank": 12432
+          },
+          {
+            "domain": "kombinat.digital",
+            "rank": 14189
+          },
+          {
+            "domain": "conde.digital",
+            "rank": 16797
+          },
+          {
+            "domain": "yuca.digital",
+            "rank": 16964
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "finance": {
@@ -719,6 +1195,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 90,
+        "in100k": 5,
+        "in10k": 1,
+        "examples": [
+          {
+            "domain": "tranche.finance",
+            "rank": 6556
+          },
+          {
+            "domain": "pancakeswap.finance",
+            "rank": 20717
+          },
+          {
+            "domain": "gbanker.finance",
+            "rank": 23492
+          },
+          {
+            "domain": "p.finance",
+            "rank": 77041
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "fund": {
@@ -768,6 +1272,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 17,
+        "in100k": 2,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "cashflow.fund",
+            "rank": 59020
+          },
+          {
+            "domain": "greenclimate.fund",
+            "rank": 69362
+          },
+          {
+            "domain": "nic.fund",
+            "rank": 117244
+          },
+          {
+            "domain": "cnouyi.fund",
+            "rank": 140909
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "gg": {
@@ -797,6 +1329,34 @@
           "sourceLabel": "Channel Isles registration guide",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 777,
+        "in100k": 128,
+        "in10k": 16,
+        "examples": [
+          {
+            "domain": "discord.gg",
+            "rank": 148
+          },
+          {
+            "domain": "vlr.gg",
+            "rank": 3408
+          },
+          {
+            "domain": "wiki.gg",
+            "rank": 3687
+          },
+          {
+            "domain": "clean.gg",
+            "rank": 3839
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "group": {
@@ -846,6 +1406,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 191,
+        "in100k": 18,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "denjoy.group",
+            "rank": 10478
+          },
+          {
+            "domain": "sovcombank.group",
+            "rank": 11567
+          },
+          {
+            "domain": "web3dev.group",
+            "rank": 16929
+          },
+          {
+            "domain": "heureka.group",
+            "rank": 30005
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "inc": {
@@ -880,6 +1468,34 @@
           "sourceLabel": "get.inc, the registry's own site",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 64,
+        "in100k": 9,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "alta.inc",
+            "rank": 15733
+          },
+          {
+            "domain": "openintegration.inc",
+            "rank": 25821
+          },
+          {
+            "domain": "people.inc",
+            "rank": 28855
+          },
+          {
+            "domain": "self.inc",
+            "rank": 29085
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "info": {
@@ -929,6 +1545,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 5093,
+        "in100k": 405,
+        "in10k": 25,
+        "examples": [
+          {
+            "domain": "aboutads.info",
+            "rank": 578
+          },
+          {
+            "domain": "afilias-nst.info",
+            "rank": 2579
+          },
+          {
+            "domain": "wsdvs.info",
+            "rank": 3124
+          },
+          {
+            "domain": "bitrix.info",
+            "rank": 3745
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "io": {
@@ -965,6 +1609,34 @@
           "sourceLabel": "NIC.IO rules for domain names, clause 4.1",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 10148,
+        "in100k": 1890,
+        "in10k": 197,
+        "examples": [
+          {
+            "domain": "sentry.io",
+            "rank": 94
+          },
+          {
+            "domain": "github.io",
+            "rank": 125
+          },
+          {
+            "domain": "adobe.io",
+            "rank": 176
+          },
+          {
+            "domain": "pangle.io",
+            "rank": 438
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "life": {
@@ -1014,6 +1686,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 548,
+        "in100k": 50,
+        "in10k": 3,
+        "examples": [
+          {
+            "domain": "myangular.life",
+            "rank": 6495
+          },
+          {
+            "domain": "simple.life",
+            "rank": 6958
+          },
+          {
+            "domain": "storyreel.life",
+            "rank": 10780
+          },
+          {
+            "domain": "netxh.life",
+            "rank": 12712
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "link": {
@@ -1048,6 +1748,34 @@
           "sourceLabel": "Nova Registry .link acceptable use policy (PDF)",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 858,
+        "in100k": 119,
+        "in10k": 16,
+        "examples": [
+          {
+            "domain": "wa.link",
+            "rank": 1957
+          },
+          {
+            "domain": "app.link",
+            "rank": 2020
+          },
+          {
+            "domain": "sng.link",
+            "rank": 3656
+          },
+          {
+            "domain": "page.link",
+            "rank": 4542
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "lol": {
@@ -1083,6 +1811,34 @@
           "sourceLabel": "XYZ.COM LLC domain registration terms",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 787,
+        "in100k": 46,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "fow.lol",
+            "rank": 22026
+          },
+          {
+            "domain": "nic.lol",
+            "rank": 24201
+          },
+          {
+            "domain": "supermax.lol",
+            "rank": 25992
+          },
+          {
+            "domain": "techaro.lol",
+            "rank": 27991
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "market": {
@@ -1132,6 +1888,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 109,
+        "in100k": 11,
+        "in10k": 1,
+        "examples": [
+          {
+            "domain": "envato.market",
+            "rank": 3592
+          },
+          {
+            "domain": "plati.market",
+            "rank": 16430
+          },
+          {
+            "domain": "warframe.market",
+            "rank": 18785
+          },
+          {
+            "domain": "adtarget.market",
+            "rank": 31183
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "me": {
@@ -1160,6 +1944,34 @@
           "sourceLabel": "Domain.ME policies",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 2930,
+        "in100k": 418,
+        "in10k": 45,
+        "examples": [
+          {
+            "domain": "wa.me",
+            "rank": 68
+          },
+          {
+            "domain": "t.me",
+            "rank": 104
+          },
+          {
+            "domain": "telegram.me",
+            "rank": 293
+          },
+          {
+            "domain": "onelink.me",
+            "rank": 411
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "media": {
@@ -1209,6 +2021,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 421,
+        "in100k": 73,
+        "in10k": 9,
+        "examples": [
+          {
+            "domain": "discord.media",
+            "rank": 524
+          },
+          {
+            "domain": "impactify.media",
+            "rank": 3969
+          },
+          {
+            "domain": "adme.media",
+            "rank": 6129
+          },
+          {
+            "domain": "gendai.media",
+            "rank": 7988
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "money": {
@@ -1258,6 +2098,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 66,
+        "in100k": 9,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "storage.money",
+            "rank": 11574
+          },
+          {
+            "domain": "u-money.money",
+            "rank": 12995
+          },
+          {
+            "domain": "cs.money",
+            "rank": 15190
+          },
+          {
+            "domain": "web.money",
+            "rank": 34541
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "net": {
@@ -1293,6 +2161,34 @@
           "sourceLabel": "Verisign, registry operator",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 48548,
+        "in100k": 6279,
+        "in10k": 821,
+        "examples": [
+          {
+            "domain": "akamai.net",
+            "rank": 8
+          },
+          {
+            "domain": "fbcdn.net",
+            "rank": 13
+          },
+          {
+            "domain": "akamaiedge.net",
+            "rank": 23
+          },
+          {
+            "domain": "gtld-servers.net",
+            "rank": 26
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "one": {
@@ -1327,6 +2223,34 @@
           "sourceLabel": "get.one, the registry's own site",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 911,
+        "in100k": 83,
+        "in10k": 7,
+        "examples": [
+          {
+            "domain": "one.one",
+            "rank": 157
+          },
+          {
+            "domain": "pubadx.one",
+            "rank": 12760
+          },
+          {
+            "domain": "relativity.one",
+            "rank": 13837
+          },
+          {
+            "domain": "service.one",
+            "rank": 15805
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "online": {
@@ -1376,6 +2300,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 4656,
+        "in100k": 262,
+        "in10k": 9,
+        "examples": [
+          {
+            "domain": "adguard-vpn.online",
+            "rank": 1215
+          },
+          {
+            "domain": "blackrussia.online",
+            "rank": 2503
+          },
+          {
+            "domain": "immersivelabs.online",
+            "rank": 2909
+          },
+          {
+            "domain": "cordkit.online",
+            "rank": 3978
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "org": {
@@ -1418,6 +2370,34 @@
         "agreementType": "Base, Non-Sponsored",
         "sourceUrl": "https://www.icann.org/en/registry-agreements/details/org",
         "checkedAt": "2026-09-16"
+      },
+      "usage": {
+        "inMillion": 39342,
+        "in100k": 4496,
+        "in10k": 407,
+        "examples": [
+          {
+            "domain": "wikipedia.org",
+            "rank": 30
+          },
+          {
+            "domain": "wordpress.org",
+            "rank": 48
+          },
+          {
+            "domain": "ntp.org",
+            "rank": 67
+          },
+          {
+            "domain": "nginx.org",
+            "rank": 73
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "page": {
@@ -1459,6 +2439,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 119,
+        "in100k": 23,
+        "in10k": 2,
+        "examples": [
+          {
+            "domain": "g.page",
+            "rank": 472
+          },
+          {
+            "domain": "plesk.page",
+            "rank": 7874
+          },
+          {
+            "domain": "webnode.page",
+            "rank": 11409
+          },
+          {
+            "domain": "hlx.page",
+            "rank": 15162
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "pro": {
@@ -1508,6 +2516,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 2645,
+        "in100k": 244,
+        "in10k": 14,
+        "examples": [
+          {
+            "domain": "spaceweb.pro",
+            "rank": 345
+          },
+          {
+            "domain": "d-net.pro",
+            "rank": 3477
+          },
+          {
+            "domain": "crcdn.pro",
+            "rank": 4797
+          },
+          {
+            "domain": "keenetic.pro",
+            "rank": 5184
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "run": {
@@ -1557,6 +2593,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 283,
+        "in100k": 29,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "peer.run",
+            "rank": 12045
+          },
+          {
+            "domain": "vwapps.run",
+            "rank": 15461
+          },
+          {
+            "domain": "unico.run",
+            "rank": 17049
+          },
+          {
+            "domain": "halo.run",
+            "rank": 26180
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "shop": {
@@ -1598,6 +2662,34 @@
           "sourceLabel": "GMO Registry .shop FAQ",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 4725,
+        "in100k": 102,
+        "in10k": 5,
+        "examples": [
+          {
+            "domain": "vrfy.shop",
+            "rank": 2148
+          },
+          {
+            "domain": "disdarrummers.shop",
+            "rank": 3593
+          },
+          {
+            "domain": "videeyss.shop",
+            "rank": 5306
+          },
+          {
+            "domain": "urlflow.shop",
+            "rank": 5774
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "site": {
@@ -1647,6 +2739,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 3256,
+        "in100k": 216,
+        "in10k": 16,
+        "examples": [
+          {
+            "domain": "business.site",
+            "rank": 2005
+          },
+          {
+            "domain": "notion.site",
+            "rank": 2442
+          },
+          {
+            "domain": "chatgpt.site",
+            "rank": 2658
+          },
+          {
+            "domain": "firwinds.site",
+            "rank": 2662
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "so": {
@@ -1658,6 +2778,34 @@
         "delegatedDate": "1997-08-28",
         "recordUpdated": "2016-04-18",
         "sourceUrl": "https://www.iana.org/domains/root/db/so.html",
+        "checkedAt": "2026-09-16"
+      },
+      "usage": {
+        "inMillion": 157,
+        "in100k": 26,
+        "in10k": 2,
+        "examples": [
+          {
+            "domain": "notion.so",
+            "rank": 2059
+          },
+          {
+            "domain": "tally.so",
+            "rank": 5855
+          },
+          {
+            "domain": "google.so",
+            "rank": 10306
+          },
+          {
+            "domain": "circle.so",
+            "rank": 19101
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
         "checkedAt": "2026-09-16"
       }
     },
@@ -1708,6 +2856,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 252,
+        "in100k": 20,
+        "in10k": 1,
+        "examples": [
+          {
+            "domain": "mastodon.social",
+            "rank": 2766
+          },
+          {
+            "domain": "bsky.social",
+            "rank": 11376
+          },
+          {
+            "domain": "mstdn.social",
+            "rank": 26194
+          },
+          {
+            "domain": "chaos.social",
+            "rank": 35100
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "software": {
@@ -1757,6 +2933,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 93,
+        "in100k": 9,
+        "in10k": 1,
+        "examples": [
+          {
+            "domain": "opera.software",
+            "rank": 1900
+          },
+          {
+            "domain": "nic.software",
+            "rank": 49241
+          },
+          {
+            "domain": "rental.software",
+            "rank": 50060
+          },
+          {
+            "domain": "aphix.software",
+            "rank": 61519
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "space": {
@@ -1806,6 +3010,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 1335,
+        "in100k": 108,
+        "in10k": 5,
+        "examples": [
+          {
+            "domain": "adspend.space",
+            "rank": 4443
+          },
+          {
+            "domain": "conn3ct.space",
+            "rank": 4876
+          },
+          {
+            "domain": "proxytg.space",
+            "rank": 9054
+          },
+          {
+            "domain": "mempool.space",
+            "rank": 10312
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "store": {
@@ -1855,6 +3087,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 1442,
+        "in100k": 68,
+        "in10k": 2,
+        "examples": [
+          {
+            "domain": "googll.store",
+            "rank": 1637
+          },
+          {
+            "domain": "jilateskrimpanas.store",
+            "rank": 9951
+          },
+          {
+            "domain": "tersentuhsenja.store",
+            "rank": 12996
+          },
+          {
+            "domain": "stage48.store",
+            "rank": 15089
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "studio": {
@@ -1904,6 +3164,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 125,
+        "in100k": 12,
+        "in10k": 1,
+        "examples": [
+          {
+            "domain": "flourish.studio",
+            "rank": 13681
+          },
+          {
+            "domain": "nightcafe.studio",
+            "rank": 20234
+          },
+          {
+            "domain": "affinity.studio",
+            "rank": 37445
+          },
+          {
+            "domain": "starapps.studio",
+            "rank": 42309
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "systems": {
@@ -1953,6 +3241,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 196,
+        "in100k": 26,
+        "in10k": 2,
+        "examples": [
+          {
+            "domain": "eset.systems",
+            "rank": 4188
+          },
+          {
+            "domain": "ajax.systems",
+            "rank": 5790
+          },
+          {
+            "domain": "bronze.systems",
+            "rank": 11006
+          },
+          {
+            "domain": "haufedev.systems",
+            "rank": 12387
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "tech": {
@@ -2002,6 +3318,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 1478,
+        "in100k": 211,
+        "in10k": 26,
+        "examples": [
+          {
+            "domain": "amon.tech",
+            "rank": 280
+          },
+          {
+            "domain": "dv.tech",
+            "rank": 910
+          },
+          {
+            "domain": "primis.tech",
+            "rank": 2070
+          },
+          {
+            "domain": "ingage.tech",
+            "rank": 2097
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "tools": {
@@ -2051,6 +3395,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 182,
+        "in100k": 21,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "fzbox.tools",
+            "rank": 14316
+          },
+          {
+            "domain": "mygames.tools",
+            "rank": 14836
+          },
+          {
+            "domain": "vwfs.tools",
+            "rank": 15258
+          },
+          {
+            "domain": "tstaging.tools",
+            "rank": 16241
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "tv": {
@@ -2080,6 +3452,34 @@
           "sourceLabel": "GoDaddy Registry universal terms of service",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 2679,
+        "in100k": 495,
+        "in10k": 71,
+        "examples": [
+          {
+            "domain": "twitch.tv",
+            "rank": 222
+          },
+          {
+            "domain": "xcal.tv",
+            "rank": 403
+          },
+          {
+            "domain": "teads.tv",
+            "rank": 824
+          },
+          {
+            "domain": "amagi.tv",
+            "rank": 912
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "ventures": {
@@ -2129,6 +3529,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 14,
+        "in100k": 2,
+        "in10k": 0,
+        "examples": [
+          {
+            "domain": "zomato.ventures",
+            "rank": 96602
+          },
+          {
+            "domain": "nic.ventures",
+            "rank": 144938
+          },
+          {
+            "domain": "veb.ventures",
+            "rank": 502797
+          },
+          {
+            "domain": "f8bet.ventures",
+            "rank": 550836
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "world": {
@@ -2178,6 +3606,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 445,
+        "in100k": 46,
+        "in10k": 2,
+        "examples": [
+          {
+            "domain": "edgecdn.world",
+            "rank": 6653
+          },
+          {
+            "domain": "wiz.world",
+            "rank": 11522
+          },
+          {
+            "domain": "provpn.world",
+            "rank": 19774
+          },
+          {
+            "domain": "adjust.world",
+            "rank": 21655
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "wtf": {
@@ -2227,6 +3683,34 @@
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 121,
+        "in100k": 14,
+        "in10k": 2,
+        "examples": [
+          {
+            "domain": "jito.wtf",
+            "rank": 5827
+          },
+          {
+            "domain": "ikiru.wtf",
+            "rank": 9269
+          },
+          {
+            "domain": "fhteam.wtf",
+            "rank": 29301
+          },
+          {
+            "domain": "myip.wtf",
+            "rank": 43224
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     },
     "xyz": {
@@ -2262,8 +3746,37 @@
           "sourceLabel": "XYZ.COM LLC domain registration terms",
           "checkedAt": "2026-09-16"
         }
+      },
+      "usage": {
+        "inMillion": 6808,
+        "in100k": 441,
+        "in10k": 12,
+        "examples": [
+          {
+            "domain": "downloadpage.xyz",
+            "rank": 1741
+          },
+          {
+            "domain": "knt9.xyz",
+            "rank": 2575
+          },
+          {
+            "domain": "hyperliquid.xyz",
+            "rank": 4302
+          },
+          {
+            "domain": "anuytzc.xyz",
+            "rank": 5622
+          }
+        ],
+        "listId": "N2PYW",
+        "listDate": "2026-09-15",
+        "rankedTotal": 1000000,
+        "sourceUrl": "https://tranco-list.eu/list/N2PYW/1000000",
+        "checkedAt": "2026-09-16"
       }
     }
   },
-  "icannCollectedAt": "2026-09-16"
+  "icannCollectedAt": "2026-09-16",
+  "trancoCollectedAt": "2026-09-16"
 }

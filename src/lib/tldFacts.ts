@@ -39,13 +39,39 @@ export interface IanaFacts {
   checkedAt: string;
 }
 
+export interface UsageFacts {
+  /** Names on this extension inside the ranked list. */
+  inMillion: number;
+  in100k: number;
+  in10k: number;
+  /** Highest-ranked names, adult and piracy labels filtered out (see fetch-tranco.mjs). */
+  examples: { domain: string; rank: number }[];
+  listId: string;
+  listDate: string;
+  rankedTotal: number;
+  sourceUrl: string;
+  checkedAt: string;
+}
+
+export interface IcannFacts {
+  operator?: string;
+  agreementDate?: string;
+  agreementType?: string;
+  sourceUrl: string;
+  checkedAt: string;
+}
+
 export interface TldFactRecord {
   iana?: IanaFacts;
+  icann?: IcannFacts;
   registry?: Record<string, SourcedFact>;
+  usage?: UsageFacts;
 }
 
 export interface TldFactsFile {
   ianaCollectedAt: string | null;
+  icannCollectedAt?: string;
+  trancoCollectedAt?: string;
   tlds: Record<string, TldFactRecord>;
 }
 
@@ -93,7 +119,51 @@ export function operatorBlock(tld: string): FactBlock | null {
   };
 }
 
-/** Block 2 — who may register, and under what conditions. Registry pages only. */
+/**
+ * Block 2 — what the extension is actually used for, counted rather than claimed.
+ *
+ * Every number comes from one dated traffic ranking, the same one for all 54, so
+ * the extensions are comparable. The split matters more than the total: an
+ * extension can hold thousands of names in the top million and almost none in
+ * the top ten thousand, which is what a long tail of parked and throwaway sites
+ * looks like from outside.
+ */
+export function usageBlock(tld: string): FactBlock | null {
+  const u = factsFor(tld)?.usage;
+  if (!u) return null;
+  const dot = `.${tld}`;
+  const n = (x: number) => x.toLocaleString("en-US");
+  const sentences: string[] = [];
+
+  sentences.push(
+    u.inMillion === 0
+      ? `Not one ${dot} name appears in the ${n(u.rankedTotal)} most-visited sites on the ${factDay(u.listDate)} Tranco ranking.`
+      : `${n(u.inMillion)} ${dot} ${u.inMillion === 1 ? "name is" : "names are"} among the ${n(u.rankedTotal)} most-visited sites on the ${factDay(u.listDate)} Tranco ranking.`,
+  );
+
+  if (u.inMillion > 0) {
+    sentences.push(
+      u.in10k === 0
+        ? `None of them reaches the top ten thousand, and ${n(u.in100k)} ${u.in100k === 1 ? "is" : "are"} inside the top hundred thousand — this is an extension of smaller sites rather than heavily-trafficked ones.`
+        : `${n(u.in10k)} of them ${u.in10k === 1 ? "is" : "are"} inside the top ten thousand and ${n(u.in100k)} inside the top hundred thousand.`,
+    );
+  }
+
+  if (u.examples.length) {
+    const list = u.examples.map((e) => `${e.domain} (#${n(e.rank)})`);
+    sentences.push(
+      `The highest-ranked ${dot} sites on that list include ${listOf(list)}.`,
+    );
+  }
+
+  return {
+    title: `How ${dot} is used`,
+    sentences,
+    sources: [{ label: `Tranco list ${u.listId}, ${factDay(u.listDate)}`, url: u.sourceUrl, checkedAt: u.checkedAt }],
+  };
+}
+
+/** Block 3 — who may register, and under what conditions. Registry pages only. */
 export function eligibilityBlock(tld: string): FactBlock | null {
   const registry = factsFor(tld)?.registry;
   if (!registry) return null;

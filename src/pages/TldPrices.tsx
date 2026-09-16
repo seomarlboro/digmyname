@@ -243,6 +243,8 @@ const TldPrices = () => {
 
         {page.operator && <SourcedBlock block={page.operator} />}
 
+        {page.usage && <SourcedBlock block={page.usage} />}
+
         {page.eligibility && <SourcedBlock block={page.eligibility} />}
 
         {page.eligibilityQuotes.length > 0 && (
