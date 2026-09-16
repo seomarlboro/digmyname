@@ -1,3 +1,4 @@
+/// <reference types="../node_modules/vite/client.d.ts" />
 import { supabase } from "@/integrations/supabase/client";
 import { SEARCHABLE_TLDS } from "./searchableTlds";
 
