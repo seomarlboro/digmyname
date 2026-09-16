@@ -9,7 +9,6 @@
   "nodeModulesDir": "auto",
   "compilerOptions": {
     "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
-    "target": "ES2020",
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "strict": false,
@@ -18,8 +17,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "types": ["vite/client"]
+    "types": ["vite/client", "vitest/globals"]
   },
   "imports": {
     "@/": "./src/"
