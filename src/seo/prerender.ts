@@ -75,6 +75,50 @@ export function renderRouteHtml(template: string, route: RouteMeta): string {
   return `${withStatic.slice(0, a)}${SPINNER_SHELL}${withStatic.slice(b + SHELL_END.length)}`;
 }
 
+/** Title shown for an unknown path before React mounts. Matches src/pages/NotFound.tsx. */
+export const NOT_FOUND_TITLE = "404 — Lost in space | DigMyName";
+
+/**
+ * Unknown-path guard, injected into the SPA fallback (dist/index.html).
+ *
+ * The host answers 200 with that exact file for any extensionless path it has
+ * no prerendered file for, so `/nope/deep/path` served the home page's head:
+ * `index, follow` plus `<link rel=canonical href="https://digmyname.com/">`.
+ * React's 404 page does set noindex — after ~210 KB of JS — so a crawler that
+ * does not render saw an indexable duplicate of the home page on every junk URL.
+ *
+ * This runs in <head> before first paint and only when the current path is not
+ * a route we ship: it flips robots to noindex, drops the canonical (a noindex
+ * page must not also point at another one) and titles the page as the 404 it is.
+ * On "/" and on every real route it does nothing.
+ */
+export function renderNotFoundGuard(knownPaths: string[]): string {
+  const known = [...new Set(knownPaths.map((p) => (p === "/" ? "/" : p.replace(/\/+$/, ""))))].sort();
+  return `<script>
+      (function () {
+        try {
+          var known = ${JSON.stringify(known)};
+          var p = location.pathname;
+          while (p.length > 1 && p.charAt(p.length - 1) === "/") p = p.slice(0, -1);
+          if (!p) p = "/";
+          if (known.indexOf(p) !== -1) return;
+          var robots = document.querySelector('meta[name="robots"]');
+          if (robots) robots.setAttribute("content", "noindex");
+          var canonical = document.querySelector('link[rel="canonical"]');
+          if (canonical && canonical.parentNode) canonical.parentNode.removeChild(canonical);
+          document.title = ${JSON.stringify(NOT_FOUND_TITLE)};
+        } catch (e) {}
+      })();
+    </script>`;
+}
+
+/** Inject the guard just before </head>. Only the SPA fallback needs it. */
+export function withNotFoundGuard(html: string, knownPaths: string[]): string {
+  const i = html.indexOf("</head>");
+  if (i === -1) throw new Error("prerender: </head> missing from template");
+  return `${html.slice(0, i)}${renderNotFoundGuard(knownPaths)}\n  ${html.slice(i)}`;
+}
+
 /** File targets for a route (and its aliases): `<slug>/index.html` for directory-index hosts and `<slug>.html` for clean-URL hosts. */
 export function outputPathsFor(path: string): string[] {
   if (path === "/") return ["index.html"];

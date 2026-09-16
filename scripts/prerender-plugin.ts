@@ -8,7 +8,7 @@ import { dirname, join, resolve } from "path";
 import type { Plugin, ResolvedConfig } from "vite";
 import { REDIRECTS, ROUTES } from "../src/seo/routes";
 import { buildTldRoutes } from "../src/seo/tldRoutes";
-import { outputPathsFor, renderRedirectHtml, renderRouteHtml } from "../src/seo/prerender";
+import { outputPathsFor, renderRedirectHtml, renderRouteHtml, withNotFoundGuard } from "../src/seo/prerender";
 
 export function prerenderRoutes(): Plugin {
   let config: ResolvedConfig;
@@ -26,6 +26,13 @@ export function prerenderRoutes(): Plugin {
 
       // Static pages plus the per-extension price pages from the prebuild snapshot.
       const routes = [...ROUTES, ...buildTldRoutes()];
+      // Every path this build actually ships. dist/index.html doubles as the
+      // host's SPA fallback for unknown extensionless paths, so it carries a
+      // guard that demotes itself to noindex when the path is not in this list.
+      const knownPaths = [
+        ...routes.flatMap((r) => [r.path, ...(r.aliases ?? [])]),
+        ...REDIRECTS.map((r) => r.from),
+      ];
       let written = 0;
       for (const route of routes) {
         const html = renderRouteHtml(template, route);
@@ -33,7 +40,7 @@ export function prerenderRoutes(): Plugin {
           for (const rel of outputPathsFor(path)) {
             const target = join(outDir, rel);
             mkdirSync(dirname(target), { recursive: true });
-            writeFileSync(target, html);
+            writeFileSync(target, path === "/" ? withNotFoundGuard(html, knownPaths) : html);
             written++;
           }
         }

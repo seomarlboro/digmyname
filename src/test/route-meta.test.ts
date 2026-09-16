@@ -10,6 +10,8 @@ import {
   outputPathsFor,
   renderHeadTags,
   renderRouteHtml,
+  withNotFoundGuard,
+  NOT_FOUND_TITLE,
 } from "@/seo/prerender";
 
 const template = `<!doctype html><html><head>
@@ -86,6 +88,52 @@ describe("prerender", () => {
     const pricing = renderHeadTags(getRouteMeta("/pricing"));
     expect(pricing).toContain(`name="robots" content="index, follow, max-snippet:-1`);
     expect(pricing.match(/name="robots"/g)).toHaveLength(1);
+  });
+
+  describe("unknown-path guard on the SPA fallback", () => {
+    // The host answers 200 with dist/index.html for any extensionless path it has
+    // no file for, so that one file has to notice it is standing in for a 404.
+    const known = ["/", "/pricing", "/tld", "/tld/io"];
+    const guarded = withNotFoundGuard(renderRouteHtml(template, getRouteMeta("/")), known);
+
+    const run = (pathname: string) => {
+      const script = guarded.match(/<script>\s*\(function \(\) \{[\s\S]*?\}\)\(\);\s*<\/script>/)?.[0] ?? "";
+      const body = script.replace(/^<script>/, "").replace(/<\/script>$/, "");
+      const doc = {
+        title: "Fast Domain Search",
+        robots: { content: "index, follow", setAttribute(_k: string, v: string) { this.content = v; } },
+        canonical: { parentNode: { removed: false } as { removed: boolean } },
+      };
+      const document = {
+        title: doc.title,
+        querySelector(sel: string) {
+          if (sel.includes("robots")) return doc.robots;
+          if (sel.includes("canonical")) {
+            return { parentNode: { removeChild: () => { doc.canonical.parentNode.removed = true; } } };
+          }
+          return null;
+        },
+      };
+      new Function("location", "document", body)({ pathname }, document);
+      return { robots: doc.robots.content, canonicalRemoved: doc.canonical.parentNode.removed, title: document.title };
+    };
+
+    it("leaves every shipped route alone, trailing slash included", () => {
+      for (const p of ["/", "/pricing", "/pricing/", "/tld/io"]) {
+        expect(run(p), p).toEqual({ robots: "index, follow", canonicalRemoved: false, title: "Fast Domain Search" });
+      }
+    });
+
+    it("demotes an unknown path to noindex and drops its canonical", () => {
+      for (const p of ["/nope", "/nope/deep/path", "/tld/not-a-tld"]) {
+        expect(run(p), p).toEqual({ robots: "noindex", canonicalRemoved: true, title: NOT_FOUND_TITLE });
+      }
+    });
+
+    it("only the fallback carries the guard", () => {
+      expect(renderRouteHtml(template, getRouteMeta("/pricing"))).not.toContain("known.indexOf");
+      expect(guarded).toContain("known.indexOf");
+    });
   });
 
   it("swaps the crawler block for the route's own content and keeps the rest of the template", () => {
