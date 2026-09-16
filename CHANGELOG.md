@@ -2,6 +2,20 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-16 — The paid signal stops being the answer (edge + migration)
+
+### Added
+- **WHOIS on TCP 43 as the free registry authority for `.co`, `.me` and `.io`** (`_shared/whois.ts`). Those three zones have no registry RDAP we can use and were 65 % of every paid third-signal call; their registries answer plain port-43 WHOIS in 250-470 ms. Same evidence bar as the RDAP path: "no registration" is believed only alongside DNS NXDOMAIN, a record alone is enough for TAKEN, and a blocked port / rate limit / retired service / unparsable answer all read as `unknown` and fall through to today's honest uncertain. Parser pinned against real registry answers.
+- **Back-off for a registry that is rate-limiting us.** `rdap.gmoregistry.net` (.shop) answers 429 in ~90 ms after 3-4 requests from one IP and recovers after ~5 s of quiet — which is why 82 % of `.shop` verdicts fell through to the paid signal. A 429/503 is now told apart from "no answer about this name": the host is backed off for 5 s so the window can close, and the name gets one retry when the caller's budget allows.
+
+### Changed
+- **The name the visitor typed is verified by Porkbun, not by the metered signal.** Porkbun's live spec allows 10 single checks / 10 s and a bulk endpoint of 25 domains per call against 200 domains / 60 s — the code was holding a decade-old 1-per-10-s limit and checking exactly one name per request. It now asks in bulk for the typed name plus every premium suspect on screen, so a registry-premium name gets its real first-year AND renewal price for free, and `verifyPremium` no longer escalates at all (it still bypasses both caches, so the answer stays fresh).
+- **`edge-cache-prewarm` stops buying its own warm cache.** `shop.store` and `new.tech` were short available names: premium suspects, one paid call each per cache expiry. Replaced with registered 6+ character names (migration `20260916170000_prewarm_no_paid_signal.sql`).
+- `FASTLY_DAILY_CAP` defaults to 300 (Fastly's free 10,000/month is 333/day).
+
+### Added (rule)
+- **Our own runs never spend money.** Benchmarks, the monitor, scripts and tests may only probe fresh 6+ character labels, off the brand list, in zones whose registry answers us. Pinned by `_shared/our-runs-are-free_test.ts`, which reads the actual scripts. August's $45.05 invoice was almost entirely our own QA and benchmark traffic — at ~10 visitors/day, visitors were a rounding error.
+
 ## 2026-09-16 — Launch-day spend brakes on the paid third signal (edge + migration)
 
 ### Added

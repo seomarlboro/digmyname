@@ -17,6 +17,7 @@ import {
   shouldEscalateToDomainr,
   type DomainrStatusEntry,
 } from "./availability-rules.ts";
+import { whoisQuery, whoisServerFor } from "./whois.ts";
 import {
   allowedCalls,
   parseDailyCap,
@@ -169,6 +170,10 @@ const DOH_HEDGE_DELAY_MS = 400;
  *  Tradeoff: more requests reach the free public aggregator on zones whose
  *  registry RDAP is slower than this delay. */
 const RDAP_HEDGE_DELAY_MS = 250;
+
+/** Budget for one WHOIS (TCP 43) query. Measured 250-470 ms to the .co/.me/.io
+ *  registries from the EU, so this is a tail guard, not the expected cost. */
+const WHOIS_TIMEOUT_MS = 1_200;
 
 /** How long a long-tail TLD may block on the IANA bootstrap download before
  *  giving up and going straight to the aggregator. Same budget arithmetic as
@@ -383,7 +388,14 @@ export async function loadRdapBootstrap(): Promise<Map<string, string[]>> {
 
 /** RDAP query result plus the registration year parsed off the SAME response
  *  body we already download for taken names (previously discarded). */
-type RdapAnswer = { state: RdapState; sinceYear?: number };
+// `throttled`: the registry answered 429/503 — it refused to talk to US, which
+// says nothing about the name. Kept apart from a plain "unknown" so the probe
+// can back off and retry instead of hammering a registry that is already
+// rate-limiting our egress IP (measured 2026-09-16: rdap.gmoregistry.net, the
+// .shop registry, starts answering 429 in ~90 ms after 3-4 requests from one IP
+// and recovers after ~5 s of quiet — that is what made 82 % of .shop verdicts
+// fall through to the PAID third signal).
+type RdapAnswer = { state: RdapState; sinceYear?: number; throttled?: boolean };
 
 /** Extract the registration YEAR from an RDAP response body. Mirrors the
  *  `domain-age` function's event parsing and the MCP's `yearFromIso` guard
@@ -415,7 +427,10 @@ async function rdapQueryOnce(url: string, timeoutMs: number, signal?: AbortSigna
       return { state: "taken", sinceYear: rdapRegistrationYear(data) };
     }
     await resp.text().catch(() => {});
-    return { state: "unknown" };
+    // 429/503 is the registry refusing us, not an answer about the name.
+    return resp.status === 429 || resp.status === 503
+      ? { state: "unknown", throttled: true }
+      : { state: "unknown" };
   } catch {
     return { state: "unknown" };
   }
@@ -535,7 +550,20 @@ export function trustsAggregator404(tld: string, bootstrapBaseCount: number): bo
   return routableByAggregator && !AGGREGATOR_UNRELIABLE_TLDS.has(tld);
 }
 
-async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapAnswer> {
+// Per-registry-host back-off. A registry that just answered 429 will answer 429
+// again for a few seconds, so every further name in that zone is wasted load on
+// a host we have annoyed — and it keeps the window open. Measured recovery for
+// the .shop registry: ~5 s of quiet.
+const RDAP_THROTTLE_COOLDOWN_MS = 5_000;
+/** How long to wait before the one retry a throttled registry gets. */
+const RDAP_THROTTLE_RETRY_MS = 1_500;
+const registryCooldownUntil = new Map<string, number>();
+
+function hostOf(url: string): string {
+  try { return new URL(url).host; } catch { return url; }
+}
+
+async function checkRdap(domain: string, signal?: AbortSignal, deadlineAt?: number): Promise<RdapAnswer> {
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
 
   // Fast lane: popular TLD → known registry endpoint, zero lookup latency.
@@ -568,7 +596,12 @@ async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapAnsw
   const ctl = new AbortController();
   const sig = signal ? AbortSignal.any([signal, ctl.signal]) : ctl.signal;
 
-  const probes = bases.map((base) => rdapQueryOnce(`${base}/domain/${domain}`, 3000, sig));
+  // Skip a registry we know is currently refusing us: its answer would be a 429
+  // either way, and not asking is what lets the window close.
+  const now = Date.now();
+  const probes = bases
+    .filter((base) => (registryCooldownUntil.get(hostOf(base)) ?? 0) <= now)
+    .map((base) => rdapQueryOnce(`${base}/domain/${domain}`, 3000, sig));
 
   // On zones the aggregator cannot route, it may only *confirm* a registration —
   // its 404s are downgraded to "unknown". See trustsAggregator404.
@@ -580,10 +613,27 @@ async function checkRdap(domain: string, signal?: AbortSignal): Promise<RdapAnsw
   const all = [...probes, aggregator];
 
   try {
-    return await Promise.race([
+    const answer = await Promise.race([
       ...all.map(decisive),
-      Promise.all(all).then((answers) => answers.find((a) => a.state !== "unknown") ?? { state: "unknown" as RdapState }),
+      Promise.all(all).then((answers) =>
+        answers.find((a) => a.state !== "unknown") ??
+        ({ state: "unknown" as RdapState, throttled: answers.some((a) => a.throttled) })
+      ),
     ]);
+    if (!answer.throttled) return answer;
+
+    // The registry rate-limited us. Back it off for everyone else, then — if the
+    // caller still has room — give this one name a single retry, because a
+    // throttled probe is exactly what used to fall through to the paid signal.
+    for (const base of bases) registryCooldownUntil.set(hostOf(base), Date.now() + RDAP_THROTTLE_COOLDOWN_MS);
+    console.warn(`rdap throttled by ${bases.map(hostOf).join(",") || "aggregator"} (${tld}) — backing off ${RDAP_THROTTLE_COOLDOWN_MS}ms`);
+    if (bases.length === 0 || deadlineAt == null || deadlineAt - Date.now() < RDAP_THROTTLE_RETRY_MS + 1500) return answer;
+
+    await sleep(RDAP_THROTTLE_RETRY_MS);
+    if (signal?.aborted) return answer;
+    const retry = await rdapQueryOnce(`${bases[0]}/domain/${domain}`, 3000, signal);
+    if (retry.state !== "unknown") registryCooldownUntil.delete(hostOf(bases[0]));
+    return retry;
   } finally {
     ctl.abort();
   }
@@ -656,6 +706,54 @@ async function checkPorkbun(domain: string, apiKey: string, secretKey: string): 
     console.warn(`porkbun error for ${domain}: ${e instanceof Error ? e.message : String(e)}`);
     return null;
   }
+}
+
+/**
+ * Up to 25 names in one call. `unresolved` is Porkbun's own word for "the
+ * registry did not answer" and is explicitly NOT a statement of availability —
+ * those names keep whatever verdict they already had.
+ */
+async function checkPorkbunBulk(
+  domains: string[],
+  apiKey: string,
+  secretKey: string,
+): Promise<Map<string, PorkbunResult>> {
+  const out = new Map<string, PorkbunResult>();
+  if (domains.length === 0) return out;
+  try {
+    const resp = await fetch("https://api.porkbun.com/api/json/v3/domain/checkDomain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ apikey: apiKey, secretapikey: secretKey, domains: domains.slice(0, PORKBUN_BULK_MAX) }),
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => "");
+      console.warn(`porkbun bulk HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+      return out;
+    }
+    const data = await resp.json();
+    if (data?.status !== "SUCCESS" || !data.domains) {
+      console.warn(`porkbun bulk non-success: ${JSON.stringify(data).slice(0, 200)}`);
+      return out;
+    }
+    for (const [name, raw] of Object.entries(data.domains as Record<string, Record<string, unknown>>)) {
+      const price = raw?.price != null ? Number(raw.price) : undefined;
+      const regular = raw?.regularPrice != null ? Number(raw.regularPrice) : undefined;
+      out.set(name.toLowerCase(), {
+        available: raw?.avail === "yes",
+        premium: raw?.premium === "yes",
+        price: Number.isFinite(price) ? price : undefined,
+        regularPrice: Number.isFinite(regular) ? regular : undefined,
+        renewPrice: porkbunRenewalPrice((raw?.additional as { renewal?: unknown } | undefined)?.renewal),
+      });
+    }
+    const unresolved = Array.isArray(data.unresolved) ? data.unresolved.length : 0;
+    if (unresolved > 0) console.log(`porkbun bulk: ${out.size} answered, ${unresolved} unresolved (kept as-is)`);
+  } catch (e) {
+    console.warn(`porkbun bulk error: ${e instanceof Error ? e.message : String(e)}`);
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -907,6 +1005,7 @@ function ttlSecondsFor(checkedVia: string, uncertain: boolean, available: boolea
   switch (checkedVia) {
     case "porkbun": return 24 * 60 * 60;             // 24h — authoritative pricing
     case "domainr": return 24 * 60 * 60;             // 24h — authoritative status
+    case "whois": return 6 * 60 * 60;                // 6h — registry port 43, same bar as rdap
     case "godaddy_definitive": return 24 * 60 * 60; // 24h
     case "rdap": return 6 * 60 * 60;                 // 6h
     case "dns": return 30 * 60;                      // 30m
@@ -941,14 +1040,14 @@ function pruneHotCache(): void {
 // ---------------------------------------------------------------------------
 const PENDING_FOREVER = <T,>(): Promise<T> => new Promise<T>(() => {});
 
-async function resolveDomain(domain: string): Promise<DomainCheckResult> {
+async function resolveDomain(domain: string, deadlineAt?: number): Promise<DomainCheckResult> {
   const likelyPremium = isLikelyPremium(domain);
   // One controller per domain: the moment a decisive answer wins, every
   // still-running DNS/RDAP probe for this domain is cancelled. An aborted
   // probe is caught inside its own helper and simply reads as "lost".
   const ctl = new AbortController();
   const dnsP = checkDnsDoH(domain, ctl.signal);
-  const rdapP = checkRdap(domain, ctl.signal);
+  const rdapP = checkRdap(domain, ctl.signal, deadlineAt);
 
   // Fast path: the first decisive "taken" signal ends the check.
   const winner = await Promise.race([
@@ -978,6 +1077,29 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
       checkedVia: "rdap",
       likelyPremium: likelyPremium || undefined,
     };
+  }
+
+  // The free registry authority, for the zones RDAP cannot serve us: .co and .me
+  // publish no usable registry RDAP at all, and .io's zone is absent from the
+  // IANA bootstrap, so all three used to reach the PAID third signal (2026-09-16:
+  // .co and .me alone were 65 % of every paid call). Their registries still answer
+  // plain WHOIS on TCP 43 — from the registry itself, in 250-470 ms, free.
+  //
+  // Same evidence bar as the RDAP path: "no registration" is only believed
+  // alongside DNS NXDOMAIN; a WHOIS record alone is enough for TAKEN, exactly as
+  // an RDAP registration is. Anything else (blocked port, rate limit, retired
+  // service, unparsable answer) reads as "unknown" and falls through to the
+  // honest uncertain below — so if the edge cannot open port 43 at all, this
+  // whole block is a no-op and behaviour is unchanged. See ./whois.ts.
+  const whoisServer = dns === "no_records" && rdap.state === "unknown" ? whoisServerFor(domain) : undefined;
+  if (whoisServer) {
+    const verdict = await whoisQuery(domain, whoisServer, WHOIS_TIMEOUT_MS);
+    if (verdict === "free") {
+      return { domain, available: true, checkedVia: "whois", likelyPremium: likelyPremium || undefined };
+    }
+    if (verdict === "taken") {
+      return { domain, available: false, checkedVia: "whois", likelyPremium };
+    }
   }
 
   // Zones without a trustworthy RDAP server (.co, .me): DNS NXDOMAIN alone is
@@ -1010,15 +1132,30 @@ async function resolveDomain(domain: string): Promise<DomainCheckResult> {
 }
 
 
-// Porkbun checkDomain endpoint allows 1 request per 10 seconds globally per API key.
-// Track last successful call timestamp at module scope (per isolate).
-const PORKBUN_MIN_INTERVAL_MS = 11_000;
-let porkbunLastCallMs = 0;
-function porkbunBudgetReady(): boolean {
-  return Date.now() - porkbunLastCallMs >= PORKBUN_MIN_INTERVAL_MS;
+// Porkbun's availability budget, from their live OpenAPI spec (read 2026-09-16):
+//   • single check  — 10 per 10 s per account (raised from 1 per 10 s in 3.29;
+//     the 1-per-10-s number this code used to hold was a decade-old default)
+//   • BULK check    — up to 25 domains per call, counted per DOMAIN against a
+//     separate allowance of 200 domains per 60 s
+// 200 domains/minute is ~288,000/day, free, from the registrar's own registry
+// connection — which is why the paid third signal is no longer the only way to
+// learn that a name is registry-premium. Per-key overrides can raise it further.
+//
+// The window below is advisory: isolates are cold ~95 % of the time, so it only
+// bites inside one isolate. Porkbun's own 429 (with Retry-After) is the real
+// limit, and a 429 here costs nothing but a missing price.
+const PORKBUN_WINDOW_MS = 60_000;
+const PORKBUN_MAX_DOMAINS_PER_WINDOW = 200;
+/** Names per bulk call, per Porkbun's cap. */
+export const PORKBUN_BULK_MAX = 25;
+let porkbunSpent: Array<{ at: number; cost: number }> = [];
+function porkbunBudgetReady(cost = 1): boolean {
+  const now = Date.now();
+  porkbunSpent = porkbunSpent.filter((e) => now - e.at < PORKBUN_WINDOW_MS);
+  return porkbunSpent.reduce((sum, e) => sum + e.cost, 0) + cost <= PORKBUN_MAX_DOMAINS_PER_WINDOW;
 }
-function consumePorkbunBudget(): void {
-  porkbunLastCallMs = Date.now();
+function consumePorkbunBudget(cost = 1): void {
+  porkbunSpent.push({ at: Date.now(), cost });
 }
 
 // ---------------------------------------------------------------------------
@@ -1196,7 +1333,7 @@ export async function checkDomains(
   let l2Settled = false;
   const probeResults = new Map<string, DomainCheckResult>();
   const pass1 = pMap(missAfterL1, 25, (d) =>
-    resolveDomain(d).then((r) => {
+    resolveDomain(d, thirdSignalDeadlineAt).then((r) => {
       probeResults.set(d, r);
       if (!(l2Settled && cachedMap.has(d))) publishBase(r);
       return r;
@@ -1263,9 +1400,12 @@ export async function checkDomains(
   await pass1;
   const baseResults = uncached.map((d) => probeResults.get(d)!);
 
-  const needsThirdSignal = baseResults
-    .filter((r) => willEscalateToThirdSignal(r) || (forced.has(r.domain) && r.available && !r.uncertain))
-    .map((r) => r.domain);
+  // The name the visitor typed is NOT escalated to the paid signal any more: the
+  // Porkbun pass below answers "is this registry-premium, and at what price" for
+  // free, from the registrar's own registry connection, and that was the only
+  // question the forced call existed to answer (2026-09-16). `forced` still
+  // bypasses both caches, so the answer is fresh.
+  const needsThirdSignal = baseResults.filter(willEscalateToThirdSignal).map((r) => r.domain);
 
   // Cost telemetry: each escalated domain = one paid Fastly "Precise Status" call.
   // Split by reason so we can see how much is .co/.me (no-RDAP, unavoidable) vs
@@ -1443,16 +1583,22 @@ export async function checkDomains(
     if (p != null) fresh[i] = { ...r, price: p };
   }
 
-  // ---- Porkbun verification pass (rate-limited 1/10s) ----------------
-  if (porkbun && porkbunBudgetReady()) {
-    const candidates = fresh
-      .filter((r) => r.available && (r.premium || r.likelyPremium) && r.checkedVia !== "porkbun")
-      // The name the visitor asked about first, then the shortest SLD (most likely premium).
-      .sort((a, b) => Number(forced.has(b.domain)) - Number(forced.has(a.domain)) || a.domain.split(".")[0].length - b.domain.split(".")[0].length);
-    const target = candidates[0];
-    if (target) {
-      consumePorkbunBudget();
-      const pb = await checkPorkbun(target.domain, porkbun.key, porkbun.secret);
+  // ---- Porkbun verification pass (bulk, 200 domains/60s) ----------------
+  // This is where a registry-premium name gets its REAL price, and since
+  // 2026-09-16 it is also what replaced the paid premium check on the typed
+  // name. Candidates: every available premium suspect plus the typed name.
+  const porkbunTargets = fresh
+    .filter((r) => r.available && (r.premium || r.likelyPremium || forced.has(r.domain)) && r.checkedVia !== "porkbun")
+    // The name the visitor asked about first, then the shortest SLD (most likely premium).
+    .sort((a, b) => Number(forced.has(b.domain)) - Number(forced.has(a.domain)) || a.domain.split(".")[0].length - b.domain.split(".")[0].length)
+    .slice(0, PORKBUN_BULK_MAX);
+  if (porkbun && porkbunTargets.length > 0 && porkbunBudgetReady(porkbunTargets.length)) {
+    consumePorkbunBudget(porkbunTargets.length);
+    const quotes = porkbunTargets.length === 1
+      ? new Map([[porkbunTargets[0].domain.toLowerCase(), await checkPorkbun(porkbunTargets[0].domain, porkbun.key, porkbun.secret)]])
+      : await checkPorkbunBulk(porkbunTargets.map((r) => r.domain), porkbun.key, porkbun.secret);
+    for (const target of porkbunTargets) {
+      const pb = quotes.get(target.domain.toLowerCase());
       if (pb) {
         const idx = fresh.findIndex((r) => r.domain === target.domain);
         if (idx >= 0) {

@@ -389,7 +389,7 @@ Deno.test({ name: "checkDomains: probes leave before the DB cache answers; a cac
   }
 } });
 
-Deno.test({ name: "checkDomains: verifyPremium forces the third signal for a plain available name and takes the registrar's premium price", sanitizeOps: false, sanitizeResources: false, fn: async () => {
+Deno.test({ name: "checkDomains: verifyPremium confirms the typed name through Porkbun and never buys a paid call", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const realFetch = globalThis.fetch;
   const envBefore = { fastly: Deno.env.get("FASTLY_API_TOKEN"), pk: Deno.env.get("PORKBUN_API_KEY"), ps: Deno.env.get("PORKBUN_SECRET_KEY") };
   Deno.env.set("FASTLY_API_TOKEN", "test-token");
@@ -413,14 +413,17 @@ Deno.test({ name: "checkDomains: verifyPremium forces the third signal for a pla
   }) as typeof fetch;
   const supabase = stubSupabase(async () => ({ data: [], error: null }));
   try {
-    // Without the flag: a 10-letter label is no suspect, the third signal is never asked, the standard price ships.
+    // Without the flag: a 10-letter label is no suspect, nothing is verified, the standard price ships.
     const plain = await checkDomains(["reputation.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 3000 });
     assertEquals(calls.filter((u) => u.includes("api.fastly.com")).length, 0);
+    assertEquals(calls.filter((u) => u.includes("checkDomain")).length, 0);
     assertEquals([plain[0].available, plain[0].premium ?? false], [true, false]);
 
-    // With the flag: Fastly says premium, Porkbun confirms the price, the row is premium + priced.
+    // With the flag: Porkbun — not the metered third signal — confirms that the
+    // typed name is registry-premium and what it really costs.
     const verified = await checkDomains(["reputation.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 3000, verifyPremium: new Set(["reputation.dev"]) });
-    assertEquals(calls.filter((u) => u.includes("api.fastly.com")).length, 1);
+    assertEquals(calls.filter((u) => u.includes("api.fastly.com")).length, 0, "the typed name must never buy a paid call");
+    assertEquals(calls.filter((u) => u.includes("checkDomain")).length, 1);
     const r = verified[0];
     assertEquals([r.available, r.premium, r.price, r.checkedVia], [true, true, 164.57, "porkbun"]);
   } finally {

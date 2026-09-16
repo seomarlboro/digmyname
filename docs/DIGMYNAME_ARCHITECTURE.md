@@ -34,13 +34,14 @@ All availability/pricing logic lives in `supabase/functions/_shared/pipeline.ts`
 - **check-domains** — the WEBSITE path (frontend calls supabase.functions.invoke('check-domains')).
 - **public-api** — the API/MCP path (/check, /search, /registrars, /age, /fast, /openapi.json).
 
-### The signals (two always, one on escalation)
+### The signals (two always, one free fallback, one metered on escalation)
 
 1. **RDAP** (authoritative for registered yes/no, no pricing). Resolved via the IANA bootstrap file (data.iana.org/rdap/dns.json) -> official registry RDAP server per TLD. Top ~55 TLDs are hardcoded in FAST_RDAP to skip the bootstrap wait. Falls back to the public rdap.org aggregator for long-tail zones.
 2. **DNS-over-HTTPS** (fast, no hangs). Cloudflare primary; Google + AdGuard fire as hedges 400ms later. First decisive answer wins.
-3. **Fastly Domain Research API** (third registerability signal, ESCALATION ONLY — see `willEscalateToThirdSignal`: uncertain, available premium suspect, available brand-blocked SLD, or the forced/typed name; .co and .me reach it via `uncertain` because they have no registry RDAP). HISTORICAL: this was "Domainr", which Fastly acquired (2026-08); its old RapidAPI endpoint is dead. Code still uses legacy names (checkDomainrBatch, interpretDomainr, checkedVia:"domainr") but the TRANSPORT is Fastly (api.fastly.com/domain-management/v1/tools/status, header Fastly-Key). Statuses: inactive(=available) / dpml / reserved / claimed(=blocked brand) / premium / active.
+3. **WHOIS on TCP 43** (registry-authoritative, free) for the zones RDAP cannot serve us — `.co`, `.me`, `.io` (`_shared/whois.ts`). Shipped 2026-09-16: one plain port-43 query to the registry, 250-470 ms measured, replacing what used to be the paid call on those zones (they were 65 % of every paid call). Same evidence bar as RDAP: "no registration" is believed only alongside DNS NXDOMAIN; a record alone is enough for TAKEN. A blocked port, a rate limit, a retired service or an unparsable answer all read as `unknown` and fall through to the honest uncertain, so the block is a no-op wherever it cannot work.
+4. **Fastly Domain Research API** (third registerability signal, ESCALATION ONLY — see `willEscalateToThirdSignal`: uncertain, available premium suspect, available brand-blocked SLD, or the forced/typed name; .co and .me reach it via `uncertain` because they have no registry RDAP). HISTORICAL: this was "Domainr", which Fastly acquired (2026-08); its old RapidAPI endpoint is dead. Code still uses legacy names (checkDomainrBatch, interpretDomainr, checkedVia:"domainr") but the TRANSPORT is Fastly (api.fastly.com/domain-management/v1/tools/status, header Fastly-Key). Statuses: inactive(=available) / dpml / reserved / claimed(=blocked brand) / premium / active.
 
-**Porkbun** is PRICING only — may tighten availability (mark taken), never loosen it.
+**Porkbun** is PRICING only — may tighten availability (mark taken), never loosen it. Its budget was re-read from the live OpenAPI spec on 2026-09-16 and is far larger than the code assumed: **10 single checks / 10 s** (the code held a decade-old 1-per-10-s default) and a **bulk endpoint, 25 domains per call against 200 domains / 60 s**. That is what lets it — not the metered third signal — answer "is this name registry-premium, and what does it really cost" for the name the visitor typed and for every premium suspect on screen.
 
 ### Trust hierarchy (the honesty core)
 
@@ -79,13 +80,15 @@ Stopwatch rule (fixed 2026-09-10): whether a lane actually flipped a card is onl
 
 **Cold-visitor benchmark (2026-09-10, `scripts/bench/first-answer.mjs`, workflow `bench-first-answer` = US runner):** 150 fresh browser contexts per location, half typing a bare word, half a name with a TLD incl. .co/.me. US (Dallas): p50 227, p90 361, **p95 386**, max 423 ms; EU (Vienna): p50 307, p90 443, **p95 485**, max 765 ms; 300/300 under one second; 136/131 first verdicts came from the browser lane. Edge alone (public API /check, fresh .com): US p50 536 / p95 868, EU p50 382 / p95 515. The public copy ("First answer under 0.5 s · p95", owner's decision 2026-09-11) quotes exactly this.
 
-## 4. The .co / .me problem (a permanent architectural constraint)
+## 4. The .co / .me problem (solved 2026-09-16 — read this before "fixing" it again)
 
 .co and .me have NO working public RDAP: not in the IANA bootstrap; rdap.nic.co is dead; rdap.org actively LIES (returns 404 even for registered .co names — verified live). So AGGREGATOR_UNRELIABLE_TLDS = {co, me}: a 404 from the aggregator on these zones is downgraded to unknown, never read as available.
 
-Consequence: .co/.me ALWAYS escalate to Fastly (the only authority), so they "flap" (available <-> Check price) purely on whether Fastly beats the deadline on a cold isolate.
+Consequence, until 2026-09-16: .co/.me ALWAYS escalated to Fastly, so they "flapped" (available <-> Check price) purely on whether Fastly beat the deadline on a cold isolate — and they were 65 % of the paid calls on the August invoice.
 
-This CANNOT be fixed at the speed layer — there is no faster authority. Solved at the UX layer: a 5-minute frontend session cache (DomainSearch.tsx, resultCacheRef) that caches only trustworthy verdicts so returning to a just-checked name shows the confirmed verdict instantly instead of re-flapping. The authoritative check still fires; the cache is for instant display, not for skipping verification.
+**What changed:** Fastly was never the only authority, only the only one we asked over HTTPS. Both registries still answer plain **WHOIS on TCP 43** — `whois.registry.co` and `whois.nic.me` — in 250-470 ms, free, from the registry itself. `_shared/whois.ts` asks them before the escalation is even considered, under the same evidence bar as RDAP (see §3). If port 43 is ever closed to the edge, every path there returns `unknown` and the behaviour falls back to exactly what is described below.
+
+The rest of this section still holds for anything WHOIS cannot answer. Solved at the UX layer: a 5-minute frontend session cache (DomainSearch.tsx, resultCacheRef) that caches only trustworthy verdicts so returning to a just-checked name shows the confirmed verdict instantly instead of re-flapping. The authoritative check still fires; the cache is for instant display, not for skipping verification.
 
 .fm/.ly/.sh have the same problem (ccTLD, no RDAP) -> deliberately NOT added. .co stays (too valuable; flap killed by the cache).
 
@@ -345,3 +348,30 @@ Only names that were actually **sent** are charged: the circuit breaker and the 
 select * from public.fastly_spend_daily order by day desc limit 3;
 ```
 `blocked > 0` means visitors are seeing *Check price* / *Couldn't verify* instead of verdicts — the cap is doing its job, and the question becomes whether to raise it or let it hold.
+
+### What each brake costs us, and what replaced the paid signal (2026-09-16)
+
+August's invoice was **$45.05** (~45,000 calls) and September had already reached 18,759 by the 16th. Forensics from `domain_cache` (the only surviving record — rows live ~48 h; Fastly's dashboard is the authority for the months before):
+
+| Where the paid calls went | Share of a 1,000-row sample |
+|---|---|
+| `.co` | 332 |
+| `.me` | 320 |
+| `.shop` | 266 |
+| `.com` (the typed-name premium check) | 32 |
+| everything else | 50 |
+
+926 of those 1,000 were written between 21:00 and 23:00 UTC on 15 September — one manual QA session. At ~10 visitors/day, **the bill was our own traffic, not the product's.** Hence the rule below.
+
+**What replaced each paid case:**
+
+- **`.co` / `.me` / `.io`** → WHOIS on TCP 43 (§3, §4). Free, faster, registry-authoritative.
+- **Registry-premium status and price, including the name the visitor typed** → Porkbun's own check, in bulk. `verifyPremium` no longer escalates at all; it still bypasses both caches, so the answer is fresh, but it is now free. The August reason for paying — `reputation.dev` shipping with the standard $8 price instead of its real $174 — is covered, and covered better: Porkbun quotes the actual first-year AND renewal price.
+- **`.shop`** → nothing yet, and it is not a latency problem. Measured 2026-09-16: `rdap.gmoregistry.net` answers **429 in ~90 ms after 3-4 requests from one IP** and recovers after ~5 s of quiet, so from a shared edge egress IP most `.shop` lookups get no RDAP answer at all, go `uncertain`, and escalate. `rdap.org` does not help (it 302s to the same host, from the same IP), and GMO retired port-43 WHOIS on 2026-05-01. The pipeline now backs off a throttling registry for 5 s and gives one name one retry when the caller's budget allows; what it will not do is buy a verdict because our own probe was refused. **Open decision for the owner:** leave `.shop` mostly *Couldn't verify*, drop it from the default TLDs the way `.gg`/`.so` were dropped, or let Porkbun answer availability there (which would need the "may tighten, never loosen" rule to change — do not do this without an explicit decision).
+- **Brand blocks (dpml/claimed)** → the curated `BLOCKED_SLDS` list already downgrades those names to *Couldn't verify* without asking anyone. Unchanged.
+
+### The rule: our own runs never spend money
+
+Benchmarks, the health monitor, scripts and tests must never send a name through the real pipeline that can reach the paid third signal. Concretely, a probe name must be a **fresh label of 6+ characters** (5 or fewer is a premium suspect on 31 of our TLDs, 3 or fewer on every TLD), **not on the brand block list**, and **not in a zone whose registry cannot answer us** (today: `.shop`). A registered reference name (`example.com`) can never escalate whatever its shape, because it is never `available`.
+
+Pinned by `_shared/our-runs-are-free_test.ts`, which reads the actual scripts. `edge-cache-prewarm` is held to the same rule — two short available names in its list were quietly buying one paid call each per day until migration `20260916170000_prewarm_no_paid_signal.sql` replaced them.
