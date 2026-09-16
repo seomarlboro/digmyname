@@ -13,6 +13,7 @@
 import snapshotJson from "../generated/tld-prices.json";
 import { SITE_URL, type RouteMeta } from "./routes";
 import { isSearchableTld } from "../lib/searchableTlds";
+import type { FactBlock } from "../lib/tldFacts";
 import {
   TLD_HUB_PATH,
   buildHub,
@@ -28,6 +29,14 @@ import {
 export const TLD_SNAPSHOT = snapshotJson as TldSnapshot;
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/** A sourced block for the crawler HTML: the sentences, then the links they rest on. */
+function factBlockStatic(block: FactBlock): string {
+  const sources = block.sources
+    .map((src) => `<a href="${esc(src.url)}" rel="nofollow">${esc(src.label)}</a> (checked ${esc(formatDay(src.checkedAt))})`)
+    .join(" · ");
+  return `<h2>${esc(block.title)}</h2>\n<p>${esc(block.sentences.join(" "))}</p>\n<p>Source: ${sources}</p>`;
+}
 
 export function renderTldStatic(page: TldPage): string {
   const rows = page.rows
@@ -45,8 +54,13 @@ export function renderTldStatic(page: TldPage): string {
       ? `<table>\n<thead><tr><th>Registrar</th><th>Register</th><th>Renew</th><th>Transfer</th><th>3 years</th><th>Verified</th></tr></thead>\n<tbody>\n${rows}\n</tbody>\n</table>`
       : "",
     page.trapLine ? `<h2>Renewal price</h2>\n<p>${esc(page.trapLine)}</p>` : "",
+    page.operator ? factBlockStatic(page.operator) : "",
+    page.eligibility ? factBlockStatic(page.eligibility) : "",
     page.hiddenLines.length ? `<h2>Not shown</h2>\n<ul>${page.hiddenLines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : "",
     `<h2>${page.indexable || isSearchableTld(page.tld) ? `How availability of .${esc(page.tld)} is checked` : `Availability of .${esc(page.tld)} names`}</h2>\n<p>${esc(page.checkLines.join(" "))}</p>`,
+    page.faq.length
+      ? `<h2>Questions</h2>\n${page.faq.map((f) => `<h3>${esc(f.q)}</h3>\n<p>${esc(f.a)}</p>`).join("\n")}`
+      : "",
     `<p><a href="${TLD_HUB_PATH}">All domain extensions</a> · <a href="/pricing">Pricing overview</a> · <a href="/">Search a domain</a></p>`,
   ]
     .filter(Boolean)

@@ -10,11 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { PromoCode } from "@/components/PromoCode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DataTable, Eyebrow, PageHeader, PageMain, Section, Stat, StatGrid, type DataColumn } from "@/components/PageKit";
+import { DataTable, Eyebrow, FaqList, PageHeader, PageMain, Section, Stat, StatGrid, type DataColumn } from "@/components/PageKit";
 import { NetworkIcon, StoreIcon, CertificateIcon } from "@/components/StatIcons";
 import { getRegistrarColor } from "@/lib/registrarColors";
 import { cn } from "@/lib/utils";
 import { isSearchableTld } from "@/lib/searchableTlds";
+import type { FactBlock } from "@/lib/tldFacts";
 import { FOOTER_TLDS } from "@/generated/tld-links";
 import { TLD_SNAPSHOT, breadcrumbJsonLd, tldPageRoute } from "@/seo/tldRoutes";
 import {
@@ -104,6 +105,27 @@ const columns: DataColumn<TldPriceRow>[] = [
 ];
 
 const Prose = ({ children }: { children: React.ReactNode }) => <p className="max-w-3xl text-base text-muted-foreground">{children}</p>;
+
+/** A block of sourced sentences with the links they rest on. The source line is
+ *  not decoration: none of these sentences is ours, and the reader is entitled
+ *  to check each one against the registry's own page and the date we read it. */
+const SourcedBlock = ({ block }: { block: FactBlock }) => (
+  <Section title={block.title}>
+    <Prose>{block.sentences.join(" ")}</Prose>
+    <p className="mt-3 max-w-3xl text-sm text-muted-foreground">
+      Source:{" "}
+      {block.sources.map((src, i) => (
+        <span key={src.url}>
+          {i > 0 && " · "}
+          <a href={src.url} target="_blank" rel="noopener noreferrer nofollow" className="text-aurora hover:underline">
+            {src.label}
+          </a>{" "}
+          <span className="whitespace-nowrap">(checked {formatDay(src.checkedAt)})</span>
+        </span>
+      ))}
+    </p>
+  </Section>
+);
 
 const TldPrices = () => {
   const navigate = useNavigate();
@@ -219,9 +241,39 @@ const TldPrices = () => {
           </Section>
         )}
 
+        {page.operator && <SourcedBlock block={page.operator} />}
+
+        {page.eligibility && <SourcedBlock block={page.eligibility} />}
+
+        {page.eligibilityQuotes.length > 0 && (
+          <Section title="In the registry's own words">
+            <ul className="max-w-3xl space-y-3">
+              {page.eligibilityQuotes.map((q) => (
+                <li key={q.quote} className="border-l-2 border-border pl-4">
+                  <blockquote className="text-base italic text-muted-foreground">“{q.quote}”</blockquote>
+                  <a
+                    href={q.url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="mt-1 inline-block text-sm text-aurora hover:underline"
+                  >
+                    {q.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
         <Section title={searchable ? `How availability of ${dot} is checked` : `Availability of ${dot} names`}>
           <Prose>{page.checkLines.join(" ")}</Prose>
         </Section>
+
+        {page.faq.length > 0 && (
+          <Section title="Questions">
+            <FaqList items={page.faq.map((f) => ({ q: f.q, a: f.a }))} className="max-w-3xl" />
+          </Section>
+        )}
 
         {/* No search box for an extension the search cannot answer for: the form
             would hand the visitor a result page about a different extension. */}

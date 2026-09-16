@@ -1,0 +1,105 @@
+{
+  "ianaCollectedAt": "2026-09-16",
+  "tlds": {
+    "build": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Plan Bee LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://about.build/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-01-09",
+        "recordUpdated": "2023-10-05",
+        "sourceUrl": "https://www.iana.org/domains/root/db/build.html",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "The registry publishes no eligibility requirement. Its FAQ answers the question of whether any name can be had with “certain exceptions” and names no qualifying criteria.",
+          "quote": "Yes, right now you have a good chance of getting the name you want with certain exceptions.",
+          "sourceUrl": "https://about.build/faqs/",
+          "sourceLabel": "about.build FAQ, the registry's own site",
+          "checkedAt": "2026-09-16"
+        },
+        "intendedUse": {
+          "value": "Plan Bee LLC presents .build as a domain for the building industry, technology companies and makers.",
+          "quote": ".Build is a top-level domain (TLD) name for the building industry, tech companies, and more.",
+          "sourceUrl": "https://about.build/",
+          "sourceLabel": "about.build, the registry's own site",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, dated 7 November 2013, is recorded as Base, Non-Sponsored — there is no sponsoring community behind the extension.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/build",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "io": {
+      "iana": {
+        "type": "Country-code top-level domain",
+        "manager": "Internet Computer Bureau Limited",
+        "managerCountry": "the British Indian Ocean Territory",
+        "registrationServicesUrl": "http://www.nic.io/",
+        "delegatedYear": 1997,
+        "delegatedDate": "1997-09-16",
+        "recordUpdated": "2023-01-18",
+        "sourceUrl": "https://www.iana.org/domains/root/db/io.html",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "No residency requirement at the second level: the registry's allocation rules say an applicant may live in any legal jurisdiction, so a .io name is not tied to the British Indian Ocean Territory.",
+          "quote": "An applicant may reside in any legal jurisdiction.",
+          "sourceUrl": "https://www.nic.io/rules.htm",
+          "sourceLabel": "NIC.IO rules for domain names, clause 3.1",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "The same rules bar sexual or pornographic use and reserve the registry's right to deactivate a name immediately on notice.",
+          "quote": "No .IO domain may be used, directly or indirectly, for any purpose that is sexual or pornographic or that is against the statutory laws of any Nation.",
+          "sourceUrl": "https://www.nic.io/rules.htm",
+          "sourceLabel": "NIC.IO rules for domain names, clause 5",
+          "checkedAt": "2026-09-16"
+        },
+        "thirdLevelRule": {
+          "value": "Third-level names under .io (such as a name under com.io) do require residency in the British Indian Ocean Territory, and one nameserver physically located there.",
+          "quote": "An applicant must be resident in the British Indian Ocean Territory.",
+          "sourceUrl": "https://www.nic.io/rules.htm",
+          "sourceLabel": "NIC.IO rules for domain names, clause 4.1",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "org": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Public Interest Registry (PIR)",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "http://publicinterestregistry.org",
+        "delegatedYear": 1985,
+        "delegatedDate": "1985-01-01",
+        "recordUpdated": "2026-03-10",
+        "sourceUrl": "https://www.iana.org/domains/root/db/org.html",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Anyone may register: Public Interest Registry states that .ORG is open and unrestricted.",
+          "quote": "Yes, .ORG is an open and unrestricted domain. Anyone is allowed to register and use .ORG domain names.",
+          "sourceUrl": "https://pir.org/for-orgs/faq/",
+          "sourceLabel": "Public Interest Registry FAQ",
+          "checkedAt": "2026-09-16"
+        },
+        "abusePolicy": {
+          "value": "Registration is not unconditional: PIR's anti-abuse policy applies to every TLD it operates, prohibits malware, botnets, phishing and spam, and its only technical remedy is suspending the whole domain rather than a single page.",
+          "quote": "This Policy is established for all TLDs for which PIR serves as the Registry Operator (collectively, the “PIR TLDs”).",
+          "sourceUrl": "https://pir.org/our-impact/anti-abuse-policy/",
+          "sourceLabel": "Public Interest Registry anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    }
+  }
+}

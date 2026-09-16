@@ -18,6 +18,7 @@
  */
 import { BROWSER_RDAP } from "./browserLane";
 import { isSearchableTld } from "./searchableTlds";
+import { eligibilityBlock, eligibilityQuotes, operatorBlock, priceFaq, type FactBlock, type FaqItem } from "./tldFacts";
 import { STALE_AFTER_DAYS, TLD_ORDER } from "./pricing";
 import { RENEWAL_TRAP_RATIO } from "./resultFilters";
 
@@ -207,6 +208,14 @@ export interface TldPage {
   trapLine: string;
   hiddenLines: string[];
   checkLines: string[];
+  /** Who runs the extension — from the IANA delegation record. Null when unverified. */
+  operator: FactBlock | null;
+  /** Who may register it — from the registry's own rules pages. Null when unverified. */
+  eligibility: FactBlock | null;
+  /** The source sentences behind `eligibility`, verbatim, so a reader can check our wording. */
+  eligibilityQuotes: { quote: string; label: string; url: string }[];
+  /** Three questions answered from this page's own price rows. */
+  faq: FaqItem[];
 }
 
 const lowest = (rows: TldPriceRow[], value: (r: TldPriceRow) => number): Named | null =>
@@ -397,6 +406,10 @@ export function buildTldPage(t: SnapshotTld, now = Date.now()): TldPage {
     trapLine,
     hiddenLines: hidden.map((h) => `${h.registrar}: price not re-verified since ${formatDay(h.lastVerifiedAt)}, so it is not shown.`),
     checkLines: checkLines(t),
+    operator: operatorBlock(t.tld),
+    eligibility: eligibilityBlock(t.tld),
+    eligibilityQuotes: eligibilityQuotes(t.tld),
+    faq: priceFaq(t.tld, rows, verified || null),
   };
 }
 
