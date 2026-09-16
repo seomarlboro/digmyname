@@ -15,6 +15,30 @@
 - MCP server: https://digmyname.com/mcp (npm: [`domain-check-skills-mcp`](https://www.npmjs.com/package/domain-check-skills-mcp))
 - Speed benchmark: https://digmyname.com/speed
 
+## Quick start
+
+No install needed to try it — the site and the API are both live.
+
+```sh
+curl "https://api.digmyname.com/functions/v1/public-api/check?domain=acmeforge.io"
+```
+
+```json
+{
+  "result": {
+    "domain": "acmeforge.io",
+    "available": true,
+    "price_usd": 28.12,
+    "cheapest_registrar": { "name": "Porkbun", "reg_price_usd": 28.12 },
+    "buy_url": "https://porkbun.com/checkout/search?q=acmeforge.io"
+  }
+}
+```
+
+Free, no API key, no account — 60 requests/minute/IP. Full docs: [digmyname.com/api](https://digmyname.com/api).
+
+Want your LLM to call it directly instead? One line: `claude mcp add domain-check -- npx -y domain-check-skills-mcp` — see [mcp/README.md](./mcp/README.md).
+
 ## What it does
 
 DigMyName checks domain availability in real time across 50+ TLDs. Availability is cross-checked against two independent signals on every name — RDAP (resolved via the IANA bootstrap registry) and DNS-over-HTTPS (Cloudflare, Google and AdGuard, hedged) — with a third, Fastly Domain Research, brought in only where those two are not enough (an uncertain answer, a premium suspect, a brand-blocked label, the zones without public RDAP, and the name the visitor typed). When the signals disagree we show an honest **Unverified** state instead of guessing. For the popular extensions the visitor's browser asks the registry's RDAP server and DNS-over-HTTPS directly for the first answer, over connections opened while the name is still being typed; the edge re-checks every card and stays the authority. Prices are refreshed weekly from the registrars' own catalogs and pages.

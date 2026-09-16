@@ -92,6 +92,17 @@ No API key, no account, no config — it works right after install.
 - "Compare registrar prices for `.ai`."
 - "When was `stripe.com` registered?"
 
+## Example response
+
+`check_domain` for `acmeforge.io` returns:
+
+```
+acmeforge.io — AVAILABLE
+  cheapest: Porkbun $28.12/yr
+  buy: https://porkbun.com/checkout/search?q=acmeforge.io
+  compare: https://digmyname.com/?q=acmeforge&utm_source=mcp&utm_medium=api&utm_campaign=domain-check-skills
+```
+
 ## How it works
 
 Availability is resolved through an **authoritative-first** chain — RDAP (IANA bootstrap), authoritative DNS-over-HTTPS (Cloudflare, Google and AdGuard, hedged), Fastly Domain Research and registrar APIs. Anything unresolved is returned as `UNKNOWN` rather than falsely reported as taken. Premium candidates are flagged separately so agents never quote a standard retail price for a registry-premium name.
