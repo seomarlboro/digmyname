@@ -17,7 +17,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "skipLibCheck": true,
-    "types": ["vite/client", "vitest/globals"]
+    "types": ["../node_modules/vite/client.d.ts", "../node_modules/vitest/globals.d.ts"]
   },
   "imports": {
     "@/": "./"
