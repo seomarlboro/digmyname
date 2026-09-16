@@ -36,10 +36,14 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /** Paid calls allowed per UTC day when FASTLY_DAILY_CAP is not set.
- *  300/day keeps us inside Fastly's 10,000 free requests/month (333/day) on the
- *  owner's instruction (2026-09-16, after an unpaid $45.05 August invoice).
- *  The environment variable overrides it either way. */
-export const DEFAULT_DAILY_CAP = 300;
+ *  ZERO since 2026-09-16, once WHOIS (.co/.me/.io) and Porkbun (premium status
+ *  and price, including the typed name) were live and verified in production:
+ *  every case the paid signal used to answer now has a free answer, so the
+ *  default is "spend nothing" and the FASTLY_API_TOKEN stays only as a fuse.
+ *  Set `FASTLY_DAILY_CAP=300` (or any number, or `off`) in the edge environment
+ *  to arm it again — it applies to the next invocation, no deploy. What a
+ *  zero-spend day actually costs us is listed in §14 of the architecture doc. */
+export const DEFAULT_DAILY_CAP = 0;
 
 /** Names accepted in one `verifyPremium` request (one paid call each). */
 export const MAX_VERIFY_NAMES = 3;

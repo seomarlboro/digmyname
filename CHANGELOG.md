@@ -11,7 +11,7 @@ All notable changes to DigMyName.
 ### Changed
 - **The name the visitor typed is verified by Porkbun, not by the metered signal.** Porkbun's live spec allows 10 single checks / 10 s and a bulk endpoint of 25 domains per call against 200 domains / 60 s — the code was holding a decade-old 1-per-10-s limit and checking exactly one name per request. It now asks in bulk for the typed name plus every premium suspect on screen, so a registry-premium name gets its real first-year AND renewal price for free, and `verifyPremium` no longer escalates at all (it still bypasses both caches, so the answer stays fresh).
 - **`edge-cache-prewarm` stops buying its own warm cache.** `shop.store` and `new.tech` were short available names: premium suspects, one paid call each per cache expiry. Replaced with registered 6+ character names (migration `20260916170000_prewarm_no_paid_signal.sql`).
-- `FASTLY_DAILY_CAP` defaults to 300 (Fastly's free 10,000/month is 333/day).
+- `FASTLY_DAILY_CAP` defaults to **0**: with WHOIS and Porkbun answering everything the paid signal used to, the default is to spend nothing. The token stays as a fuse — set `FASTLY_DAILY_CAP=300` in the edge environment to arm it again, no deploy. Refused calls are counted in `fastly_spend_daily.blocked`, so we can see what a zero-spend day would have bought.
 
 ### Added (rule)
 - **Our own runs never spend money.** Benchmarks, the monitor, scripts and tests may only probe fresh 6+ character labels, off the brand list, in zones whose registry answers us. Pinned by `_shared/our-runs-are-free_test.ts`, which reads the actual scripts. August's $45.05 invoice was almost entirely our own QA and benchmark traffic — at ~10 visitors/day, visitors were a rounding error.

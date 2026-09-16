@@ -326,7 +326,7 @@ Three environment variables on the edge, narrowest first. A Supabase secret chan
 | Variable | Effect | Costs us |
 |---|---|---|
 | `HEADLINE_PREMIUM_CHECK=off` | drops the per-search verify call | a registry-premium name outside the suspect heuristics can ship with the standard TLD price again (the reason the verify exists) |
-| `FASTLY_DAILY_CAP=<n>` | ceiling on paid calls per UTC day; default **300** — 10,000 free requests/month is 333/day; `off` = no ceiling, `0` = spend nothing | past the ceiling the degraded state below |
+| `FASTLY_DAILY_CAP=<n>` | ceiling on paid calls per UTC day; default **0** since the free replacements went live and were verified in production; any number arms it again (Fastly's free 10,000/month is 333/day), `off` removes the ceiling | past the ceiling the degraded state below |
 | `THIRD_SIGNAL=off` | kills every paid call, all four escalation reasons | the degraded state below, permanently |
 
 **The degraded state is the pipeline's existing no-verdict behaviour — nothing new was invented and nothing is loosened:** a premium suspect keeps `available:true` with `premiumUnverified` (the card shows the premium mark and *Check price*, never a $ figure), brand-blocked names and `.co`/`.me` stay `uncertain` (*Couldn't verify*). No name is ever shown available on weaker evidence than before, and uncertain results are still never cached.
