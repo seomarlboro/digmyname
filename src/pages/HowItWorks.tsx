@@ -30,7 +30,7 @@ const sources = [
     icon: ShieldCheck,
     name: "IANA RDAP bootstrap",
     detail:
-      "Instead of relying on a single public RDAP proxy, we resolve the official IANA bootstrap file to talk directly to each TLD's authoritative registry server — far more reliable for .io, .ai, .co, .gg.",
+      "Instead of relying on a single public RDAP proxy, we resolve the official IANA bootstrap file to talk directly to each TLD's authoritative registry server, with a verified address table for the popular extensions so the common case skips the lookup — far more reliable for .com, .ai and .xyz. Some zones publish no RDAP server at all (.co and .me among them); there the third signal carries the answer, and we drop extensions where nothing can confirm it.",
   },
   {
     icon: Network,
