@@ -20,8 +20,6 @@
     "types": ["../node_modules/vite/client.d.ts", "../node_modules/vitest/globals.d.ts"]
   },
   "imports": {
-    "@/": "./",
-    // Vite resolves directory imports; Deno needs the concrete file.
-    "react-syntax-highlighter/dist/esm/styles/prism": "../node_modules/react-syntax-highlighter/dist/esm/styles/prism/index.js"
+    "@/": "./"
   }
 }
