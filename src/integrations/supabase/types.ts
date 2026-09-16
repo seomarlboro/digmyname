@@ -83,6 +83,39 @@ export type Database = {
         }
         Relationships: []
       }
+      fastly_spend_daily: {
+        Row: {
+          blocked: number
+          brand: number
+          calls: number
+          co_me: number
+          day: string
+          other: number
+          premium: number
+          updated_at: string
+        }
+        Insert: {
+          blocked?: number
+          brand?: number
+          calls?: number
+          co_me?: number
+          day: string
+          other?: number
+          premium?: number
+          updated_at?: string
+        }
+        Update: {
+          blocked?: number
+          brand?: number
+          calls?: number
+          co_me?: number
+          day?: string
+          other?: number
+          premium?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -274,7 +307,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      fastly_spend_add: {
+        Args: {
+          n_blocked?: number
+          n_brand?: number
+          n_calls: number
+          n_co_me?: number
+          n_other?: number
+          n_premium?: number
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
