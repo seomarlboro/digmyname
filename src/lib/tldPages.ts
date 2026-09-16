@@ -18,7 +18,6 @@
  */
 import { BROWSER_RDAP } from "./browserLane";
 import { isSearchableTld } from "./searchableTlds";
-import { eligibilityBlock, eligibilityQuotes, operatorBlock, priceFaq, usageBlock, type FactBlock, type FaqItem } from "./tldFacts";
 import { STALE_AFTER_DAYS, TLD_ORDER } from "./pricing";
 import { RENEWAL_TRAP_RATIO } from "./resultFilters";
 
@@ -208,16 +207,33 @@ export interface TldPage {
   trapLine: string;
   hiddenLines: string[];
   checkLines: string[];
+}
+
+/**
+ * A page with its sourced prose attached. The facts are deliberately NOT part of
+ * buildTldPage: tldFacts.ts pulls in src/data/tldFacts.json (166 KB), and
+ * /pricing imports this module for three path helpers. Keeping the two apart is
+ * what stops that page from downloading every registry policy on the internet.
+ * See withFacts() in tldFacts.ts.
+ */
+export interface TldPageWithFacts extends TldPage {
   /** Who runs the extension — from the IANA delegation record. Null when unverified. */
-  operator: FactBlock | null;
+  operator: FactBlockLike | null;
   /** What it is actually used for — counted off one dated traffic ranking. Null when uncounted. */
-  usage: FactBlock | null;
+  usage: FactBlockLike | null;
   /** Who may register it — from the registry's own rules pages. Null when unverified. */
-  eligibility: FactBlock | null;
+  eligibility: FactBlockLike | null;
   /** The source sentences behind `eligibility`, verbatim, so a reader can check our wording. */
   eligibilityQuotes: { quote: string; label: string; url: string }[];
   /** Three questions answered from this page's own price rows. */
-  faq: FaqItem[];
+  faq: { q: string; a: string }[];
+}
+
+/** Structural twin of FactBlock, declared here so this module needs no import from tldFacts.ts. */
+export interface FactBlockLike {
+  title: string;
+  sentences: string[];
+  sources: { label: string; url: string; checkedAt: string }[];
 }
 
 const lowest = (rows: TldPriceRow[], value: (r: TldPriceRow) => number): Named | null =>
@@ -408,11 +424,6 @@ export function buildTldPage(t: SnapshotTld, now = Date.now()): TldPage {
     trapLine,
     hiddenLines: hidden.map((h) => `${h.registrar}: price not re-verified since ${formatDay(h.lastVerifiedAt)}, so it is not shown.`),
     checkLines: checkLines(t),
-    operator: operatorBlock(t.tld),
-    usage: usageBlock(t.tld),
-    eligibility: eligibilityBlock(t.tld),
-    eligibilityQuotes: eligibilityQuotes(t.tld),
-    faq: priceFaq(t.tld, rows, verified || null),
   };
 }
 

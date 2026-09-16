@@ -15,13 +15,14 @@ import { NetworkIcon, StoreIcon, CertificateIcon } from "@/components/StatIcons"
 import { getRegistrarColor } from "@/lib/registrarColors";
 import { cn } from "@/lib/utils";
 import { isSearchableTld } from "@/lib/searchableTlds";
-import type { FactBlock } from "@/lib/tldFacts";
+import { withFacts } from "@/lib/tldFacts";
 import { FOOTER_TLDS } from "@/generated/tld-links";
 import { TLD_SNAPSHOT, breadcrumbJsonLd, tldPageRoute } from "@/seo/tldRoutes";
 import {
   PRICE_COLUMNS,
   TLD_HUB_PATH,
   buildTldPage,
+  type FactBlockLike,
   formatDay,
   snapshotFromRows,
   tldPath,
@@ -109,7 +110,7 @@ const Prose = ({ children }: { children: React.ReactNode }) => <p className="max
 /** A block of sourced sentences with the links they rest on. The source line is
  *  not decoration: none of these sentences is ours, and the reader is entitled
  *  to check each one against the registry's own page and the date we read it. */
-const SourcedBlock = ({ block }: { block: FactBlock }) => (
+const SourcedBlock = ({ block }: { block: FactBlockLike }) => (
   <Section title={block.title}>
     <Prose>{block.sentences.join(" ")}</Prose>
     <p className="mt-3 max-w-3xl text-sm text-muted-foreground">
@@ -142,9 +143,9 @@ const TldPrices = () => {
     enabled: valid,
   });
 
-  const page = useMemo(() => (data ? buildTldPage(data) : null), [data]);
+  const page = useMemo(() => (data ? withFacts(buildTldPage(data)) : null), [data]);
   // The <head> keeps the snapshot's numbers so it matches the prerendered HTML.
-  const headPage = useMemo(() => (fromSnapshot ? buildTldPage(fromSnapshot) : page), [fromSnapshot, page]);
+  const headPage = useMemo(() => (fromSnapshot ? withFacts(buildTldPage(fromSnapshot)) : page), [fromSnapshot, page]);
   const [name, setName] = useState("");
 
   if (!valid) return <NotFound />;

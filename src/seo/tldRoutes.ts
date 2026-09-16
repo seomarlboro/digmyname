@@ -13,7 +13,7 @@
 import snapshotJson from "../generated/tld-prices.json";
 import { SITE_URL, type RouteMeta } from "./routes";
 import { isSearchableTld } from "../lib/searchableTlds";
-import type { FactBlock } from "../lib/tldFacts";
+import { withFacts } from "../lib/tldFacts";
 import {
   TLD_HUB_PATH,
   buildHub,
@@ -23,6 +23,8 @@ import {
   type HubEntry,
   type TldHub,
   type TldPage,
+  type TldPageWithFacts,
+  type FactBlockLike,
   type TldSnapshot,
 } from "../lib/tldPages";
 
@@ -31,14 +33,14 @@ export const TLD_SNAPSHOT = snapshotJson as TldSnapshot;
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** A sourced block for the crawler HTML: the sentences, then the links they rest on. */
-function factBlockStatic(block: FactBlock): string {
+function factBlockStatic(block: FactBlockLike): string {
   const sources = block.sources
     .map((src) => `<a href="${esc(src.url)}" rel="nofollow">${esc(src.label)}</a> (checked ${esc(formatDay(src.checkedAt))})`)
     .join(" · ");
   return `<h2>${esc(block.title)}</h2>\n<p>${esc(block.sentences.join(" "))}</p>\n<p>Source: ${sources}</p>`;
 }
 
-export function renderTldStatic(page: TldPage): string {
+export function renderTldStatic(page: TldPageWithFacts): string {
   const rows = page.rows
     .map(
       (r) =>
@@ -104,7 +106,7 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]): strin
 
 const day = (iso: string | null) => (iso ? iso.slice(0, 10) : undefined);
 
-export function tldPageRoute(page: TldPage): RouteMeta {
+export function tldPageRoute(page: TldPageWithFacts): RouteMeta {
   return {
     path: page.path,
     title: page.title,
@@ -140,6 +142,9 @@ export function tldHubRoute(hub: TldHub): RouteMeta {
 
 /** The hub plus one route per extension with at least one price fresh enough to show. */
 export function buildTldRoutes(snapshot: TldSnapshot = TLD_SNAPSHOT, now = Date.now()): RouteMeta[] {
-  const pages = snapshot.tlds.map((t) => buildTldPage(t, now)).filter((p) => p.registrarCount > 0);
+  const pages = snapshot.tlds
+    .map((t) => buildTldPage(t, now))
+    .filter((p) => p.registrarCount > 0)
+    .map(withFacts);
   return [tldHubRoute(buildHub(snapshot, now)), ...pages.map(tldPageRoute)];
 }

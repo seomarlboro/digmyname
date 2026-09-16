@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { TLD_FACTS, operatorBlock, eligibilityBlock, eligibilityQuotes, usageBlock, priceFaq, listOf, hostOf } from "@/lib/tldFacts";
+import { TLD_FACTS, operatorBlock, eligibilityBlock, eligibilityQuotes, usageBlock, priceFaq, withFacts, listOf, hostOf } from "@/lib/tldFacts";
 import { buildTldPage, type SnapshotPrice, type SnapshotTld, type TldPriceRow } from "@/lib/tldPages";
 import { TLD_SNAPSHOT } from "@/seo/tldRoutes";
 import { parseIana } from "../../scripts/tld-facts/fetch-iana.mjs";
@@ -74,6 +74,31 @@ describe("the facts file", () => {
         if (fact.quote) expect(fact.quote, `${name}.${key}`).not.toBe(fact.value);
       }
     }
+  });
+});
+
+describe("bundle layering", () => {
+  it("tldPages.ts does not import the facts, so /pricing never ships them", async () => {
+    // src/data/tldFacts.json is 166 KB. /pricing imports tldPages.ts for three
+    // path helpers; when buildTldPage attached the facts itself, that page
+    // downloaded every registry policy we had collected (18.2 KB gz → 3.7 KB
+    // once split). withFacts() is the seam — keep it.
+    const raw = (await import("../lib/tldPages.ts?raw")).default as string;
+    // Comments may name the file; only real imports would ship it.
+    const code = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(code).not.toMatch(/from\s+["'][^"']*tldFacts["']/);
+    expect(code).not.toMatch(/import\([^)]*tldFacts/);
+    expect(code).not.toMatch(/tldFacts\.json/);
+  });
+
+  it("the page builder stays free of prose, and withFacts adds it", () => {
+    const page = buildTldPage(tld("io", [price("Porkbun", 28.12, 51.8), price("Cloudflare", 40, 50)]), NOW);
+    expect("operator" in page).toBe(false);
+    expect("usage" in page).toBe(false);
+    const full = withFacts(page);
+    expect(full.operator).not.toBeNull();
+    expect(full.usage).not.toBeNull();
+    expect(full.faq).toHaveLength(3);
   });
 });
 
@@ -231,7 +256,7 @@ describe("FAQ", () => {
 
   it("agrees with the table: the trap count matches the page's own flags", () => {
     for (const snap of TLD_SNAPSHOT.tlds) {
-      const page = buildTldPage(snap, NOW);
+      const page = withFacts(buildTldPage(snap, NOW));
       if (!page.faq.length) continue;
       const claimsTrap = !/^Not at /.test(page.faq[1].a);
       expect(claimsTrap, snap.tld).toBe(page.traps.length > 0);

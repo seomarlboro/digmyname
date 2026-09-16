@@ -16,7 +16,8 @@
  */
 import factsJson from "../data/tldFacts.json";
 import { RENEWAL_TRAP_RATIO } from "./resultFilters";
-import type { TldPriceRow } from "./tldPages";
+import { formatDay } from "./tldPages";
+import type { TldPage, TldPageWithFacts, TldPriceRow } from "./tldPages";
 
 export interface SourcedFact {
   value: string;
@@ -86,8 +87,9 @@ export interface FactBlock {
   sources: { label: string; url: string; checkedAt: string }[];
 }
 
-const DAY = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
-export const factDay = (iso: string): string => DAY.format(new Date(`${iso}T00:00:00Z`));
+/** Same spelling as every other date on these pages — Intl's en-GB "short" says
+ *  "Sept" where tldPages says "Sep", and the two sat side by side in one line. */
+export const factDay = (iso: string): string => formatDay(`${iso}T00:00:00Z`);
 
 /** "Generic top-level domain" → "generic top-level domain", for mid-sentence use. */
 const lowerType = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
@@ -292,4 +294,22 @@ export function priceFaq(tld: string, rows: TldPriceRow[], verifiedLabel: string
 export function listOf(items: string[]): string {
   if (items.length <= 1) return items[0] ?? "";
   return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+}
+
+/**
+ * Attach the sourced prose to a built page.
+ *
+ * Callers do this, rather than buildTldPage doing it, so that importing the
+ * price helpers does not also import the fact data. /pricing wants three path
+ * helpers out of tldPages.ts and would otherwise ship the whole facts file.
+ */
+export function withFacts(page: TldPage): TldPageWithFacts {
+  return {
+    ...page,
+    operator: operatorBlock(page.tld),
+    usage: usageBlock(page.tld),
+    eligibility: eligibilityBlock(page.tld),
+    eligibilityQuotes: eligibilityQuotes(page.tld),
+    faq: priceFaq(page.tld, page.rows, page.verifiedLine ? page.verifiedLine.replace(/^Prices\s+/, "").replace(/\.$/, "") : null),
+  };
 }

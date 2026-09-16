@@ -18,6 +18,7 @@ import {
   type SnapshotPrice,
   type SnapshotTld,
 } from "@/lib/tldPages";
+import { withFacts } from "@/lib/tldFacts";
 import { TLD_SNAPSHOT, breadcrumbJsonLd, buildTldRoutes, renderTldStatic } from "@/seo/tldRoutes";
 import { ROUTES } from "@/seo/routes";
 
@@ -93,7 +94,7 @@ describe("page titles and descriptions (numbers from the snapshot)", () => {
     expect(p.description).toContain("verified 13 Sep 2026");
     expect(p.h1).toBe(".build domain price at Porkbun");
     expect(p.indexable).toBe(false);
-    const text = [p.title, p.description, p.h1, p.lede, p.trapLine, renderTldStatic(p)].join(" ");
+    const text = [p.title, p.description, p.h1, p.lede, p.trapLine, renderTldStatic(withFacts(p))].join(" ");
     expect(text).not.toMatch(/\bfrom \$/);
     expect(text).not.toMatch(/compared|comparing|side by side/i);
     // "not a comparison" is the one allowed mention: it says what the page is not.
@@ -157,7 +158,7 @@ describe("prices shown", () => {
     const p = buildTldPage(tld("xyz", [price("A", 1, 1, null, daysAgo(15)), price("B", 2, 2, null, daysAgo(13))]), NOW);
     expect(p.rows.find((r) => r.registrar === "A")?.stale).toBe(true);
     expect(p.rows.find((r) => r.registrar === "B")?.stale).toBe(false);
-    expect(renderTldStatic(p)).toContain("(stale)");
+    expect(renderTldStatic(withFacts(p))).toContain("(stale)");
     expect(p.verifiedLine).toMatch(/^Prices verified between \d+ \w+ 2026 and \d+ \w+ 2026\.$/);
   });
 
@@ -167,7 +168,7 @@ describe("prices shown", () => {
     expect(p.rows.map((r) => r.registrar)).toEqual(["Porkbun"]);
     expect(p.hiddenLines).toContain("Namecheap: price not re-verified since 16 Feb 2026, so it is not shown.");
     expect(p.hiddenLines.some((l) => l.startsWith("GoDaddy: price not re-verified since"))).toBe(true);
-    const html = renderTldStatic(p);
+    const html = renderTldStatic(withFacts(p));
     expect(html).not.toContain("777.77");
     expect(html).not.toContain("888.88");
   });
