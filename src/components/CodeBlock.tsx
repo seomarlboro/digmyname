@@ -1,10 +1,11 @@
+/// <reference path="../types/syntax-highlighter.d.ts" />
 import { useId, useState } from "react";
 import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import bash from "react-syntax-highlighter/dist/esm/languages/prism/bash";
 import json from "react-syntax-highlighter/dist/esm/languages/prism/json";
 import javascript from "react-syntax-highlighter/dist/esm/languages/prism/javascript";
 import python from "react-syntax-highlighter/dist/esm/languages/prism/python";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism/index.js";
 import { Check, Copy, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

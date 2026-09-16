@@ -1,0 +1,25 @@
+{
+  // Shared Deno configuration so `deno check` succeeds across the whole repo:
+  // - the Supabase edge functions (supabase/functions/**) use Deno defaults
+  // - the frontend (src/**) is a Vite + React app and needs DOM, the "@/*"
+  //   path alias and Vite's import.meta.env types
+  "exclude": ["node_modules", "dist", "mcp"],
+  // The frontend uses Vite-style extensionless imports.
+  "unstable": ["sloppy-imports"],
+  "nodeModulesDir": "manual",
+  "compilerOptions": {
+    "lib": ["deno.ns", "ES2020", "DOM", "DOM.Iterable", "WebWorker"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "types": ["../node_modules/vite/client.d.ts", "../node_modules/vitest/globals.d.ts"]
+  },
+  "imports": {
+    "@/": "./"
+  }
+}
