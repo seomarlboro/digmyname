@@ -1,4 +1,4 @@
-/// <reference types="../node_modules/vite/client.d.ts" />
+/// <reference types="../../node_modules/vite/client.d.ts" />
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
