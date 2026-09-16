@@ -4,6 +4,9 @@
   // - the frontend (src/**) is a Vite + React app and needs DOM, the "@/*"
   //   path alias and Vite's import.meta.env types
   "exclude": ["node_modules", "dist", "mcp"],
+  // The frontend uses Vite-style extensionless imports.
+  "unstable": ["sloppy-imports"],
+  "nodeModulesDir": "auto",
   "compilerOptions": {
     "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
     "target": "ES2020",
