@@ -1,6 +1,195 @@
 {
   "ianaCollectedAt": "2026-09-16",
   "tlds": {
+    "agency": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-01-09",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/agency.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "14 November 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/agency",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .agency: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 14 November 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/agency",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "ai": {
+      "iana": {
+        "type": "Country-code top-level domain",
+        "manager": "Government of Anguilla",
+        "managerCountry": "Anguilla",
+        "registrationServicesUrl": "https://nic.ai",
+        "delegatedYear": 1995,
+        "delegatedDate": "1995-02-16",
+        "recordUpdated": "2025-02-11",
+        "sourceUrl": "https://www.iana.org/domains/root/db/ai.html",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "The registry publishes no residency or nexus requirement for .ai; what it does publish is a use rule — a name must not be put to abusive use.",
+          "quote": "Domain use must not be abusive.",
+          "sourceUrl": "https://www.nic.ai/faq",
+          "sourceLabel": "NIC.AI FAQ",
+          "checkedAt": "2026-09-16"
+        },
+        "operatorNote": {
+          "value": "Day-to-day it is not run from Anguilla: the official registry operator site for .ai is published by Identity Digital, which handles registrar accreditation, while IANA still records the Government of Anguilla as the ccTLD manager.",
+          "quote": ".ai Official Registry Operator Website ©2025 Identity Digital Inc.",
+          "sourceUrl": "https://www.nic.ai/",
+          "sourceLabel": "NIC.AI, the official .ai registry operator site",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "app": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Charleston Road Registry Inc.",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.registry.google",
+        "delegatedYear": 2015,
+        "delegatedDate": "2015-06-25",
+        "recordUpdated": "2025-04-11",
+        "sourceUrl": "https://www.iana.org/domains/root/db/app.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Charleston Road Registry Inc.",
+        "agreementDate": "14 May 2015",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/app",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "hsts": {
+          "value": "Every .app name is HTTPS-only. The whole extension sits on the HSTS preload list built into browsers, so a browser refuses a plain-HTTP connection to any .app address before it is ever made — a certificate is not optional here, and no per-site configuration turns it on.",
+          "quote": "The .app top-level domain is included on the HSTS preload list, making HTTPS required on all connections to .app websites — no individual HSTS registration or configuration required.",
+          "sourceUrl": "https://www.registry.google/domains/app/",
+          "sourceLabel": "Google Registry",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "Google Registry publishes no eligibility requirement for .app; the practical condition is technical rather than who you are — you need working HTTPS from the first day the name resolves.",
+          "sourceUrl": "https://www.registry.google/domains/app/",
+          "sourceLabel": "Google Registry",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 14 May 2015, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/app",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "art": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "UK Creative Ideas Limited",
+        "managerCountry": "the United Kingdom of Great Britain and Northern Ireland",
+        "registrationServicesUrl": "http://art.art/",
+        "delegatedYear": 2016,
+        "delegatedDate": "2016-06-09",
+        "recordUpdated": "2024-04-30",
+        "sourceUrl": "https://www.iana.org/domains/root/db/art.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "UK Creative Ideas Limited",
+        "agreementDate": "24 March 2016",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/art",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 24 March 2016, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/art",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "intendedUse": {
+          "value": "UK Creative Ideas presents .art as an extension for the artistic community rather than a restricted one, and publishes no qualifying criteria a registrant must meet.",
+          "quote": "Our mission is to support the artistic community, protect and strengthen its members' digital identity, and generate value from art.",
+          "sourceUrl": "https://www.art.art/",
+          "sourceLabel": "art.art, the registry's own site",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "biz": {
+      "iana": {
+        "type": "Restricted generic top-level domain",
+        "manager": "Registry Services, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "http://www.nic.biz",
+        "delegatedYear": 2001,
+        "delegatedDate": "2001-06-26",
+        "recordUpdated": "2026-03-10",
+        "sourceUrl": "https://www.iana.org/domains/root/db/biz.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Registry Services, LLC",
+        "agreementDate": "30 June 2019",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/biz",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 30 June 2019, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/biz",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "GoDaddy Registry publishes no qualifying criteria for .biz. Its terms require only that a registrant be at least 18 and able to enter a binding contract, and not be barred from receiving the service under US or other applicable law.",
+          "quote": "you represent and warrant that you are (i) at least eighteen (18) years of age, (ii) otherwise recognized as being able to form legally binding contracts under applicable law",
+          "sourceUrl": "https://registry.godaddy/legal/",
+          "sourceLabel": "GoDaddy Registry universal terms of service",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
     "build": {
       "iana": {
         "type": "Generic top-level domain",
@@ -29,8 +218,714 @@
           "checkedAt": "2026-09-16"
         },
         "agreementType": {
-          "value": "Its registry agreement with ICANN, dated 7 November 2013, is recorded as Base, Non-Sponsored — there is no sponsoring community behind the extension.",
+          "value": "Its registry agreement with ICANN, signed 7 November 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
           "sourceUrl": "https://www.icann.org/en/registry-agreements/details/build",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      },
+      "icann": {
+        "operator": "Plan Bee LLC",
+        "agreementDate": "7 November 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/build",
+        "checkedAt": "2026-09-16"
+      }
+    },
+    "capital": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-04-03",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/capital.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "6 March 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/capital",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .capital: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 6 March 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/capital",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "cc": {
+      "iana": {
+        "type": "Country-code top-level domain",
+        "manager": "eNIC Cocos (Keeling) Islands Pty. Ltd. d/b/a Island Internet Services",
+        "managerCountry": "Australia",
+        "registrationServicesUrl": "http://www.nic.cc/",
+        "delegatedYear": 1997,
+        "delegatedDate": "1997-10-13",
+        "recordUpdated": "2026-03-24",
+        "sourceUrl": "https://www.iana.org/domains/root/db/cc.html",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "operatorNote": {
+          "value": "Verisign runs the authoritative registry for .cc, alongside the other three it names, and sells nothing directly — every registration goes through an ICANN-accredited registrar.",
+          "quote": "Verisign operates the authoritative registry of .com, .net, .cc, and .name domain names, and offers registry services for a range of additional domain names, including internationalized domain names (IDNs).",
+          "sourceUrl": "https://www.verisign.com/what-we-do/verisign-registry/",
+          "sourceLabel": "Verisign, registry operator",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "Despite .cc being the country code for the Cocos (Keeling) Islands, IANA records the manager there while the registry itself is operated by Verisign; neither publishes a residency requirement.",
+          "sourceUrl": "https://www.verisign.com/what-we-do/verisign-registry/",
+          "sourceLabel": "Verisign, registry operator",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "cloud": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "ARUBA PEC S.p.A.",
+        "managerCountry": "Italy",
+        "registrationServicesUrl": "https://www.get.cloud",
+        "delegatedYear": 2015,
+        "delegatedDate": "2015-06-18",
+        "recordUpdated": "2025-12-18",
+        "sourceUrl": "https://www.iana.org/domains/root/db/cloud.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Aruba PEC S.p.A.",
+        "agreementDate": "16 April 2015",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/cloud",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 16 April 2015, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/cloud",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "The registry's own site for .cloud publishes no eligibility criteria: it presents the extension and points at registrars, and states no test a registrant has to pass.",
+          "sourceUrl": "https://www.get.cloud/",
+          "sourceLabel": "get.cloud, the registry's own site",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "club": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Registry Services, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "http://nic.club/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-01-09",
+        "recordUpdated": "2024-04-16",
+        "sourceUrl": "https://www.iana.org/domains/root/db/club.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Registry Services, LLC",
+        "agreementDate": "8 November 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/club",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 8 November 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/club",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "GoDaddy Registry publishes no qualifying criteria for .club. Its terms require only that a registrant be at least 18 and able to enter a binding contract, and not be barred from receiving the service under US or other applicable law.",
+          "quote": "you represent and warrant that you are (i) at least eighteen (18) years of age, (ii) otherwise recognized as being able to form legally binding contracts under applicable law",
+          "sourceUrl": "https://registry.godaddy/legal/",
+          "sourceLabel": "GoDaddy Registry universal terms of service",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "co": {
+      "iana": {
+        "type": "Country-code top-level domain",
+        "manager": "Ministry of Information and Communications Technologies (MinTIC)",
+        "managerCountry": "Colombia",
+        "registrationServicesUrl": "http://www.registry.co",
+        "delegatedYear": 1991,
+        "delegatedDate": "1991-12-24",
+        "recordUpdated": "2026-02-17",
+        "sourceUrl": "https://www.iana.org/domains/root/db/co.html",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "The .CO registry publishes no residency or nexus requirement — nothing ties a .co name to Colombia. What it does require is a registration agreement with an accredited registrar and contact data that is true and kept current, on pain of suspension or cancellation.",
+          "quote": "The Applicant explicitly agrees that the provision of inaccurate or incomplete data, as well as the failure to update outdated data may result in the cancellation or suspension of the Domain Name.",
+          "sourceUrl": "https://registry.co/co-registration-policies",
+          "sourceLabel": ".CO registration policies",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its lawful-use clause bars fraudulent or illegal purposes and names spam, phishing, pharming, botnets, malware and trademark infringement outright.",
+          "quote": "This includes, but is not limited to, the use for the distribution of unsolicited bulk email, phishing, pharming, use of botnets or malware, infringement of trademark rights, or any other abusive or malicious practices.",
+          "sourceUrl": "https://registry.co/co-registration-policies",
+          "sourceLabel": ".CO registration policies",
+          "checkedAt": "2026-09-16"
+        },
+        "operatorNote": {
+          "value": "The policies are issued by Consorcio Equipo PuntoCo as the .CO Registry, while IANA records Colombia's MinTIC as the ccTLD manager.",
+          "quote": "The .CO Registration Policies outline the terms and conditions of the Consorcio Equipo PuntoCo (referred to as \"the .CO Registry\")",
+          "sourceUrl": "https://registry.co/co-registration-policies",
+          "sourceLabel": ".CO registration policies",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "com": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "VeriSign Global Registry Services",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "http://www.verisigninc.com",
+        "delegatedYear": 1985,
+        "delegatedDate": "1985-01-01",
+        "recordUpdated": "2026-03-10",
+        "sourceUrl": "https://www.iana.org/domains/root/db/com.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "VeriSign, Inc.",
+        "agreementDate": "1 December 2024",
+        "agreementType": "Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/com",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 1 December 2024, is recorded as Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/com",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "operatorNote": {
+          "value": "Verisign runs the authoritative registry for .com, alongside the other three it names, and sells nothing directly — every registration goes through an ICANN-accredited registrar.",
+          "quote": "Verisign operates the authoritative registry of .com, .net, .cc, and .name domain names, and offers registry services for a range of additional domain names, including internationalized domain names (IDNs).",
+          "sourceUrl": "https://www.verisign.com/what-we-do/verisign-registry/",
+          "sourceLabel": "Verisign, registry operator",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "community": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-01-23",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/community.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "5 December 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/community",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .community: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 5 December 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/community",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "company": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2013,
+        "delegatedDate": "2013-12-12",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/company.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "7 November 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/company",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .company: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 7 November 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/company",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "design": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Registry Services, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "http://nic.design/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-12-18",
+        "recordUpdated": "2024-04-16",
+        "sourceUrl": "https://www.iana.org/domains/root/db/design.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Registry Services, LLC",
+        "agreementDate": "7 November 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/design",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 7 November 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/design",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "GoDaddy Registry publishes no qualifying criteria for .design. Its terms require only that a registrant be at least 18 and able to enter a binding contract, and not be barred from receiving the service under US or other applicable law.",
+          "quote": "you represent and warrant that you are (i) at least eighteen (18) years of age, (ii) otherwise recognized as being able to form legally binding contracts under applicable law",
+          "sourceUrl": "https://registry.godaddy/legal/",
+          "sourceLabel": "GoDaddy Registry universal terms of service",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "dev": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Charleston Road Registry Inc.",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.registry.google",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-11-20",
+        "recordUpdated": "2025-04-11",
+        "sourceUrl": "https://www.iana.org/domains/root/db/dev.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Charleston Road Registry Inc.",
+        "agreementDate": "16 October 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/dev",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "hsts": {
+          "value": "Every .dev name is HTTPS-only. The whole extension sits on the HSTS preload list built into browsers, so a browser refuses a plain-HTTP connection to any .dev address before it is ever made — a certificate is not optional here, and no per-site configuration turns it on.",
+          "quote": "The .dev top-level domain is included on the HSTS preload list, making HTTPS required on all connections to .dev websites and pages without needing individual HSTS registration or configuration.",
+          "sourceUrl": "https://www.registry.google/domains/dev/",
+          "sourceLabel": "Google Registry",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "Google Registry publishes no eligibility requirement for .dev; the practical condition is technical rather than who you are — you need working HTTPS from the first day the name resolves.",
+          "sourceUrl": "https://www.registry.google/domains/dev/",
+          "sourceLabel": "Google Registry",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 16 October 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/dev",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "digital": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-04-17",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/digital.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "6 March 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/digital",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .digital: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 6 March 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/digital",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "finance": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-04-24",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/finance.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "20 March 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/finance",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .finance: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 20 March 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/finance",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "fund": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-04-17",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/fund.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "20 March 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/fund",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .fund: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 20 March 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/fund",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "gg": {
+      "iana": {
+        "type": "Country-code top-level domain",
+        "manager": "Island Networks Ltd.",
+        "managerCountry": "Guernsey",
+        "registrationServicesUrl": "http://www.nic.gg",
+        "delegatedYear": 1996,
+        "delegatedDate": "1996-08-07",
+        "recordUpdated": "2025-07-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/gg.html",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Island Networks takes registrations through accredited registrars or directly at the registry, and direct registration is bare-bones — no DNS hosting and no email, so it suits only registrants running their own nameservers.",
+          "quote": "You may also register directly at the registry but this is a 'bare-bones', registration-only service.",
+          "sourceUrl": "https://www.channelisles.net/register-1/about-registering",
+          "sourceLabel": "Channel Isles registration guide",
+          "checkedAt": "2026-09-16"
+        },
+        "terms": {
+          "value": "The registry's terms apply to every .gg registration whether or not a registrar is involved, so a registrar's own terms do not replace them.",
+          "quote": "you must ensure that you have read the Registration Terms and Conditions for .GG and .JE domains since these apply to all registrations, including those which have a registrar.",
+          "sourceUrl": "https://www.channelisles.net/register-1/about-registering",
+          "sourceLabel": "Channel Isles registration guide",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "group": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2015,
+        "delegatedDate": "2015-07-30",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/group.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "15 August 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/group",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .group: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 15 August 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/group",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "inc": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Intercap Registry Inc.",
+        "managerCountry": "the Cayman Islands",
+        "registrationServicesUrl": "https://get.inc",
+        "delegatedYear": 2018,
+        "delegatedDate": "2018-07-03",
+        "recordUpdated": "2023-11-17",
+        "sourceUrl": "https://www.iana.org/domains/root/db/inc.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Intercap Registry Inc.",
+        "agreementDate": "10 March 2018",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/inc",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 10 March 2018, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/inc",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "The registry's own site for .inc publishes no eligibility criteria: it presents the extension and points at registrars, and states no test a registrant has to pass.",
+          "sourceUrl": "https://www.get.inc/",
+          "sourceLabel": "get.inc, the registry's own site",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "info": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Identity Digital Limited",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2001,
+        "delegatedDate": "2001-06-26",
+        "recordUpdated": "2026-03-10",
+        "sourceUrl": "https://www.iana.org/domains/root/db/info.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Identity Digital Domains Limited",
+        "agreementDate": "30 June 2019",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/info",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .info: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 30 June 2019, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/info",
           "sourceLabel": "ICANN registry agreement record",
           "checkedAt": "2026-09-16"
         }
@@ -72,6 +967,417 @@
         }
       }
     },
+    "life": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-05-08",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/life.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "6 February 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/life",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .life: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 6 February 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/life",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "link": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Nova Registry Ltd.",
+        "managerCountry": "Malta",
+        "registrationServicesUrl": "http://uniregistry.link",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-01-09",
+        "recordUpdated": "2026-06-26",
+        "sourceUrl": "https://www.iana.org/domains/root/db/link.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Nova Registry Ltd",
+        "agreementDate": "14 November 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/link",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 14 November 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/link",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Nova Registry publishes an acceptable use policy for .link as a PDF from its registry site; it is the document a registrant is bound by beyond the registrar's own terms.",
+          "sourceUrl": "https://nova.link/wp-content/uploads/2023/05/Nova-.link-Acceptable-Use-Policy-2023-Final.pdf",
+          "sourceLabel": "Nova Registry .link acceptable use policy (PDF)",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "lol": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "XYZ.COM LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://nic.lol",
+        "delegatedYear": 2015,
+        "delegatedDate": "2015-04-23",
+        "recordUpdated": "2025-08-12",
+        "sourceUrl": "https://www.iana.org/domains/root/db/lol.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "XYZ.COM LLC",
+        "agreementDate": "30 January 2015",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/lol",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 30 January 2015, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/lol",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "XYZ.COM LLC publishes no qualifying criteria for .lol beyond age: its own registration terms require a registrant to be eighteen or older, and call any registration by someone younger unauthorised.",
+          "quote": "Any registration, use of or access to the Services, by anyone under eighteen (18) is unauthorized and is a violation of this Agreement.",
+          "sourceUrl": "https://gen.xyz/registrationterms",
+          "sourceLabel": "XYZ.COM LLC domain registration terms",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "market": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Dog Beach, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-05-22",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/market.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Dog Beach, LLC",
+        "agreementDate": "6 March 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/market",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .market: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 6 March 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/market",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "me": {
+      "iana": {
+        "type": "Country-code top-level domain",
+        "manager": "Government of Montenegro",
+        "managerCountry": "Montenegro",
+        "registrationServicesUrl": "http://www.domain.me",
+        "delegatedYear": 2007,
+        "delegatedDate": "2007-09-24",
+        "recordUpdated": "2020-10-19",
+        "sourceUrl": "https://www.iana.org/domains/root/db/me.html",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Anyone may register: the registry states that .me names are available to any individual or corporation worldwide, with no restriction and no specific requirements — despite .me being Montenegro's country code.",
+          "quote": ".ME domain names are available to any individual or corporation worldwide without restriction or specific requirements.",
+          "sourceUrl": "https://domain.me/policies/",
+          "sourceLabel": "Domain.ME policies",
+          "checkedAt": "2026-09-16"
+        },
+        "terms": {
+          "value": "Its policy page is where the registry's terms and conditions and abuse reporting live; a registrar's own terms sit on top of them, not instead of them.",
+          "sourceUrl": "https://domain.me/policies/",
+          "sourceLabel": "Domain.ME policies",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "media": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-04-03",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/media.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "6 March 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/media",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .media: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 6 March 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/media",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "money": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-11-20",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/money.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "16 October 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/money",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .money: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 16 October 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/money",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "net": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "VeriSign Global Registry Services",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "http://www.verisigninc.com",
+        "delegatedYear": 1985,
+        "delegatedDate": "1985-01-01",
+        "recordUpdated": "2026-03-10",
+        "sourceUrl": "https://www.iana.org/domains/root/db/net.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "VeriSign, Inc.",
+        "agreementDate": "1 July 2023",
+        "agreementType": "Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/net",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 1 July 2023, is recorded as Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/net",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "operatorNote": {
+          "value": "Verisign runs the authoritative registry for .net, alongside the other three it names, and sells nothing directly — every registration goes through an ICANN-accredited registrar.",
+          "quote": "Verisign operates the authoritative registry of .com, .net, .cc, and .name domain names, and offers registry services for a range of additional domain names, including internationalized domain names (IDNs).",
+          "sourceUrl": "https://www.verisign.com/what-we-do/verisign-registry/",
+          "sourceLabel": "Verisign, registry operator",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "one": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "One.com A/S",
+        "managerCountry": "Denmark",
+        "registrationServicesUrl": "https://get.one/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-12-18",
+        "recordUpdated": "2026-05-19",
+        "sourceUrl": "https://www.iana.org/domains/root/db/one.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "One.com A/S",
+        "agreementDate": "7 November 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/one",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 7 November 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/one",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "The registry's own site for .one publishes no eligibility criteria: it presents the extension and points at registrars, and states no test a registrant has to pass.",
+          "sourceUrl": "https://get.one/",
+          "sourceLabel": "get.one, the registry's own site",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "online": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Radix Technologies Inc. SEZC",
+        "managerCountry": "the Cayman Islands",
+        "registrationServicesUrl": "https://radix.website/",
+        "delegatedYear": 2015,
+        "delegatedDate": "2015-03-06",
+        "recordUpdated": "2026-04-27",
+        "sourceUrl": "https://www.iana.org/domains/root/db/online.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Radix Technologies Inc SEZC",
+        "agreementDate": "15 January 2015",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/online",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Radix sets no qualifying criteria for .online. What it requires of a registrant is a registration agreement with an ICANN-accredited registrar and compliance with ICANN's consensus policies, including the UDRP and Uniform Rapid Suspension.",
+          "quote": "Every Registered Name Holder is required to enter into and comply with a registration agreement with an ICANN-Accredited registrar or its authorized representative.",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix acceptable use and anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use and anti-abuse policy applies to every Radix TLD and binds both the name and the person holding it; registry functions run on CentralNic's platform.",
+          "quote": "Radix requires that every domain name in its TLDs (“Registered Name”) and Registered Name Holder adhere to this Acceptable Use and Anti-Abuse Policy (“AUP”).",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix acceptable use and anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Names in ICANN's Specification 5 schedule are reserved across all Radix TLDs, and Radix reserves further names, premium inventory included, which it may release later.",
+          "quote": "These names will be reserved and not available for registration in all Radix TLDs.",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 15 January 2015, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/online",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
     "org": {
       "iana": {
         "type": "Generic top-level domain",
@@ -98,8 +1404,866 @@
           "sourceUrl": "https://pir.org/our-impact/anti-abuse-policy/",
           "sourceLabel": "Public Interest Registry anti-abuse policy",
           "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 30 June 2019, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/org",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      },
+      "icann": {
+        "operator": "Public Interest Registry",
+        "agreementDate": "30 June 2019",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/org",
+        "checkedAt": "2026-09-16"
+      }
+    },
+    "page": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Charleston Road Registry Inc.",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.registry.google",
+        "delegatedYear": 2015,
+        "delegatedDate": "2015-02-05",
+        "recordUpdated": "2025-04-11",
+        "sourceUrl": "https://www.iana.org/domains/root/db/page.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Charleston Road Registry Inc.",
+        "agreementDate": "4 December 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/page",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "hsts": {
+          "value": "Every .page name is HTTPS-only. The whole extension sits on the HSTS preload list built into browsers, so a browser refuses a plain-HTTP connection to any .page address before it is ever made — a certificate is not optional here, and no per-site configuration turns it on.",
+          "quote": "The .page top-level domain is included on the HSTS preload list, making HTTPS required on all connections to .page websites and pages without needing individual HSTS registration or configuration.",
+          "sourceUrl": "https://www.registry.google/domains/page/",
+          "sourceLabel": "Google Registry",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "Google Registry publishes no eligibility requirement for .page; the practical condition is technical rather than who you are — you need working HTTPS from the first day the name resolves.",
+          "sourceUrl": "https://www.registry.google/domains/page/",
+          "sourceLabel": "Google Registry",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 4 December 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/page",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "pro": {
+      "iana": {
+        "type": "Restricted generic top-level domain",
+        "manager": "Identity Digital Limited",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2002,
+        "delegatedDate": "2002-05-08",
+        "recordUpdated": "2026-03-10",
+        "sourceUrl": "https://www.iana.org/domains/root/db/pro.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Identity Digital Domains Limited",
+        "agreementDate": "1 October 2015",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/pro",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .pro: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 1 October 2015, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/pro",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "run": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2015,
+        "delegatedDate": "2015-04-30",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/run.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "19 March 2015",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/run",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .run: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 19 March 2015, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/run",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "shop": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "GMO Registry, Inc.",
+        "managerCountry": "Japan",
+        "registrationServicesUrl": "http://www.gmoregistry.com/en/",
+        "delegatedYear": 2016,
+        "delegatedDate": "2016-05-05",
+        "recordUpdated": "2019-08-20",
+        "sourceUrl": "https://www.iana.org/domains/root/db/shop.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "GMO Registry, Inc.",
+        "agreementDate": "8 April 2016",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/shop",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 8 April 2016, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/shop",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "GMO Registry publishes no eligibility requirement for .shop — the only restrictions it states are on the name itself.",
+          "sourceUrl": "https://get.shop/",
+          "sourceLabel": "GMO Registry .shop FAQ",
+          "checkedAt": "2026-09-16"
+        },
+        "nameRules": {
+          "value": "A .shop label may run to 63 characters of letters, numbers and dashes; symbols and emoji are not accepted.",
+          "quote": "Domain names cannot include symbols (i.e. !, @, $, %, &) or emojis.",
+          "sourceUrl": "https://get.shop/",
+          "sourceLabel": "GMO Registry .shop FAQ",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "site": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Radix Technologies Inc. SEZC",
+        "managerCountry": "the Cayman Islands",
+        "registrationServicesUrl": "https://radix.website/",
+        "delegatedYear": 2015,
+        "delegatedDate": "2015-03-06",
+        "recordUpdated": "2026-04-21",
+        "sourceUrl": "https://www.iana.org/domains/root/db/site.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Radix Technologies Inc SEZC",
+        "agreementDate": "15 January 2015",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/site",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Radix sets no qualifying criteria for .site. What it requires of a registrant is a registration agreement with an ICANN-accredited registrar and compliance with ICANN's consensus policies, including the UDRP and Uniform Rapid Suspension.",
+          "quote": "Every Registered Name Holder is required to enter into and comply with a registration agreement with an ICANN-Accredited registrar or its authorized representative.",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix acceptable use and anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use and anti-abuse policy applies to every Radix TLD and binds both the name and the person holding it; registry functions run on CentralNic's platform.",
+          "quote": "Radix requires that every domain name in its TLDs (“Registered Name”) and Registered Name Holder adhere to this Acceptable Use and Anti-Abuse Policy (“AUP”).",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix acceptable use and anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Names in ICANN's Specification 5 schedule are reserved across all Radix TLDs, and Radix reserves further names, premium inventory included, which it may release later.",
+          "quote": "These names will be reserved and not available for registration in all Radix TLDs.",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 15 January 2015, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/site",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "so": {
+      "iana": {
+        "type": "Country-code top-level domain",
+        "manager": "Ministry of Post and Telecommunications",
+        "registrationServicesUrl": "http://www.nic.so/",
+        "delegatedYear": 1997,
+        "delegatedDate": "1997-08-28",
+        "recordUpdated": "2016-04-18",
+        "sourceUrl": "https://www.iana.org/domains/root/db/so.html",
+        "checkedAt": "2026-09-16"
+      }
+    },
+    "social": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Dog Beach, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-01-09",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/social.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Dog Beach, LLC",
+        "agreementDate": "7 November 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/social",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .social: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 7 November 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/social",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "software": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Dog Beach, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-05-22",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/software.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Dog Beach, LLC",
+        "agreementDate": "20 March 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/software",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .software: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 20 March 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/software",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "space": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Radix Technologies Inc.",
+        "managerCountry": "the Cayman Islands",
+        "registrationServicesUrl": "https://radix.website/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-05-22",
+        "recordUpdated": "2026-04-21",
+        "sourceUrl": "https://www.iana.org/domains/root/db/space.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Radix Technologies Inc SEZC",
+        "agreementDate": "3 April 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/space",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Radix sets no qualifying criteria for .space. What it requires of a registrant is a registration agreement with an ICANN-accredited registrar and compliance with ICANN's consensus policies, including the UDRP and Uniform Rapid Suspension.",
+          "quote": "Every Registered Name Holder is required to enter into and comply with a registration agreement with an ICANN-Accredited registrar or its authorized representative.",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix acceptable use and anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use and anti-abuse policy applies to every Radix TLD and binds both the name and the person holding it; registry functions run on CentralNic's platform.",
+          "quote": "Radix requires that every domain name in its TLDs (“Registered Name”) and Registered Name Holder adhere to this Acceptable Use and Anti-Abuse Policy (“AUP”).",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix acceptable use and anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Names in ICANN's Specification 5 schedule are reserved across all Radix TLDs, and Radix reserves further names, premium inventory included, which it may release later.",
+          "quote": "These names will be reserved and not available for registration in all Radix TLDs.",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 3 April 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/space",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "store": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Radix Technologies Inc.",
+        "managerCountry": "the Cayman Islands",
+        "registrationServicesUrl": "https://radix.website/",
+        "delegatedYear": 2016,
+        "delegatedDate": "2016-02-11",
+        "recordUpdated": "2026-04-27",
+        "sourceUrl": "https://www.iana.org/domains/root/db/store.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Radix Technologies Inc SEZC",
+        "agreementDate": "9 April 2015",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/store",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Radix sets no qualifying criteria for .store. What it requires of a registrant is a registration agreement with an ICANN-accredited registrar and compliance with ICANN's consensus policies, including the UDRP and Uniform Rapid Suspension.",
+          "quote": "Every Registered Name Holder is required to enter into and comply with a registration agreement with an ICANN-Accredited registrar or its authorized representative.",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix acceptable use and anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use and anti-abuse policy applies to every Radix TLD and binds both the name and the person holding it; registry functions run on CentralNic's platform.",
+          "quote": "Radix requires that every domain name in its TLDs (“Registered Name”) and Registered Name Holder adhere to this Acceptable Use and Anti-Abuse Policy (“AUP”).",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix acceptable use and anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Names in ICANN's Specification 5 schedule are reserved across all Radix TLDs, and Radix reserves further names, premium inventory included, which it may release later.",
+          "quote": "These names will be reserved and not available for registration in all Radix TLDs.",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 9 April 2015, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/store",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "studio": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Dog Beach, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2015,
+        "delegatedDate": "2015-06-25",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/studio.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Dog Beach, LLC",
+        "agreementDate": "11 February 2015",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/studio",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .studio: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 11 February 2015, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/studio",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "systems": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2013,
+        "delegatedDate": "2013-12-12",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/systems.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "7 November 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/systems",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .systems: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 7 November 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/systems",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "tech": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Radix Technologies Inc.",
+        "managerCountry": "the Cayman Islands",
+        "registrationServicesUrl": "https://radix.website/",
+        "delegatedYear": 2015,
+        "delegatedDate": "2015-03-12",
+        "recordUpdated": "2026-04-14",
+        "sourceUrl": "https://www.iana.org/domains/root/db/tech.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Radix Technologies Inc SEZC",
+        "agreementDate": "30 January 2015",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/tech",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Radix sets no qualifying criteria for .tech. What it requires of a registrant is a registration agreement with an ICANN-accredited registrar and compliance with ICANN's consensus policies, including the UDRP and Uniform Rapid Suspension.",
+          "quote": "Every Registered Name Holder is required to enter into and comply with a registration agreement with an ICANN-Accredited registrar or its authorized representative.",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix acceptable use and anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use and anti-abuse policy applies to every Radix TLD and binds both the name and the person holding it; registry functions run on CentralNic's platform.",
+          "quote": "Radix requires that every domain name in its TLDs (“Registered Name”) and Registered Name Holder adhere to this Acceptable Use and Anti-Abuse Policy (“AUP”).",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix acceptable use and anti-abuse policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Names in ICANN's Specification 5 schedule are reserved across all Radix TLDs, and Radix reserves further names, premium inventory included, which it may release later.",
+          "quote": "These names will be reserved and not available for registration in all Radix TLDs.",
+          "sourceUrl": "https://radix.website/policies",
+          "sourceLabel": "Radix reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 30 January 2015, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/tech",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "tools": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-01-16",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/tools.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "21 November 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/tools",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .tools: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 21 November 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/tools",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "tv": {
+      "iana": {
+        "type": "Country-code top-level domain",
+        "manager": "Ministry of Transport, Energy, Communications and Innovations",
+        "managerCountry": "Tuvalu",
+        "registrationServicesUrl": "https://turnon.tv/",
+        "delegatedYear": 1996,
+        "delegatedDate": "1996-03-18",
+        "recordUpdated": "2026-08-05",
+        "sourceUrl": "https://www.iana.org/domains/root/db/tv.html",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Anyone may register, anywhere: the registry states there are no residency requirements for .tv and that names go first come, first served — despite .tv being Tuvalu's country code.",
+          "quote": "Anyone can register a .TV domain worldwide on a first-come, first-served basis. There are no residency requirements.",
+          "sourceUrl": "https://domains.registry.godaddy/tv",
+          "sourceLabel": "GoDaddy Registry .tv domain hub",
+          "checkedAt": "2026-09-16"
+        },
+        "terms": {
+          "value": "GoDaddy Registry runs .tv under the same universal terms as its gTLDs, which require a registrant to be at least 18 and able to enter a binding contract.",
+          "quote": "you represent and warrant that you are (i) at least eighteen (18) years of age, (ii) otherwise recognized as being able to form legally binding contracts under applicable law",
+          "sourceUrl": "https://registry.godaddy/legal/",
+          "sourceLabel": "GoDaddy Registry universal terms of service",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "ventures": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2013,
+        "delegatedDate": "2013-10-31",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/ventures.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "27 August 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/ventures",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .ventures: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 27 August 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/ventures",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "world": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-09-11",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/world.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "12 June 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/world",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .world: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 12 June 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/world",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "wtf": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "Binky Moon, LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://www.identity.digital/",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-04-17",
+        "recordUpdated": "2025-10-07",
+        "sourceUrl": "https://www.iana.org/domains/root/db/wtf.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "Binky Moon, LLC",
+        "agreementDate": "6 March 2014",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/wtf",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "eligibility": {
+          "value": "Identity Digital sets no qualifying criteria for .wtf: the requirement it does state is that every registrant holds a registration agreement with an ICANN-accredited registrar and keeps its contact details accurate.",
+          "quote": "where a registrant fails to keep registration information accurate or up-to-date;",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "useRestriction": {
+          "value": "Its acceptable use policy covers every TLD it runs and lets the registry deny, suspend, cancel, redirect or transfer a name at its sole discretion — for malware, phishing, spam, botnets, DNS hijacking, denial-of-service or child abuse imagery, among other listed abuses.",
+          "quote": "Identity Digital reserves the right, at its sole discretion and at any time and without limitation, to deny, suspend, cancel, redirect, or transfer any registration or transaction",
+          "sourceUrl": "https://www.identity.digital/policies/acceptable-use-policy",
+          "sourceLabel": "Identity Digital acceptable use policy",
+          "checkedAt": "2026-09-16"
+        },
+        "reservedNames": {
+          "value": "Some names are held back regardless: the registry reserves names for its own operations, for ICANN requirements and as premium inventory, and that list can change at any time.",
+          "quote": "Identity Digital registries may at any time reserve domain names from registration",
+          "sourceUrl": "https://www.identity.digital/policies/reserved-names",
+          "sourceLabel": "Identity Digital reserved names policy",
+          "checkedAt": "2026-09-16"
+        },
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 6 March 2014, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/wtf",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        }
+      }
+    },
+    "xyz": {
+      "iana": {
+        "type": "Generic top-level domain",
+        "manager": "XYZ.COM LLC",
+        "managerCountry": "the United States of America",
+        "registrationServicesUrl": "https://nic.xyz",
+        "delegatedYear": 2014,
+        "delegatedDate": "2014-02-06",
+        "recordUpdated": "2025-08-12",
+        "sourceUrl": "https://www.iana.org/domains/root/db/xyz.html",
+        "checkedAt": "2026-09-16"
+      },
+      "icann": {
+        "operator": "XYZ.COM LLC",
+        "agreementDate": "5 December 2013",
+        "agreementType": "Base, Non-Sponsored",
+        "sourceUrl": "https://www.icann.org/en/registry-agreements/details/xyz",
+        "checkedAt": "2026-09-16"
+      },
+      "registry": {
+        "agreementType": {
+          "value": "Its registry agreement with ICANN, signed 5 December 2013, is recorded as Base, Non-Sponsored — no sponsoring community stands behind the extension, so there is no community test to pass.",
+          "sourceUrl": "https://www.icann.org/en/registry-agreements/details/xyz",
+          "sourceLabel": "ICANN registry agreement record",
+          "checkedAt": "2026-09-16"
+        },
+        "eligibility": {
+          "value": "XYZ.COM LLC publishes no qualifying criteria for .xyz beyond age: its own registration terms require a registrant to be eighteen or older, and call any registration by someone younger unauthorised.",
+          "quote": "Any registration, use of or access to the Services, by anyone under eighteen (18) is unauthorized and is a violation of this Agreement.",
+          "sourceUrl": "https://gen.xyz/registrationterms",
+          "sourceLabel": "XYZ.COM LLC domain registration terms",
+          "checkedAt": "2026-09-16"
         }
       }
     }
-  }
+  },
+  "icannCollectedAt": "2026-09-16"
 }

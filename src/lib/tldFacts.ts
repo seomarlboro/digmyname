@@ -98,7 +98,19 @@ export function eligibilityBlock(tld: string): FactBlock | null {
   const registry = factsFor(tld)?.registry;
   if (!registry) return null;
   // Deterministic order so the prose does not reshuffle between builds.
-  const order = ["eligibility", "territory", "useRestriction", "thirdLevelRule", "hsts", "intendedUse", "agreementType"];
+  const order = [
+    "eligibility",      // who may register — the question the block asks
+    "hsts",             // .app/.dev/.page: HTTPS is enforced for the whole zone
+    "useRestriction",   // what a name may not be used for
+    "nameRules",        // limits on the label itself
+    "thirdLevelRule",
+    "reservedNames",
+    "terms",
+    "operatorNote",     // who actually runs it, where that differs from IANA
+    "intendedUse",
+    "territory",
+    "agreementType",    // the ICANN contract — weakest, so first to be dropped by the cap
+  ];
   const keys = [...new Set([...order.filter((k) => registry[k]), ...Object.keys(registry)])];
   const facts = keys.map((k) => registry[k]).filter(Boolean).slice(0, 4);
   if (!facts.length) return null;

@@ -3,6 +3,7 @@ import { TLD_FACTS, operatorBlock, eligibilityBlock, eligibilityQuotes, priceFaq
 import { buildTldPage, type SnapshotPrice, type SnapshotTld, type TldPriceRow } from "@/lib/tldPages";
 import { TLD_SNAPSHOT } from "@/seo/tldRoutes";
 import { parseIana } from "../../scripts/tld-facts/fetch-iana.mjs";
+import { parseIcann } from "../../scripts/tld-facts/fetch-icann.mjs";
 
 const COLLECTED = TLD_FACTS.ianaCollectedAt ?? "";
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -71,6 +72,38 @@ describe("the facts file", () => {
       for (const [key, fact] of Object.entries(rec.registry ?? {})) {
         if (fact.quote) expect(fact.quote, `${name}.${key}`).not.toBe(fact.value);
       }
+    }
+  });
+});
+
+describe("coverage", () => {
+  const priced = TLD_SNAPSHOT.tlds.map((t) => t.tld);
+
+  it("every extension with a price page has an IANA record", () => {
+    const missing = priced.filter((t) => !TLD_FACTS.tlds[t]?.iana);
+    expect(missing, `no IANA record: ${missing.join(", ")}`).toEqual([]);
+  });
+
+  it("every gTLD has its ICANN registry-agreement record, and no ccTLD pretends to", () => {
+    for (const t of priced) {
+      const rec = TLD_FACTS.tlds[t];
+      const isCc = /country-code/i.test(rec.iana?.type ?? "");
+      expect(Boolean(rec.icann), `${t} (${isCc ? "ccTLD" : "gTLD"})`).toBe(!isCc);
+    }
+  });
+
+  // .so is the one extension whose registry (nic.so) does not answer, so its page
+  // shows two blocks instead of three. That is the honest outcome, not a gap to
+  // paper over — but it should stay the only one without anyone noticing.
+  it("only .so lacks registry facts", () => {
+    const without = priced.filter((t) => !Object.keys(TLD_FACTS.tlds[t]?.registry ?? {}).length);
+    expect(without).toEqual(["so"]);
+  });
+
+  it("every other extension renders both fact blocks", () => {
+    for (const t of priced.filter((x) => x !== "so")) {
+      expect(operatorBlock(t), t).not.toBeNull();
+      expect(eligibilityBlock(t), t).not.toBeNull();
     }
   });
 });
@@ -237,6 +270,26 @@ describe("the IANA parser", () => {
 
   it("omits what it cannot find instead of guessing", () => {
     expect(parseIana("<main><h1>Delegation Record for .NOTHING</h1></main>")).toEqual({});
+  });
+});
+
+describe("the ICANN parser", () => {
+  const sample =
+    '<div class="agreement__label"><span class="agreement__subtitle">U-Label</span> agency </div>' +
+    '<div class="agreement__operator"><span class="agreement__subtitle">Operator</span> Binky Moon, LLC </div>' +
+    '<div class="agreement__date"><span class="agreement__subtitle">Agreement Date</span> 14 November 2013 </div>' +
+    '<div class="agreement__label"><span class="agreement__subtitle">Agreement Type</span> Base  , <!----> Non-Sponsored <!----><!----></div>';
+
+  it("reads operator, date and type, and tidies ICANN's spacing", () => {
+    expect(parseIcann(sample)).toEqual({
+      operator: "Binky Moon, LLC",
+      agreementDate: "14 November 2013",
+      agreementType: "Base, Non-Sponsored",
+    });
+  });
+
+  it("omits what it cannot find", () => {
+    expect(parseIcann("<div>nothing here</div>")).toEqual({});
   });
 });
 
