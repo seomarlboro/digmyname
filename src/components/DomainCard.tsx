@@ -70,7 +70,7 @@ let pendingRetryFocus: string | null = null;
 
 /**
  * One result row. Pure function of its props (memoised): no store subscriptions
- * of its own, so an answer landing on one card does not re-render the other 52.
+ * of its own, so an answer landing on one card does not re-render the other 50.
  */
 const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onToggleFavorite, onAction }: DomainCardProps) => {
   const { domain, available, checking } = result;
@@ -201,6 +201,9 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
     // Our own budget expired (or the batch never reached us) — the registry did
     // NOT fail, so don't say it did.
     const stillChecking = result.uncertainReason === "budget_timeout" || result.reachFailed;
+    // The registry rate-limited OUR checks (429). Retrying now hits the same
+    // wall, so this row offers no Retry and says what actually happened.
+    const registryLimited = result.uncertainReason === "registry_throttled";
     if (compact) {
       return (
         <div className={`grid ${COMPACT_GRID} border-b border-border px-3 py-3 sm:px-4 sm:py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN} ${FOCUS_RING}`} ref={focusRoot} tabIndex={-1}>
@@ -215,10 +218,10 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
               Trademark
             </Badge>
           ) : (
-            <span className="hidden text-xs text-muted-foreground min-w-[80px] sm:inline">{result.reachFailed ? "No connection" : stillChecking ? "Still checking" : "Couldn't verify"}</span>
+            <span className="hidden text-xs text-muted-foreground min-w-[80px] sm:inline">{result.reachFailed ? "No connection" : stillChecking ? "Still checking" : registryLimited ? "Registry limits checks" : "Couldn't verify"}</span>
           )}
           <span className="hidden sm:block" />
-          {brandProtected ? (
+          {brandProtected || registryLimited ? (
             <span />
           ) : (
             <Button
@@ -256,11 +259,13 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                   ? "Couldn't reach our server — check your connection and retry."
                   : stillChecking
                     ? "Still checking — this one's slow. Retry."
-                    : "Couldn't verify availability — sources disagreed. Try again."}
+                    : registryLimited
+                      ? "Couldn't verify — this registry limits our checks. Check the name at a registrar."
+                      : "Couldn't verify availability — sources disagreed. Try again."}
               </p>
             )}
           </div>
-          {!brandProtected && (
+          {!brandProtected && !registryLimited && (
             <Button
               variant="outline"
               onClick={retry}

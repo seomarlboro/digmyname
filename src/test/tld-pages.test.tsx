@@ -207,6 +207,25 @@ describe("how availability is checked (facts from the pipeline tables)", () => {
     }
   });
 
+  it(".shop: the page names the real reason (the registry limits us), never the missing-RDAP one", () => {
+    // .shop left the default search on 2026-09-16 for a DIFFERENT reason than
+    // .gg/.so: its registry IS in the bootstrap and does have an RDAP server —
+    // that server just answers 429 after a handful of requests from one IP.
+    // Saying "no RDAP server is listed" here would be false.
+    const page = buildTldPage(
+      tld("shop", [price("A", 1, 1), price("B", 2, 2)], { registryHost: "rdap.gmoregistry.net", inIanaBootstrap: true }),
+      NOW,
+    );
+    const lines = page.checkLines.join(" ");
+    expect(lines).toContain("DigMyName does not check availability for .shop");
+    expect(lines).toContain("rate-limits our availability checks");
+    expect(lines).not.toContain("No RDAP server");
+    expect(lines).not.toContain("your browser");
+    // It is answered when typed, and the page says so.
+    expect(lines).toContain("Unverified");
+    expect(page.indexable).toBe(false);
+  });
+
   it("a searchable extension with two registrars is still indexed", () => {
     expect(buildTldPage(tld("io", [price("A", 1, 1), price("B", 2, 2)], { registryHost: "rdap.identitydigital.services" }), NOW).indexable).toBe(true);
   });

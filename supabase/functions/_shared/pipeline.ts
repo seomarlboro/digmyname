@@ -62,7 +62,7 @@ export interface DomainCheckResult {
   /** Why the result is uncertain, when the cause is deterministic (not a probe failure).
    *  `budget_timeout` = OUR request budget expired before this domain resolved —
    *  the registry did not fail. Must never be reported as a registry failure. */
-  uncertainReason?: "brand_protected" | "budget_timeout";
+  uncertainReason?: "brand_protected" | "budget_timeout" | "registry_throttled";
   likelyPremium?: boolean;
   /** RDAP-404 + NXDOMAIN agree the name is registerable, but it is a premium-tier
    *  suspect whose real registry price the third signal did NOT confirm this
@@ -1123,12 +1123,20 @@ async function resolveDomain(domain: string, deadlineAt?: number): Promise<Domai
     return { domain, available: false, checkedVia: "rdap", uncertain: true };
   }
 
+  // Why we could not answer, when the reason is us rather than the name: the
+  // registry refused our request (429/503). The card says so instead of the
+  // generic "couldn't verify", and we do NOT buy a verdict for it — a registry
+  // rate-limiting our egress IP is our problem to back off from, not $0.001 of
+  // third-signal call. (.shop is the zone where this happens today; see
+  // ON_REQUEST_TLDS in src/lib/searchableTlds.ts.)
+  const throttledReason = rdap.throttled ? ("registry_throttled" as const) : undefined;
+
   // Heuristic fallback — short SLD on premium TLD with no clear answer.
   if (likelyPremium) {
-    return { domain, available: false, checkedVia: "heuristic", likelyPremium: true, uncertain: true };
+    return { domain, available: false, checkedVia: "heuristic", likelyPremium: true, uncertain: true, uncertainReason: throttledReason };
   }
 
-  return { domain, available: false, checkedVia: "unknown", uncertain: true };
+  return { domain, available: false, checkedVia: "unknown", uncertain: true, uncertainReason: throttledReason };
 }
 
 

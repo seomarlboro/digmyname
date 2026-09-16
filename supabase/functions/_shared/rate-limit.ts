@@ -6,7 +6,7 @@
 // limiter here only bites if the platform starts reusing them — and then it
 // must never bite the website's own traffic. That traffic is many SMALL
 // requests: one check-domains request per top TLD plus batches of 8 (16
-// requests for a 53-TLD search, 318 domains with AI variations on), and six
+// requests for an all-TLD search, 51 domains today, 306 with AI variations on), and six
 // /fast requests per keystroke wave. A budget counted in requests failed that
 // on the second search. This one is counted in COST UNITS (domains), with a
 // request cap on top so a flood of 1-domain requests (each a paid invocation)

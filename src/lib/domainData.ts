@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { SEARCHABLE_TLDS } from "./searchableTlds";
+import { ON_REQUEST_TLDS, SEARCHABLE_TLDS } from "./searchableTlds";
 
 /** A curated extension. Deliberately nothing else: prices come from the live
  *  registrar table (`registrar_prices`) and card attributes from real verdicts,
@@ -50,7 +50,7 @@ export interface DomainResult {
   uncertain?: boolean;
   /** Deterministic cause of uncertainty: `brand_protected` (trademark/registry-reserved)
    *  or `budget_timeout` (our own request budget expired — NOT a registry failure). */
-  uncertainReason?: "brand_protected" | "budget_timeout";
+  uncertainReason?: "brand_protected" | "budget_timeout" | "registry_throttled";
   /** Client-only: the batch that owned this row never reached the backend (503 /
    *  network error). Distinct from `uncertain` (backend reached, verdict
    *  inconclusive). Renders "couldn't reach — Retry"; cleared on retry. Never
@@ -66,7 +66,13 @@ export interface DomainResult {
   listingUrl?: string;
 }
 
-const tldMap = new Map(TLD_LIST.map((t) => [t.extension, t]));
+/** Lookup for a TYPED extension. Wider than TLD_LIST on purpose: an on-request
+ *  extension (`.shop`) is not in the default grid, but typing `acme.shop` must
+ *  still produce a card — an honest "Couldn't verify" beats pretending we never
+ *  heard of the zone. Everything else still falls through to `unsupportedTld`. */
+const tldMap = new Map(
+  [...SEARCHABLE_TLDS, ...ON_REQUEST_TLDS].map((extension) => [extension, { extension } as TLD]),
+);
 
 /** What a raw query actually resolves to. Exported because the UI has to say so:
  *  typing `acme.zone` searches `acme` across the curated list and checks nothing
@@ -202,7 +208,7 @@ export interface AvailabilityInfo {
   likelyPremium?: boolean;
   premiumUnverified?: boolean;
   uncertain?: boolean;
-  uncertainReason?: "brand_protected" | "budget_timeout";
+  uncertainReason?: "brand_protected" | "budget_timeout" | "registry_throttled";
   sldBlocked?: boolean;
   forSale?: boolean;
   forSaleVia?: string;

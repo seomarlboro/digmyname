@@ -17,7 +17,7 @@
  *   - every price carries its own verification date; older than 14 days is marked stale.
  */
 import { BROWSER_RDAP } from "./browserLane";
-import { isSearchableTld } from "./searchableTlds";
+import { isOnRequestTld, isSearchableTld } from "./searchableTlds";
 import { STALE_AFTER_DAYS, TLD_ORDER } from "./pricing";
 import { RENEWAL_TRAP_RATIO } from "./resultFilters";
 
@@ -277,8 +277,18 @@ export function checkLines(t: RdapFacts & { tld: string }): string[] {
   // is no check to describe. Saying "how availability of .gg is checked" on a
   // page for an extension we refuse to answer for is the lie this prevents.
   if (!isSearchableTld(t.tld)) {
+    // Two different reasons, and saying the wrong one is its own small lie:
+    // .gg/.so have no RDAP server at all, while .shop has one that rate-limits
+    // our checks (429 after a handful of requests from one IP). Neither zone is
+    // in the default search; only the second one answers when a visitor types it.
+    const why = t.inIanaBootstrap === false
+      ? `No RDAP server for this zone is listed in IANA's bootstrap registry, so a name here cannot be confirmed free`
+      : `The registry rate-limits our availability checks, so most answers here would be inconclusive rather than a verdict`;
+    const typed = isOnRequestTld(t.tld)
+      ? ` Type a full ${dot} name in the search and you still get a card — an honest Unverified, never a guess.`
+      : "";
     return [
-      `DigMyName does not check availability for ${dot}. No RDAP server for this zone is listed in IANA's bootstrap registry, so a name here cannot be confirmed free, and the search offers only extensions it can answer for. This page is prices only — check the name itself at a registrar.`,
+      `DigMyName does not check availability for ${dot}. ${why}, and the search offers only extensions it can answer for. This page is prices only — check the name itself at a registrar.${typed}`,
     ];
   }
   const thirdSignal =

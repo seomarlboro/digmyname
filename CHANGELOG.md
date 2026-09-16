@@ -2,6 +2,13 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-16 — .shop leaves the default grid (frontend + edge)
+
+### Changed
+- **The default search is 51 extensions; `.shop` is no longer one of them.** Its registry answers 429 after 3-4 requests from one IP, so most fresh `.shop` names could not be verified without buying a paid third-signal call — and `rdap.org` redirects to the same host while GMO retired port-43 WHOIS in May. Same call as `.gg`/`.so` in August, different reason.
+- **A typed `.shop` name still gets a card**, unlike `.gg`/`.so`: *Couldn't verify — this registry limits our checks. Check the name at a registrar.* No Retry button (it would hit the same wall), no paid call. New `uncertainReason: "registry_throttled"`, carried through the API, set whenever a registry answers 429/503 rather than about the name.
+- **`/tld/shop` stays as a price page** and now states the real reason instead of `.gg`/`.so`'s "no RDAP server in IANA's bootstrap", which was false for `.shop`. It already hid the "Check a .shop name" form and is `noindex`; the sitemap drops it.
+
 ## 2026-09-16 — The paid signal stops being the answer (edge + migration)
 
 ### Added

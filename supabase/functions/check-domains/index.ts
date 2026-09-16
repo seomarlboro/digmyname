@@ -32,7 +32,7 @@ const corsHeaders = {
 // ---------------------------------------------------------------------------
 // Per-IP budget (in-memory, sliding window, per isolate). Counted in DOMAINS,
 // not requests: the website sends one request per top TLD plus batches of 8
-// (16 requests for a 53-TLD search, 318 domains with AI variations on), so the
+// (16 requests for an all-TLD search, 51 domains today, 306 with AI variations), so the
 // old 30-requests/min cap would have failed it on the second search the day
 // the platform starts reusing isolates. The request cap bounds a flood of
 // 1-domain requests. Logic and tests live in ../_shared/rate-limit.ts.

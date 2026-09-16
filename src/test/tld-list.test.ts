@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { TLD_LIST, TLD_RANK, generateDomainList } from "@/lib/domainData";
+import { TLD_LIST, TLD_RANK, generateDomainList, parseQuery } from "@/lib/domainData";
+import { isCheckableTld, isOnRequestTld, isSearchableTld } from "@/lib/searchableTlds";
 import { TLD_SNAPSHOT } from "@/seo/tldRoutes";
 
 describe("TLD_LIST", () => {
@@ -32,5 +33,34 @@ describe("TLD_LIST", () => {
     expect(list).toHaveLength(TLD_LIST.length);
     expect(list[0]).toMatchObject({ domain: "acme.com", checking: true, available: false });
     expect(list[0].tld).toEqual({ extension: "com" });
+  });
+});
+
+describe(".shop is answered only when typed", () => {
+  it("is not in the default grid", () => {
+    // Dropped 2026-09-16: rdap.gmoregistry.net answers 429 after 3-4 requests
+    // from one IP, so most fresh .shop names could not be verified without
+    // buying a paid third-signal call. See ON_REQUEST_TLDS.
+    expect(TLD_LIST.map((t) => t.extension)).not.toContain("shop");
+    expect(isSearchableTld("shop")).toBe(false);
+    expect(isOnRequestTld("shop")).toBe(true);
+    expect(isCheckableTld("shop")).toBe(true);
+  });
+
+  it("a typed .shop name still produces exactly one card, first", () => {
+    const rows = generateDomainList("acmeforge.shop");
+    expect(rows[0].domain).toBe("acmeforge.shop");
+    expect(rows.filter((r) => r.tld.extension === "shop")).toHaveLength(1);
+    expect(parseQuery("acmeforge.shop").unsupportedTld).toBeNull();
+  });
+
+  it("a .shop card never appears in a search that did not ask for it", () => {
+    expect(generateDomainList("acmeforge").some((r) => r.tld.extension === "shop")).toBe(false);
+    expect(generateDomainList("acmeforge.com").some((r) => r.tld.extension === "shop")).toBe(false);
+  });
+
+  it("an extension nobody can answer for is still unsupported", () => {
+    expect(parseQuery("acmeforge.gg").unsupportedTld).toBe("gg");
+    expect(generateDomainList("acmeforge.gg").some((r) => r.tld.extension === "gg")).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 // Pure unit tests for the per-key budget — NO network.
 // Run with: deno test supabase/functions/_shared/rate-limit_test.ts
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { SEARCHABLE_TLDS } from "../../../src/lib/searchableTlds.ts";
 import { createBudget } from "./rate-limit.ts";
 
 // The check-domains budget as configured in check-domains/index.ts.
@@ -8,10 +9,16 @@ const SITE = { windowMs: 60_000, maxRequests: 600, maxCost: 4000 };
 // The /fast budget as configured in public-api/index.ts.
 const FAST = { windowMs: 60_000, maxRequests: 1200, maxCost: 10_000 };
 
-/** One website search over all 53 TLDs: 10 solo top-TLD requests + 6 batches
- *  of 8 (the last one holds 3). 16 requests, 53 domains. */
+/** The real default grid, imported rather than copied so this test cannot drift
+ *  from the list (it lost `.shop` on 2026-09-16 and gained nothing since). */
+const TLD_COUNT = SEARCHABLE_TLDS.length;
+/** Names per search when the "AI variations" toggle is on: the base + 5 prefixes. */
+const NAMES_WITH_VARIATIONS = 6;
+
+/** One website search over every default TLD: 10 solo top-TLD requests + batches
+ *  of 8 for the rest. 16 requests, TLD_COUNT domains. */
 function siteSearch(spend: ReturnType<typeof createBudget>, key: string, now: number, names = 1): boolean {
-  const domains = 53 * names;
+  const domains = TLD_COUNT * names;
   const solo = 10;
   const rest = domains - solo;
   let ok = true;
@@ -20,16 +27,24 @@ function siteSearch(spend: ReturnType<typeof createBudget>, key: string, now: nu
   return ok;
 }
 
-Deno.test("site pattern: 20 plain 53-TLD searches in one minute all pass (the old 30-requests cap failed the 2nd)", () => {
+Deno.test("site pattern: 20 plain all-TLD searches in one minute all pass (the old 30-requests cap failed the 2nd)", () => {
   const spend = createBudget(SITE);
   for (let s = 0; s < 20; s++) assert(siteSearch(spend, "1.2.3.4", 1000 + s * 2000));
 });
 
-Deno.test("site pattern: 12 searches with AI variations on (318 domains each) pass, the 13th is refused", () => {
+Deno.test("site pattern: every search with AI variations on that fits the budget passes, the next is refused", () => {
   const spend = createBudget(SITE);
-  for (let s = 0; s < 12; s++) assert(siteSearch(spend, "1.2.3.4", 1000 + s * 3000, 6), `search ${s + 1}`);
-  // 12 x 318 = 3816 domains spent; the next search's batches push past 4000.
-  assertEquals(siteSearch(spend, "1.2.3.4", 50_000, 6), false);
+  const perSearch = TLD_COUNT * NAMES_WITH_VARIATIONS;
+  // Two caps, and either can bite first: domains spent, and requests made
+  // (10 solo + batches of 8 for the rest).
+  const requestsPerSearch = 10 + Math.ceil((perSearch - 10) / 8);
+  const fits = Math.min(
+    Math.floor(SITE.maxCost / perSearch),
+    Math.floor(SITE.maxRequests / requestsPerSearch),
+  );
+  for (let s = 0; s < fits; s++) assert(siteSearch(spend, "1.2.3.4", 1000 + s * 3000, NAMES_WITH_VARIATIONS), `search ${s + 1}`);
+  // The budget is spent to within one search of the cap; the next one's batches push past it.
+  assertEquals(siteSearch(spend, "1.2.3.4", 50_000, NAMES_WITH_VARIATIONS), false);
 });
 
 Deno.test("flood of 50-domain requests is refused once 4000 domains are spent", () => {

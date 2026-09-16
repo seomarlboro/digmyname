@@ -125,7 +125,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const [scrolled, setScrolled] = useState(false);
 
   // Auth, favourites and the price table are read ONCE here and handed to the
-  // cards as props: 53 cards each subscribing to react-query themselves meant
+  // cards as props: one card per default TLD, each subscribing to react-query itself, meant
   // 150+ observers re-rendering on every store notification.
   const { user } = useAuth();
   const { favorites, toggleFavorite } = useFavorites();
