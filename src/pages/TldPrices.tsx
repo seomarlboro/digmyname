@@ -152,15 +152,9 @@ const TldPrices = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <RouteHead route={tldPageRoute(headPage)}>
-        <script type="application/ld+json">
-          {breadcrumbJsonLd([
-            { name: "Home", path: "/" },
-            { name: "Domain prices", path: TLD_HUB_PATH },
-            { name: dot, path: tldPath(tld) },
-          ])}
-        </script>
-      </RouteHead>
+      {/* Breadcrumb JSON-LD rides on the route meta (src/seo/tldRoutes.ts) so the
+          prerendered head carries it too — it used to appear only after React mounted. */}
+      <RouteHead route={tldPageRoute(headPage)} />
       <Header />
       <PageMain>
         <nav aria-label="Breadcrumb" className="mb-2 text-sm text-muted-foreground">

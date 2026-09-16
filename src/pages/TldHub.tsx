@@ -91,14 +91,7 @@ const TldHub = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <RouteHead route={headRoute}>
-        <script type="application/ld+json">
-          {breadcrumbJsonLd([
-            { name: "Home", path: "/" },
-            { name: "Domain prices", path: TLD_HUB_PATH },
-          ])}
-        </script>
-      </RouteHead>
+      <RouteHead route={headRoute} />
       <Header />
       <PageMain>
         <PageHeader eyebrow={<Eyebrow>Domain prices</Eyebrow>} title={hub.h1} lede={hub.lede} />

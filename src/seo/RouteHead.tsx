@@ -27,6 +27,8 @@ export const RouteHead = ({ path, route: given, children }: { path?: string; rou
       <meta name="twitter:title" content={ogTitle} />
       <meta name="twitter:description" content={ogDescription} />
       <meta name="robots" content={robotsDirective(route)} />
+      {/* Same string the prerender wrote, so Helmet adopts that tag instead of adding a second. */}
+      {route.jsonLd ? <script type="application/ld+json">{route.jsonLd}</script> : null}
       {children}
     </Helmet>
   );

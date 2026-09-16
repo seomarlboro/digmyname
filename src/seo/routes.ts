@@ -36,6 +36,13 @@ export interface RouteMeta {
   /** Sitemap <lastmod> (YYYY-MM-DD). Only set where a real date exists, e.g. a price's verification day. */
   lastmod?: string;
   /**
+   * Route-level JSON-LD, already serialised. Written into the prerendered head
+   * so a crawler that does not run React still gets it, and rendered again by
+   * <RouteHead> on mount — byte-identical, so Helmet adopts the static tag
+   * instead of adding a second one.
+   */
+  jsonLd?: string;
+  /**
    * Crawler-visible summary written into the prerendered HTML. React replaces the
    * whole #root on mount, so real users never see it; it exists so no-JS crawlers
    * and LLM bots read real content on every route, not just the home page.

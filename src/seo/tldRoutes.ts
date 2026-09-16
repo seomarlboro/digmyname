@@ -72,6 +72,9 @@ export function renderHubStatic(hub: TldHub): string {
 
 /** The only structured data on these pages: a breadcrumb trail (no Product/Offer — nothing is sold here; no FAQPage). */
 export function breadcrumbJsonLd(items: { name: string; path: string }[]): string {
+  // "<" escaped so the string is safe inside a <script> block and, more to the
+  // point, byte-identical whether it is written by the build-time prerender or
+  // by Helmet on mount — Helmet only adopts a static tag it matches exactly.
   return JSON.stringify({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -81,7 +84,7 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]): strin
       name: it.name,
       item: it.path === "/" ? `${SITE_URL}/` : `${SITE_URL}${it.path}`,
     })),
-  });
+  }).replace(/</g, "\\u003c");
 }
 
 const day = (iso: string | null) => (iso ? iso.slice(0, 10) : undefined);
@@ -95,6 +98,11 @@ export function tldPageRoute(page: TldPage): RouteMeta {
     changefreq: "weekly",
     priority: "0.6",
     lastmod: day(page.newestVerifiedAt),
+    jsonLd: breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Domain prices", path: TLD_HUB_PATH },
+      { name: `.${page.tld}`, path: page.path },
+    ]),
     staticHtml: renderTldStatic(page),
   };
 }
@@ -107,6 +115,10 @@ export function tldHubRoute(hub: TldHub): RouteMeta {
     changefreq: "weekly",
     priority: "0.7",
     lastmod: day(hub.newestVerifiedAt),
+    jsonLd: breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Domain prices", path: TLD_HUB_PATH },
+    ]),
     staticHtml: renderHubStatic(hub),
   };
 }

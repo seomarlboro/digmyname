@@ -51,6 +51,9 @@ export function renderHeadTags(route: RouteMeta): string {
     `<meta data-rh="true" name="twitter:description" content="${escapeAttr(ogDescription)}" />`,
     `<meta data-rh="true" name="robots" content="${robotsDirective(route)}" />`,
   ];
+  // Emitted exactly as Helmet renders a <script type="application/ld+json">
+  // child, so the tag is adopted on mount rather than duplicated.
+  if (route.jsonLd) lines.push(`<script data-rh="true" type="application/ld+json">${route.jsonLd}</script>`);
   return lines.map((l) => `    ${l}`).join("\n");
 }
 
