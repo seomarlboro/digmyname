@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      cron_heartbeats: {
+        Row: {
+          job_name: string
+          last_run_at: string
+          rows_affected: number | null
+        }
+        Insert: {
+          job_name: string
+          last_run_at: string
+          rows_affected?: number | null
+        }
+        Update: {
+          job_name?: string
+          last_run_at?: string
+          rows_affected?: number | null
+        }
+        Relationships: []
+      }
       domain_cache: {
         Row: {
           available: boolean
@@ -62,6 +80,39 @@ export type Database = {
           domain?: string
           id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      fastly_spend_daily: {
+        Row: {
+          blocked: number
+          brand: number
+          calls: number
+          co_me: number
+          day: string
+          other: number
+          premium: number
+          updated_at: string
+        }
+        Insert: {
+          blocked?: number
+          brand?: number
+          calls?: number
+          co_me?: number
+          day: string
+          other?: number
+          premium?: number
+          updated_at?: string
+        }
+        Update: {
+          blocked?: number
+          brand?: number
+          calls?: number
+          co_me?: number
+          day?: string
+          other?: number
+          premium?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -256,7 +307,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      fastly_spend_add: {
+        Args: {
+          n_blocked?: number
+          n_brand?: number
+          n_calls: number
+          n_co_me?: number
+          n_other?: number
+          n_premium?: number
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
