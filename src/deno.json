@@ -20,6 +20,6 @@
     "types": ["vite/client", "vitest/globals"]
   },
   "imports": {
-    "@/": "./src/"
+    "@/": "./"
   }
 }
