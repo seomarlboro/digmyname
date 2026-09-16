@@ -18,25 +18,30 @@ import { SearchIcon, ShieldIcon, StoreIcon } from "@/components/StatIcons";
 import { PageMain, PageHeader, Eyebrow, Stat, StatGrid, FeatureCard, Section, FaqList, CalloutBlock } from "@/components/PageKit";
 
 
-/** The three availability signals — and only those. Pricing is a separate step (see the callout below the grid). */
+/** The availability signals — and only those. Two run on every name; the third is the
+ *  tie-breaker (supabase/functions/_shared/availability-rules.ts: shouldEscalateToDomainr).
+ *  Pricing is a separate step (see the callout below the grid). */
 const sources = [
-  {
-    icon: Search,
-    name: "Fastly Domain Research",
-    detail:
-      "Aggregated registry status across hundreds of TLDs, including DPML and brand-block signals plus premium flags. Fastest and broadest first pass.",
-  },
   {
     icon: ShieldCheck,
     name: "IANA RDAP bootstrap",
+    always: "Every name",
     detail:
       "Instead of relying on a single public RDAP proxy, we resolve the official IANA bootstrap file to talk directly to each TLD's authoritative registry server, with a verified address table for the popular extensions so the common case skips the lookup — far more reliable for .com, .ai and .xyz. Some zones publish no RDAP server at all (.co and .me among them); there the third signal carries the answer, and we drop extensions where nothing can confirm it.",
   },
   {
     icon: Network,
     name: "DNS-over-HTTPS (3 resolvers)",
+    always: "Every name",
     detail:
       "A and NS lookups via Cloudflare, Google and AdGuard, hedged, confirm whether a domain has live infrastructure. Catches parked but resolving names that RDAP alone can miss.",
+  },
+  {
+    icon: Search,
+    name: "Fastly Domain Research",
+    always: "When the two above are not enough",
+    detail:
+      "Aggregated registry status across hundreds of TLDs, including DPML and brand-block signals plus premium flags. It is a paid call, so it is not spent on names the first two already settle: it runs on an uncertain answer, a premium suspect, a brand-blocked name, the no-RDAP zones and the name you typed.",
   },
 ];
 
@@ -95,7 +100,7 @@ const comparison = [
 const faqs = [
   {
     q: "Why do other tools sometimes mark domains incorrectly?",
-    a: "Most checkers rely on a single source — usually a public RDAP proxy or a cached zone file. When that source times out (common for .io, .ai, .co) they silently default to either \"Available\" or \"Taken\" instead of admitting uncertainty. We cross-check three independent availability signals and only report a definitive answer when they agree.",
+    a: "Most checkers rely on a single source — usually a public RDAP proxy or a cached zone file. When that source times out (common for .io, .ai, .co) they silently default to either \"Available\" or \"Taken\" instead of admitting uncertainty. We run two independent signals on every name and bring in a third whenever those two are not enough, and we only report a definitive answer when they agree.",
   },
   {
     q: "What does the \"Unverified\" state mean?",
@@ -144,11 +149,11 @@ const HowItWorks = () => {
               Built for <span className="text-aurora-gradient">honesty,</span> not just speed.
             </>
           }
-          lede="Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks three independent availability signals and tells you when it isn't sure — so you never buy a domain that turns out to be taken, or skip one that was actually free."
+          lede="Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks two independent availability signals on every name, escalates to a third whenever those two fall short, and tells you when it still isn't sure — so you never buy a domain that turns out to be taken, or skip one that was actually free."
         >
           {/* Counts, not slogans: each number here is something you can verify on the site. */}
           <StatGrid cols={3}>
-            <Stat value="3" label="Availability signals" accent="mint" icon={SearchIcon} />
+            <Stat value="2+1" label="Signals per name" accent="mint" icon={SearchIcon} />
             <Stat value="6" label="Registrars compared" accent="violet" icon={StoreIcon} />
             <Stat value="0" label="Guesses shown as facts" accent="warning" icon={ShieldIcon} />
           </StatGrid>
@@ -158,8 +163,8 @@ const HowItWorks = () => {
 
         {/* Sources */}
         <Section
-          title="Three signals, one truth"
-          lede="Every search runs through this chain in parallel. We only commit to an answer when the signals agree."
+          title="Two signals always, a third when they are not enough"
+          lede="RDAP and DNS run in parallel on every name. The third is a paid call, so it is spent where it decides the answer: when those two disagree or time out, on a premium suspect, on a brand-blocked name, on the zones that publish no RDAP (.co, .me), and on the one name you typed. We only commit to an answer when the signals agree."
         >
           <div className="grid gap-4 sm:grid-cols-3">
             {sources.map((s, i) => (
@@ -169,6 +174,7 @@ const HowItWorks = () => {
                 index={String(i + 1).padStart(2, "0")}
                 title={s.name}
               >
+                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{s.always}</span>
                 {s.detail}
               </FeatureCard>
             ))}

@@ -6,7 +6,7 @@
 
 **DigMyName** (digmyname.com) is a domain-availability + registrar-pricing SaaS. It answers two questions for any domain name:
 
-1. **Is it available?** — verified against three independent signals, with an honest *Unverified* state when they disagree instead of guessing.
+1. **Is it available?** — verified against two independent signals on every name plus a third where those two are not enough, with an honest *Unverified* state when they disagree instead of guessing.
 2. **Where is it cheapest?** — price comparison across 6 registrars, exposing the renewal traps that cheap first-year promos hide.
 
 It ships three surfaces: the **website**, a free **no-auth JSON API** (for scripts/agents), and an **MCP server** on npm (so any LLM — Claude, Cursor, Windsurf, Continue, Zed — can check domains directly).
@@ -34,11 +34,11 @@ All availability/pricing logic lives in `supabase/functions/_shared/pipeline.ts`
 - **check-domains** — the WEBSITE path (frontend calls supabase.functions.invoke('check-domains')).
 - **public-api** — the API/MCP path (/check, /search, /registrars, /age, /fast, /openapi.json).
 
-### The three signals
+### The signals (two always, one on escalation)
 
 1. **RDAP** (authoritative for registered yes/no, no pricing). Resolved via the IANA bootstrap file (data.iana.org/rdap/dns.json) -> official registry RDAP server per TLD. Top ~55 TLDs are hardcoded in FAST_RDAP to skip the bootstrap wait. Falls back to the public rdap.org aggregator for long-tail zones.
 2. **DNS-over-HTTPS** (fast, no hangs). Cloudflare primary; Google + AdGuard fire as hedges 400ms later. First decisive answer wins.
-3. **Fastly Domain Research API** (third registerability signal). HISTORICAL: this was "Domainr", which Fastly acquired (2026-08); its old RapidAPI endpoint is dead. Code still uses legacy names (checkDomainrBatch, interpretDomainr, checkedVia:"domainr") but the TRANSPORT is Fastly (api.fastly.com/domain-management/v1/tools/status, header Fastly-Key). Statuses: inactive(=available) / dpml / reserved / claimed(=blocked brand) / premium / active.
+3. **Fastly Domain Research API** (third registerability signal, ESCALATION ONLY — see `willEscalateToThirdSignal`: uncertain, available premium suspect, available brand-blocked SLD, or the forced/typed name; .co and .me reach it via `uncertain` because they have no registry RDAP). HISTORICAL: this was "Domainr", which Fastly acquired (2026-08); its old RapidAPI endpoint is dead. Code still uses legacy names (checkDomainrBatch, interpretDomainr, checkedVia:"domainr") but the TRANSPORT is Fastly (api.fastly.com/domain-management/v1/tools/status, header Fastly-Key). Statuses: inactive(=available) / dpml / reserved / claimed(=blocked brand) / premium / active.
 
 **Porkbun** is PRICING only — may tighten availability (mark taken), never loosen it.
 

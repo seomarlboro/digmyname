@@ -45,12 +45,12 @@ export interface RouteMeta {
 
 const staticHome = `
 <h1>DigMyName — Fast Domain Availability Search &amp; Registrar Price Comparison</h1>
-<p>DigMyName checks domain availability in real time across 50+ TLDs and compares registration, renewal, and transfer prices across 6 registrars (Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, and OVHcloud). Availability is verified against three independent signals — RDAP, DNS-over-HTTPS, and Fastly Domain Research — and shows an honest Unverified state instead of guessing. Free, no API key. Includes an MCP server and a no-auth JSON API for Claude, ChatGPT, Cursor, and any LLM.</p>
+<p>DigMyName checks domain availability in real time across 50+ TLDs and compares registration, renewal, and transfer prices across 6 registrars (Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, and OVHcloud). Availability is verified against two independent signals on every name — RDAP and DNS-over-HTTPS — with a third (Fastly Domain Research) brought in whenever those two are not enough, and shows an honest Unverified state instead of guessing. Free, no API key. Includes an MCP server and a no-auth JSON API for Claude, ChatGPT, Cursor, and any LLM.</p>
 <p>Search classic TLDs (.com, .net, .org), tech (.io, .ai, .dev, .app, .tech, .build, .run, .page, .link, .tools), startup (.co, .ventures), creative (.design, .studio, .art), and e-commerce (.shop, .store) — see not just if a domain is free, but where it is cheapest, with renewal traps exposed.</p>
 <ul>
   <li>Real-time domain availability across 50+ TLDs</li>
   <li>Cheapest-registrar price comparison across 6 registrars</li>
-  <li>Three-signal verification (RDAP + DNS-over-HTTPS + Fastly) with honest Unverified state</li>
+  <li>RDAP + DNS-over-HTTPS on every name, Fastly Domain Research as the tie-breaker, honest Unverified state</li>
   <li>Free no-auth JSON API and MCP server for AI agents</li>
   <li>Optional name variations (get-, my-, the-, app-, pro- in front of your word)</li>
 </ul>
@@ -65,7 +65,7 @@ const staticPricing = `
 
 const staticHowItWorks = `
 <h1>How DigMyName works — honest domain availability checks</h1>
-<p>Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName cross-checks three independent availability signals — Fastly Domain Research, RDAP resolved through the IANA bootstrap registry, and DNS-over-HTTPS across three resolvers — and only commits to Available or Taken when they agree. Otherwise it shows an Unverified state with a Retry button instead of a guess.</p>
+<p>Most domain checkers rely on a single data source and quietly guess when it fails. DigMyName runs two independent availability signals on every name — RDAP resolved through the IANA bootstrap registry, and DNS-over-HTTPS across three resolvers — and escalates to a third, Fastly Domain Research, whenever those two are not enough: an uncertain answer, a premium suspect, a brand-blocked name, the zones with no RDAP, and the name you typed. It only commits to Available or Taken when the signals agree; otherwise it shows an Unverified state with a Retry button instead of a guess.</p>
 <p>Pricing is a separate step: premium prices come from Porkbun's live catalog and the registrar comparison covers 6 registrars. DigMyName is not a registrar and does not sell domains; buy links go straight to the registrar with no affiliate tag.</p>
 <p><a href="/">Try an honest search</a> · <a href="/api">Free JSON API</a></p>`;
 
@@ -131,9 +131,9 @@ export const ROUTES: RouteMeta[] = [
     aliases: ["/about"],
     title: "How DigMyName Works — Honest Domain Availability Checks",
     description:
-      "DigMyName verifies domain availability against three independent availability signals — Fastly Domain Research, IANA RDAP and DNS-over-HTTPS — and never shows guesses as facts. Here's exactly how it works.",
+      "DigMyName verifies domain availability against two independent signals on every name — IANA RDAP and DNS-over-HTTPS — plus Fastly Domain Research whenever those two are not enough, and never shows guesses as facts. Here's exactly how it works.",
     ogDescription:
-      "Three-signal verification, an honest Unverified state, and real registrar prices — here's why DigMyName is more accurate than the alternatives.",
+      "Two signals on every name, a third when they disagree, an honest Unverified state and real registrar prices — here's why DigMyName is more accurate than the alternatives.",
     changefreq: "monthly",
     priority: "0.7",
     staticHtml: staticHowItWorks,

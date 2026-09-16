@@ -18,7 +18,7 @@ Pricing model: free to use. Buy links go straight to the registrar with no affil
 
 ## How availability checking works
 
-Every name is cross-checked against three independent signals:
+Every name is cross-checked against two independent signals, with a third brought in where those two are not enough:
 
 1. RDAP — the TLD registry's own server, resolved through the IANA bootstrap file (a fast-path table covers the popular TLDs). Authoritative for registered / not registered.
 2. DNS-over-HTTPS — A and NS lookups via Cloudflare, hedged with Google and AdGuard. Live records mean the name is taken.

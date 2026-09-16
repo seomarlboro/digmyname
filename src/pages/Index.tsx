@@ -36,7 +36,7 @@ const Index = () => {
           operatingSystem: "Any (web-based)",
           browserRequirements: "Requires JavaScript and a modern browser",
           description:
-            "Domain availability search verified against three independent signals, with registrar price comparison and a free no-auth JSON API. First answer under 0.5 s (p95).",
+            "Domain availability search verified against two independent signals on every name, with a third brought in whenever they are not enough, registrar price comparison and a free no-auth JSON API. First answer under 0.5 s (p95).",
           offers: {
             "@type": "Offer",
             price: "0",
@@ -45,7 +45,7 @@ const Index = () => {
           },
           featureList: [
             "Real-time domain availability checks — first answer under 0.5 s (p95)",
-            "Three-signal verification with an honest Unverified state",
+            "RDAP + DNS on every name, a third signal when they disagree, honest Unverified state",
             "Registrar price comparison including renewal traps",
             "Optional get-/my-/the-/app-/pro- name variations",
             "Free no-auth JSON API for agents and developers",
