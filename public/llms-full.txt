@@ -10,7 +10,7 @@ DigMyName helps users find an available domain name and buy it from the cheapest
 
 1. Real-time availability check across 50+ top-level domains, with an honest "Unverified" state instead of a guess when sources disagree.
 2. Side-by-side registrar price comparison (registration, renewal, transfer, ICANN fee, WHOIS privacy, promo codes) across 6 registrars.
-3. AI-powered alternative name suggestions when the searched name is taken.
+3. An optional toggle that also searches five fixed prefixes (get, my, the, app, pro) in front of the name. No model is involved.
 
 URL: https://digmyname.com
 Primary user: founders, indie hackers, freelancers, agencies, developers.

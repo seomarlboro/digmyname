@@ -1,12 +1,12 @@
 # DigMyName
 
-> DigMyName is a smart domain-name search tool that checks availability across 50+ TLDs in real time and compares registration, renewal, and transfer prices side-by-side across major registrars (Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, and OVHcloud). AI-powered name suggestions help founders, indie hackers, and developers find brandable, available domains in seconds.
+> DigMyName is a smart domain-name search tool that checks availability across 50+ TLDs in real time and compares registration, renewal, and transfer prices side-by-side across major registrars (Namecheap, Cloudflare, Porkbun, GoDaddy, Spaceship, and OVHcloud). An optional toggle also searches five fixed prefixes (get, my, the, app, pro) in front of the name.
 
 ## What this site does
 
 - Instantly checks domain availability across .com, .io, .ai, .app, .dev, .co, .xyz, and 50+ other TLDs using a hybrid RDAP + DNS-over-HTTPS + Fastly verification system.
 - Compares real registrar prices (registration, renewal, transfer, ICANN fee, WHOIS privacy) so users avoid hidden renewal-price traps.
-- Generates AI-powered alternative name ideas when the searched domain is taken.
+- Optional toggle that also searches five fixed prefixes (get, my, the, app, pro) in front of the typed name. It is a fixed list, not a generated one.
 - Hides irrelevant pricing for already-taken domains and surfaces premium-pricing notices where applicable.
 - Lets signed-in users save favorite domains for later comparison (sign-in required; that page is not indexed).
 
@@ -16,7 +16,7 @@ Founders launching startups, indie hackers, freelancers, agencies, and developer
 
 ## Pages
 
-- [Home](https://digmyname.com/): Search a name and instantly see availability + cheapest registrar across 50+ TLDs. Toggle AI suggestions for alternative ideas.
+- [Home](https://digmyname.com/): Search a name and instantly see availability + cheapest registrar across 50+ TLDs. Toggle name variations to also search get-, my-, the-, app-, pro- in front of the name.
 - [Pricing](https://digmyname.com/pricing): Side-by-side comparison of registration, renewal, transfer prices, ICANN fees, promo codes, and WHOIS privacy across major registrars for popular TLDs.
 - [Domain prices by extension](https://digmyname.com/tld): One page per extension (e.g. https://digmyname.com/tld/io) with every tracked registrar's registration, renewal and transfer price, 3-year cost, renewal traps and the date each price was verified. Extensions tracked at one registrar say so and are not called a comparison.
 - [How it works](https://digmyname.com/how-it-works): Explanation of the multi-source availability verification chain (RDAP, DNS, Fastly, registrar APIs) and how DigMyName compares to other domain search tools.

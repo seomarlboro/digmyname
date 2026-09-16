@@ -34,7 +34,11 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
 );
 import DomainCard from "@/components/DomainCard";
 
-import { generateDomainList, parseQuery, checkDomainsAvailability, checkDomainsFast, applyFastVerdict, TLD_RANK, type DomainResult, type AvailabilityResponse, type FastInfo } from "@/lib/domainData";
+import { generateDomainList, parseQuery, checkDomainsAvailability, checkDomainsFast, applyFastVerdict, TLD_RANK, VARIATION_PREFIXES, VARIATION_COUNT, type DomainResult, type AvailabilityResponse, type FastInfo } from "@/lib/domainData";
+
+/** The toggle used to be labelled "AI suggestions". There is no model behind it:
+ *  it prepends a fixed list of words. The control now says which ones. */
+const VARIATION_LABEL = VARIATION_PREFIXES.slice(0, VARIATION_COUNT).join(", ");
 
 /** Stable ordering key: TLD authority only. Never sort on available/uncertain/
  *  provisional/price — those mutate over a row's lifecycle and would reorder
@@ -116,7 +120,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<DomainResult[]>([]);
   resultsRef.current = results;
-  const [aiSuggestions, setAiSuggestions] = useState(false);
+  const [nameVariations, setNameVariations] = useState(false);
   const [viewMode, setViewMode] = useState<"cards" | "compact">("cards");
   const [scrolled, setScrolled] = useState(false);
 
@@ -258,7 +262,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
 
     const run = async () => {
       // Step 1: Show domains immediately with "checking" state
-      const domains = generateDomainList(debouncedQuery, aiSuggestions, selectedTlds);
+      const domains = generateDomainList(debouncedQuery, nameVariations, selectedTlds);
       const now = Date.now();
       const hydrated = domains.map((d) => {
         const cached = resultCacheRef.current.get(d.domain);
@@ -488,7 +492,7 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       job.ctl.abort();
       if (activeJobRef.current === job) activeJobRef.current = null;
     };
-  }, [debouncedQuery, aiSuggestions, selectedTlds, markFirstAnswer, cacheResult]);
+  }, [debouncedQuery, nameVariations, selectedTlds, markFirstAnswer, cacheResult]);
 
 
   useEffect(() => {
@@ -624,24 +628,24 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
       )}
       <button
         type="button"
-        onClick={() => setAiSuggestions((value) => !value)}
-        aria-label={aiSuggestions ? "Disable AI suggestions" : "Enable AI suggestions"}
-        aria-pressed={aiSuggestions}
-        title={aiSuggestions ? "AI suggestions on" : "AI suggestions off"}
+        onClick={() => setNameVariations((value) => !value)}
+        aria-label={`Also search the ${VARIATION_LABEL} variations of the name`}
+        aria-pressed={nameVariations}
+        title={`Also search ${VARIATION_LABEL} + your name — ${nameVariations ? "on" : "off"}`}
         className={`relative flex h-[38px] w-[58px] shrink-0 items-center rounded-full p-1 transition-all duration-300 ${
-          aiSuggestions
+          nameVariations
             ? "bg-[linear-gradient(90deg,hsl(160_70%_80%),hsl(205_90%_78%),hsl(255_85%_78%))] shadow-[0_2px_16px_hsl(var(--primary)/0.4)]"
             : "bg-black/10 hover:bg-black/[0.16] dark:bg-white/10 dark:hover:bg-white/[0.16]"
         }`}
       >
         <span
           className={`flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-toggle ${
-            aiSuggestions ? "translate-x-5" : "translate-x-0"
+            nameVariations ? "translate-x-5" : "translate-x-0"
           }`}
         >
           <StarsIcon
             className="h-[18px] w-[18px]"
-            active={aiSuggestions}
+            active={nameVariations}
           />
         </span>
       </button>

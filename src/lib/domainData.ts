@@ -83,7 +83,13 @@ export const TLD_LIST: TLD[] = [
  *  reorders rows as availability/pricing data arrives. */
 export const TLD_RANK: Record<string, number> = Object.fromEntries(TLD_LIST.map((t, i) => [t.extension, i]));
 
+/** Prefixes for the "also search variations" toggle. A fixed list, not a model —
+ *  the toggle's label names them so nobody has to guess what it does. */
 export const VARIATION_PREFIXES = ["get", "my", "the", "app", "pro", "hub", "lab", "try", "go", "use"];
+
+/** How many of those prefixes the toggle actually searches. Used by the label too,
+ *  so the control can never promise a different set than it runs. */
+export const VARIATION_COUNT = 5;
 
 export interface DomainResult {
   domain: string;
@@ -170,7 +176,7 @@ export function generateDomainList(query: string, withVariations = false, allowe
   if (!q) return [];
 
   const names = withVariations
-    ? [q, ...VARIATION_PREFIXES.slice(0, 5).map((p) => p + q)]
+    ? [q, ...VARIATION_PREFIXES.slice(0, VARIATION_COUNT).map((p) => p + q)]
     : [q];
   const results: DomainResult[] = [];
 

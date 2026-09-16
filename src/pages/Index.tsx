@@ -47,7 +47,7 @@ const Index = () => {
             "Real-time domain availability checks — first answer under 0.5 s (p95)",
             "Three-signal verification with an honest Unverified state",
             "Registrar price comparison including renewal traps",
-            "AI-powered alternative name suggestions",
+            "Optional get-/my-/the-/app-/pro- name variations",
             "Free no-auth JSON API for agents and developers",
           ],
           publisher: { "@type": "Organization", name: "DigMyName", url: "https://digmyname.com/" },

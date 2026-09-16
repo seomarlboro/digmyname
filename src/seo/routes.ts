@@ -52,7 +52,7 @@ const staticHome = `
   <li>Cheapest-registrar price comparison across 6 registrars</li>
   <li>Three-signal verification (RDAP + DNS-over-HTTPS + Fastly) with honest Unverified state</li>
   <li>Free no-auth JSON API and MCP server for AI agents</li>
-  <li>AI-powered alternative name suggestions</li>
+  <li>Optional name variations (get-, my-, the-, app-, pro- in front of your word)</li>
 </ul>
 <p><a href="/pricing">Pricing</a> · <a href="/tld">Domain prices by extension</a> · <a href="/how-it-works">How it works</a> · <a href="/speed">Speed</a> · <a href="/mcp">MCP server</a> · <a href="/api">API</a></p>`;
 
