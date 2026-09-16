@@ -55,8 +55,10 @@ const Index = () => {
       </RouteHead>
       <Header />
       <main>
-        {/* Impact affiliate-network site verification; kept inside <main> so it sits in a landmark. */}
-        <p className="sr-only">Impact-Site-Verification: 0c5c9ad9-2ca3-4d35-a5d5-71f850a02320</p>
+        {/* Impact's site verification lives in the <meta> tag in index.html and
+            nowhere else. It used to be duplicated here as an sr-only paragraph,
+            which meant a screen reader read a 36-character token aloud as the
+            first thing inside <main>, ahead of the search results. */}
         <DomainSearch selectedTlds={selectedTlds} filters={filters} onResetFilters={() => setFilters(DEFAULT_FILTERS)} />
         <Suspense fallback={null}>
           <FilterBar
