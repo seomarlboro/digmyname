@@ -309,16 +309,28 @@ Deno.test("doh: no resolver answered → error", () => {
 
 // ---- checkDomains: the shared cache is read alongside pass 1, not before it ----
 
-/** Minimal supabase-js stand-in: every query chain is thenable and resolves to `answer(table)`. */
-function stubSupabase(answer: (table: string) => Promise<{ data: unknown; error: null }>) {
+/** Minimal supabase-js stand-in: every query chain is thenable and resolves to `answer(table)`.
+ *  `maybeSingle()` unwraps the first row the way PostgREST does (the spend counter
+ *  reads that way), and `rpc()` answers under its own function name. */
+function stubSupabase(
+  answer: (table: string) => Promise<{ data: unknown; error: null }>,
+  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: null }> = () =>
+    Promise.resolve({ data: null, error: null }),
+) {
   const chain = (table: string): Record<string, unknown> => {
     const q: Record<string, unknown> = {};
     const self = () => q;
     for (const m of ["select", "in", "gt", "eq", "order", "limit", "upsert", "update", "lt"]) q[m] = self;
     q.then = (res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) => answer(table).then(res, rej);
+    q.maybeSingle = () => ({
+      then: (res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) =>
+        answer(table)
+          .then(({ data, error }) => res({ data: Array.isArray(data) ? (data[0] ?? null) : data, error }))
+          .catch((e) => (rej ? rej(e) : Promise.reject(e))),
+    });
     return q;
   };
-  return { from: chain } as unknown as NonNullable<Parameters<typeof checkDomains>[1]>["supabase"];
+  return { from: chain, rpc } as unknown as NonNullable<Parameters<typeof checkDomains>[1]>["supabase"];
 }
 
 // The pipeline's hedge / timeout timers are unref'd and outlive the request on purpose, so the timer sanitizer is off here.
@@ -414,6 +426,47 @@ Deno.test({ name: "checkDomains: verifyPremium forces the third signal for a pla
   } finally {
     globalThis.fetch = realFetch;
     for (const [k, v] of [["FASTLY_API_TOKEN", envBefore.fastly], ["PORKBUN_API_KEY", envBefore.pk], ["PORKBUN_SECRET_KEY", envBefore.ps]] as const) {
+      if (v == null) Deno.env.delete(k); else Deno.env.set(k, v);
+    }
+  }
+} });
+
+Deno.test({ name: "checkDomains: over the daily cap no paid call leaves, and the card degrades to premium-unverified (never priced, never 'available' on weaker evidence)", sanitizeOps: false, sanitizeResources: false, fn: async () => {
+  const realFetch = globalThis.fetch;
+  const envBefore = { fastly: Deno.env.get("FASTLY_API_TOKEN"), cap: Deno.env.get("FASTLY_DAILY_CAP") };
+  Deno.env.set("FASTLY_API_TOKEN", "test-token");
+  Deno.env.set("FASTLY_DAILY_CAP", "10");
+  const calls: string[] = [];
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input);
+    calls.push(url);
+    if (url.includes("/domain/")) return new Response("", { status: 404 }); // registry RDAP: not registered
+    if (url.includes("dns-query") || url.includes("dns.google") || url.includes("adguard")) return json({ Status: 3, Answer: [] });
+    if (url.includes("data.iana.org")) return json({ services: [] });
+    if (url.includes("porkbun.com")) return json({ status: "SUCCESS", pricing: { dev: { registration: "8.48", renewal: "18.48" } } });
+    return new Response("", { status: 404 });
+  }) as typeof fetch;
+  const spendCalls: Record<string, unknown>[] = [];
+  // Today's counter already sits ON the cap (10 of 10 spent).
+  const supabase = stubSupabase(
+    async (table) => ({ data: table === "fastly_spend_daily" ? [{ calls: 10 }] : [], error: null }),
+    (_fn, args) => { spendCalls.push(args); return Promise.resolve({ data: null, error: null }); },
+  );
+  try {
+    // A 3-character label is a premium suspect on every TLD → pass 1 says available,
+    // pass 2 would normally confirm the registry-premium status. The cap is spent.
+    const [r] = await checkDomains(["qzv.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 3000 });
+    assertEquals(calls.filter((u) => u.includes("api.fastly.com")).length, 0);
+    // Honest degraded state: still registerable (two authoritative signals agreed),
+    // flagged premium, and with NO price — the card reads "Check price".
+    assertEquals([r.available, r.premiumUnverified, r.likelyPremium, r.price], [true, true, true, undefined]);
+    // The refusal is accounted for, so the first hour shows visitors are being degraded.
+    assertEquals(spendCalls.length, 1);
+    assertEquals([spendCalls[0].n_calls, spendCalls[0].n_blocked], [0, 1]);
+  } finally {
+    globalThis.fetch = realFetch;
+    for (const [k, v] of [["FASTLY_API_TOKEN", envBefore.fastly], ["FASTLY_DAILY_CAP", envBefore.cap]] as const) {
       if (v == null) Deno.env.delete(k); else Deno.env.set(k, v);
     }
   }

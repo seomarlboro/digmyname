@@ -55,7 +55,7 @@ This is the single most important invariant. An uncertain result is NEVER cached
 1. L1 hot cache (per-isolate, in-memory, 10 min). **Measured dead** (2026-08-12, three ways: 0–6 % of requests reach a warm isolate), so in practice it never fires; same for the in-isolate response cache in public-api.
 2. L2 DB cache (domain_cache table, tiered TTL) — skips network probes. Readers only use rows with `expires_at > now()`; since 2026-09-15 the pg_cron job `domain-cache-purge-expired` (daily 03:17 UTC) deletes expired rows, so a checked name is kept at most ~48 h (max TTL 24 h + up to a day until the job). TTLs unchanged. Awaited BEFORE the probes start (100–115 ms from another region, ~10–30 in-region); running it in parallel with the probes is a known free win, not yet applied (owner go pending).
 3. Pass 1 — free authoritative sources (RDAP + DNS) run in parallel per domain; each publishes its verdict into partialSink the moment it lands.
-4. Pass 2 — the third signal (Fastly) fires ONLY where it adds value (premium suspects, brand-blocked names, .co/.me) — plus, since 2026-09-12, the ONE name the visitor typed: the site sends a `verifyPremium` request for the headline card after the wave settles (800 ms), which bypasses the cache for that name and forces pass 2 whenever pass 1 says available. Registry-premium names outside the suspect heuristics (`reputation.dev`, $174 at Porkbun) used to ship with the standard TLD price. Porkbun's checkDomain prefers that name for the confirmed price. One paid call per settled search, cached 24 h; kill switch `HEADLINE_PREMIUM_CHECK=off`; API/MCP unchanged.
+4. Pass 2 — the third signal (Fastly) fires ONLY where it adds value (premium suspects, brand-blocked names, .co/.me) — plus, since 2026-09-12, the ONE name the visitor typed: the site sends a `verifyPremium` request for the headline card after the wave settles (800 ms), which bypasses the cache for that name and forces pass 2 whenever pass 1 says available. Registry-premium names outside the suspect heuristics (`reputation.dev`, $174 at Porkbun) used to ship with the standard TLD price. Porkbun's checkDomain prefers that name for the confirmed price. One paid call per settled search (the verify bypasses BOTH cache layers, so it does not amortise across visitors the way everything else does); kill switch `HEADLINE_PREMIUM_CHECK=off`; API/MCP unchanged. Since 2026-09-16 every paid call — this one included — is counted and bounded by a daily cap: **§14**.
 5. Aftermarket NS detection — registered names on Sedo/Dan/Afternic/etc. get a resale listing link.
 6. Price enrichment — Porkbun public catalog + registrar_prices DB rows.
 7. Cache write — only trustworthy verdicts, background via EdgeRuntime.waitUntil.
@@ -291,11 +291,57 @@ Goal: know about breakage before a visitor does — especially the one failure m
    - Response time of every request is logged to the step summary (not gated — that's what `bench-first-answer` is for).
 3. **Registrar price freshness**, read anonymously from `registrar_prices` via `${VITE_SUPABASE_URL}/rest/v1/` (RLS allows public SELECT — the same mechanism `scripts/generate-tld-prices.ts` already uses; never a service-role key). Gate: the single freshest `verified_at` among `supported=true` rows must be within `STALE_AFTER_DAYS = 14` (`src/lib/pricing.ts` — the same number the site badges a price "stale" with, not the API's harder `STALE_PRICE_MAX_DAYS = 60` cutoff in §5). The count of rows individually past that threshold is logged as context only, not gated: tld-list.com's pricing API has been paused since 2026-09-11 (§5), so partial per-row staleness while the scraper fallback rotates through the catalog is a known, owner-accepted state — the freshest row going stale means the refresh pipeline itself stopped, which is the thing actually worth paging on.
 4. **Nightly cleanups actually ran** — `public.cron_heartbeats` (new table, migration `20260916150000_cron_heartbeats.sql`): `domain-cache-purge-expired` and `site-events-retention` (§3, §12) were extended to `INSERT ... ON CONFLICT DO UPDATE` a `(job_name, last_run_at, rows_affected)` row after each run (row count via `GET DIAGNOSTICS`, not a `RETURNING`-based count, so a 200k-row purge isn't made more expensive). RLS allows public SELECT on this table only — no domain names, no event content, just two job names, timestamps and counts, read the same anon way as the price check. Gate: both jobs' `last_run_at` within 27h (24h cadence + margin). This directly verifies the cleanups ran, rather than inferring it from row counts on tables whose content (domain names, event rows) this monitor has no reason to touch.
-5. **Fastly Domain Research spend — proposed, not implemented.** No telemetry persists anywhere in code today; `pipeline.ts` only `console.log`s a per-request breakdown (`fastly-escalate n=... co_me=... premium=... brand=... other=...`, around line 1250) that lives in ephemeral edge-function logs. Two options, deliberately left to the owner rather than built here (this workflow touches the sacred availability pipeline for nothing, and cost telemetry is a design call, not a monitoring plumbing one):
-   - **Authoritative:** Fastly's own account billing/usage dashboard (or its billing API, a separate token) — the actual metered $ figure, computed entirely on Fastly's side; zero code change, zero domain exposure.
-   - **A free, code-side leading indicator:** persist the exact aggregate counts already computed for the `fastly-escalate` log line (`needsThirdSignal.length`, split by `co_me`/`premium`/`brand`/`other`) into a small per-day counts table via one additive `UPSERT`, mirroring `cron_heartbeats`'s shape — call volume only, never a domain name, and reconciled against Fastly's real invoice rather than treated as the $ figure itself (this repo doesn't know Fastly's per-call price).
+5. **Fastly Domain Research spend — now counted and capped (2026-09-16, §14).** The counts the `fastly-escalate` log line already computed are persisted per UTC day in `public.fastly_spend_daily`, and the same counter backs a daily ceiling. Fastly's own billing dashboard stays the authoritative $ figure; this table is the leading indicator, reconciled against the invoice.
 6. This section.
 
 **Secrets used:** `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (repo secrets, GitHub Actions) — the same anon key already public in the deployed frontend bundle and used by `scripts/generate-tld-prices.ts`; RLS-scoped, read-only for this workflow's purposes. Checks 1–2 need no secret at all. Checks 3–4 skip themselves with a `⚠️ skipped` line (not a failure) if these aren't configured. No service-role key, no Fastly token, no new write access anywhere. Issue creation uses the default `GITHUB_TOKEN` (`permissions: issues: write`), also no new secret.
 
 
+## 14. Cost of the paid signal, and the three brakes (shipped 2026-09-16)
+
+**The only metered dependency is the third signal.** RDAP, DNS-over-HTTPS, the registrar catalogs and the browser lane cost nothing. Fastly Domain Research "Status-Precise" gives **10,000 requests/month free, then $0.001 each** (fastly.com/pricing, read 2026-09-16; $0.0008 past 1M). One escalated domain = one request.
+
+**What a visitor actually costs** (measured 2026-09-16 by replaying the edge's own pass-1 rules — RDAP + DoH — over all 52 searchable TLDs, `willEscalateToThirdSignal` applied to the result):
+
+| What the visitor types | Paid calls for one settled search |
+|---|---|
+| a fresh 9-character label | **2** (.co + .me — they have no registry RDAP, §4) **+ 1** for the headline verify = 3 |
+| a 6-character dictionary word | 0–4 (whatever is free on a no-RDAP zone) + 1 |
+| a 5-character label (`quixo`) | **20** (19 premium suspects + .co) — the verify is skipped for suspects |
+| a 4-character label (`quix`, `acme`) | 6–7 |
+| a brand on the block list (`google`) | ~20 (every free card is brand-blocked → escalates) |
+
+Two multipliers matter more than the per-name number:
+
+- **The headline verify bypasses both cache layers by design** (`forced` skips L1 and L2 in `checkDomains`), so it is **one paid call per settled search, per visitor, forever** — not per unique name. Everything else is cached for 24 h and therefore amortises across visitors within a day.
+- **Every typing pause over ~250 ms is a wave**, and a pause over ~1.3 s also fires a verify. Prefix waves are shared across visitors and amortise; the full names do not.
+
+### The brakes
+
+Three environment variables on the edge, narrowest first. A Supabase secret change applies to the **next invocation with no deploy** (supabase.com/docs/guides/functions/secrets) — decisive here, because a git push deploys nothing in this project and only a Lovable build ships an edge function. Logic and tests: `_shared/third-signal-budget.ts`, `_shared/third-signal-budget_test.ts`.
+
+| Variable | Effect | Costs us |
+|---|---|---|
+| `HEADLINE_PREMIUM_CHECK=off` | drops the per-search verify call | a registry-premium name outside the suspect heuristics can ship with the standard TLD price again (the reason the verify exists) |
+| `FASTLY_DAILY_CAP=<n>` | ceiling on paid calls per UTC day; default **300** — 10,000 free requests/month is 333/day; `off` = no ceiling, `0` = spend nothing | past the ceiling the degraded state below |
+| `THIRD_SIGNAL=off` | kills every paid call, all four escalation reasons | the degraded state below, permanently |
+
+**The degraded state is the pipeline's existing no-verdict behaviour — nothing new was invented and nothing is loosened:** a premium suspect keeps `available:true` with `premiumUnverified` (the card shows the premium mark and *Check price*, never a $ figure), brand-blocked names and `.co`/`.me` stay `uncertain` (*Couldn't verify*). No name is ever shown available on weaker evidence than before, and uncertain results are still never cached.
+
+### Accounting
+
+`public.fastly_spend_daily` — one row per UTC day: `calls`, the `co_me`/`premium`/`brand`/`other` split (the same four buckets as the `fastly-escalate` log line), and `blocked` (calls the cap refused). **Counts only: no domain, no IP, no session.** Writes go through `fastly_spend_add()` (one atomic add, returns the running total); service_role only — query it from the SQL editor, or grant `SELECT` to anon later if the health monitor should watch it.
+
+Only names that were actually **sent** are charged: the circuit breaker and the deadline skip most of a batch when Fastly is down, and those skipped names are not counted.
+
+**Failure modes, deliberately asymmetric:**
+- The counter read happens *only* on a batch that already reached pass 2, so a search that escalates nothing pays no extra DB round trip.
+- If the counter cannot be read, the pipeline **fails closed** (no paid calls until it can) — the moment we cannot count is the moment we cannot afford to keep spending, and a DB outage also kills the cache, which is when escalations spike.
+- The one exception is *"the table/function does not exist"*, which fails **open** with a warning: the edge function can reach production one build before its migration does, and silently disabling the third signal for everyone is a failure nobody would notice. After deploying, confirm a `.co` name still resolves.
+
+### First-hour watch
+
+```sql
+select * from public.fastly_spend_daily order by day desc limit 3;
+```
+`blocked > 0` means visitors are seeing *Check price* / *Couldn't verify* instead of verdicts — the cap is doing its job, and the question becomes whether to raise it or let it hold.

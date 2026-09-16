@@ -2,6 +2,16 @@
 
 All notable changes to DigMyName.
 
+## 2026-09-16 — Launch-day spend brakes on the paid third signal (edge + migration)
+
+### Added
+- **A daily cap on paid third-signal calls.** `FASTLY_DAILY_CAP` (default 300 — Fastly's free 10,000/month is 333/day; `off` = no ceiling, `0` = spend nothing) bounds Fastly Domain Research requests per UTC day. Past the ceiling the refused names fall through to the pipeline's existing no-verdict branches — a premium suspect keeps `available:true` with `premiumUnverified` (card: premium mark + *Check price*, never a $ figure), brand-blocked names and `.co`/`.me` stay *Couldn't verify*. Nothing is shown available on weaker evidence, and a partially-spent budget still pays for as many names as it can.
+- **A real kill switch for the whole paid signal.** `THIRD_SIGNAL=off` now disables every escalation reason from the edge's environment; it used to be a hardcoded constant that needed a deploy. `HEADLINE_PREMIUM_CHECK=off` (the per-search verify) is unchanged, now covered by tests. A Supabase secret change applies to the next invocation with no deploy — which matters in a project where only a Lovable build ships an edge function.
+- **Spend accounting:** `public.fastly_spend_daily` (migration `20260916160000_fastly_spend_daily.sql`) — one row per UTC day with `calls`, the `co_me`/`premium`/`brand`/`other` split already computed for the `fastly-escalate` log line, and `blocked`. Counts only: no domain, no IP, no session; service_role only. Written through the atomic `fastly_spend_add()`. Only calls actually sent are charged — the circuit breaker and the deadline skip most of a batch when Fastly is down.
+
+### Changed
+- The counter read happens only on a batch that already reached pass 2, so a search that escalates nothing pays no extra DB round trip. If the counter cannot be read the pipeline fails **closed** (the moment we cannot count is the moment we cannot afford to spend); the one exception is "table/function not deployed yet", which fails open with a warning so a build-ordering gap cannot silently switch the third signal off for everyone.
+
 ## 2026-09-15 — Light theme: glass filter bar, visible search field, hero title on short screens (frontend)
 
 ### Changed

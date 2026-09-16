@@ -17,6 +17,14 @@ import {
   shouldEscalateToDomainr,
   type DomainrStatusEntry,
 } from "./availability-rules.ts";
+import {
+  allowedCalls,
+  parseDailyCap,
+  readSpentToday,
+  recordSpend,
+  type SpendSplit,
+  thirdSignalEnabled,
+} from "./third-signal-budget.ts";
 
 // ============================================================================
 // Trust hierarchy (P0):
@@ -116,10 +124,14 @@ export function isLikelyPremium(domain: string): boolean {
 // Domainr's RapidAPI endpoint was delisted (Fastly acquisition, 2026-08), so
 // the third registerability signal is the Fastly Domain Research API. RDAP-404 +
 // NXDOMAIN alone cannot distinguish a genuinely free name from a registry-reserved
-// / DPML trademark-blocked one. When the flag below is off, SLDs matching
+// / DPML trademark-blocked one. When the signal is off, SLDs matching
 // well-known DPML-protected trademarks are downgraded to `uncertain` — never shown
 // available, never priced, never cached.
-const THIRD_SIGNAL_ENABLED = true;
+//
+// It is also the only METERED dependency we have, so since 2026-09-16 it can be
+// switched off from the edge's environment (`THIRD_SIGNAL=off`) and is bounded by
+// a daily cap — both read per request, no deploy needed. See
+// ./third-signal-budget.ts for the brakes and what a visitor sees without a call.
 
 // Brand/registry-block rules live in ./availability-rules.ts (isLikelyBlocked).
 
@@ -774,7 +786,11 @@ let domainrCooldownUntil = 0;
 // relative window: Fastly gets only whatever genuinely remains after Pass-1
 // (RDAP/DNS). A slow registry pass therefore shrinks — or entirely skips — the
 // Fastly window instead of stacking on top of it and blowing the caller's race.
-async function checkDomainrBatch(domains: string[], apiKey: string, deadlineAt: number): Promise<Map<string, DomainrStatusEntry> | null> {
+// `sent` (optional) collects the names a request was actually ISSUED for — what
+// Fastly bills. It is deliberately not `domains.length`: the circuit breaker and
+// the deadline can skip most of a batch, and the daily spend counter must not
+// charge us for calls that never left.
+async function checkDomainrBatch(domains: string[], apiKey: string, deadlineAt: number, sent?: string[]): Promise<Map<string, DomainrStatusEntry> | null> {
   if (domains.length === 0) return new Map();
   if (Date.now() < domainrDisabledUntil) return null;
   if (Date.now() < domainrCooldownUntil) return null;
@@ -788,6 +804,7 @@ async function checkDomainrBatch(domains: string[], apiKey: string, deadlineAt: 
     // Deadline-aware: never start a call that cannot plausibly finish in time.
     const remaining = deadlineAt - Date.now();
     if (remaining < 150) return;
+    sent?.push(domain);
     try {
       const url = `https://api.fastly.com/domain-management/v1/tools/status?domain=${encodeURIComponent(domain)}`;
       const resp = await fetch(url, {
@@ -1058,6 +1075,21 @@ export function willEscalateToThirdSignal(r: DomainCheckResult): boolean {
   );
 }
 
+/** Why each escalated name needs the paid signal. Same four buckets in the
+ *  `fastly-escalate` log line and in `fastly_spend_daily`, so a log and an
+ *  invoice can be reconciled without ever recording a domain name. */
+export function splitByReason(domains: readonly string[]): SpendSplit {
+  const split: SpendSplit = { co_me: 0, premium: 0, brand: 0, other: 0 };
+  for (const d of domains) {
+    const t = d.split(".").pop()?.toLowerCase() ?? "";
+    if (t === "co" || t === "me") split.co_me++;
+    else if (isLikelyBlocked(d)) split.brand++;
+    else if (isLikelyPremium(d)) split.premium++;
+    else split.other++;
+  }
+  return split;
+}
+
 /** A confirmed premium's renewal exactly as the registrar quoted it; nothing for standard, taken or unpriced names. */
 export function confirmedPremiumRenewal(
   pb: { available: boolean; renewPrice?: number },
@@ -1239,21 +1271,50 @@ export async function checkDomains(
   // Split by reason so we can see how much is .co/.me (no-RDAP, unavoidable) vs
   // premium / brand suspects, and decide whether to also drop .co/.me from defaults.
   if (needsThirdSignal.length > 0) {
-    let coMe = 0, premium = 0, brand = 0, other = 0;
-    for (const d of needsThirdSignal) {
-      const t = d.split(".").pop()?.toLowerCase() ?? "";
-      if (t === "co" || t === "me") coMe++;
-      else if (isLikelyBlocked(d)) brand++;
-      else if (isLikelyPremium(d)) premium++;
-      else other++;
-    }
-    console.log(`fastly-escalate n=${needsThirdSignal.length} co_me=${coMe} premium=${premium} brand=${brand} other=${other}`);
+    const s = splitByReason(needsThirdSignal);
+    console.log(`fastly-escalate n=${needsThirdSignal.length} co_me=${s.co_me} premium=${s.premium} brand=${s.brand} other=${s.other}`);
   }
 
-  const domainrResults = THIRD_SIGNAL_ENABLED && fastlyKey && needsThirdSignal.length > 0
-    ? await checkDomainrBatch(needsThirdSignal, fastlyKey, thirdSignalDeadlineAt)
+  // ---- Daily spend cap --------------------------------------------------
+  // Read ONLY on a batch that actually reached pass 2, so a search that escalates
+  // nothing (the common case) pays no extra DB round trip. On the batches that do
+  // escalate, the read sits in front of a call that was about to cost money
+  // anyway. Over the cap, the refused names simply get no third-signal verdict —
+  // the branches below already handle that honestly (premiumUnverified /
+  // uncertain), so nothing is shown as available on weaker evidence.
+  const thirdSignalOn = thirdSignalEnabled();
+  let paidNames = needsThirdSignal;
+  let blockedCalls = 0;
+  if (thirdSignalOn && fastlyKey && needsThirdSignal.length > 0) {
+    const cap = parseDailyCap();
+    if (Number.isFinite(cap)) {
+      const spent = await readSpentToday(supabase);
+      const allowed = allowedCalls(spent, cap, needsThirdSignal.length);
+      if (allowed < needsThirdSignal.length) {
+        blockedCalls = needsThirdSignal.length - allowed;
+        paidNames = needsThirdSignal.slice(0, allowed);
+        console.warn(
+          `fastly-cap spent=${Number.isFinite(spent) ? spent : "unknown"} cap=${cap} allowed=${allowed} blocked=${blockedCalls}`
+        );
+      }
+    }
+  }
+
+  const sentNames: string[] = [];
+  const domainrResults = thirdSignalOn && fastlyKey && paidNames.length > 0
+    ? await checkDomainrBatch(paidNames, fastlyKey, thirdSignalDeadlineAt, sentNames)
     : null;
-  if (!THIRD_SIGNAL_ENABLED) {
+
+  // Account for what actually left (counts only, never a name). Backgrounded like
+  // the cache write — the visitor never waits for it.
+  if (sentNames.length > 0 || blockedCalls > 0) {
+    const spend = recordSpend(supabase, sentNames.length, splitByReason(sentNames), blockedCalls);
+    const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+    if (rt?.waitUntil) rt.waitUntil(spend);
+    else void spend;
+  }
+
+  if (!thirdSignalOn) {
     // Only brand-block matches are acted on while the third signal is offline.
     const brandFlagged = baseResults.filter((r) => r.available && !r.uncertain && isLikelyBlocked(r.domain)).length;
     if (brandFlagged > 0) {
@@ -1303,7 +1364,7 @@ export async function checkDomains(
         // Probe error / disagreement on a brand-blocked SLD: the trademark
         // statement holds regardless of why the probes were inconclusive.
         fresh.push({ ...base, uncertainReason: "brand_protected" as const });
-      } else if (THIRD_SIGNAL_ENABLED && fastlyKey && base.available && likelyPremium) {
+      } else if (thirdSignalOn && fastlyKey && base.available && likelyPremium) {
         // GUARDRAIL: reached only when base.available === true — i.e. RDAP-404 AND
         // DNS-NXDOMAIN agreed in resolveDomain. Brand-blocked names are caught by
         // the two branches ABOVE (brandBlockRisk / base.uncertain && blocked) and

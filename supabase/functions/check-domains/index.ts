@@ -4,6 +4,7 @@
 // warm module-level caches.
 import { checkDomains, isValidDomain, type DomainCheckResult } from "../_shared/pipeline.ts";
 import { clientIpOf, createBudget } from "../_shared/rate-limit.ts";
+import { headlinePremiumCheckEnabled, verifySetFor } from "../_shared/third-signal-budget.ts";
 
 // Backwards-compat re-exports (tests and any external importers).
 export {
@@ -89,11 +90,13 @@ Deno.serve(async (req) => {
     const partialSink = new Map<string, DomainCheckResult>();
 
     // `verifyPremium`: the site asks for the registry-premium status of the card
-    // the visitor typed (one name, after the wave settled). Costs one third-signal
-    // call, so it is capped at three names and can be switched off with
-    // HEADLINE_PREMIUM_CHECK=off without a deploy.
-    const premiumCheckOn = Deno.env.get("HEADLINE_PREMIUM_CHECK") !== "off";
-    const verify = verifyPremium === true && premiumCheckOn && validOrder.length <= 3 ? new Set(validOrder) : undefined;
+    // the visitor typed (one name, after the wave settled). It bypasses both cache
+    // layers, so it is one paid third-signal call PER SETTLED SEARCH — the largest
+    // per-visitor cost in the product. Capped at MAX_VERIFY_NAMES names and killed
+    // by HEADLINE_PREMIUM_CHECK=off, which a Supabase secret change applies to the
+    // next invocation (no deploy — and in this project only a Lovable build
+    // deploys). The gate is pure and tested in _shared/third-signal-budget_test.ts.
+    const verify = verifySetFor(validOrder, verifyPremium, headlinePremiumCheckEnabled());
     const pipeline = checkDomains(domains, {
       partialSink,
       thirdSignalDeadlineAt: Date.now() + THIRD_SIGNAL_WINDOW_MS,
