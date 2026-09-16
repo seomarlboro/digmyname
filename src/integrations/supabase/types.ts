@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      cron_heartbeats: {
+        Row: {
+          job_name: string
+          last_run_at: string
+          rows_affected: number | null
+        }
+        Insert: {
+          job_name: string
+          last_run_at: string
+          rows_affected?: number | null
+        }
+        Update: {
+          job_name?: string
+          last_run_at?: string
+          rows_affected?: number | null
+        }
+        Relationships: []
+      }
       domain_cache: {
         Row: {
           available: boolean
