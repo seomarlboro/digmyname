@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_quota_daily: {
+        Row: {
+          blocked: number
+          caller: string
+          day: string
+          domains: number
+          first_seen: string
+          requests: number
+          updated_at: string
+        }
+        Insert: {
+          blocked?: number
+          caller: string
+          day: string
+          domains?: number
+          first_seen?: string
+          requests?: number
+          updated_at?: string
+        }
+        Update: {
+          blocked?: number
+          caller?: string
+          day?: string
+          domains?: number
+          first_seen?: string
+          requests?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cron_heartbeats: {
         Row: {
           job_name: string
@@ -307,6 +337,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      api_quota_add: {
+        Args: {
+          n_blocked?: number
+          n_domains?: number
+          n_requests?: number
+          p_caller: string
+        }
+        Returns: {
+          domains: number
+          requests: number
+        }[]
+      }
       fastly_spend_add: {
         Args: {
           n_blocked?: number
