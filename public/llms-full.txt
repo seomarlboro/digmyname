@@ -92,7 +92,7 @@ Availability is checked in real time (cache rules above). Prices are refreshed w
 
 ## Public API for AI agents
 
-Base URL: `https://api.digmyname.com/functions/v1/public-api` — no auth, 60 requests per minute per IP. OpenAPI at `/openapi.json`, plugin manifest at `https://digmyname.com/.well-known/ai-plugin.json`.
+Base URL: `https://api.digmyname.com/functions/v1/public-api` — no auth, 60 requests per minute per IP and 5,000 domains per UTC day per IP. OpenAPI at `/openapi.json`, plugin manifest at `https://digmyname.com/.well-known/ai-plugin.json`.
 
 - `GET /check?domain=name.com` — availability, `uncertain`, `premium`, `for_sale`, `price_usd`, `cheapest_registrar`, `buy_url`, `register_url`.
 - `GET /search?q=name&tlds=com,io,ai` — one name across many TLDs (max 12; defaults to com, io, ai, app, dev, co, net, org, xyz, me, tech).
@@ -107,7 +107,7 @@ DigMyName ships an official Model Context Protocol server so any MCP-capable age
 - Package: `domain-check-skills-mcp` — npm, v1.2.11, MIT license, Node.js 18+.
 - npm page: https://www.npmjs.com/package/domain-check-skills-mcp
 - Landing page and setup docs: https://digmyname.com/mcp
-- No API key and no account required. Rate limit: 60 requests per minute per IP.
+- No API key and no account required. Rate limit: 60 requests per minute per IP, and 5,000 domains per UTC day per IP.
 
 One-line install for Claude Code:
 

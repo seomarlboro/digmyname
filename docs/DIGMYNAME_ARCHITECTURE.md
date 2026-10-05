@@ -377,3 +377,22 @@ August's invoice was **$45.05** (~45,000 calls) and September had already reache
 Benchmarks, the health monitor, scripts and tests must never send a name through the real pipeline that can reach the paid third signal. Concretely, a probe name must be a **fresh label of 6+ characters** (5 or fewer is a premium suspect on 31 of our TLDs, 3 or fewer on every TLD), **not on the brand block list**, and **not in a zone whose registry cannot answer us** (today: `.shop`). A registered reference name (`example.com`) can never escalate whatever its shape, because it is never `available`.
 
 Pinned by `_shared/our-runs-are-free_test.ts`, which reads the actual scripts. `edge-cache-prewarm` is held to the same rule — two short available names in its list were quietly buying one paid call each per day until migration `20260916170000_prewarm_no_paid_signal.sql` replaced them.
+
+## 15. The daily quota on the public API (shipped 2026-10-05)
+
+**What happened.** On 2026-10-04 a script walked the keyless API and wrote **84,425** fresh names into `domain_cache` in one day — **21,347** of them four-letter `.ca` labels, a plain enumeration of the zone — then **42,527** more by 08:00 the next morning. The day before produced **one** row. Peak hour: 25,448 names. Human traffic over the same period was ~10 visitors a day. Cloudflare mailed the account: the free **100,000 Workers requests/day** allowance in front of `api.digmyname.com` was exhausted, so the API and its edge cache started failing for everyone until the UTC reset.
+
+The money brakes (§14) held — the cap is 0, so the enumeration bought nothing, and four-letter labels are exactly the premium suspects that used to escalate. What had no defence was *volume*.
+
+**Why the old limiter could not see it.** `_shared/rate-limit.ts` counts in isolate memory, and Supabase hands out a fresh isolate for almost every request (0-6 % warm, measured 2026-08-12). A 60-requests/minute counter that lives one request is not a limit. This was already written down as an open item; the scraper collected on it.
+
+**What now exists.**
+
+- **A shared counter in Postgres** — `public.api_quota_daily`, one row per caller per UTC day, written through the atomic `api_quota_add` RPC so two isolates serving the same caller cannot lose a count. Rows older than 30 days are deleted nightly at 03:37 UTC with the same heartbeat as the other cleanups (§13).
+- **Counted in domains, not requests**, because a domain is the unit that costs: an RDAP call, a DoH query, possibly a WHOIS connection and a `domain_cache` row. `/search` counts its whole TLD fan-out, `/fast` counts its batch, `/check` and `/age` count one.
+- **5,000 domains per UTC day per IP** (`DEFAULT_DAILY_DOMAIN_CAP`), overridable without a deploy via the `API_DAILY_DOMAIN_CAP` edge environment variable (`off` removes the ceiling, `0` answers nothing). For scale: a full search on the site is 51 domains, so the cap is ~100 heavy human days and ~6 % of what the scraper took.
+- **An honest refusal.** Past the cap the API answers `429` with `error: "daily_quota"`, the cap, `resets: "00:00 UTC"`, a `Retry-After` pointing at that reset, and an address to ask for more. No wrong verdict, no silence.
+- **Counts only.** The caller key is `sha256(utc-day + salt + ip)` truncated to 16 hex characters: it rotates at midnight by construction, so the table cannot become a visit history, and it holds no domain, no query and no address.
+- **Fail-open.** If the counter errors or the table is not deployed yet, the request is served and a line is logged. A limiter that cannot count must not become an outage; the money brake fails closed instead, which is the correct direction for each.
+
+**The layer in front.** A Cloudflare rate limiting rule on `api.digmyname.com` (free plan: one rule, 10-second window, block) refuses more than 10 requests / 10 s from one IP before the request reaches a Worker — so a flood costs no Worker invocations at all. It throttles a single address; the quota above is what survives an address changing.

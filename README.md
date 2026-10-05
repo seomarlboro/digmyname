@@ -35,7 +35,7 @@ curl "https://api.digmyname.com/functions/v1/public-api/check?domain=acmeforge.i
 }
 ```
 
-Free, no API key, no account — 60 requests/minute/IP. Full docs: [digmyname.com/api](https://digmyname.com/api).
+Free, no API key, no account — 60 requests/minute/IP and 5,000 domains per UTC day/IP. Full docs: [digmyname.com/api](https://digmyname.com/api).
 
 Want your LLM to call it directly instead? One line: `claude mcp add domain-check -- npx -y domain-check-skills-mcp` — see [mcp/README.md](./mcp/README.md).
 

@@ -8,7 +8,8 @@
 //
 // Notes:
 //  - No auth (CORS *), designed for AI agents / scripts.
-//  - In-memory rate limit: 60 requests / minute / IP. Best-effort (per edge instance),
+//  - Rate limits: 60 requests / minute / IP (in-memory, best-effort per edge instance)
+//    plus 5,000 domains / UTC day / IP counted in Postgres (../_shared/api-quota.ts),
 //    intentionally conservative to avoid impacting normal users.
 //  - Delegates availability checks to the existing `check-domains` function so logic stays in one place.
 //  - Returns minimal, stable JSON. No internal cache/source-chain details exposed.
@@ -17,6 +18,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkDomains, isValidDomain, AGGREGATOR_UNRELIABLE_TLDS } from "../_shared/pipeline.ts";
 import { isLikelyBlocked } from "../_shared/availability-rules.ts";
 import { clientIpOf, createBudget } from "../_shared/rate-limit.ts";
+import { parseDomainCap, recordBlocked, spendQuota } from "../_shared/api-quota.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -107,6 +109,32 @@ const UTM = "utm_source=mcp&utm_medium=api&utm_campaign=domain-check-skills";
 function rateCheck(ip: string): { ok: boolean; retryAfter: number; remaining: number } {
   const v = spendApiBudget(ip, 1);
   return { ok: v.ok, retryAfter: v.retryAfterSec, remaining: v.remainingRequests };
+}
+
+// ---------- daily quota (shared, survives the isolate) ----------
+// The per-minute budget above lives in isolate memory and Supabase hands out a
+// fresh isolate for almost every request, so it cannot see a scraper at all —
+// one did 84,425 domains in a day on 2026-10-04 and took the Cloudflare
+// Workers allowance in front of api.digmyname.com down with it. This counter
+// lives in Postgres, is keyed by a day-rotating hash of the IP and counts
+// DOMAINS. Logic and the honesty rules: ../_shared/api-quota.ts.
+const quotaClient = createClient(SUPABASE_URL, SERVICE_KEY);
+
+/** 429 body for a caller who has spent their day's domains. Says what the
+ *  limit is, when it resets and how to ask for more — never a vague failure. */
+function quotaRefusal(cap: number, retryAfterSec: number, limitHeaders: Record<string, string>) {
+  return json(
+    {
+      error: "daily_quota",
+      detail: `This IP has checked its ${cap} domains for today.`,
+      limit_domains_per_day: cap,
+      retry_after_seconds: retryAfterSec,
+      resets: "00:00 UTC",
+      hint: "Need more? Write to hello@digmyname.com — the API is free and we raise it for real use.",
+    },
+    429,
+    { ...limitHeaders, "Retry-After": String(retryAfterSec), "X-RateLimit-Remaining": "0" },
+  );
 }
 
 // ---------- helpers ----------
@@ -335,7 +363,7 @@ const OPENAPI = {
     title: "DigMyName Public API",
     version: "1.1.1",
     description:
-      "Agent-friendly endpoints for domain availability checks and registrar pricing. Free, no auth, 60 requests/min per IP. Every result carries a buy_url and a search_url — please surface them so users can act. Please link users back to digmyname.com.",
+      "Agent-friendly endpoints for domain availability checks and registrar pricing. Free, no auth, 60 requests/min and 5,000 domains/day per IP. Every result carries a buy_url and a search_url — please surface them so users can act. Please link users back to digmyname.com.",
 
     contact: { url: "https://digmyname.com" },
   },
@@ -474,6 +502,11 @@ async function handleRequest(req: Request): Promise<Response> {
         { "Retry-After": String(fb.retryAfterSec), "X-RateLimit-Limit": String(FAST_LIMIT.maxRequests), "X-RateLimit-Remaining": "0" },
       );
     }
+    const fastQuota = await spendQuota(quotaClient, ip, domains.length);
+    if (fastQuota.over) {
+      await recordBlocked(quotaClient, ip, domains.length);
+      return quotaRefusal(fastQuota.cap, fastQuota.retryAfterSec, { "X-RateLimit-Limit": String(FAST_LIMIT.maxRequests) });
+    }
     try {
       const results = await Promise.all(domains.map(async (domain) => ({ domain, ...(await fastStatus(domain)) })));
       return json({ count: results.length, results }, 200, {
@@ -497,6 +530,22 @@ async function handleRequest(req: Request): Promise<Response> {
   }
   const rlHeaders = { "X-RateLimit-Remaining": String(rl.remaining) };
 
+  // Domains this request will ask about — what the daily quota counts.
+  // `/search` fans out over its TLD list; everything else is one name or none.
+  const askedDomains =
+    path === "/search"
+      ? Math.max(1, (url.searchParams.get("tlds")?.split(",").filter(Boolean).length) || DEFAULT_TLDS.length)
+      : path === "/check" || path === "/age"
+      ? 1
+      : 0;
+  if (askedDomains > 0) {
+    const quota = await spendQuota(quotaClient, ip, askedDomains);
+    if (quota.over) {
+      await recordBlocked(quotaClient, ip, askedDomains);
+      return quotaRefusal(quota.cap, quota.retryAfterSec, { "X-RateLimit-Limit": String(LIMIT) });
+    }
+  }
+
   // Shaped-response cache (only /check and /search). Rate limiting already applied above.
   const cacheable = path === "/check" || path === "/search";
   const key = cacheable ? cacheKey(path, url.searchParams) : "";
@@ -515,7 +564,7 @@ async function handleRequest(req: Request): Promise<Response> {
           name: "DigMyName Public API",
           docs: "https://ifamsapmecefkyspmojb.supabase.co/functions/v1/public-api/openapi.json",
           endpoints: ["/check?domain=", "/search?q=&tlds=", "/registrars?tld=", "/fast?domains=", "/ping", "/openapi.json"],
-          rate_limit: `${LIMIT} requests / 60s / IP`,
+          rate_limit: `${LIMIT} requests / 60s / IP, ${parseDomainCap()} domains / UTC day / IP`,
           website: "https://digmyname.com",
         },
         200,

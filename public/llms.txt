@@ -44,7 +44,7 @@ Founders launching startups, indie hackers, freelancers, agencies, and developer
 Base URL: `https://api.digmyname.com/functions/v1/public-api`
 OpenAPI: `https://api.digmyname.com/functions/v1/public-api/openapi.json`
 Plugin manifest: `https://digmyname.com/.well-known/ai-plugin.json`
-No auth required. Rate limit: 60 requests / 60 seconds / IP.
+No auth required. Rate limit: 60 requests / 60 seconds / IP, and 5,000 domains / UTC day / IP.
 Served behind a Cloudflare edge cache: repeat lookups within 60 seconds return in about 0.1 s; first-time lookups run the full live check (about half a second, under 0.9 s at p95 — measured from the US and the EU, September 2026).
 
 Endpoints:
@@ -65,7 +65,7 @@ Package: `domain-check-skills-mcp` (npm, v1.2.12, MIT, Node.js 18+)
 Claim: the fastest domain availability MCP server we've measured — dispute it at https://digmyname.com/speed.
 npm: https://www.npmjs.com/package/domain-check-skills-mcp
 Docs: https://digmyname.com/mcp
-No API key, no account, free. Rate limit: 60 requests / minute / IP.
+No API key, no account, free. Rate limit: 60 requests / minute / IP, and 5,000 domains / UTC day / IP.
 
 Install (Claude Code, one line):
 ```

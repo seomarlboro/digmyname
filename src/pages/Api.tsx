@@ -217,6 +217,12 @@ print(res.json()["result"]["available"])`,
           <div className="surface-card p-6">
             <ul className="list-body">
               <li>60 requests per 60 seconds per IP.</li>
+              <li>
+                5,000 domains per UTC day per IP. Past that the API answers{" "}
+                <code className="font-mono text-xs">429 daily_quota</code> until midnight UTC. Enumerating a zone
+                hits this; normal scripting and agent use does not. Need more? Write to us and say what you're
+                building — it's free, and we raise it.
+              </li>
               <li>No key, no account, no tracking of API callers beyond rate-limit counters.</li>
               <li>
                 A registry-premium name comes back as <code className="font-mono text-xs">premium: true</code> with{" "}

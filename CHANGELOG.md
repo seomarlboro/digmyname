@@ -2,6 +2,15 @@
 
 All notable changes to DigMyName.
 
+## 2026-10-05 — A daily quota on the public API (edge + migration)
+
+### Added
+- **5,000 domains per UTC day per IP on the public API**, counted in Postgres (`api_quota_daily` + the atomic `api_quota_add` RPC, `_shared/api-quota.ts`) so the limit survives the isolate the request ran in. Past the cap: `429 daily_quota` with the ceiling, `resets: "00:00 UTC"` and where to ask for more. Tunable without a deploy through `API_DAILY_DOMAIN_CAP` (`off` = no ceiling). Counts only — the caller key is a day-rotating salted hash, never an address, a domain or a query. Fails open: an unreachable counter serves the request.
+- **Nightly retention for the new table** (03:37 UTC, 30 days), writing the same `cron_heartbeats` row as the other cleanups.
+
+### Why
+- On 2026-10-04 a script enumerated the keyless API: 84,425 fresh names cached in one day (21,347 four-letter `.ca` labels), 42,527 more by 08:00 the next morning, against ~10 human visitors a day. It exhausted the account's free 100,000 Workers requests/day in front of `api.digmyname.com`, which took the API and its edge cache down for everyone. The paid signal cost nothing — its cap is 0 — but nothing limited volume: the old per-minute limiter lives in isolate memory and Supabase almost never reuses an isolate.
+
 ## 2026-09-16 — .shop leaves the default grid (frontend + edge)
 
 ### Changed
