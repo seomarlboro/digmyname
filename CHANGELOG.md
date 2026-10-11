@@ -2,6 +2,21 @@
 
 All notable changes to DigMyName.
 
+## 2026-10-11 — The daily quota counts the visitor, not the edge (edge + Worker + migration)
+
+### Fixed
+- **The public API through `api.digmyname.com` answered `429 daily_quota` to everyone for most of every day from 2026-10-05 to 2026-10-11.** The edge Worker forwarded none of the visitor's headers, so the origin saw one caller — the Worker — for every request, and the "5,000 domains per UTC day per IP" quota was one allowance for the whole edge. Our own cache prewarm asks for 7,200 a day on its own. The cap tripped every morning UTC and held until midnight; the MCP package and the live benchmark went with it. The website's search calls the origin directly and was not affected.
+- **Callers behind the edge are now charged to their own address.** The Worker vouches for the visitor's address with a shared key; the origin believes it only when the key checks out, and ignores a claimed address that arrives without it (`_shared/trusted-caller.ts`). The keys are not in the repository — only their SHA-256 digests are.
+- **The cache prewarm is counted in its own row (`internal`) and never capped**, identified by a key it reads from the database vault at run time (migration `20261011120000_prewarm_internal_key.sql`).
+- **`Retry-After` reaches API users.** The Worker dropped every origin header, including the one the quota refusal documents.
+
+### Changed
+- **An IPv6 caller is counted per /64**, the block one subscriber holds, instead of per address.
+- **The monitor says which 429.** A failed reference-name check now reports the API's error code (`HTTP 429 (daily_quota)`), and the price-freshness and cron-heartbeat checks read the project's public URL and anon key from the tracked `.env` when the repo secrets are unset — until now they had been skipped on every scheduled run.
+
+### Why it took six days
+- The monitor opened an issue every day and it read "HTTP 429" on six lines. The quota's own refusal body named the cause; the monitor did not read it. The Worker's code lived only in the Cloudflare dashboard, so nothing in this repository showed that it sent the origin no client address.
+
 ## 2026-10-05 — A daily quota on the public API (edge + migration)
 
 ### Added

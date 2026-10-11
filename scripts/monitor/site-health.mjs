@@ -9,14 +9,28 @@
 //      EDGE_API_URL (default https://api.digmyname.com/functions/v1/public-api)
 //      VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY (optional, anon key —
 //        same two values the frontend and scripts/generate-tld-prices.ts use;
-//        only used for anonymous, RLS-scoped SELECTs, never a service key)
+//        only used for anonymous, RLS-scoped SELECTs, never a service key).
+//        When unset they are read from the repository's tracked `.env`, which
+//        holds exactly these public values.
 //      RESULT_OUT (optional path to write the JSON result to)
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 const SITE_URL = (process.env.SITE_URL || "https://digmyname.com").replace(/\/$/, "");
 const EDGE_API_URL = (process.env.EDGE_API_URL || "https://api.digmyname.com/functions/v1/public-api").replace(/\/$/, "");
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "";
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
+// The two DB-backed checks need the project URL and the anon key. Both are
+// public by design and already tracked in `.env` for the frontend build, so a
+// run without the repo secrets (every scheduled run up to 2026-10-11 — those
+// two checks had only ever reported "skipped") reads them from there.
+function fromTrackedEnv(name) {
+  try {
+    const text = readFileSync(new URL("../../.env", import.meta.url), "utf8");
+    return text.match(new RegExp(`^${name}="?([^"\\r\\n]*)"?`, "m"))?.[1] ?? "";
+  } catch {
+    return "";
+  }
+}
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || fromTrackedEnv("VITE_SUPABASE_URL");
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || fromTrackedEnv("VITE_SUPABASE_PUBLISHABLE_KEY");
 const RESULT_OUT = process.env.RESULT_OUT || "";
 
 // Mirrors src/lib/pricing.ts STALE_AFTER_DAYS — the threshold at which the site
@@ -92,7 +106,12 @@ async function checkReferenceDomain(domain, expectation) {
   const url = `${EDGE_API_URL}/check?domain=${encodeURIComponent(domain)}`;
   const { ms, value, error } = await timed(async () => {
     const res = await fetch(url, { signal: withTimeout(HTTP_TIMEOUT_MS) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      // Name the refusal: "HTTP 429" alone does not say whether the per-minute
+      // limit, the daily quota or the platform in front answered.
+      const reason = await res.json().then((b) => b?.error, () => undefined);
+      throw new Error(typeof reason === "string" ? `HTTP ${res.status} (${reason})` : `HTTP ${res.status}`);
+    }
     const body = await res.json();
     return body?.result;
   });

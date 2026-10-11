@@ -17,8 +17,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkDomains, isValidDomain, AGGREGATOR_UNRELIABLE_TLDS } from "../_shared/pipeline.ts";
 import { isLikelyBlocked } from "../_shared/availability-rules.ts";
-import { clientIpOf, createBudget } from "../_shared/rate-limit.ts";
-import { parseDomainCap, recordBlocked, spendQuota } from "../_shared/api-quota.ts";
+import { createBudget } from "../_shared/rate-limit.ts";
+import { parseDomainCap, type QuotaVerdict, recordBlocked, recordInternal, spendQuota } from "../_shared/api-quota.ts";
+import { type Caller, resolveCaller } from "../_shared/trusted-caller.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -119,6 +120,20 @@ function rateCheck(ip: string): { ok: boolean; retryAfter: number; remaining: nu
 // lives in Postgres, is keyed by a day-rotating hash of the IP and counts
 // DOMAINS. Logic and the honesty rules: ../_shared/api-quota.ts.
 const quotaClient = createClient(SUPABASE_URL, SERVICE_KEY);
+
+/** Charge a request's domains to its caller. Returns the refusing verdict when
+ *  the caller is past the day's cap, otherwise `null`. Our own scheduled jobs
+ *  are counted in their own row and never refused (../_shared/trusted-caller.ts). */
+async function chargeQuota(caller: Caller, domains: number): Promise<QuotaVerdict | null> {
+  if (caller.internal) {
+    await recordInternal(quotaClient, domains);
+    return null;
+  }
+  const quota = await spendQuota(quotaClient, caller.ip, domains);
+  if (!quota.over) return null;
+  await recordBlocked(quotaClient, caller.ip, domains);
+  return quota;
+}
 
 /** 429 body for a caller who has spent their day's domains. Says what the
  *  limit is, when it resets and how to ask for more — never a vague failure. */
@@ -483,7 +498,10 @@ async function handleRequest(req: Request): Promise<Response> {
     return json(OPENAPI);
   }
 
-  const ip = clientIpOf(req, "anon");
+  // The visitor's address — through the edge Worker that is the address the
+  // Worker vouches for, not the Worker's own (../_shared/trusted-caller.ts).
+  const caller = await resolveCaller(req, "anon");
+  const ip = caller.ip;
 
   // /fast spends its own domain-counted budget, never the documented API one.
   if (path === "/fast") {
@@ -502,9 +520,8 @@ async function handleRequest(req: Request): Promise<Response> {
         { "Retry-After": String(fb.retryAfterSec), "X-RateLimit-Limit": String(FAST_LIMIT.maxRequests), "X-RateLimit-Remaining": "0" },
       );
     }
-    const fastQuota = await spendQuota(quotaClient, ip, domains.length);
-    if (fastQuota.over) {
-      await recordBlocked(quotaClient, ip, domains.length);
+    const fastQuota = await chargeQuota(caller, domains.length);
+    if (fastQuota) {
       return quotaRefusal(fastQuota.cap, fastQuota.retryAfterSec, { "X-RateLimit-Limit": String(FAST_LIMIT.maxRequests) });
     }
     try {
@@ -539,9 +556,8 @@ async function handleRequest(req: Request): Promise<Response> {
       ? 1
       : 0;
   if (askedDomains > 0) {
-    const quota = await spendQuota(quotaClient, ip, askedDomains);
-    if (quota.over) {
-      await recordBlocked(quotaClient, ip, askedDomains);
+    const quota = await chargeQuota(caller, askedDomains);
+    if (quota) {
       return quotaRefusal(quota.cap, quota.retryAfterSec, { "X-RateLimit-Limit": String(LIMIT) });
     }
   }

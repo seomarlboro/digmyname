@@ -20,6 +20,14 @@
 //     it rotates at midnight and is not linkable across days or back to an
 //     address. No domain, no query, no raw IP — the shape rule the other
 //     operational tables follow.
+//   • The address counted is the VISITOR's. Requests through the edge Worker
+//     are charged to the address the Worker vouches for, never to the Worker
+//     itself (`trusted-caller.ts` — until 2026-10-11 the whole edge shared one
+//     bucket and tripped the cap every morning). An IPv6 caller is charged per
+//     /64, the block one subscriber is handed, so stepping through addresses
+//     inside it does not mint a fresh allowance each time.
+//   • Our own scheduled traffic (the edge cache prewarm) is counted in its own
+//     row, `internal`, and never capped.
 //   • One atomic upsert per request that both records and reports the running
 //     total, so two isolates serving the same scraper cannot lose a count.
 //   • FAIL-OPEN. If the counter is unreachable the request is served. A limiter
@@ -36,6 +44,7 @@
 // generic failure, and never a wrong availability verdict.
 // ============================================================================
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { ipv6Groups } from "./trusted-caller.ts";
 
 /** Domains one caller may ask about per UTC day when the env var is unset.
  *  5,000 is ~100× a heavy human day on the site (a full search is 51 domains)
@@ -64,6 +73,26 @@ export function utcDay(now = new Date()): string {
 export function secondsUntilReset(now = new Date()): number {
   const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
   return Math.max(1, Math.ceil((next - now.getTime()) / 1000));
+}
+
+/** The row our own scheduled jobs are counted in. Not a hash on purpose: it is
+ *  not a visitor, and the row should be readable at a glance. */
+export const INTERNAL_CALLER = "internal";
+
+/**
+ * What an address is counted as. IPv4 is counted as itself. IPv6 is counted by
+ * its /64 — the block a network hands to one subscriber — because a per-address
+ * count would give anyone holding a /64 2^64 separate allowances. An IPv4
+ * address written in IPv6 form (`::ffff:203.0.113.9`) is the IPv4 address.
+ * Anything that is not an address is counted as the text it is.
+ */
+export function quotaSubject(ip: string): string {
+  const g = ipv6Groups(ip);
+  if (!g) return ip.trim();
+  if (g[0] === 0 && g[1] === 0 && g[2] === 0 && g[3] === 0 && g[4] === 0 && g[5] === 0xffff) {
+    return `${g[6] >> 8}.${g[6] & 255}.${g[7] >> 8}.${g[7] & 255}`;
+  }
+  return `${g.slice(0, 4).map((n) => n.toString(16)).join(":")}::/64`;
 }
 
 /**
@@ -137,7 +166,7 @@ export async function spendQuota(
   if (!Number.isFinite(cap)) return decide(0, cap, now);
   const n = Math.max(1, Math.floor(domains));
   try {
-    const caller = await callerId(ip, utcDay(now));
+    const caller = await callerId(quotaSubject(ip), utcDay(now));
     const { data, error } = await supabase.rpc("api_quota_add", {
       p_caller: caller,
       n_domains: n,
@@ -167,12 +196,28 @@ export async function recordBlocked(
   now = new Date(),
 ): Promise<void> {
   try {
-    const caller = await callerId(ip, utcDay(now));
+    const caller = await callerId(quotaSubject(ip), utcDay(now));
     await supabase.rpc("api_quota_add", {
       p_caller: caller,
       n_domains: 0,
       n_requests: 0,
       n_blocked: Math.max(1, Math.floor(domains)),
+    });
+  } catch {
+    // statistics only
+  }
+}
+
+/** Count domains our own scheduled jobs asked for, in the `internal` row. Never
+ *  capped and never refused: this is bookkeeping, so we can see what our own
+ *  jobs cost next to what visitors cost. Best effort, never throws. */
+export async function recordInternal(supabase: SupabaseClient, domains: number): Promise<void> {
+  try {
+    await supabase.rpc("api_quota_add", {
+      p_caller: INTERNAL_CALLER,
+      n_domains: Math.max(1, Math.floor(domains)),
+      n_requests: 1,
+      n_blocked: 0,
     });
   } catch {
     // statistics only
