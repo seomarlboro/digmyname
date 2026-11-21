@@ -20,7 +20,7 @@ const API_BASE =
   process.env.DIGMYNAME_API_BASE ||
   "https://api.digmyname.com/functions/v1/public-api";
 
-const VERSION = "1.2.12";
+const VERSION = "1.2.13";
 const USER_AGENT = `domain-check-skills-mcp/${VERSION} (+https://digmyname.com/mcp)`;
 const CACHE_TTL_MS = Number(process.env.DIGMYNAME_CACHE_TTL_MS || "30000");
 const PRICING_TTL_MS = 6 * 60 * 60 * 1000;
@@ -47,8 +47,14 @@ const DomainResultSchema = z.object({
   domain: z.string(),
   available: z.boolean(),
   uncertain: z.boolean().optional(),
+  uncertain_reason: z.string().nullable().optional(),
   premium: z.boolean().optional(),
   likely_premium: z.boolean().optional(),
+  // Available, but no registrar has yet confirmed that the extension's standard
+  // price applies to this very name (it may be on the registry's premium list).
+  price_unverified: z.boolean().optional(),
+  // Not registered and not registrable: the registry holds the name back.
+  registry_reserved: z.boolean().optional(),
   price_usd: z.number().nullable().optional(),
   for_sale: z.boolean().optional(),
   for_sale_via: z.string().nullable().optional(),
@@ -135,9 +141,13 @@ function ttlForPath(path: string): number {
  *  seeing a verdict the API had already replaced. A /search response is cached
  *  as one unit, so a single uncertain row keeps the whole batch out of cache. */
 function holdsUncertainVerdict(data: unknown): boolean {
-  const d = data as { result?: { uncertain?: boolean }; results?: Array<{ uncertain?: boolean }> };
-  if (d?.result?.uncertain) return true;
-  return Array.isArray(d?.results) && d.results.some((r) => r?.uncertain);
+  type Row = { uncertain?: boolean; price_unverified?: boolean };
+  const d = data as { result?: Row; results?: Row[] };
+  // A price the API has not confirmed yet is requested right after its answer,
+  // so such a response is not held here either: the next call may carry it.
+  const unsettled = (r: Row | undefined) => r?.uncertain === true || r?.price_unverified === true;
+  if (unsettled(d?.result)) return true;
+  return Array.isArray(d?.results) && d.results.some(unsettled);
 }
 
 async function api<T>(path: string): Promise<T> {
@@ -188,8 +198,15 @@ function yearFromIso(iso: string | null | undefined): number | null {
 }
 
 function statusLabel(r: DomainResult): string {
-  if (r.uncertain) return "UNKNOWN";
-  if (!r.available) return r.for_sale ? "TAKEN (listed for sale)" : "TAKEN";
+  if (r.uncertain) {
+    return r.uncertain_reason === "not_sold_at_registrar"
+      ? "UNKNOWN (the registry lists no owner, but a registrar will not sell it — it may be reserved)"
+      : "UNKNOWN";
+  }
+  if (!r.available) {
+    if (r.registry_reserved) return "RESERVED BY THE REGISTRY (not registered, and cannot be registered)";
+    return r.for_sale ? "TAKEN (listed for sale)" : "TAKEN";
+  }
   if (r.premium) return "AVAILABLE (premium)";
   if (r.likely_premium) return "AVAILABLE (likely premium — real price may differ)";
   return "AVAILABLE";
@@ -199,7 +216,11 @@ function formatResult(r: DomainResult): string {
   const parts = [`${r.domain} — ${statusLabel(r)}`];
 
   if (r.available) {
-    if (r.cheapest_registrar) {
+    if (r.price_unverified) {
+      // Never omit this line: a missing price reads as "nothing to say", and an
+      // agent would fill the gap with the extension's standard price.
+      parts.push("  price not confirmed (may be premium) — check at registrar");
+    } else if (r.cheapest_registrar) {
       parts.push(
         `  cheapest: ${r.cheapest_registrar.name} ${money(r.cheapest_registrar.reg_price_usd)}/yr`
       );
@@ -237,7 +258,7 @@ function registerTool(
 
 registerTool(
   "check_domain",
-  "Check if ONE specific domain (e.g. acme.io) is registrable right now. Use for a single fully-qualified name; to test one word across many extensions, use search_domains instead. Returns an availability verdict, the cheapest registrar and its buy link, the first-year price, and \u2014 for taken names \u2014 the registration year. Availability is confirmed by RDAP + DNS-over-HTTPS, authoritative for most TLDs; ambiguous names (premium suspects, trademark-blocked names, and zones with no reliable RDAP such as .co/.me) are additionally cross-checked against a third signal (Fastly Domain Research). When no source is authoritative or they disagree, the verdict comes back as uncertain rather than guessed \u2014 treat uncertain as 'unknown, NOT available', and note that price may be absent for such names.",
+  "Check if ONE specific domain (e.g. acme.io) is registrable right now. Use for a single fully-qualified name; to test one word across many extensions, use search_domains instead. Returns an availability verdict, the cheapest registrar and its buy link, the first-year price, and \u2014 for taken names \u2014 the registration year. Outside .com/.net/.org a registry may price a single name as premium, so a price is given only once a registrar has quoted that very name; until then the result says 'price not confirmed (may be premium) \u2014 check at registrar'. Never quote the extension's standard price for such a name; asking again later may return the confirmed price. A name the registry holds back is reported as RESERVED BY THE REGISTRY: nobody owns it and nobody can register it. Availability is confirmed by RDAP + DNS-over-HTTPS, authoritative for most TLDs; ambiguous names (premium suspects, trademark-blocked names, and zones with no reliable RDAP such as .co/.me) are additionally cross-checked against a third signal (Fastly Domain Research). When no source is authoritative or they disagree, the verdict comes back as uncertain rather than guessed \u2014 treat uncertain as 'unknown, NOT available', and note that price may be absent for such names.",
   { domain: z.string().describe("A single fully-qualified domain including its TLD, e.g. 'acme.io'. URLs and 'www.' prefixes are stripped automatically. Not a bare word \u2014 use search_domains to test a word across multiple TLDs.") },
   async ({ domain }) => {
     const clean = normalizeDomain(domain);
@@ -266,7 +287,7 @@ registerTool(
 
 registerTool(
   "search_domains",
-  "Check ONE name across MANY TLDs in a single call (e.g. 'acme' \u2192 com, io, ai \u2026). Use when comparing extensions for the same word; for a single known domain use check_domain instead. Results are grouped AVAILABLE / TAKEN / UNKNOWN, each carrying cheapest price, buy link, and (for taken names) registration year. Names whose availability cannot be confirmed appear under UNKNOWN and must NOT be treated as available (honest 'unverified' state, never a guess).",
+  "Check ONE name across MANY TLDs in a single call (e.g. 'acme' \u2192 com, io, ai \u2026). Use when comparing extensions for the same word; for a single known domain use check_domain instead. Results are grouped AVAILABLE / TAKEN / UNKNOWN, each carrying a buy link, the cheapest price when a registrar has confirmed it for that name ('price not confirmed (may be premium)' otherwise \u2014 never assume the extension's standard price), and (for taken names) the registration year. Names the registry holds back are listed under TAKEN as RESERVED BY THE REGISTRY. Names whose availability cannot be confirmed appear under UNKNOWN and must NOT be treated as available (honest 'unverified' state, never a guess).",
   {
     query: z.string().describe("The name WITHOUT any TLD, e.g. 'acme' (not 'acme.com'). This single word is tested against each TLD in the tlds list."),
     tlds: z

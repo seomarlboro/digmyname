@@ -705,7 +705,7 @@ Deno.test({ name: "price: an available name on a premium-tier extension carries 
   }
 }) });
 
-Deno.test({ name: "price: the follow-up request quotes waiting names in ONE registrar call — standard price, premium price, or not available after all", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+Deno.test({ name: "price: the follow-up request quotes waiting names in ONE registrar call — standard price, premium price, or a refusal that is never 'taken'", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
   const realFetch = globalThis.fetch;
   const calls: string[] = [];
   globalThis.fetch = stubNetwork((domains) => {
@@ -739,9 +739,12 @@ Deno.test({ name: "price: the follow-up request quotes waiting names in ONE regi
     const premium = by.get("premiumquoted.store")!;
     assertEquals([premium.available, premium.premium, premium.price, premium.premiumRenewPrice, premium.priceUnverified ?? false, premium.checkedVia], [true, true, 6823.39, 27291.98, false, "porkbun"]);
 
-    // Not for sale after all: never available.
+    // The registrar will not sell it, while the registry lists no registration.
+    // The registrar is a price source, not an availability source: this is two
+    // answers that disagree — uncertain, never available, and never "taken".
     const refused = by.get("refusedquoted.store")!;
-    assertEquals([refused.available, refused.price, refused.checkedVia], [false, undefined, "porkbun"]);
+    assertEquals([refused.available, refused.uncertain, refused.uncertainReason, refused.price], [false, true, "not_sold_at_registrar", undefined]);
+    assertEquals(refused.checkedVia, "rdap", "the verdict's source is still the registry — the registrar did not become one");
 
     // The registrar did not answer for this one: still available, still no price.
     const silent = by.get("silentquoted.store")!;
@@ -751,7 +754,7 @@ Deno.test({ name: "price: the follow-up request quotes waiting names in ONE regi
     const cached = new Map(written.map((w) => [w.domain, w]));
     assertEquals([cached.get("plainquoted.store")!.rdap_data.reg_price, cached.get("plainquoted.store")!.rdap_data.price_unverified], [0.98, false]);
     assertEquals([cached.get("premiumquoted.store")!.rdap_data.premium, cached.get("premiumquoted.store")!.rdap_data.reg_price], [true, 6823.39]);
-    assertEquals(cached.get("refusedquoted.store")!.available, false);
+    assertEquals(cached.has("refusedquoted.store"), false, "an uncertain result is never cached — and so never cached as taken");
   } finally {
     globalThis.fetch = realFetch;
   }
@@ -831,4 +834,162 @@ Deno.test({ name: "reserved: the flag travels with the taken verdict and into th
     globalThis.fetch = realFetch;
   }
 } });
+
+// ---- The registrar prices names; it does not decide availability -------------
+
+Deno.test({ name: "registrar: a refusal never turns a name into 'taken' — not for a premium suspect, not for the typed name", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = stubNetwork((domains) =>
+    domains.length === 1
+      ? json200({ status: "SUCCESS", response: { avail: "no", premium: "no" } })
+      : json200({ status: "SUCCESS", domains: Object.fromEntries(domains.map((d) => [d, { avail: "no", premium: "no" }])) }), calls);
+  const { supabase, written } = recordingSupabase(async (table) => ({ data: table === "registrar_prices" ? PRICE_TABLE : [], error: null }));
+  const envBefore = Deno.env.get("THIRD_SIGNAL");
+  Deno.env.set("THIRD_SIGNAL", "off"); // keep the paid signal out of a test about the registrar
+  try {
+    // `abcd.dev`: a 4-letter premium suspect, quoted inline. `typedname.dev`: the name the visitor typed.
+    const results = await checkDomains(["abcd.dev", "typedname.dev"], {
+      supabase,
+      thirdSignalDeadlineAt: Date.now() + 1000,
+      verifyPremium: new Set(["typedname.dev"]),
+      registrarSells: () => true,
+    });
+    assert(calls.length >= 1, "the registrar was asked");
+    for (const r of results) {
+      assertEquals([r.available, r.uncertain, r.uncertainReason], [false, true, "not_sold_at_registrar"], r.domain);
+      assertEquals(r.price, undefined, r.domain);
+    }
+    assertEquals(written.filter((w) => w.domain === "abcd.dev" || w.domain === "typedname.dev").length, 0, "nothing is cached: not as available, not as taken");
+  } finally {
+    globalThis.fetch = realFetch;
+    if (envBefore == null) Deno.env.delete("THIRD_SIGNAL"); else Deno.env.set("THIRD_SIGNAL", envBefore);
+  }
+}) });
+
+Deno.test({ name: "registrar: an extension it does not sell is not asked about — the name stays available, its price unknown", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const asked: string[][] = [];
+  // If it WERE asked, this registrar would say "not available" — the answer that used to read as taken.
+  globalThis.fetch = stubNetwork((domains) => {
+    asked.push(domains);
+    const answer = (d: string) => (d.endsWith(".store") ? { avail: "yes", premium: "no", price: "2.57" } : { avail: "no", premium: "no" });
+    return domains.length === 1
+      ? json200({ status: "SUCCESS", response: answer(domains[0]) })
+      : json200({ status: "SUCCESS", domains: Object.fromEntries(domains.map((d) => [d, answer(d)])) });
+  }, []);
+  const waiting = (domain: string) => ({ domain, available: true, checked_via: "rdap", rdap_data: { cache_version: 6, reg_price: null, price_unverified: true } });
+  const names = ["soldhere.store", "notsoldhere.museum"];
+  const { supabase } = recordingSupabase(async (table) => ({
+    data: table === "domain_cache" ? names.map(waiting) : table === "registrar_prices" ? PRICE_TABLE : [],
+    error: null,
+  }));
+  try {
+    const results = await checkDomains(names, {
+      supabase,
+      thirdSignalDeadlineAt: Date.now() + 1000,
+      quotePrices: "await",
+      // The registrar's catalog: it sells .store, not .museum.
+      registrarSells: (tld) => tld === "store",
+    });
+    const by = new Map(results.map((r) => [r.domain, r]));
+    assertEquals(asked.flat(), ["soldhere.store"], "only the extension the registrar sells is sent to it");
+
+    const sold = by.get("soldhere.store")!;
+    assertEquals([sold.available, sold.price, sold.priceUnverified ?? false], [true, 0.98, false]);
+
+    // Availability unchanged; price unknown → the card says "Check price".
+    const notSold = by.get("notsoldhere.museum")!;
+    assertEquals([notSold.available, notSold.uncertain ?? false, notSold.price, notSold.priceUnverified], [true, false, undefined, true]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}) });
+
+// ---- Who gets the registrar's allowance --------------------------------------
+
+/** A limiter that says what it is told to and records what was asked of it. */
+function mockBudget(room: { site: number; api: number }) {
+  const log: string[] = [];
+  return {
+    log,
+    budget: {
+      room: (caller: "site" | "api") => room[caller],
+      spend: (caller: "site" | "api", n: number) => { log.push(`spend ${caller} ${n}`); },
+      backOff: (caller: "site" | "api", ms: number) => { log.push(`backOff ${caller} ${ms}`); },
+    },
+  };
+}
+
+Deno.test({ name: "budget: with nothing left for the API its background quote does not run — the site's follow-up still does", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = stubNetwork((domains) =>
+    domains.length === 1
+      ? json200({ status: "SUCCESS", response: { avail: "yes", premium: "no", price: "10.18" } })
+      : json200({ status: "SUCCESS", domains: Object.fromEntries(domains.map((d) => [d, { avail: "yes", premium: "no", price: "10.18" }])) }), calls);
+  const { supabase } = recordingSupabase(async (table) => ({ data: table === "registrar_prices" ? PRICE_TABLE : [], error: null }));
+  // The site has taken its share; the API has none left.
+  const { budget, log } = mockBudget({ site: 140, api: 0 });
+  try {
+    const api = await checkDomains(["budgetapi.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "background", quoteCaller: "api", quoteBudget: budget, registrarSells: () => true });
+    // The answer is unchanged — available, no price — and nobody was asked.
+    assertEquals([api[0].available, api[0].price, api[0].priceUnverified], [true, undefined, true]);
+    assertEquals(calls.length, 0, "no registrar call on the API's behalf");
+    assertEquals(log, [], "nothing spent");
+
+    const site = await checkDomains(["budgetsite.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "await", quoteCaller: "site", quoteBudget: budget, registrarSells: () => true });
+    assertEquals(calls.length, 1, "the visitor's follow-up is served");
+    assertEquals([site[0].available, site[0].price, site[0].priceUnverified ?? false], [true, 10.18, false]);
+    assertEquals(log, ["spend site 1"]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}) });
+
+Deno.test({ name: "budget: the API asks for no more names than its share allows", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const asked: string[][] = [];
+  globalThis.fetch = stubNetwork((domains) => {
+    asked.push(domains);
+    return json200({ status: "SUCCESS", domains: Object.fromEntries(domains.map((d) => [d, { avail: "yes", premium: "no", price: "10.18" }])) });
+  }, []);
+  const { supabase } = recordingSupabase(async (table) => ({ data: table === "registrar_prices" ? PRICE_TABLE : [], error: null }));
+  const { budget, log } = mockBudget({ site: 200, api: 3 });
+  try {
+    const names = Array.from({ length: 8 }, (_, i) => `sharename${i}.dev`);
+    await checkDomains(names, { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "background", quoteCaller: "api", quoteBudget: budget, registrarSells: () => true });
+    assertEquals(asked.map((a) => a.length), [3], "three names of eight: all the API had left");
+    assertEquals(log, ["spend api 3"]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}) });
+
+Deno.test({ name: "budget: a 429 from the registrar makes the API stand back for as long as it was told — and says nothing in the logs", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const realWarn = console.warn;
+  const warnings: string[] = [];
+  console.warn = (...args: unknown[]) => { warnings.push(args.map(String).join(" ")); };
+  globalThis.fetch = stubNetwork(() => new Response("slow down", { status: 429, headers: { "retry-after": "45" } }), []);
+  const { supabase } = recordingSupabase(async (table) => ({ data: table === "registrar_prices" ? PRICE_TABLE : [], error: null }));
+  try {
+    // The API's own call is throttled: back off, silently.
+    const apiSide = mockBudget({ site: 200, api: 60 });
+    const api = await checkDomains(["throttledapi.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "background", quoteCaller: "api", quoteBudget: apiSide.budget, registrarSells: () => true });
+    assertEquals([api[0].available, api[0].price, api[0].priceUnverified], [true, undefined, true], "the answer was never waiting on the quote");
+    assertEquals(apiSide.log, ["spend api 1", "backOff api 45000"]);
+    assertEquals(warnings.filter((w) => w.includes("porkbun")), [], "a throttled background quote is not a warning");
+
+    // The site's call is throttled: the account is at its limit, so the API yields; the site's 429 IS logged.
+    const siteSide = mockBudget({ site: 200, api: 60 });
+    const site = await checkDomains(["throttledsite.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "await", quoteCaller: "site", quoteBudget: siteSide.budget, registrarSells: () => true });
+    assertEquals([site[0].available, site[0].price, site[0].priceUnverified], [true, undefined, true], "no quote, no price — never the standard one");
+    assertEquals(siteSide.log, ["spend site 1", "backOff api 45000"]);
+    assertEquals(warnings.filter((w) => w.includes("porkbun HTTP 429")).length, 1);
+  } finally {
+    globalThis.fetch = realFetch;
+    console.warn = realWarn;
+  }
+}) });
 

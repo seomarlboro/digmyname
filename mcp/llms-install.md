@@ -35,7 +35,7 @@ Transport: `stdio`. Requires Node.js 18+.
 
 | Tool | Description |
 | --- | --- |
-| `check_domain` | Check one domain: availability, premium flags, cheapest registrar, buy link, registration year. |
+| `check_domain` | Check one domain: availability, premium flags, cheapest registrar, buy link, registration year. Prints "price not confirmed (may be premium)" until a registrar has quoted the name. |
 | `search_domains` | Check one name across many TLDs at once (defaults to a curated set of 11). |
 | `compare_registrars` | Compare registration, renewal and 3-year totals across 6 registrars for a TLD. |
 | `get_domain_age` | Registration year and expiration date for a taken domain via RDAP. |

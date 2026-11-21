@@ -242,7 +242,9 @@ async function invokeCheck(domains: string[]) {
       // The API never waits for a registrar quote (0.5–1 s). A name that needs
       // one is answered `price_unverified` and quoted after the response, so a
       // repeat call finds the price in the cache.
-      checkDomains(domains, { thirdSignalDeadlineAt, partialSink: partial, quotePrices: "background" }),
+      // It draws on the API's share of the registrar's allowance only — at
+      // most 30 % of a window, never what the site has used.
+      checkDomains(domains, { thirdSignalDeadlineAt, partialSink: partial, quotePrices: "background", quoteCaller: "api" }),
       budget,
     ]);
   } finally {
@@ -408,7 +410,9 @@ const OPENAPI = {
           "(a repeat call a few seconds later usually carries the price, or `premium: true` with the premium figure). " +
           "`registry_reserved: true` (always with `available: false`) means the registry holds the name back: it is " +
           "not registered and cannot be. " +
-          "`uncertain: true` means the signals did not agree — it is never reported as available.",
+          "`uncertain: true` means the signals did not agree — it is never reported as available. " +
+          "`uncertain_reason: \"not_sold_at_registrar\"` is one such disagreement: the registry lists no registration, " +
+          "yet a registrar will not sell the name (it may be reserved).",
         parameters: [
           { name: "domain", in: "query", required: true, schema: { type: "string", example: "myname.com" } },
         ],

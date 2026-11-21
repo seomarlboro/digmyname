@@ -209,6 +209,9 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
     // The registry rate-limited OUR checks (429). Retrying now hits the same
     // wall, so this row offers no Retry and says what actually happened.
     const registryLimited = result.uncertainReason === "registry_throttled";
+    // The registry lists no registration and a registrar will not sell the name.
+    // Asking again gets the same two answers, so this row offers no Retry either.
+    const notSold = result.uncertainReason === "not_sold_at_registrar";
     if (compact) {
       return (
         <div className={`grid ${COMPACT_GRID} border-b border-border px-3 py-3 sm:px-4 sm:py-4 transition-colors hover:bg-muted/10 ${COMPACT_ROW_MIN} ${FOCUS_RING}`} ref={focusRoot} tabIndex={-1}>
@@ -223,10 +226,10 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
               Trademark
             </Badge>
           ) : (
-            <span className="hidden text-xs text-muted-foreground min-w-[80px] sm:inline">{result.reachFailed ? "No connection" : stillChecking ? "Still checking" : registryLimited ? "Registry limits checks" : "Couldn't verify"}</span>
+            <span className="hidden text-xs text-muted-foreground min-w-[80px] sm:inline">{result.reachFailed ? "No connection" : stillChecking ? "Still checking" : registryLimited ? "Registry limits checks" : notSold ? "Not sold at registrars" : "Couldn't verify"}</span>
           )}
           <span className="hidden sm:block" />
-          {brandProtected || registryLimited ? (
+          {brandProtected || registryLimited || notSold ? (
             <span />
           ) : (
             <Button
@@ -266,11 +269,13 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                     ? "Still checking — this one's slow. Retry."
                     : registryLimited
                       ? "Couldn't verify — this registry limits our checks. Check the name at a registrar."
-                      : "Couldn't verify availability — sources disagreed. Try again."}
+                      : notSold
+                        ? "Couldn't verify — the registry lists no owner, but a registrar won't sell it. It may be reserved."
+                        : "Couldn't verify availability — sources disagreed. Try again."}
               </p>
             )}
           </div>
-          {!brandProtected && !registryLimited && (
+          {!brandProtected && !registryLimited && !notSold && (
             <Button
               variant="outline"
               onClick={retry}

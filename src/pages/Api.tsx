@@ -231,6 +231,9 @@ print(res.json()["result"]["available"])`,
                 <code className="font-mono text-xs">price_usd: null</code>; the quote is requested after the response,
                 and a later call returns the price — or <code className="font-mono text-xs">premium: true</code> with
                 the registrar's figure. No number is the honest answer; the extension's standard price would be a guess.
+                A registrar only prices names for us: if it refuses a name the registry lists as free, the answer is{" "}
+                <code className="font-mono text-xs">uncertain</code> with{" "}
+                <code className="font-mono text-xs">uncertain_reason: "not_sold_at_registrar"</code>, never "taken".
               </li>
               <li>
                 <code className="font-mono text-xs">registry_reserved: true</code> (always with{" "}

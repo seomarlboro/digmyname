@@ -60,9 +60,11 @@ export interface DomainResult {
   reserved?: boolean;
   /** APIs disagreed or failed — treat with caution */
   uncertain?: boolean;
-  /** Deterministic cause of uncertainty: `brand_protected` (trademark/registry-reserved)
-   *  or `budget_timeout` (our own request budget expired — NOT a registry failure). */
-  uncertainReason?: "brand_protected" | "budget_timeout" | "registry_throttled";
+  /** Deterministic cause of uncertainty: `brand_protected` (trademark/registry-reserved),
+   *  `budget_timeout` (our own request budget expired — NOT a registry failure), or
+   *  `not_sold_at_registrar` (the registry lists no registration, yet a registrar
+   *  will not sell the name — two sources that do not agree; never "taken"). */
+  uncertainReason?: "brand_protected" | "budget_timeout" | "registry_throttled" | "not_sold_at_registrar";
   /** Client-only: the batch that owned this row never reached the backend (503 /
    *  network error). Distinct from `uncertain` (backend reached, verdict
    *  inconclusive). Renders "couldn't reach — Retry"; cleared on retry. Never
@@ -222,7 +224,7 @@ export interface AvailabilityInfo {
   priceUnverified?: boolean;
   reserved?: boolean;
   uncertain?: boolean;
-  uncertainReason?: "brand_protected" | "budget_timeout" | "registry_throttled";
+  uncertainReason?: "brand_protected" | "budget_timeout" | "registry_throttled" | "not_sold_at_registrar";
   sldBlocked?: boolean;
   forSale?: boolean;
   forSaleVia?: string;

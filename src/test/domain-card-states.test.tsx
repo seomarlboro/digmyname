@@ -80,3 +80,26 @@ describe("DomainCard: a price no registrar has confirmed for this name", () => {
     });
   }
 });
+
+// The registrar prices names; it never decides availability. When it refuses a
+// name the registry lists as free, the card must not say "Registered".
+describe("DomainCard: a name the registry lists as free but a registrar will not sell", () => {
+  afterEach(() => { cleanup(); invoke.mockClear(); });
+  const refused = row({ domain: "coffee.xyz", tld: { extension: "xyz" }, available: false, uncertain: true, uncertainReason: "not_sold_at_registrar" });
+
+  it("card: says what the two sources said — never 'Registered', never a price — and offers no Retry", async () => {
+    const { container } = await card(refused, false, storeRow);
+    expect(container.textContent).toContain("the registry lists no owner, but a registrar won't sell it");
+    expect(container.textContent).not.toContain("Registered");
+    expect(container.textContent).not.toContain("$");
+    expect([...container.querySelectorAll("button")].some((b) => /retry/i.test(b.textContent ?? "") || /retry/i.test(b.getAttribute("aria-label") ?? ""))).toBe(false);
+  });
+
+  it("compact row: the same state in its short form", async () => {
+    const { container } = await card(refused, true, storeRow);
+    expect(container.textContent).toContain("Not sold at registrars");
+    expect(container.textContent).not.toContain("Registered");
+    expect(container.textContent).not.toContain("$");
+  });
+});
+

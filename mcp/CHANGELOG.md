@@ -5,6 +5,14 @@ All notable changes to `domain-check-skills-mcp`.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.13] — 2026-11-21
+
+### Changed
+- An available name whose price no registrar has confirmed yet now prints `price not confirmed (may be premium) — check at registrar` instead of printing no price line at all. Outside .com/.net/.org a registry can price a single name as premium (`online.store`: $6,823 for the first year), and a missing line invited the reader to assume the extension's standard price. Tool descriptions say the same.
+- A name the registry holds back prints `RESERVED BY THE REGISTRY (not registered, and cannot be registered)` instead of `TAKEN`.
+- An `UNKNOWN` caused by a registrar refusing a name the registry lists as free says so.
+- A response that still waits for its price is not held in the 30-second cache, so the next call can carry the confirmed price.
+
 ## [1.2.12] — 2026-09-11
 
 ### Changed

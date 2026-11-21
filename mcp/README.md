@@ -80,8 +80,8 @@ No API key, no account, no config — it works right after install.
 
 | Tool | Description |
 | --- | --- |
-| `check_domain` | Availability, premium / likely-premium flags, cheapest registrar, direct buy link and registration year (when taken) for one domain. |
-| `search_domains` | One name across many TLDs at once (defaults to a curated set of 11). Includes availability, price, buy link and registration year for taken results. |
+| `check_domain` | Availability, premium / likely-premium flags, cheapest registrar, direct buy link and registration year (when taken) for one domain. Says "price not confirmed (may be premium)" when no registrar has quoted the name yet, and "reserved by the registry" when it cannot be registered. |
+| `search_domains` | One name across many TLDs at once (defaults to a curated set of 11). Includes availability, buy link, the price once a registrar has confirmed it, and registration year for taken results. |
 | `compare_registrars` | Registration, renewal and 3-year totals per registrar for a TLD. |
 | `get_domain_age` | Registration year and expiration date for a taken domain via RDAP. |
 
@@ -105,7 +105,7 @@ acmeforge.io — AVAILABLE
 
 ## How it works
 
-Availability is resolved through an **authoritative-first** chain — RDAP (IANA bootstrap), authoritative DNS-over-HTTPS (Cloudflare, Google and AdGuard, hedged), Fastly Domain Research and registrar APIs. Anything unresolved is returned as `UNKNOWN` rather than falsely reported as taken. Premium candidates are flagged separately so agents never quote a standard retail price for a registry-premium name.
+Availability is resolved through an **authoritative-first** chain — RDAP (IANA bootstrap), authoritative DNS-over-HTTPS (Cloudflare, Google and AdGuard, hedged), Fastly Domain Research and registrar APIs. Anything unresolved is returned as `UNKNOWN` rather than falsely reported as taken. Premium candidates are flagged separately so agents never quote a standard retail price for a registry-premium name. Outside .com, .net and .org a registry can price any single name as premium, so a price is printed only once a registrar has quoted that very name; until then the answer reads `price not confirmed (may be premium) — check at registrar`, and a later call may carry the confirmed price. A name the registry holds back is reported as reserved, not as taken by someone.
 
 Pricing comes from DigMyName's registrar price cache across 6 registrars and 50+ TLDs.
 

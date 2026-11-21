@@ -78,7 +78,7 @@ Install (Claude Desktop / Cursor / Windsurf config):
 ```
 
 Tools:
-- `check_domain` — availability, premium flag, cheapest registrar and a direct buy link for one domain. Shows registration year when taken.
+- `check_domain` — availability, premium flag, cheapest registrar and a direct buy link for one domain. Shows registration year when taken; says "price not confirmed (may be premium)" until a registrar has quoted the name, and "reserved by the registry" when it cannot be registered.
 - `search_domains` — one name across many TLDs at once (defaults to a curated set of 11). Returns availability, price, buy link and registration year for taken results.
 - `compare_registrars` — registration, renewal and 3-year totals per registrar for a TLD.
 - `get_domain_age` — registration year and expiration date for a taken domain via RDAP.

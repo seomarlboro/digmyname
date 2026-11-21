@@ -56,13 +56,13 @@ const tools = [
     name: "check_domain",
     sig: "(domain: string)",
     icon: Sparkles,
-    desc: "Live availability, premium flags, cheapest registrar and buy link for one domain. Shows registration year when taken.",
+    desc: "Live availability, premium flags, cheapest registrar and buy link for one domain. Shows registration year when taken, and says so when a price is not confirmed yet.",
   },
   {
     name: "search_domains",
     sig: "(query: string, tlds?: string[])",
     icon: Puzzle,
-    desc: "Check one name across 11 popular TLDs in parallel (or the ones you pass). Returns availability + price + registration year for taken results.",
+    desc: "Check one name across 11 popular TLDs in parallel (or the ones you pass). Returns availability, the price once a registrar has confirmed it, and registration year for taken results.",
   },
   {
     name: "compare_registrars",

@@ -6,7 +6,9 @@ All notable changes to DigMyName.
 
 ### Fixed
 - **A registry-premium name was shown at the extension's standard price.** `online.store` has no registration and no DNS, so every free signal reads "available" — and a registrar sells it for $6,823.39 the first year, renewing at $27,291.98. We printed $0.98. Premium was guessed from the label's length (5 characters or fewer), and registries price ordinary words of any length as premium: of 15 common-word names we had priced as standard on new gTLDs, 13 were premium ($546–$10,917) and 2 were not for sale at all.
-- **Now, outside .com/.net/.org, a price is shown only for a name a registrar has quoted.** Until then the name is available with no price (`priceUnverified` in the pipeline, `price_unverified` in the API, "Checking price…" then a price or "Check price" on the site). The quote gives the standard price, the registrar's premium figure, or "not available after all".
+- **Now, outside .com/.net/.org, a price is shown only for a name a registrar has quoted.** Until then the name is available with no price (`priceUnverified` in the pipeline, `price_unverified` in the API, "Checking price…" then a price or "Check price" on the site). The quote gives the standard price, the registrar's premium figure, or a refusal (below).
+
+- **A registrar's "not available" no longer turns a name into "Registered".** The registrar is asked about price; it does not decide availability. When it refuses a name the registry lists as free, the result is uncertain (`uncertain_reason: "not_sold_at_registrar"`) — never available, never priced, never cached, never "taken". This also changes the older path for short and typed names, which used to read as taken. An extension the registrar does not sell is not sent to it at all: the name stays available, its price unknown.
 
 ### Changed
 - **Quotes are asked after the verdict, never inside it.** Measured: one registrar call adds 0.5–0.95 s to a 0.3 s answer. The site's search wave answers at once and a new price lane asks for the waiting names in bulk (one request for the top row, then 25 names per request). The API answers at once and requests the quote after the response; a later call finds it in the cache.
@@ -18,10 +20,12 @@ All notable changes to DigMyName.
 - **Prices now appear a moment after the cards**, and the API's first answer for a name outside .com/.net/.org usually has no price. That is the trade: no number instead of a wrong one.
 - **The registrar's bulk allowance is 200 domains a minute per account** — about four full searches of fresh names. Past it, cards say "Check price". Quoted answers are cached (6 h standard, 24 h premium) and shared.
 - **Through `api.digmyname.com` a price-less answer is held by the edge cache for 60 s** like any other 200, so the price shows up on a call made after that. The Worker lives outside this repo and was not changed.
-- **The MCP package is unchanged**: it prints an available name without a price line when none is known.
+- **A refused name still reads "available, price unconfirmed" on the first answer** (search wave and API), because an uncertain result is never cached; the refusal shows once the price follow-up has asked.
+- **The site comes first for quotes.** The API may use 30 % of the registrar's per-minute allowance at most and never what the site has taken, and it stops quietly when the registrar says 429. The ledger is per isolate, so this caps each API isolate rather than the API as a whole.
+- **MCP 1.2.13 (in the repo, not published):** an unconfirmed price prints "price not confirmed (may be premium) — check at registrar" instead of no line; a reserved name prints "RESERVED BY THE REGISTRY"; a response still waiting for its price is not held in the MCP's 30-second cache.
 
 ### Tests
-- Pipeline: a waiting name is never priced, with or without a registrar; the follow-up quotes four names in one call (standard / premium with the 2026-11-21 figures / not for sale / no answer); the API path stores the quote for the next call; the reserved flag reaches the cache row. Site: card facts, both card layouts, and the price lane driving the real search component.
+- Pipeline: a waiting name is never priced, with or without a registrar; the follow-up quotes four names in one call (standard / premium with the 2026-11-21 figures / refused / no answer); a refusal is uncertain and uncached for plain, short and typed names alike; an extension the registrar does not sell is never sent to it; the API path stores the quote for the next call; the allowance is split 70/30 (pure tests plus a mocked limiter driving the pipeline, including a 429); the reserved flag reaches the cache row. Site: card facts, both card layouts, and the price lane driving the real search component.
 
 ## 2026-11-21 — The edge cache prewarm is switched off (database cron, no code)
 
