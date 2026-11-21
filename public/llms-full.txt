@@ -94,7 +94,7 @@ Availability is checked in real time (cache rules above). Prices are refreshed w
 
 Base URL: `https://api.digmyname.com/functions/v1/public-api` — no auth, 60 requests per minute per IP and 5,000 domains per UTC day per IP. OpenAPI at `/openapi.json`, plugin manifest at `https://digmyname.com/.well-known/ai-plugin.json`.
 
-- `GET /check?domain=name.com` — availability, `uncertain`, `premium`, `for_sale`, `price_usd`, `cheapest_registrar`, `buy_url`, `register_url`.
+- `GET /check?domain=name.com` — availability, `uncertain`, `premium`, `price_unverified`, `registry_reserved`, `for_sale`, `price_usd`, `cheapest_registrar`, `buy_url`, `register_url`. Outside .com/.net/.org `price_usd` is returned only once a registrar has quoted the name; before that the answer is `price_unverified: true` with `price_usd: null`, and a later call carries the price. `registry_reserved: true` means the registry holds the name back (never available).
 - `GET /search?q=name&tlds=com,io,ai` — one name across many TLDs (max 12; defaults to com, io, ai, app, dev, co, net, org, xyz, me, tech).
 - `GET /registrars?tld=com` — sorted registrar pricing with `three_year_total_usd`.
 

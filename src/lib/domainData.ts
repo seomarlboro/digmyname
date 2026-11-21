@@ -46,6 +46,18 @@ export interface DomainResult {
    *  price was not confirmed this request. available:true with NO price; UI shows
    *  "premium — Check price", never a $ figure. */
   premiumUnverified?: boolean;
+  /** Backend: available, but no registrar has yet quoted this very name on an
+   *  extension whose registry may price one name as premium. No $ figure may be
+   *  shown — not the extension's standard price either. Not a premium suspect:
+   *  the card says "Check price" without the premium mark. Cleared by the price
+   *  follow-up (`quotePrices`). */
+  priceUnverified?: boolean;
+  /** Client-only: a price follow-up for this row is on its way (or the edge has
+   *  not answered yet). The card says "Checking price…" instead of "Check price". */
+  pricePending?: boolean;
+  /** Backend: the registry holds the name back — not registered, and it cannot
+   *  be. Always with available:false; the card says "Reserved by the registry". */
+  reserved?: boolean;
   /** APIs disagreed or failed — treat with caution */
   uncertain?: boolean;
   /** Deterministic cause of uncertainty: `brand_protected` (trademark/registry-reserved)
@@ -207,12 +219,46 @@ export interface AvailabilityInfo {
   premiumRenewPrice?: number;
   likelyPremium?: boolean;
   premiumUnverified?: boolean;
+  priceUnverified?: boolean;
+  reserved?: boolean;
   uncertain?: boolean;
   uncertainReason?: "brand_protected" | "budget_timeout" | "registry_throttled";
   sldBlocked?: boolean;
   forSale?: boolean;
   forSaleVia?: string;
   listingUrl?: string;
+}
+
+/**
+ * A result row after an authoritative answer. One mapping for the search wave,
+ * the price lane and Retry, so a field the backend adds cannot reach one of
+ * them and miss another.
+ *
+ * `awaitingQuote`: the caller will ask a registrar for this row's price next,
+ * so a row that came back without one says "Checking price…" in the meantime.
+ */
+export function applyVerdict(row: DomainResult, info: AvailabilityInfo, opts?: { awaitingQuote?: boolean }): DomainResult {
+  return {
+    ...row,
+    available: info.available,
+    checking: false,
+    provisional: false,
+    gdPrice: info.price,
+    premiumRenewPrice: info.premiumRenewPrice,
+    premium: info.premium,
+    likelyPremium: info.likelyPremium,
+    premiumUnverified: info.premiumUnverified,
+    priceUnverified: info.priceUnverified,
+    pricePending: opts?.awaitingQuote === true && info.available && !info.uncertain && info.priceUnverified === true,
+    reserved: info.reserved,
+    uncertain: info.uncertain,
+    uncertainReason: info.uncertainReason,
+    sldBlocked: info.sldBlocked,
+    forSale: info.forSale,
+    forSaleVia: info.forSaleVia,
+    listingUrl: info.listingUrl,
+    reachFailed: false,
+  };
 }
 
 /** Discriminated availability response. `ok:false` means the batch never reached
@@ -230,13 +276,19 @@ export interface AvailabilityResponse {
 export async function checkDomainsAvailability(
   domains: string[],
   signal?: AbortSignal,
-  opts?: { /** Ask for the registry-premium status of these names (one third-signal call each). */ verifyPremium?: boolean }
+  opts?: {
+    /** Ask for the registry-premium status of these names (one third-signal call each). */
+    verifyPremium?: boolean;
+    /** The price follow-up: these names came back `priceUnverified`; have a
+     *  registrar quote them, in one bulk call, and wait for it. */
+    quotePrices?: boolean;
+  }
 ): Promise<AvailabilityResponse> {
   const results = new Map<string, AvailabilityInfo>();
 
   try {
     const { data, error } = await supabase.functions.invoke("check-domains", {
-      body: opts?.verifyPremium ? { domains, verifyPremium: true } : { domains },
+      body: opts?.verifyPremium ? { domains, verifyPremium: true } : opts?.quotePrices ? { domains, quotePrices: true } : { domains },
       signal,
     });
 
@@ -255,6 +307,8 @@ export async function checkDomainsAvailability(
           premiumRenewPrice: r.premiumRenewPrice,
           likelyPremium: r.likelyPremium,
           premiumUnverified: r.premiumUnverified,
+          priceUnverified: r.priceUnverified,
+          reserved: r.reserved,
           uncertain: r.uncertain,
           uncertainReason: r.uncertainReason,
           sldBlocked: r.sldBlocked,

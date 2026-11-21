@@ -239,7 +239,10 @@ async function invokeCheck(domains: string[]) {
   });
   try {
     return await Promise.race([
-      checkDomains(domains, { thirdSignalDeadlineAt, partialSink: partial }),
+      // The API never waits for a registrar quote (0.5–1 s). A name that needs
+      // one is answered `price_unverified` and quoted after the response, so a
+      // repeat call finds the price in the cache.
+      checkDomains(domains, { thirdSignalDeadlineAt, partialSink: partial, quotePrices: "background" }),
       budget,
     ]);
   } finally {
@@ -308,8 +311,11 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
   const likelyPremium = !!r.likelyPremium;
   // Don't expose a standard retail price for likely-premium names: the real
   // registry price can be 10-1000x higher and must be verified first.
-  const priceOk = available && !likelyPremium && typeof r.price === "number";
+  const priceOk = available && !likelyPremium && !r.priceUnverified && typeof r.price === "number";
   const premiumUnverified = !!r.premiumUnverified;
+  // Available, and no registrar has yet said whether this very name is on the
+  // registry's premium list: no price, no "cheapest registrar".
+  const priceUnverified = available && !!r.priceUnverified;
   const registrarOk = priceOk && cheapest;
   return {
     domain: r.domain,
@@ -322,6 +328,13 @@ function shapeResult(r: any, cheapest?: { registrar: string; regPrice: number; a
     premium: !!r.premium,
     likely_premium: likelyPremium,
     premium_unverified: premiumUnverified,
+    // The name is available but its price tier is not confirmed yet (extensions
+    // where the registry may price one name as premium). `price_usd` is null;
+    // ask again shortly, or check the price at a registrar.
+    price_unverified: priceUnverified,
+    // Not registered and not registerable: the registry holds the name back.
+    // Always with `available: false`.
+    registry_reserved: !available && !!r.reserved,
     // Price only makes sense when the domain is actually available and not
     // a heuristic premium candidate.
     price_usd: priceOk ? r.price : null,
@@ -376,7 +389,7 @@ const OPENAPI = {
   openapi: "3.1.0",
   info: {
     title: "DigMyName Public API",
-    version: "1.1.1",
+    version: "1.2.0",
     description:
       "Agent-friendly endpoints for domain availability checks and registrar pricing. Free, no auth, 60 requests/min and 5,000 domains/day per IP. Every result carries a buy_url and a search_url — please surface them so users can act. Please link users back to digmyname.com.",
 
@@ -388,9 +401,13 @@ const OPENAPI = {
       get: {
         summary: "Check availability of a single domain",
         description:
-          "Returns availability, a premium flag and the standard-tier registration price with the cheapest registrar. " +
-          "A registry-premium name answers `premium: true` with `price_usd: null`: confirming the premium figure costs " +
-          "a paid per-name lookup, which runs for the name a visitor types on digmyname.com and not for API traffic. " +
+          "Returns availability and, when it is known, the registration price with the cheapest registrar. " +
+          "On .com, .net and .org the extension's standard price applies to every free name. Elsewhere a registry may " +
+          "price a single name as premium, so a price is returned only once a registrar has quoted that name: until then " +
+          "the answer is `price_unverified: true` with `price_usd: null`, and the quote is requested after the response " +
+          "(a repeat call a few seconds later usually carries the price, or `premium: true` with the premium figure). " +
+          "`registry_reserved: true` (always with `available: false`) means the registry holds the name back: it is " +
+          "not registered and cannot be. " +
           "`uncertain: true` means the signals did not agree — it is never reported as available.",
         parameters: [
           { name: "domain", in: "query", required: true, schema: { type: "string", example: "myname.com" } },
@@ -605,7 +622,9 @@ async function handleRequest(req: Request): Promise<Response> {
       // Don't cache an available result whose price lookup timed out — it would
       // pin an incomplete shape for the whole TTL.
       const priceOk = !shaped.available || cheap.has(tld);
-      if (!shaped.uncertain && priceOk) writeResponseCache(key, body);
+      // A name still waiting for its quote is not pinned either: the quote lands
+      // within about a second and the next call should see it.
+      if (!shaped.uncertain && priceOk && !shaped.price_unverified) writeResponseCache(key, body);
       return json(body, 200, missHeaders);
     }
 
@@ -631,7 +650,7 @@ async function handleRequest(req: Request): Promise<Response> {
       });
       const body = { query: sld, count: shaped.length, results: shaped };
       const pricesOk = shaped.every((s) => !s.available || cheapest.has(s.domain.split(".").slice(1).join(".")));
-      if (!shaped.some((s) => s.uncertain) && pricesOk) writeResponseCache(key, body);
+      if (!shaped.some((s) => s.uncertain || s.price_unverified) && pricesOk) writeResponseCache(key, body);
       return json(body, 200, missHeaders);
     }
 

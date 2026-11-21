@@ -361,7 +361,7 @@ Deno.test({ name: "checkDomains: probes leave before the DB cache answers; a cac
       await cacheGate;
       cacheSettled = true;
       return {
-        data: [{ domain: "cachedname.com", available: true, checked_via: "domainr", rdap_data: { cache_version: 5, reg_price: 9.99, premium: false } }],
+        data: [{ domain: "cachedname.com", available: true, checked_via: "domainr", rdap_data: { cache_version: 6, reg_price: 9.99, premium: false } }],
         error: null,
       };
     }
@@ -612,6 +612,221 @@ Deno.test({ name: "checkDomains: a registry-reserved name (404 + 'registry reser
 
     // Nothing but the free name may reach the cache as available.
     assertEquals(written.filter((w) => w.available).map((w) => w.domain), ["gardenplot.tech"]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+} });
+
+// ---- A standard price needs a registrar's word (2026-11-21) -----------------
+// `online.store` has no registration and no DNS, so the registry answers a plain
+// 404 — and a registrar sells it for $6,823.39 the first year, renewing at
+// $27,291.98. The pipeline printed the extension's standard $0.98 next to it,
+// because a 6-letter label was never a "premium suspect". On every extension but
+// .com/.net/.org a standard price is now printed only once a registrar has
+// quoted that very name; until then the name is `priceUnverified`.
+
+/** stubSupabase plus a record of every row upserted into `domain_cache`. */
+function recordingSupabase(answer: (table: string) => Promise<{ data: unknown; error: null }>) {
+  const written: Array<{ domain: string; available: boolean; checked_via: string; rdap_data: Record<string, unknown> }> = [];
+  const base = stubSupabase(answer) as unknown as { from: (t: string) => Record<string, unknown>; rpc: unknown };
+  const supabase = {
+    rpc: base.rpc,
+    from: (table: string) => {
+      const q = base.from(table);
+      const upsert = q.upsert as (rows: unknown) => unknown;
+      q.upsert = (rows: unknown) => {
+        if (table === "domain_cache") written.push(...(Array.isArray(rows) ? rows : [rows]) as typeof written);
+        return upsert(rows);
+      };
+      return q;
+    },
+  } as unknown as NonNullable<Parameters<typeof checkDomains>[1]>["supabase"];
+  return { supabase, written };
+}
+
+/** Registry: nothing registered. DNS: NXDOMAIN. Registrar: whatever `quote` says. */
+function stubNetwork(quote: (domains: string[]) => Response, calls: string[]) {
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  return (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("api.porkbun.com/api/json/v3/domain/checkDomain")) {
+      calls.push(url);
+      const single = url.split("/checkDomain/")[1];
+      const body = JSON.parse(String(init?.body ?? "{}")) as { domains?: string[] };
+      return quote(single ? [decodeURIComponent(single)] : (body.domains ?? []));
+    }
+    if (url.includes("/domain/")) return new Response("", { status: 404 });
+    if (url.includes("dns-query") || url.includes("dns.google") || url.includes("adguard")) return json({ Status: 3, Answer: [] });
+    if (url.includes("data.iana.org")) return json({ services: [] });
+    if (url.includes("porkbun.com")) return json({ status: "SUCCESS", pricing: { store: { registration: "2.57", renewal: "43.77" }, dev: { registration: "10.18", renewal: "12.87" } } });
+    return new Response("", { status: 404 });
+  }) as typeof fetch;
+}
+
+const PRICE_TABLE = [{ tld: "store", reg_price: 0.98 }, { tld: "dev", reg_price: 10.18 }, { tld: "com", reg_price: 9.59 }];
+const withRegistrarKeys = async (fn: () => Promise<void>) => {
+  const before = { pk: Deno.env.get("PORKBUN_API_KEY"), ps: Deno.env.get("PORKBUN_SECRET_KEY") };
+  Deno.env.set("PORKBUN_API_KEY", "pk");
+  Deno.env.set("PORKBUN_SECRET_KEY", "sk");
+  try { await fn(); } finally {
+    for (const [k, v] of [["PORKBUN_API_KEY", before.pk], ["PORKBUN_SECRET_KEY", before.ps]] as const) {
+      if (v == null) Deno.env.delete(k); else Deno.env.set(k, v);
+    }
+  }
+};
+const json200 = (body: unknown) => new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
+
+Deno.test({ name: "price: an available name on a premium-tier extension carries NO standard price until a registrar quotes it; .com is unchanged", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = stubNetwork(() => json200({ status: "SUCCESS", domains: {} }), calls);
+  const { supabase, written } = recordingSupabase(async (table) => ({ data: table === "registrar_prices" ? PRICE_TABLE : [], error: null }));
+  try {
+    // The search wave: no quote mode. `onlineone.store` stands in for online.store (same shape: 6+ letters, plain 404).
+    const results = await checkDomains(["onlineone.store", "onlineone.com"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000 });
+    const by = new Map(results.map((r) => [r.domain, r]));
+
+    const store = by.get("onlineone.store")!;
+    assertEquals([store.available, store.uncertain ?? false, store.checkedVia], [true, false, "rdap"], "the verdict itself does not change");
+    assertEquals(store.price, undefined, "the standard $0.98 must not be printed for an unquoted name");
+    assertEquals(store.priceUnverified, true);
+    assertEquals(store.premiumUnverified ?? false, false, "not a premium suspect — only the price is unknown");
+
+    // .com has one registry price for every free name: nothing to quote.
+    const com = by.get("onlineone.com")!;
+    assertEquals([com.available, com.price, com.priceUnverified ?? false], [true, 9.59, false]);
+
+    assertEquals(calls.length, 0, "the wave never waits for a registrar");
+    const row = written.find((w) => w.domain === "onlineone.store")!;
+    assertEquals([row.available, row.rdap_data.reg_price, row.rdap_data.price_unverified], [true, null, true], "cached without a price, flagged");
+    assert(new Date((row as unknown as { expires_at: string }).expires_at).getTime() - Date.now() <= 600_000 + 1000, "a name waiting for its quote is cached 10 minutes at most");
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}) });
+
+Deno.test({ name: "price: the follow-up request quotes waiting names in ONE registrar call — standard price, premium price, or not available after all", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = stubNetwork((domains) => {
+    const answers: Record<string, unknown> = {
+      // An ordinary name: the registrar's own standard price.
+      "plainquoted.store": { avail: "yes", premium: "no", price: "2.57", regularPrice: "43.77" },
+      // The online.store case, with the figures quoted on 2026-11-21.
+      "premiumquoted.store": { avail: "yes", premium: "yes", price: "6823.39", regularPrice: "27291.98", additional: { renewal: { price: "27291.98" } } },
+      // The registry will not sell it (reserved, and its 404 said nothing).
+      "refusedquoted.store": { avail: "no", premium: "no" },
+    };
+    return json200({ status: "SUCCESS", domains: Object.fromEntries(domains.filter((d) => d in answers).map((d) => [d, answers[d]])), unresolved: domains.filter((d) => !(d in answers)) });
+  }, calls);
+  // All four sit in the shared cache from the search wave, waiting for a quote.
+  const waiting = (domain: string) => ({ domain, available: true, checked_via: "rdap", rdap_data: { cache_version: 6, reg_price: null, price_unverified: true } });
+  const names = ["plainquoted.store", "premiumquoted.store", "refusedquoted.store", "silentquoted.store"];
+  const { supabase, written } = recordingSupabase(async (table) => ({
+    data: table === "domain_cache" ? names.map(waiting) : table === "registrar_prices" ? PRICE_TABLE : [],
+    error: null,
+  }));
+  try {
+    const results = await checkDomains(names, { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "await" });
+    const by = new Map(results.map((r) => [r.domain, r]));
+    assertEquals(calls.length, 1, "four names, one bulk call");
+
+    // Standard: the extension's standard price (cheapest registrar we track), verdict and source untouched.
+    const plain = by.get("plainquoted.store")!;
+    assertEquals([plain.available, plain.price, plain.priceUnverified ?? false, plain.premium ?? false, plain.checkedVia], [true, 0.98, false, false, "rdap"]);
+
+    // Premium: the registrar's figures, never the standard price.
+    const premium = by.get("premiumquoted.store")!;
+    assertEquals([premium.available, premium.premium, premium.price, premium.premiumRenewPrice, premium.priceUnverified ?? false, premium.checkedVia], [true, true, 6823.39, 27291.98, false, "porkbun"]);
+
+    // Not for sale after all: never available.
+    const refused = by.get("refusedquoted.store")!;
+    assertEquals([refused.available, refused.price, refused.checkedVia], [false, undefined, "porkbun"]);
+
+    // The registrar did not answer for this one: still available, still no price.
+    const silent = by.get("silentquoted.store")!;
+    assertEquals([silent.available, silent.price, silent.priceUnverified], [true, undefined, true]);
+
+    // The cache now holds the quoted answers, so the next visitor does not ask again.
+    const cached = new Map(written.map((w) => [w.domain, w]));
+    assertEquals([cached.get("plainquoted.store")!.rdap_data.reg_price, cached.get("plainquoted.store")!.rdap_data.price_unverified], [0.98, false]);
+    assertEquals([cached.get("premiumquoted.store")!.rdap_data.premium, cached.get("premiumquoted.store")!.rdap_data.reg_price], [true, 6823.39]);
+    assertEquals(cached.get("refusedquoted.store")!.available, false);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}) });
+
+Deno.test({ name: "price: without a registrar (no key, or it fails) the name stays available and price-less — never the standard price", sanitizeOps: false, sanitizeResources: false, fn: async () => {
+  const realFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = stubNetwork(() => new Response("upstream down", { status: 503 }), calls);
+  const { supabase } = recordingSupabase(async (table) => ({ data: table === "registrar_prices" ? PRICE_TABLE : [], error: null }));
+  const before = { pk: Deno.env.get("PORKBUN_API_KEY"), ps: Deno.env.get("PORKBUN_SECRET_KEY") };
+  try {
+    // No key configured at all.
+    Deno.env.delete("PORKBUN_API_KEY"); Deno.env.delete("PORKBUN_SECRET_KEY");
+    const noKey = await checkDomains(["nokeyname.store"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "await" });
+    assertEquals([noKey[0].available, noKey[0].price, noKey[0].priceUnverified], [true, undefined, true]);
+    assertEquals(calls.length, 0);
+
+    // Key present, registrar answers 503.
+    Deno.env.set("PORKBUN_API_KEY", "pk"); Deno.env.set("PORKBUN_SECRET_KEY", "sk");
+    const failed = await checkDomains(["failname.store", "failname.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "await" });
+    for (const r of failed) assertEquals([r.available, r.price, r.priceUnverified], [true, undefined, true], r.domain);
+    assertEquals(calls.length, 1);
+  } finally {
+    globalThis.fetch = realFetch;
+    for (const [k, v] of [["PORKBUN_API_KEY", before.pk], ["PORKBUN_SECRET_KEY", before.ps]] as const) {
+      if (v == null) Deno.env.delete(k); else Deno.env.set(k, v);
+    }
+  }
+} });
+
+Deno.test({ name: "price: the API answers at once without a price and stores the registrar's quote for the next call", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = stubNetwork(() => json200({ status: "SUCCESS", response: { avail: "yes", premium: "no", price: "10.18", regularPrice: "12.87" } }), calls);
+  const { supabase, written } = recordingSupabase(async (table) => ({ data: table === "registrar_prices" ? PRICE_TABLE : [], error: null }));
+  try {
+    const results = await checkDomains(["apiquoted.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "background" });
+    // What the caller receives: available, no price yet.
+    assertEquals([results[0].available, results[0].price, results[0].priceUnverified], [true, undefined, true]);
+    // What was stored once the registrar answered (outside the edge runtime the job is awaited).
+    assertEquals(calls.length, 1);
+    const last = written.filter((w) => w.domain === "apiquoted.dev").at(-1)!;
+    assertEquals([last.available, last.rdap_data.reg_price, last.rdap_data.price_unverified, last.checked_via], [true, 10.18, false, "rdap"]);
+
+    // The next call is served from the cache — priced, and without asking the registrar again.
+    const again = await checkDomains(["apiquoted.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "background" });
+    assertEquals([again[0].available, again[0].price, again[0].priceUnverified ?? false], [true, 10.18, false]);
+    assertEquals(calls.length, 1);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}) });
+
+Deno.test({ name: "reserved: the flag travels with the taken verdict and into the cache row", sanitizeOps: false, sanitizeResources: false, fn: async () => {
+  const realFetch = globalThis.fetch;
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url.endsWith("/domain/gardenbed.tech")) return new Response(RADIX_404_RESERVED, { status: 404 });
+    if (url.endsWith("/domain/takenbed.tech")) return json({ objectClassName: "domain", events: [{ eventAction: "registration", eventDate: "2016-06-06T13:33:19Z" }] });
+    if (url.includes("dns-query") || url.includes("dns.google") || url.includes("adguard")) return json({ Status: 3, Answer: [] });
+    if (url.includes("data.iana.org")) return json({ services: [] });
+    if (url.includes("porkbun.com")) return json({ status: "SUCCESS", pricing: {} });
+    return new Response("", { status: 404 });
+  }) as typeof fetch;
+  const { supabase, written } = recordingSupabase(async () => ({ data: [], error: null }));
+  try {
+    const results = await checkDomains(["gardenbed.tech", "takenbed.tech"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000 });
+    const by = new Map(results.map((r) => [r.domain, r]));
+    assertEquals([by.get("gardenbed.tech")!.available, by.get("gardenbed.tech")!.reserved], [false, true]);
+    // An ordinary registration is not "reserved".
+    assertEquals([by.get("takenbed.tech")!.available, by.get("takenbed.tech")!.reserved ?? false, by.get("takenbed.tech")!.sinceYear], [false, false, 2016]);
+    assertEquals(written.find((w) => w.domain === "gardenbed.tech")!.rdap_data.reserved, true);
+    assertEquals(written.find((w) => w.domain === "takenbed.tech")!.rdap_data.reserved, false);
   } finally {
     globalThis.fetch = realFetch;
   }

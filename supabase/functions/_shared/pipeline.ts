@@ -12,6 +12,7 @@
 // ============================================================================
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
+  hasRegistryPremiumTier,
   interpretDomainr,
   interpretRdap404,
   isLikelyBlocked,
@@ -50,7 +51,11 @@ import {
 // 5 (2026-11-21): a registry RDAP 404 whose body says the name is reserved is
 // no longer read as "not registered" (interpretRdap404). Rows cached as
 // available under the old reading (`garden.tech`, 6 h) must not be served.
-const CACHE_VERSION = 5;
+// 6 (2026-11-21): on extensions with a registry premium tier an available name
+// no longer carries the standard price until a registrar has quoted it
+// (`priceUnverified`). Rows cached with an unquoted standard price
+// (`online.store` at $0.98) must not be served.
+const CACHE_VERSION = 6;
 
 
 export interface DomainCheckResult {
@@ -76,6 +81,18 @@ export interface DomainCheckResult {
    *  (probe failure/disagreement) and `premium` (confirmed premium w/ real price).
    *  Never cached with a price. */
   premiumUnverified?: boolean;
+  /** Available, on an extension whose registry may price this one name as
+   *  premium (hasRegistryPremiumTier), and no registrar has quoted it yet.
+   *  available:true, price MUST stay undefined — the extension's standard price
+   *  is not known to apply. Not a premium suspect: the card says "Check price"
+   *  without the premium mark. Cleared by a registrar quote (standard price, a
+   *  premium price, or "not available"). Cached for 10 minutes at most. */
+  priceUnverified?: boolean;
+  /** The registry holds the name back: no registration exists, and it cannot be
+   *  registered (its RDAP 404 says so — interpretRdap404). Travels with
+   *  available:false; lets a card say "Reserved by the registry" instead of
+   *  "Registered". Label only. */
+  reserved?: boolean;
   /** Registered but parked on an aftermarket marketplace (Sedo, Dan, Afternic, …). */
   forSale?: boolean;
   forSaleVia?: string;
@@ -1082,8 +1099,8 @@ async function resolveDomain(domain: string, deadlineAt?: number): Promise<Domai
     // A taken-by-RDAP win carries the registration year off the same response
     // (rdapP is already resolved here, so this await is instant). DNS-only takens
     // have no RDAP body → no inline year, and fall back to /age as before.
-    const sinceYear = winner === "rdap" ? (await rdapP).sinceYear : undefined;
-    return { domain, available: false, checkedVia: winner, likelyPremium, sinceYear };
+    const rdapWin = winner === "rdap" ? await rdapP : undefined;
+    return { domain, available: false, checkedVia: winner, likelyPremium, sinceYear: rdapWin?.sinceYear, reserved: rdapWin?.reserved || undefined };
   }
 
   const [dns, rdap] = await Promise.all([dnsP, rdapP]);
@@ -1187,6 +1204,69 @@ function porkbunBudgetReady(cost = 1): boolean {
 function consumePorkbunBudget(cost = 1): void {
   porkbunSpent.push({ at: Date.now(), cost });
 }
+/** Domains this isolate may still send to the registrar in the current window. */
+function porkbunBudgetRoom(): number {
+  return porkbunBudgetReady(0)
+    ? PORKBUN_MAX_DOMAINS_PER_WINDOW - porkbunSpent.reduce((sum, e) => sum + e.cost, 0)
+    : 0;
+}
+
+/** Up to PORKBUN_BULK_MAX names: the single-name endpoint for one, the bulk
+ *  endpoint for more. Names the registrar did not answer are simply absent. */
+async function registrarQuotes(domains: string[], key: string, secret: string): Promise<Map<string, PorkbunResult>> {
+  if (domains.length === 0) return new Map();
+  if (domains.length === 1) {
+    const one = await checkPorkbun(domains[0], key, secret);
+    return one ? new Map([[domains[0].toLowerCase(), one]]) : new Map();
+  }
+  return checkPorkbunBulk(domains, key, secret);
+}
+
+/**
+ * What a registrar's answer makes of a name the base pass read as available.
+ *
+ * `plainName`: the name was waiting only for a price (`priceUnverified`) — not a
+ * premium suspect and not the name the visitor typed. When the registrar says
+ * "available, standard tier" for such a name the verdict and its source stay as
+ * they were (so does its cache lifetime); only the flag is lifted, and the
+ * caller prints the extension's standard price. Every other outcome — premium,
+ * or not available after all — is the registrar's verdict, exactly as it always
+ * was for suspects.
+ */
+function applyRegistrarQuote(
+  r: DomainCheckResult,
+  pb: PorkbunResult,
+  catalogStandard: number | undefined,
+  plainName: boolean,
+): DomainCheckResult {
+  const isPremium =
+    pb.premium ||
+    (pb.price != null && catalogStandard != null && pb.price > catalogStandard * 2) ||
+    (pb.price != null && catalogStandard == null && pb.price >= 50);
+  if (plainName && pb.available && !isPremium) return { ...r, priceUnverified: undefined };
+  const price = pb.available
+    ? (isPremium ? pb.price : (pb.price ?? catalogStandard ?? r.price))
+    : undefined;
+  return {
+    ...r,
+    available: pb.available,
+    checkedVia: "porkbun",
+    price,
+    premium: pb.available ? (isPremium || undefined) : undefined,
+    premiumRenewPrice: confirmedPremiumRenewal(pb, isPremium, price),
+    likelyPremium: isPremium || undefined,
+    uncertain: undefined,
+    // Porkbun IS the registrar check `premiumUnverified` was waiting for.
+    // Once it answers with a price the flag is satisfied; for a taken
+    // name it is moot. Carrying it forward next to a verified price told
+    // the card to show "Check price" over a $ figure we had confirmed.
+    premiumUnverified: pb.available && price == null ? r.premiumUnverified : undefined,
+    priceUnverified: pb.available && price == null ? r.priceUnverified : undefined,
+  };
+}
+
+/** Names whose background quote is in flight in this isolate (one call each). */
+const quotingNow = new Set<string>();
 
 // ---------------------------------------------------------------------------
 // Lazily-created service-role client, reused across requests in this isolate.
@@ -1216,6 +1296,8 @@ function buildCacheRow(r: DomainCheckResult, ttl: number) {
       premium_renew_price: r.premiumRenewPrice ?? null,
       likely_premium: r.likelyPremium ?? false,
       premium_unverified: r.premiumUnverified ?? false,
+      price_unverified: r.priceUnverified ?? false,
+      reserved: r.reserved ?? false,
       for_sale: r.forSale ?? false,
       for_sale_via: r.forSaleVia ?? null,
       listing_url: r.listingUrl ?? null,
@@ -1290,6 +1372,16 @@ export async function checkDomains(
      *  is bypassed for them and pass 2 runs whenever pass 1 says available, so
      *  a registry-premium name never ships with the standard TLD price. */
     verifyPremium?: ReadonlySet<string>;
+    /** What to do about available names that still wait for a registrar quote
+     *  (`priceUnverified`). A quote costs 0.5–1 s (measured 2026-11-21), so it is
+     *  never part of the verdict itself:
+     *    • unset        — answer at once, flag the names, ask nobody (the site's
+     *                     search wave; it follows up in one bulk request);
+     *    • "await"      — this request IS that follow-up: quote the flagged names,
+     *                     cached ones included, and wait for the registrar;
+     *    • "background" — answer at once and quote after the response, so the
+     *                     next request finds the price in the cache (the API). */
+    quotePrices?: "await" | "background";
   } = {}
 ): Promise<DomainCheckResult[]> {
   const supabase = deps.supabase ?? getServiceClient();
@@ -1305,6 +1397,7 @@ export async function checkDomains(
   const batch = domains.slice(0, 50).filter(isValidDomain);
   if (batch.length === 0) return [];
   const forced = deps.verifyPremium ?? new Set<string>();
+  const quoteMode = deps.quotePrices;
 
   const porkbunKey = Deno.env.get("PORKBUN_API_KEY");
   const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
@@ -1356,6 +1449,10 @@ export async function checkDomains(
       // the cautious one — publishing available:true here sold reserved names
       // (`test.dev`, `mail.dev`) whenever Pass 2 missed the 900ms API budget.
       publish({ domain: r.domain, available: false, checkedVia: r.checkedVia, uncertain: true });
+    } else if (r.available && !r.uncertain && hasRegistryPremiumTier(r.domain)) {
+      // A caller whose budget expires reads this as final: the name is
+      // available, its price is not known yet.
+      publish({ ...r, priceUnverified: true });
     } else {
       publish(r);
     }
@@ -1395,6 +1492,8 @@ export async function checkDomains(
         premiumRenewPrice: typeof meta.premium_renew_price === "number" ? meta.premium_renew_price : undefined,
         likelyPremium: meta.likely_premium as boolean | undefined,
         premiumUnverified: meta.premium_unverified as boolean | undefined,
+        priceUnverified: meta.price_unverified === true ? true : undefined,
+        reserved: meta.reserved === true ? true : undefined,
         // Additive; absent on rows written before Phase 2 → undefined → the MCP
         // simply falls back to /age for those until they refresh.
         sinceYear: meta.since_year as number | undefined,
@@ -1582,12 +1681,40 @@ export async function checkDomains(
     }
   }
 
-  // ---- Standard price enrichment (free Porkbun pricing catalog) --------
+  // ---- Price: what may be printed next to an available name ------------
+  // The verdict above is final. What follows only decides the price, and it is
+  // strict: on an extension whose registry may price one name as premium, the
+  // standard price is printed only for a name a registrar has quoted.
   const pricing = getWarmTldPricingOnly();
 
-  const neededTlds = [...new Set(
-    fresh.filter((r) => r.available && r.price == null).map((r) => r.domain.split(".").slice(1).join("."))
-  )];
+  // This request is the follow-up for names that were answered without a price:
+  // the cached ones still waiting join the quote pass below.
+  if (quoteMode === "await") {
+    for (const [d, c] of [...cachedMap]) {
+      if (c.available && !c.uncertain && c.priceUnverified) {
+        fresh.push({ ...c });
+        cachedMap.delete(d);
+      }
+    }
+  }
+
+  // Flag every fresh name that still needs a quote. Not the premium suspects
+  // (they have their own, stricter state) and not a verdict the third signal
+  // gave: that one already says whether the name is premium.
+  for (let i = 0; i < fresh.length; i++) {
+    const r = fresh[i];
+    if (
+      r.available && !r.uncertain && r.price == null &&
+      !r.premium && !r.likelyPremium && !r.premiumUnverified && !r.priceUnverified &&
+      (r.checkedVia === "rdap" || r.checkedVia === "whois") &&
+      hasRegistryPremiumTier(r.domain)
+    ) {
+      fresh[i] = { ...r, priceUnverified: true };
+    }
+  }
+
+  const tldOf = (domain: string) => domain.split(".").slice(1).join(".");
+  const neededTlds = [...new Set(fresh.filter((r) => r.available && r.price == null).map((r) => tldOf(r.domain)))];
   const dbPrice = new Map<string, number>();
   if (neededTlds.length > 0) {
     const { data: priceRows } = await supabase
@@ -1602,62 +1729,58 @@ export async function checkDomains(
       if (cur == null || v < cur) dbPrice.set(row.tld, v);
     }
   }
+  /** The extension's standard first-year price: the cheapest registrar we track,
+   *  else the registrar catalog, else what the registrar just quoted. */
+  const standardPriceFor = (domain: string, quoted?: number) =>
+    dbPrice.get(tldOf(domain)) ?? pricing.get(tldOf(domain))?.registration ?? quoted;
 
-  for (let i = 0; i < fresh.length; i++) {
-    const r = fresh[i];
-    // Don't attach a standard retail price to likely-premium names until a
-    // registrar has verified the real price.
-    if (!r.available || r.price != null || r.likelyPremium) continue;
-    const tld = r.domain.split(".").slice(1).join(".");
-    const p = dbPrice.get(tld) ?? pricing.get(tld)?.registration;
-    if (p != null) fresh[i] = { ...r, price: p };
+  // ---- Registrar quote pass (bulk, 200 domains / 60 s per account) -------
+  // Where a registry-premium name gets its REAL price — and, since 2026-11-21,
+  // where an ordinary name on a premium-tier extension earns the standard one.
+  // Always asked: premium suspects and the name the visitor typed (`forced`).
+  // Asked only when this request is the price follow-up: names waiting for a
+  // quote. Order = who waits first: the typed name, the suspects (shortest
+  // label first), then the waiting names in the order the caller sent them.
+  const isSuspect = (r: DomainCheckResult) => r.premium === true || r.likelyPremium === true;
+  const order = new Map(batch.map((d, i) => [d, i]));
+  const rank = (r: DomainCheckResult) => (forced.has(r.domain) ? 0 : isSuspect(r) ? 1 : 2);
+  const quoteCandidates = fresh
+    .filter((r) =>
+      r.available && r.checkedVia !== "porkbun" &&
+      (isSuspect(r) || forced.has(r.domain) || (quoteMode === "await" && r.priceUnverified === true))
+    )
+    .sort((a, b) =>
+      rank(a) - rank(b) ||
+      (rank(a) === 2
+        ? (order.get(a.domain) ?? 0) - (order.get(b.domain) ?? 0)
+        : a.domain.split(".")[0].length - b.domain.split(".")[0].length)
+    );
+  const quoteTargets = porkbun ? quoteCandidates.slice(0, Math.min(PORKBUN_BULK_MAX, porkbunBudgetRoom())) : [];
+  /** What the registrar charged for a name it called standard — the last resort
+   *  when neither our price table nor the catalog knows the extension. */
+  const quotedStandard = new Map<string, number>();
+  if (porkbun && quoteTargets.length > 0) {
+    consumePorkbunBudget(quoteTargets.length);
+    const quotes = await registrarQuotes(quoteTargets.map((r) => r.domain), porkbun.key, porkbun.secret);
+    for (const target of quoteTargets) {
+      const pb = quotes.get(target.domain.toLowerCase());
+      if (!pb) continue;
+      const idx = fresh.findIndex((r) => r.domain === target.domain);
+      if (idx < 0) continue;
+      const plainName = target.priceUnverified === true && !isSuspect(target) && !forced.has(target.domain);
+      if (pb.price != null) quotedStandard.set(target.domain, pb.price);
+      fresh[idx] = applyRegistrarQuote(fresh[idx], pb, pricing.get(tldOf(target.domain))?.registration, plainName);
+    }
   }
 
-  // ---- Porkbun verification pass (bulk, 200 domains/60s) ----------------
-  // This is where a registry-premium name gets its REAL price, and since
-  // 2026-09-16 it is also what replaced the paid premium check on the typed
-  // name. Candidates: every available premium suspect plus the typed name.
-  const porkbunTargets = fresh
-    .filter((r) => r.available && (r.premium || r.likelyPremium || forced.has(r.domain)) && r.checkedVia !== "porkbun")
-    // The name the visitor asked about first, then the shortest SLD (most likely premium).
-    .sort((a, b) => Number(forced.has(b.domain)) - Number(forced.has(a.domain)) || a.domain.split(".")[0].length - b.domain.split(".")[0].length)
-    .slice(0, PORKBUN_BULK_MAX);
-  if (porkbun && porkbunTargets.length > 0 && porkbunBudgetReady(porkbunTargets.length)) {
-    consumePorkbunBudget(porkbunTargets.length);
-    const quotes = porkbunTargets.length === 1
-      ? new Map([[porkbunTargets[0].domain.toLowerCase(), await checkPorkbun(porkbunTargets[0].domain, porkbun.key, porkbun.secret)]])
-      : await checkPorkbunBulk(porkbunTargets.map((r) => r.domain), porkbun.key, porkbun.secret);
-    for (const target of porkbunTargets) {
-      const pb = quotes.get(target.domain.toLowerCase());
-      if (pb) {
-        const idx = fresh.findIndex((r) => r.domain === target.domain);
-        if (idx >= 0) {
-          const standard = pricing.get(target.domain.split(".").slice(1).join("."))?.registration;
-          const isPremium =
-            pb.premium ||
-            (pb.price != null && standard != null && pb.price > standard * 2) ||
-            (pb.price != null && standard == null && pb.price >= 50);
-          const price = pb.available
-            ? (isPremium ? pb.price : (pb.price ?? standard ?? fresh[idx].price))
-            : undefined;
-          fresh[idx] = {
-            ...fresh[idx],
-            available: pb.available,
-            checkedVia: "porkbun",
-            price,
-            premium: pb.available ? (isPremium || undefined) : undefined,
-            premiumRenewPrice: confirmedPremiumRenewal(pb, isPremium, price),
-            likelyPremium: isPremium || undefined,
-            uncertain: undefined,
-            // Porkbun IS the registrar check `premiumUnverified` was waiting for.
-            // Once it answers with a price the flag is satisfied; for a taken
-            // name it is moot. Carrying it forward next to a verified price told
-            // the card to show "Check price" over a $ figure we had confirmed.
-            premiumUnverified: pb.available && price == null ? fresh[idx].premiumUnverified : undefined,
-          };
-        }
-      }
-    }
+  // ---- Standard price ---------------------------------------------------
+  for (let i = 0; i < fresh.length; i++) {
+    const r = fresh[i];
+    // No standard price for a premium suspect until a registrar has verified the
+    // real one, and none for a name still waiting for its quote.
+    if (!r.available || r.price != null || r.likelyPremium || r.priceUnverified) continue;
+    const p = standardPriceFor(r.domain, quotedStandard.get(r.domain));
+    if (p != null) fresh[i] = { ...r, price: p };
   }
 
   if (forced.size > 0) {
@@ -1703,6 +1826,50 @@ export async function checkDomains(
     else await write;
   }
 
+  // ---- Background quote (the API) ----------------------------------------
+  // The answer above has already been built without a price for the names that
+  // wait for one. Ask the registrar after the response, and store what it says:
+  // the next request for the same name finds the price — or the premium price,
+  // or "not available after all" — in the cache.
+  if (quoteMode === "background" && porkbun) {
+    const later = fresh
+      .filter((r) => r.available && !r.uncertain && r.priceUnverified === true && !quotingNow.has(r.domain))
+      .slice(0, Math.min(PORKBUN_BULK_MAX, porkbunBudgetRoom()));
+    if (later.length > 0) {
+      consumePorkbunBudget(later.length);
+      for (const r of later) quotingNow.add(r.domain);
+      const job = (async () => {
+        try {
+          const quotes = await registrarQuotes(later.map((r) => r.domain), porkbun.key, porkbun.secret);
+          const rows: ReturnType<typeof buildCacheRow>[] = [];
+          for (const r of later) {
+            const pb = quotes.get(r.domain.toLowerCase());
+            if (!pb) continue;
+            let quoted = applyRegistrarQuote(r, pb, pricing.get(tldOf(r.domain))?.registration, true);
+            if (quoted.available && quoted.price == null && !quoted.priceUnverified) {
+              const p = standardPriceFor(r.domain, pb.price);
+              if (p != null) quoted = { ...quoted, price: p };
+            }
+            const ttl = ttlSecondsFor(quoted.checkedVia, false, quoted.available);
+            if (ttl <= 0) continue;
+            const capped = quoted.available && quoted.price == null ? Math.min(ttl, 600) : ttl;
+            hotCache.delete(r.domain);
+            hotCache.set(r.domain, { result: quoted, expiresAt: Date.now() + Math.min(capped * 1000, HOT_CACHE_TTL_MS) });
+            rows.push(buildCacheRow(quoted, capped));
+          }
+          if (rows.length > 0) await supabase.from("domain_cache").upsert(rows, { onConflict: "domain" });
+        } catch (e) {
+          console.warn(`background quote failed: ${e instanceof Error ? e.message : String(e)}`);
+        } finally {
+          for (const r of later) quotingNow.delete(r.domain);
+        }
+      })();
+      const quoteRt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+      if (quoteRt?.waitUntil) quoteRt.waitUntil(job);
+      else await job;
+    }
+  }
+
   // ---- Background registration-year warm --------------------------------
   // A taken name's availability is usually decided by DNS (has-records) BEFORE
   // the slower RDAP returns, so resolveDomain hands back no inline registration
@@ -1714,7 +1881,7 @@ export async function checkDomains(
   // the domain is no longer a target. Edge-only (EdgeRuntime.waitUntil) so it can
   // never leak network calls into the test runner / local dev.
   const yearWarm = cacheable.filter(
-    ({ r }) => !r.available && !r.uncertain && r.sinceYear == null && !warmingYears.has(r.domain),
+    ({ r }) => !r.available && !r.uncertain && !r.reserved && r.sinceYear == null && !warmingYears.has(r.domain),
   );
   const warmRt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
   if (yearWarm.length > 0 && warmRt?.waitUntil) {

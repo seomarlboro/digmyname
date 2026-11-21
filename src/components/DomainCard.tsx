@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { ExternalLink, Gem, Heart, Loader2, RefreshCw, AlertCircle, Tag, CalendarClock } from "lucide-react";
+import { ExternalLink, Gem, Heart, Loader2, Lock, RefreshCw, AlertCircle, Tag, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PromoCode } from "@/components/PromoCode";
@@ -87,6 +87,8 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
     renewPrice: displayRenew,
     hasHighRenewal,
     showCheckPrice,
+    pricePending,
+    isReserved,
     premiumPrice,
     registrarName,
     promoCode,
@@ -101,10 +103,13 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
 
   // Registration year for taken domains — fetched lazily in the background,
   // so it never delays the availability check.
-  const age = useDomainAge(domain, !checking && result.uncertain !== true && !available);
+  // A name the registry reserves has no registration, hence no year to look up.
+  const age = useDomainAge(domain, !checking && result.uncertain !== true && !available && !isReserved);
   const sinceLabel = formatRegisteredSince(age);
-  /** One taken-state label for cards and compact rows. */
-  const registeredText = sinceLabel ? `Registered ${sinceLabel.toLowerCase()}` : "Registered";
+  /** One taken-state label for cards and compact rows. A reserved name is not
+   *  registered by anyone — the registry itself holds it back. */
+  const registeredText = isReserved ? "Reserved by the registry" : sinceLabel ? `Registered ${sinceLabel.toLowerCase()}` : "Registered";
+  const TakenIcon = isReserved ? Lock : CalendarClock;
 
 
   const handleFavorite = () => onToggleFavorite(domain);
@@ -318,6 +323,9 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                 )}
                 {isPremium && premiumPrice != null ? (
                   <span className="text-lg font-bold text-foreground">{usd(premiumPrice)}</span>
+                ) : pricePending && !isPremium && !isLikelyPremium ? (
+                  // A registrar is being asked about this very name; nothing is shown as a price until it answers.
+                  <span className="text-sm text-muted-foreground">Checking price…</span>
                 ) : isPremium || isLikelyPremium || showCheckPrice ? (
                   <span className={`text-sm font-semibold ${AMBER_TEXT}`}>Check price</span>
                 ) : (
@@ -362,7 +370,7 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                 </span>
               ) : (
                 <span className="hidden whitespace-nowrap text-xs text-muted-foreground items-center gap-1 sm:flex">
-                  <CalendarClock className="h-3 w-3" />
+                  <TakenIcon className="h-3 w-3" />
                   {registeredText}
                 </span>
               )}
@@ -371,17 +379,19 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                   <CtaLink href={result.listingUrl} onClick={() => onAction?.("aftermarket", domain)} className="hidden sm:inline-flex">
                     {result.forSaleVia ?? "View"}
                   </CtaLink>
-                ) : (
+                ) : isReserved ? null : (
                   <CtaLink tone="secondary" href={`https://www.whois.com/whois/${domain}`} onClick={() => onAction?.("whois", domain)} className="hidden sm:inline-flex">
                     Whois
                   </CtaLink>
                 )}
                 {/* Phones: one open-site arrow, same control as the available row's. Desktop: the single button above. */}
-                <Button variant="ghost" size="icon" className="text-muted-foreground sm:hidden" asChild aria-label={`Open ${domain}`}>
-                  <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("visit", domain)}>
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </Button>
+                {!isReserved && (
+                  <Button variant="ghost" size="icon" className="text-muted-foreground sm:hidden" asChild aria-label={`Open ${domain}`}>
+                    <a href={`https://${domain}`} target="_blank" rel="noopener noreferrer" onClick={() => onAction?.("visit", domain)}>
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
               </div>
               {desktopHeart}
             </div>
@@ -477,6 +487,9 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                       </>
                     )}
                   </>
+                ) : pricePending && !isLikelyPremium ? (
+                  // A registrar is being asked about this very name; nothing is shown as a price until it answers.
+                  <p className="text-base whitespace-nowrap text-muted-foreground">Checking price…</p>
                 ) : isLikelyPremium || showCheckPrice ? (
                   <>
                     <p className={`text-base font-semibold whitespace-nowrap ${AMBER_TEXT}`}>
@@ -516,7 +529,7 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
               // A taken card said only "Since 1997" (or nothing): the word "Taken" lived in the section heading, off-screen once you scroll.
               <div className="sm:text-right">
                 <p className="text-sm text-muted-foreground flex items-center gap-1.5 sm:justify-end">
-                  <CalendarClock className="h-3.5 w-3.5 text-muted-foreground" />
+                  <TakenIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   {registeredText}
                 </p>
               </div>
@@ -538,7 +551,8 @@ const DomainCard = ({ result, compact = false, onRetry, cheapest, favorited, onT
                   </a>
                 </Button>
               </div>
-            ) : (
+            ) : isReserved ? null : (
+              // A reserved name has no registration to look up and no site to open.
               <div className="flex items-center gap-2">
                 <CtaLink tone="secondary" href={`https://www.whois.com/whois/${domain}`} onClick={() => onAction?.("whois", domain)}>
                   Whois

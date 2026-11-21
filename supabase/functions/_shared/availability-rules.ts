@@ -191,3 +191,32 @@ export function interpretRdap404(body: string | null | undefined): Rdap404Meanin
   if (/\bnot available\b|\bunavailable\b|\bcannot be registered\b|\bblocked\b/.test(text)) return "not_registerable";
   return "not_registered";
 }
+
+// ---------------------------------------------------------------------------
+// Where a registry may price ONE name differently from the next
+//
+// On .com, .net and .org every unregistered name costs the same at the registry.
+// Almost everywhere else the registry keeps a premium list, and it is not a list
+// of short names: `online.store` (6 letters, no registration, no DNS) was
+// $6,823 for the first year at a registrar on 2026-11-21 while we printed the
+// extension's standard $0.98 next to it. No free signal says which names are on
+// such a list — RDAP answers a premium name with the same plain 404 as any
+// other — so on these extensions a standard price is only a fact once a
+// registrar has quoted that very name.
+//
+// Shared by the edge pipeline and the site's cards so both draw the line in the
+// same place.
+// ---------------------------------------------------------------------------
+
+/** Extensions whose registry sells every unregistered name at one price. */
+const FLAT_PRICE_TLDS = new Set(["com", "net", "org"]);
+
+/** True when the registry of this extension may hold `domain` on a premium
+ *  list. Accepts a domain or a bare extension (with or without the dot). */
+export function hasRegistryPremiumTier(domainOrTld: string): boolean {
+  const s = domainOrTld.trim().toLowerCase().replace(/^\./, "");
+  const dot = s.indexOf(".");
+  // A bare extension has no dot; a domain's extension is everything after its first label.
+  const tld = dot === -1 ? s : s.slice(dot + 1);
+  return tld !== "" && !FLAT_PRICE_TLDS.has(tld);
+}

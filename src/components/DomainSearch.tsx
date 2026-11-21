@@ -7,7 +7,7 @@ import AuthDialog from "@/components/LazyAuthDialog";
 import LiveStopwatch from "@/components/LiveStopwatch";
 import { deriveCardFacts } from "@/lib/cardFacts";
 import { matchesFilters, type ResultFilters } from "@/lib/resultFilters";
-import { earlyHeadline, isPremiumSuspectSld, sldOf } from "@/lib/searchLanes";
+import { earlyHeadline, isPremiumSuspectSld, quoteChunks, sldOf } from "@/lib/searchLanes";
 import { applyBrowserVerdict, browserLaneEligible, checkInBrowser, warmRegistries, type BrowserVerdict } from "@/lib/browserLane";
 import { trackSiteEvent, type FirstAnswerLane } from "@/lib/siteEvents";
 import { CARD_ACTION_EVENT, cardClickProps, shownOffers, type CardActionKind } from "@/lib/cardClickEvent";
@@ -34,7 +34,7 @@ const StarsIcon = ({ className, active }: { className?: string; active?: boolean
 );
 import DomainCard from "@/components/DomainCard";
 
-import { generateDomainList, parseQuery, checkDomainsAvailability, checkDomainsFast, applyFastVerdict, TLD_RANK, VARIATION_PREFIXES, VARIATION_COUNT, type DomainResult, type AvailabilityResponse, type FastInfo } from "@/lib/domainData";
+import { generateDomainList, parseQuery, checkDomainsAvailability, checkDomainsFast, applyFastVerdict, applyVerdict, TLD_RANK, VARIATION_PREFIXES, VARIATION_COUNT, type DomainResult, type AvailabilityResponse, type FastInfo } from "@/lib/domainData";
 
 /** The toggle used to be labelled "AI suggestions". There is no model behind it:
  *  it prepends a fixed list of words. The control now says which ones. */
@@ -101,7 +101,9 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const impressionPendingRef = useRef(false);
   const cacheResult = useCallback((r: DomainResult) => {
     // Honesty guardrail: only remember confident, authoritative verdicts.
-    if (r.checking || r.uncertain || r.provisional || r.reachFailed) return;
+    // …and only complete ones: a row still waiting for its price would pin
+    // "Check price" for five minutes after the registrar has answered.
+    if (r.checking || r.uncertain || r.provisional || r.reachFailed || r.priceUnverified) return;
     resultCacheRef.current.set(r.domain, {
       result: { ...r, checking: false, provisional: false },
       expiresAt: Date.now() + RESULT_CACHE_TTL_MS,
@@ -380,7 +382,12 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         }
       }
 
-      const applyBatch = (slice: string[], resp: AvailabilityResponse) => {
+      // Names the wave answered without a price: available, on an extension
+      // whose registry may price one name as premium, not quoted by a registrar
+      // yet. The price lane (step 5) asks for them in bulk.
+      const waitingForQuote = new Set<string>();
+
+      const applyBatch = (slice: string[], resp: AvailabilityResponse, fromPriceLane = false) => {
         if (job.cancelled) return;
         // The honest stopwatch stops on the first ANSWER. A batch that never
         // reached the backend (503 / network error) only turns rows into
@@ -391,24 +398,8 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
           prev.map((r) => {
             const info = resp.results.get(r.domain);
             if (info) {
-              const updated = {
-                ...r,
-                available: info.available,
-                checking: false,
-                provisional: false,
-                gdPrice: info.price,
-                premiumRenewPrice: info.premiumRenewPrice,
-                premium: info.premium,
-                likelyPremium: info.likelyPremium,
-                premiumUnverified: info.premiumUnverified,
-                uncertain: info.uncertain,
-                uncertainReason: info.uncertainReason,
-                sldBlocked: info.sldBlocked,
-                forSale: info.forSale,
-                forSaleVia: info.forSaleVia,
-                listingUrl: info.listingUrl,
-                reachFailed: false,
-              };
+              // The wave's answer starts the wait for a quote; the price lane's answer ends it.
+              const updated = applyVerdict(r, info, { awaitingQuote: !fromPriceLane });
               cacheResult(updated);
               return updated;
             }
@@ -424,7 +415,33 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
 
       const runBatch = async (slice: string[]) => {
         const resp = await checkDomainsAvailability(slice, job.ctl.signal);
+        for (const [domain, info] of resp.results) {
+          if (info.available && !info.uncertain && info.priceUnverified) waitingForQuote.add(domain);
+        }
         applyBatch(slice, resp);
+      };
+
+      // Step 5: the price lane. A registrar quote costs 0.5–1 s, so it is never
+      // part of the verdict: once a group of cards has its verdicts, the names
+      // still waiting for a price go out together — one request, one bulk call
+      // to the registrar per 25 names, in on-screen order. A failed or silent
+      // quote leaves the card where the wave put it (available, "Check price");
+      // it never turns a confirmed verdict into "couldn't reach".
+      const settleWithoutQuote = (names: readonly string[]) => {
+        const set = new Set(names);
+        setResults((prev) => prev.map((r) => (set.has(r.domain) && r.pricePending ? { ...r, pricePending: false } : r)));
+      };
+      const priceLane = async (group: readonly string[]) => {
+        if (job.cancelled) return;
+        await Promise.all(
+          quoteChunks(group, waitingForQuote).map(async (chunk) => {
+            const resp = await checkDomainsAvailability(chunk, job.ctl.signal, { quotePrices: true });
+            if (job.cancelled) return;
+            if (resp.ok) applyBatch(chunk, resp, true);
+            // Names the response did not carry, and every name of a failed request.
+            settleWithoutQuote(resp.ok ? chunk.filter((d) => !resp.results.has(d)) : chunk);
+          }),
+        );
       };
 
       // Step 3a: the headline card (typed TLD, else .com) leaves NOW, with the
@@ -469,20 +486,26 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
         await new Promise<void>((resolve) => setTimeout(resolve, PREMIUM_VERIFY_DELAY_MS));
         if (job.cancelled) return;
         const row = resultsRef.current.find((r) => r.domain === headline);
+        // A headline that came back without a price is quoted by the price lane
+        // (step 5), premium status included — asking twice would spend two calls.
         const worthAsking =
           row && !row.checking && row.available && !row.uncertain && !row.provisional &&
-          !row.premium && !row.premiumUnverified && !row.likelyPremium && !isPremiumSuspectSld(sldOf(headline));
+          !row.premium && !row.premiumUnverified && !row.likelyPremium && !isPremiumSuspectSld(sldOf(headline)) &&
+          !waitingForQuote.has(headline);
         if (!worthAsking) return;
         const resp = await checkDomainsAvailability([headline], job.ctl.signal, { verifyPremium: true });
         if (!job.cancelled && resp.ok) applyBatch([headline], resp);
       });
 
+      // one request per top TLD → each card flips as soon as its own lookup lands
+      const soloDone = Promise.all([headlineDone, ...laterSolo.map((d) => runBatch([d]))]);
+      const restDone = Promise.all(restBatches.map(runBatch));
       await Promise.all([
-        headlineDone,
         verifyHeadline,
-        // one request per top TLD → each card flips as soon as its own lookup lands
-        ...laterSolo.map((d) => runBatch([d])),
-        ...restBatches.map(runBatch),
+        // The top row gets its prices as soon as its own verdicts are in; the
+        // rest of the grid follows when its batches have landed.
+        soloDone.then(() => priceLane(solo)),
+        restDone.then(() => priceLane(rest)),
       ]);
     };
 
@@ -517,29 +540,25 @@ const DomainSearch = ({ selectedTlds, filters, onResetFilters, onHasResultsChang
   const retryDomain = useCallback(async (domain: string) => {
     setResults((prev) => prev.map((r) => (r.domain === domain ? { ...r, checking: true, reachFailed: false } : r)));
     const { ok, results } = await checkDomainsAvailability([domain]);
+    const info = results.get(domain);
     setResults((prev) =>
       prev.map((r) => {
         if (r.domain !== domain) return r;
-        const info = results.get(domain);
         if (!info) return { ...r, checking: false, provisional: false, uncertain: true, reachFailed: !ok };
-        const updated = {
-          ...r,
-          checking: false,
-          provisional: false,
-          available: info.available,
-          gdPrice: info.price,
-          premiumRenewPrice: info.premiumRenewPrice,
-          premium: info.premium,
-          likelyPremium: info.likelyPremium,
-          premiumUnverified: info.premiumUnverified,
-          uncertain: info.uncertain,
-          uncertainReason: info.uncertainReason,
-          sldBlocked: info.sldBlocked,
-          forSale: info.forSale,
-          forSaleVia: info.forSaleVia,
-          listingUrl: info.listingUrl,
-          reachFailed: false,
-        };
+        const updated = applyVerdict(r, info, { awaitingQuote: true });
+        cacheResult(updated);
+        return updated;
+      })
+    );
+    // Same rule as the search wave: a name that came back without a price gets
+    // its registrar quote in a second request, never inside the verdict.
+    if (!info || !info.available || info.uncertain || !info.priceUnverified) return;
+    const quoted = (await checkDomainsAvailability([domain], undefined, { quotePrices: true })).results.get(domain);
+    setResults((prev) =>
+      prev.map((r) => {
+        if (r.domain !== domain) return r;
+        if (!quoted) return { ...r, pricePending: false };
+        const updated = applyVerdict(r, quoted);
         cacheResult(updated);
         return updated;
       })

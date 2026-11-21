@@ -35,6 +35,8 @@ curl "https://api.digmyname.com/functions/v1/public-api/check?domain=acmeforge.i
 }
 ```
 
+Outside .com, .net and .org a registry can price one name as premium, so the first answer for a name may carry `"price_unverified": true` and no price; a later call returns the price a registrar quoted.
+
 Free, no API key, no account — 60 requests/minute/IP and 5,000 domains per UTC day/IP. Full docs: [digmyname.com/api](https://digmyname.com/api).
 
 Want your LLM to call it directly instead? One line: `claude mcp add domain-check -- npx -y domain-check-skills-mcp` — see [mcp/README.md](./mcp/README.md).

@@ -260,7 +260,9 @@ The sample is biased on purpose (common English words). It shows the rate for th
 | Extensions where a reserved name is indistinguishable from a free one in RDAP | At least Google's (`app`, `dev`, `page`): `test.dev` and a random name return the same "not found" | M |
 | Live cache rows exposed right now: available, standard price, no premium flag, label ≥ 6 characters, outside `com/net/org` | ~560 (39 on Radix TLDs, 520 elsewhere; ~60 are this audit's own test names). Upper bound — most are not dictionary words | M |
 
-### Proposed fixes (not applied)
+### Proposed fixes
+
+Status: A and C shipped the same day (`837e8e4`). B is implemented as a quote requested *after* the verdict rather than inside it — a registrar call measured 0.5–0.95 s — see `CHANGELOG.md` and architecture §5. D is covered by the API documentation that ships with B.
 
 | # | Fix | Effect | Effort | Touches |
 |---|---|---|---|---|

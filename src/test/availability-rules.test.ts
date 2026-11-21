@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  hasRegistryPremiumTier,
   interpretDomainr,
   interpretRdap404,
   isLikelyBlocked,
@@ -134,5 +135,21 @@ describe("interpretRdap404", () => {
     expect(interpretRdap404(body(["Object not found"], { notices }))).toBe("not_registered");
     expect(interpretRdap404("<html><body>404 — all rights reserved, name reserved</body></html>")).toBe("not_registered");
     expect(interpretRdap404(body(["Copyright 2026. All rights reserved."]))).toBe("not_registered");
+  });
+});
+
+describe("hasRegistryPremiumTier", () => {
+  it("only .com, .net and .org sell every free name at one registry price", () => {
+    for (const d of ["online.com", "online.net", "online.org", "com", ".org"]) expect(hasRegistryPremiumTier(d)).toBe(false);
+    for (const d of ["online.store", "garden.tech", "acmeforge.io", "acmeforge.ai", "acmeforge.co", "acmeforge.dev", "acmeforge.xyz", "store", ".app"]) {
+      expect(hasRegistryPremiumTier(d)).toBe(true);
+    }
+  });
+
+  it("reads the extension, not the label — and a second-level extension is not .com", () => {
+    expect(hasRegistryPremiumTier("com.store")).toBe(true);
+    expect(hasRegistryPremiumTier("ONLINE.COM")).toBe(false);
+    expect(hasRegistryPremiumTier("acme.us.com")).toBe(true);
+    expect(hasRegistryPremiumTier("")).toBe(false);
   });
 });

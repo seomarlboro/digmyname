@@ -2,6 +2,27 @@
 
 All notable changes to DigMyName.
 
+## 2026-11-21 — No standard price without a registrar's quote; reserved names say so (edge + frontend)
+
+### Fixed
+- **A registry-premium name was shown at the extension's standard price.** `online.store` has no registration and no DNS, so every free signal reads "available" — and a registrar sells it for $6,823.39 the first year, renewing at $27,291.98. We printed $0.98. Premium was guessed from the label's length (5 characters or fewer), and registries price ordinary words of any length as premium: of 15 common-word names we had priced as standard on new gTLDs, 13 were premium ($546–$10,917) and 2 were not for sale at all.
+- **Now, outside .com/.net/.org, a price is shown only for a name a registrar has quoted.** Until then the name is available with no price (`priceUnverified` in the pipeline, `price_unverified` in the API, "Checking price…" then a price or "Check price" on the site). The quote gives the standard price, the registrar's premium figure, or "not available after all".
+
+### Changed
+- **Quotes are asked after the verdict, never inside it.** Measured: one registrar call adds 0.5–0.95 s to a 0.3 s answer. The site's search wave answers at once and a new price lane asks for the waiting names in bulk (one request for the top row, then 25 names per request). The API answers at once and requests the quote after the response; a later call finds it in the cache.
+- **A name the registry holds back is labelled "Reserved by the registry"**, not "Registered", and loses the Whois and open-site actions. API: `registry_reserved: true` (with `available: false`).
+- **API responses gain `price_unverified` and `registry_reserved`** (additive; OpenAPI 1.2.0). `price_usd` is `null` while `price_unverified` is true.
+- **`CACHE_VERSION` 5 → 6**, so rows cached with an unquoted standard price are re-resolved.
+
+### What this costs, stated plainly
+- **Prices now appear a moment after the cards**, and the API's first answer for a name outside .com/.net/.org usually has no price. That is the trade: no number instead of a wrong one.
+- **The registrar's bulk allowance is 200 domains a minute per account** — about four full searches of fresh names. Past it, cards say "Check price". Quoted answers are cached (6 h standard, 24 h premium) and shared.
+- **Through `api.digmyname.com` a price-less answer is held by the edge cache for 60 s** like any other 200, so the price shows up on a call made after that. The Worker lives outside this repo and was not changed.
+- **The MCP package is unchanged**: it prints an available name without a price line when none is known.
+
+### Tests
+- Pipeline: a waiting name is never priced, with or without a registrar; the follow-up quotes four names in one call (standard / premium with the 2026-11-21 figures / not for sale / no answer); the API path stores the quote for the next call; the reserved flag reaches the cache row. Site: card facts, both card layouts, and the price lane driving the real search component.
+
 ## 2026-11-21 — The edge cache prewarm is switched off (database cron, no code)
 
 ### Changed

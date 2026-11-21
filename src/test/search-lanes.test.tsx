@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { earlyHeadline, isPremiumSuspectSld, sldOf } from "@/lib/searchLanes";
+import { earlyHeadline, isPremiumSuspectSld, PRICE_QUOTE_CHUNK, quoteChunks, sldOf } from "@/lib/searchLanes";
 
 describe("searchLanes", () => {
   it("a label of 1–5 characters is a premium suspect (mirrors the pipeline)", () => {
@@ -11,6 +11,17 @@ describe("searchLanes", () => {
     expect(isPremiumSuspectSld("acmefo")).toBe(false);
     expect(sldOf("acmeforge.com")).toBe("acmeforge");
     expect(sldOf("acmeforge")).toBe("acmeforge");
+  });
+
+  it("the price follow-up asks only for waiting names, in on-screen order, 25 per request", () => {
+    const onScreen = Array.from({ length: 60 }, (_, i) => `name${i}.store`);
+    const waiting = new Set(onScreen.filter((_, i) => i % 2 === 0)); // 30 of them
+    const chunks = quoteChunks(onScreen, waiting);
+    expect(PRICE_QUOTE_CHUNK).toBe(25);
+    expect(chunks.map((c) => c.length)).toEqual([25, 5]);
+    expect(chunks.flat()).toEqual(onScreen.filter((d) => waiting.has(d)));
+    expect(quoteChunks(onScreen, new Set())).toEqual([]);
+    expect(quoteChunks(["a.store"], new Set(["b.store"]))).toEqual([]);
   });
 
   it("the headline goes early only when it cannot trigger the paid third signal", () => {
@@ -323,5 +334,74 @@ describe("DomainSearch lanes", () => {
     await type("takenname"); // taken: nothing to price
     await settle();
     expect(verifyCalls()).toHaveLength(0);
+  });
+
+  // 2026-11-21: a registrar quote costs 0.5–1 s, so the wave answers without it
+  // and the names that still need a price go out together afterwards.
+  it("names answered without a price get one bulk follow-up per group of cards; a failed follow-up leaves the verdicts alone", async () => {
+    const flat = (d: string) => /\.(com|net|org)$/.test(d);
+    let failQuotes = false;
+    invoke.mockImplementation(async (_name: unknown, options: unknown) => {
+      const body = (options as { body: { domains: string[]; verifyPremium?: boolean; quotePrices?: boolean } }).body;
+      if (body.quotePrices) {
+        if (failQuotes) return { data: null, error: new Error("edge unavailable") };
+        return { data: { results: body.domains.map((d) => ({ domain: d, available: true })) }, error: null };
+      }
+      // The wave: everything is available; outside .com/.net/.org no price is known yet.
+      return { data: { results: body.domains.map((d) => ({ domain: d, available: true, priceUnverified: flat(d) ? undefined : true })) }, error: null };
+    });
+    const { default: DomainSearch } = await import("@/components/DomainSearch");
+    const { DEFAULT_FILTERS } = await import("@/lib/resultFilters");
+    const qc = new QueryClient();
+    const { container } = render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter>
+          <DomainSearch selectedTlds={new Set()} filters={DEFAULT_FILTERS} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const input = container.querySelector('input[aria-label="Search domain name"]') as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    const type = async (text: string) => {
+      await act(async () => {
+        setter.call(input, text);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    };
+    const settle = async () => {
+      for (const step of [80, 170, 50, 800, 50]) await act(async () => { vi.advanceTimersByTime(step); for (let i = 0; i < 40; i++) await Promise.resolve(); });
+    };
+    type Body = { domains: string[]; verifyPremium?: boolean; quotePrices?: boolean };
+    const bodies = () => invoke.mock.calls.filter((c) => c[0] === "check-domains").map((c) => (c[1] as { body: Body }).body);
+
+    // The typed name carries its own extension, so the headline is one of the waiting names.
+    await type("reputation.store");
+    await settle();
+    const wave = bodies().filter((b) => !b.quotePrices && !b.verifyPremium);
+    const quotes = bodies().filter((b) => b.quotePrices);
+    const asked = wave.flatMap((b) => b.domains).filter((d) => !flat(d));
+
+    // Every waiting name is quoted exactly once, 25 per request at most…
+    expect(quotes.flatMap((b) => b.domains).sort()).toEqual([...asked].sort());
+    expect(quotes.every((b) => b.domains.length <= PRICE_QUOTE_CHUNK)).toBe(true);
+    // …in few requests: one for the top row, the rest of the grid in chunks — not one per card.
+    expect(quotes.length).toBeLessThanOrEqual(1 + Math.ceil(asked.length / PRICE_QUOTE_CHUNK));
+    expect(quotes.length).toBeLessThan(wave.length);
+    // The headline is quoted first, and is not asked about a second time through the premium-verify request.
+    expect(quotes[0].domains[0]).toBe("reputation.store");
+    expect(bodies().filter((b) => b.verifyPremium)).toHaveLength(0);
+    // Nothing is left saying "Checking price…".
+    expect(container.textContent).not.toContain("Checking price…");
+
+    // A follow-up that fails must not turn confirmed verdicts into "couldn't reach".
+    failQuotes = true;
+    invoke.mockClear();
+    await type("reputations.store");
+    await settle();
+    expect(bodies().some((b) => b.quotePrices)).toBe(true);
+    expect(container.textContent).not.toContain("Checking price…");
+    expect(container.textContent).not.toContain("Couldn't reach our server");
+    expect(container.textContent).not.toContain("No connection");
+    expect(container.textContent).toContain("Check price");
   });
 });

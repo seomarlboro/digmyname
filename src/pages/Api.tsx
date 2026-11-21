@@ -225,10 +225,17 @@ print(res.json()["result"]["available"])`,
               </li>
               <li>No key, no account, no tracking of API callers beyond rate-limit counters.</li>
               <li>
-                A registry-premium name comes back as <code className="font-mono text-xs">premium: true</code> with{" "}
-                <code className="font-mono text-xs">price_usd: null</code>. Confirming the premium figure costs a paid
-                lookup per name, so it runs for the name a visitor types on the site, not for every API call — the flag
-                is the honest answer, an invented number would not be.
+                Outside .com, .net and .org a registry can price one name far above its neighbours, so a price is
+                returned only once a registrar has quoted that very name. Until then the answer carries{" "}
+                <code className="font-mono text-xs">price_unverified: true</code> and{" "}
+                <code className="font-mono text-xs">price_usd: null</code>; the quote is requested after the response,
+                and a later call returns the price — or <code className="font-mono text-xs">premium: true</code> with
+                the registrar's figure. No number is the honest answer; the extension's standard price would be a guess.
+              </li>
+              <li>
+                <code className="font-mono text-xs">registry_reserved: true</code> (always with{" "}
+                <code className="font-mono text-xs">available: false</code>) means the registry holds the name back:
+                nobody has registered it, and nobody can.
               </li>
               <li>
                 Repeat lookups within 60 seconds are served from a Cloudflare edge cache (~0.1 s);

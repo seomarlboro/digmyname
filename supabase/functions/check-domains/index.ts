@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { domains, verifyPremium } = (await req.json()) as { domains: string[]; verifyPremium?: boolean };
+    const { domains, verifyPremium, quotePrices } = (await req.json()) as { domains: string[]; verifyPremium?: boolean; quotePrices?: boolean };
     if (!Array.isArray(domains) || domains.length === 0) {
       return new Response(JSON.stringify({ error: "domains array required" }), {
         status: 400,
@@ -97,10 +97,16 @@ Deno.serve(async (req) => {
     // next invocation (no deploy — and in this project only a Lovable build
     // deploys). The gate is pure and tested in _shared/third-signal-budget_test.ts.
     const verify = verifySetFor(validOrder, verifyPremium, headlinePremiumCheckEnabled());
+    // `quotePrices`: the site's price follow-up. Its search wave is answered
+    // without waiting for a registrar (a quote costs 0.5–1 s); available names on
+    // extensions with a premium tier come back `priceUnverified`, and the site
+    // asks for their quotes here, in bulk, once the cards are on screen. Only this
+    // request waits for the registrar; verdicts are taken from the cache.
     const pipeline = checkDomains(domains, {
       partialSink,
       thirdSignalDeadlineAt: Date.now() + THIRD_SIGNAL_WINDOW_MS,
       verifyPremium: verify,
+      quotePrices: quotePrices === true ? "await" : undefined,
     });
 
     const budget = new Promise<"timeout">((resolve) => {

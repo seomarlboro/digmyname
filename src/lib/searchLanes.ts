@@ -31,3 +31,21 @@ export function earlyHeadline(solo: readonly string[]): string | null {
   if (!headline) return null;
   return isPremiumSuspectSld(sldOf(headline)) ? null : headline;
 }
+
+/**
+ * Names per price follow-up request. One request = one bulk call to the
+ * registrar, which takes 25 names at most (PORKBUN_BULK_MAX in the pipeline).
+ */
+export const PRICE_QUOTE_CHUNK = 25;
+
+/**
+ * The price follow-up for one group of cards: the names that came back without
+ * a price (`waiting`), in the order the cards are on screen, cut into requests
+ * of PRICE_QUOTE_CHUNK. An empty result means there is nothing to ask.
+ */
+export function quoteChunks(onScreen: readonly string[], waiting: ReadonlySet<string>): string[][] {
+  const names = onScreen.filter((d) => waiting.has(d));
+  const chunks: string[][] = [];
+  for (let i = 0; i < names.length; i += PRICE_QUOTE_CHUNK) chunks.push(names.slice(i, i + PRICE_QUOTE_CHUNK));
+  return chunks;
+}

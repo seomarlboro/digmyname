@@ -4,6 +4,7 @@
  * never disagree about what "premium", "check price" or "renewal trap" mean.
  */
 import { resolveDisplayPrice, type DomainResult } from "./domainData";
+import { hasRegistryPremiumTier } from "../../supabase/functions/_shared/availability-rules";
 
 export interface CheapestRegistrar {
   registrar: string;
@@ -25,6 +26,13 @@ export interface CardFacts {
   isPremium: boolean;
   isPremiumUnverified: boolean;
   isLikelyPremium: boolean;
+  /** Available, and no registrar has confirmed that the extension's standard
+   *  price applies to this very name — so no price is shown at all. */
+  isPriceUnverified: boolean;
+  /** …and the answer is on its way: "Checking price…" rather than "Check price". */
+  pricePending: boolean;
+  /** Not registered and not registerable: the registry holds the name back. */
+  isReserved: boolean;
   /** Trusted first-year price from the registrar table, or null (never a seed price). */
   trustedPrice: number | null;
   /** Renewal price for the same registrar row, or null when there is no trusted price. */
@@ -51,7 +59,15 @@ export function deriveCardFacts(result: DomainResult, cheapest: CheapestRegistra
   const isLikelyPremium = !isPremium && (result.likelyPremium === true || isPremiumUnverified);
   // Never fabricate a price: without a trusted DB row the card falls through to
   // the price-less "Check price" state instead of a static seed price.
-  const trustedPrice = resolveDisplayPrice(cheapest?.regPrice);
+  // The registrar table holds the EXTENSION's price. On an extension whose
+  // registry may price one name as premium it applies to this name only once a
+  // registrar has said so: the edge marks the names still waiting, and a row the
+  // edge has not answered at all (browser / DNS lane only) has no say on price.
+  const isPriceUnverified =
+    available && !isPremium &&
+    (result.priceUnverified === true || (result.provisional === true && hasRegistryPremiumTier(result.domain)));
+  const pricePending = isPriceUnverified && (result.pricePending === true || result.provisional === true);
+  const trustedPrice = isPriceUnverified ? null : resolveDisplayPrice(cheapest?.regPrice);
   const hasTrustedPrice = trustedPrice != null;
   const showCheckPrice = available && (isPremiumUnverified || !hasTrustedPrice) && !isPremium;
   const premiumPrice = isPremium && typeof result.gdPrice === "number" && result.gdPrice > 0 ? result.gdPrice : null;
@@ -78,6 +94,9 @@ export function deriveCardFacts(result: DomainResult, cheapest: CheapestRegistra
     isPremium,
     isPremiumUnverified,
     isLikelyPremium,
+    isPriceUnverified,
+    pricePending,
+    isReserved: !available && !uncertain && result.reserved === true,
     trustedPrice,
     renewPrice,
     hasHighRenewal,
