@@ -705,6 +705,20 @@ interface PorkbunResult {
   renewPrice?: number;
 }
 
+/**
+ * A registrar's money field → a number. Porkbun writes prices as strings WITH a
+ * thousands separator — `"6,823.39"`, `"27,291.98"` (live answers for
+ * `online.store`, 2026-11-21) — and `Number("6,823.39")` is NaN. Read as plain
+ * `Number()`, every premium price of $1,000 or more was silently dropped: the
+ * card said "Premium" and showed no figure. Anything that is not a finite,
+ * non-negative amount is `undefined`.
+ */
+export function registrarMoney(raw: unknown): number | undefined {
+  if (raw == null || raw === "") return undefined;
+  const n = typeof raw === "number" ? raw : Number(String(raw).replace(/[,\s]/g, ""));
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
+}
+
 /** `additional.renewal` is documented as an object ({type, price, regularPrice}) but has also been
  *  seen as a bare number; read both, and nothing else. A missing/unusable quote → undefined. */
 export function porkbunRenewalPrice(renewal: unknown): number | undefined {
@@ -712,9 +726,8 @@ export function porkbunRenewalPrice(renewal: unknown): number | undefined {
     typeof renewal === "object" && renewal !== null
       ? ((renewal as { price?: unknown; regularPrice?: unknown }).price ?? (renewal as { regularPrice?: unknown }).regularPrice)
       : renewal;
-  if (raw == null || raw === "") return undefined;
-  const n = Number(raw);
-  return Number.isFinite(n) && n > 0 ? n : undefined;
+  const n = registrarMoney(raw);
+  return n != null && n > 0 ? n : undefined;
 }
 
 /** How a registrar call reports that it was told to slow down. */
@@ -755,14 +768,14 @@ async function checkPorkbun(domain: string, apiKey: string, secretKey: string, o
       return null;
     }
     const r = data.response;
-    const price = r.price != null ? Number(r.price) : undefined;
-    const regular = r.regularPrice != null ? Number(r.regularPrice) : undefined;
+    const price = registrarMoney(r.price);
+    const regular = registrarMoney(r.regularPrice);
     const renewal = porkbunRenewalPrice(r.additional?.renewal);
     return {
       available: r.avail === "yes",
       premium: r.premium === "yes",
-      price: Number.isFinite(price) ? price : undefined,
-      regularPrice: Number.isFinite(regular) ? regular : undefined,
+      price,
+      regularPrice: regular,
       renewPrice: renewal,
     };
   } catch (e) {
@@ -803,13 +816,13 @@ async function checkPorkbunBulk(
       return out;
     }
     for (const [name, raw] of Object.entries(data.domains as Record<string, Record<string, unknown>>)) {
-      const price = raw?.price != null ? Number(raw.price) : undefined;
-      const regular = raw?.regularPrice != null ? Number(raw.regularPrice) : undefined;
+      const price = registrarMoney(raw?.price);
+      const regular = registrarMoney(raw?.regularPrice);
       out.set(name.toLowerCase(), {
         available: raw?.avail === "yes",
         premium: raw?.premium === "yes",
-        price: Number.isFinite(price) ? price : undefined,
-        regularPrice: Number.isFinite(regular) ? regular : undefined,
+        price,
+        regularPrice: regular,
         renewPrice: porkbunRenewalPrice((raw?.additional as { renewal?: unknown } | undefined)?.renewal),
       });
     }
@@ -902,11 +915,11 @@ export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
       if (data?.status !== "SUCCESS" || !data.pricing) throw new Error("non-success");
       const map = new Map<string, TldPrice>();
       for (const [tld, v] of Object.entries(data.pricing as Record<string, Record<string, string>>)) {
-        const reg = Number(v?.registration);
-        const ren = Number(v?.renewal);
+        // Same writer, same thousands separator: `.inc` renews at "2,060.25" in the
+        // catalog (read 2026-11-21) and used to load as "no renewal price".
         map.set(tld.toLowerCase(), {
-          registration: Number.isFinite(reg) ? reg : undefined,
-          renewal: Number.isFinite(ren) ? ren : undefined,
+          registration: registrarMoney(v?.registration),
+          renewal: registrarMoney(v?.renewal),
         });
       }
       pricingCache = { map, expiresAt: Date.now() + 12 * 60 * 60 * 1000 };

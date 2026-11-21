@@ -2,7 +2,7 @@
 // Run with: deno test supabase/functions/_shared/pipeline_test.ts
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { interpretDomainr, interpretRdap404, isLikelyBlocked } from "./availability-rules.ts";
-import { checkDomains, isLikelyPremium, porkbunRenewalPrice, trustsAggregator404, willEscalateToThirdSignal, type DomainCheckResult } from "./pipeline.ts";
+import { checkDomains, isLikelyPremium, porkbunRenewalPrice, registrarMoney, trustsAggregator404, willEscalateToThirdSignal, type DomainCheckResult } from "./pipeline.ts";
 
 // ---- interpretDomainr -------------------------------------------------------
 
@@ -713,7 +713,8 @@ Deno.test({ name: "price: the follow-up request quotes waiting names in ONE regi
       // An ordinary name: the registrar's own standard price.
       "plainquoted.store": { avail: "yes", premium: "no", price: "2.57", regularPrice: "43.77" },
       // The online.store case, with the figures quoted on 2026-11-21.
-      "premiumquoted.store": { avail: "yes", premium: "yes", price: "6823.39", regularPrice: "27291.98", additional: { renewal: { price: "27291.98" } } },
+      // Written exactly as the registrar writes it — strings with a thousands separator.
+      "premiumquoted.store": { avail: "yes", type: "registration", price: "6,823.39", firstYearPromo: "yes", regularPrice: "6,823.39", premium: "yes", additional: { renewal: { type: "renewal", price: "27,291.98", regularPrice: "27,291.98" } }, minDuration: 1 },
       // The registry will not sell it (reserved, and its 404 said nothing).
       "refusedquoted.store": { avail: "no", premium: "no" },
     };
@@ -1053,6 +1054,56 @@ Deno.test({ name: "refusal: once a registrar has refused a name, the next reques
     const api = await checkDomains(["refusedelsewhere.store"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "background", quoteCaller: "api", registrarSells: () => true });
     assertEquals([api[0].available, api[0].uncertain, api[0].uncertainReason], [false, true, "not_sold_at_registrar"]);
     assertEquals(calls.length, 1);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}) });
+
+// ---- The registrar writes money with a thousands separator ---------------------
+// Found by the first live run against the registrar, 2026-11-21: its answer for
+// `online.store` was `"price":"6,823.39"`, `Number("6,823.39")` is NaN, and the
+// quote came back premium with no figure. Bodies below are the registrar's own.
+Deno.test("registrarMoney: '6,823.39' is 6823.39 — and junk is nothing", () => {
+  assertEquals(registrarMoney("6,823.39"), 6823.39);
+  assertEquals(registrarMoney("27,291.98"), 27291.98);
+  assertEquals(registrarMoney("1,234,567.00"), 1234567);
+  assertEquals(registrarMoney("6.99"), 6.99);
+  assertEquals(registrarMoney(50.98), 50.98);
+  assertEquals(registrarMoney("0"), 0);
+  for (const junk of [null, undefined, "", "n/a", "-5", {}, "12abc"]) assertEquals(registrarMoney(junk), undefined, String(junk));
+  assertEquals(porkbunRenewalPrice({ type: "renewal", price: "27,291.98", regularPrice: "27,291.98" }), 27291.98);
+  assertEquals(porkbunRenewalPrice("10,917.11"), 10917.11);
+});
+
+Deno.test({ name: "registrar: a premium quote of $1,000 or more keeps its figure — bulk and single answers as the registrar writes them", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const LIVE: Record<string, unknown> = {
+    "gardenlive.space": { avail: "yes", type: "registration", price: "2,729.67", firstYearPromo: "yes", regularPrice: "2,729.67", premium: "yes", additional: { renewal: { type: "renewal", price: "10,917.11", regularPrice: "10,917.11" }, transfer: { type: "transfer", price: "10,917.11", regularPrice: "10,917.11" } }, minDuration: 1 },
+    "onlinelive.store": { avail: "yes", type: "registration", price: "6,823.39", firstYearPromo: "yes", regularPrice: "6,823.39", premium: "yes", additional: { renewal: { type: "renewal", price: "27,291.98", regularPrice: "27,291.98" } }, minDuration: 1 },
+    "plainlive.tech": { avail: "yes", type: "registration", price: "6.99", firstYearPromo: "yes", regularPrice: "50.98", premium: "no", additional: { renewal: { type: "renewal", price: "50.98", regularPrice: "50.98" } }, minDuration: 1 },
+  };
+  globalThis.fetch = stubNetwork((domains) =>
+    domains.length === 1
+      ? json200({ status: "SUCCESS", response: LIVE[domains[0]] })
+      : json200({ status: "SUCCESS", checked: domains.length, domains: Object.fromEntries(domains.map((d) => [d, LIVE[d]])) }), []);
+  const waiting = (domain: string) => ({ domain, available: true, checked_via: "rdap", rdap_data: { cache_version: 6, reg_price: null, price_unverified: true } });
+  const { supabase, written } = recordingSupabase(async (table) => ({
+    data: table === "domain_cache" ? Object.keys(LIVE).map(waiting) : table === "registrar_prices" ? [{ tld: "tech", reg_price: 6.99 }] : [],
+    error: null,
+  }));
+  try {
+    // Bulk: the three names of the live run in one call.
+    const bulk = await checkDomains(Object.keys(LIVE), { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "await", registrarSells: () => true });
+    const by = new Map(bulk.map((r) => [r.domain, r]));
+    assertEquals([by.get("onlinelive.store")!.premium, by.get("onlinelive.store")!.price, by.get("onlinelive.store")!.premiumRenewPrice, by.get("onlinelive.store")!.priceUnverified ?? false], [true, 6823.39, 27291.98, false]);
+    assertEquals([by.get("gardenlive.space")!.premium, by.get("gardenlive.space")!.price, by.get("gardenlive.space")!.premiumRenewPrice], [true, 2729.67, 10917.11]);
+    assertEquals([by.get("plainlive.tech")!.premium ?? false, by.get("plainlive.tech")!.price], [false, 6.99]);
+    const row = written.find((w) => w.domain === "onlinelive.store")!;
+    assertEquals([row.rdap_data.premium, row.rdap_data.reg_price, row.rdap_data.premium_renew_price, row.rdap_data.price_unverified], [true, 6823.39, 27291.98, false]);
+
+    // Single: the typed-name path uses the one-name endpoint, same number format.
+    const single = await checkDomains(["gardenlive.space"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, verifyPremium: new Set(["gardenlive.space"]), registrarSells: () => true });
+    assertEquals([single[0].premium, single[0].price, single[0].premiumRenewPrice, single[0].checkedVia], [true, 2729.67, 10917.11, "porkbun"]);
   } finally {
     globalThis.fetch = realFetch;
   }
