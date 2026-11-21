@@ -754,7 +754,12 @@ Deno.test({ name: "price: the follow-up request quotes waiting names in ONE regi
     const cached = new Map(written.map((w) => [w.domain, w]));
     assertEquals([cached.get("plainquoted.store")!.rdap_data.reg_price, cached.get("plainquoted.store")!.rdap_data.price_unverified], [0.98, false]);
     assertEquals([cached.get("premiumquoted.store")!.rdap_data.premium, cached.get("premiumquoted.store")!.rdap_data.reg_price], [true, 6823.39]);
-    assertEquals(cached.has("refusedquoted.store"), false, "an uncertain result is never cached — and so never cached as taken");
+    // The refusal is kept as a registrar FACT beside the registry's own verdict (no registration) —
+    // never as "taken", and for a day like any other registrar quote.
+    const refusedRow = cached.get("refusedquoted.store")! as unknown as { available: boolean; expires_at: string; rdap_data: Record<string, unknown> };
+    assertEquals([refusedRow.available, refusedRow.rdap_data.registrar_refused, refusedRow.rdap_data.reg_price], [true, true, null]);
+    const lifetimeH = (new Date(refusedRow.expires_at).getTime() - Date.now()) / 3_600_000;
+    assert(lifetimeH > 23.9 && lifetimeH <= 24, `a refusal is remembered for 24 h, got ${lifetimeH.toFixed(2)} h`);
   } finally {
     globalThis.fetch = realFetch;
   }
@@ -860,7 +865,10 @@ Deno.test({ name: "registrar: a refusal never turns a name into 'taken' — not 
       assertEquals([r.available, r.uncertain, r.uncertainReason], [false, true, "not_sold_at_registrar"], r.domain);
       assertEquals(r.price, undefined, r.domain);
     }
-    assertEquals(written.filter((w) => w.domain === "abcd.dev" || w.domain === "typedname.dev").length, 0, "nothing is cached: not as available, not as taken");
+    // What is cached is the registrar's fact next to the registry's verdict — no row says "taken".
+    const rows = written.filter((w) => w.domain === "abcd.dev" || w.domain === "typedname.dev");
+    assertEquals(rows.map((w) => w.domain).sort(), ["abcd.dev", "typedname.dev"]);
+    for (const w of rows) assertEquals([w.available, w.rdap_data.registrar_refused], [true, true], w.domain);
   } finally {
     globalThis.fetch = realFetch;
     if (envBefore == null) Deno.env.delete("THIRD_SIGNAL"); else Deno.env.set("THIRD_SIGNAL", envBefore);
@@ -966,11 +974,14 @@ Deno.test({ name: "budget: the API asks for no more names than its share allows"
   }
 }) });
 
-Deno.test({ name: "budget: a 429 from the registrar makes the API stand back for as long as it was told — and says nothing in the logs", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+Deno.test({ name: "budget: a 429 from the registrar makes the API stand back for as long as it was told, and is logged as one error line", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
   const realFetch = globalThis.fetch;
   const realWarn = console.warn;
+  const realError = console.error;
   const warnings: string[] = [];
+  const errors: string[] = [];
   console.warn = (...args: unknown[]) => { warnings.push(args.map(String).join(" ")); };
+  console.error = (...args: unknown[]) => { errors.push(args.map(String).join(" ")); };
   globalThis.fetch = stubNetwork(() => new Response("slow down", { status: 429, headers: { "retry-after": "45" } }), []);
   const { supabase } = recordingSupabase(async (table) => ({ data: table === "registrar_prices" ? PRICE_TABLE : [], error: null }));
   try {
@@ -979,17 +990,71 @@ Deno.test({ name: "budget: a 429 from the registrar makes the API stand back for
     const api = await checkDomains(["throttledapi.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "background", quoteCaller: "api", quoteBudget: apiSide.budget, registrarSells: () => true });
     assertEquals([api[0].available, api[0].price, api[0].priceUnverified], [true, undefined, true], "the answer was never waiting on the quote");
     assertEquals(apiSide.log, ["spend api 1", "backOff api 45000"]);
-    assertEquals(warnings.filter((w) => w.includes("porkbun")), [], "a throttled background quote is not a warning");
+    // The account's real limit must be visible in the logs: one machine-readable line, no name, no key.
+    assertEquals(errors, ['{"src":"porkbun","status":429,"retryAfter":45}']);
 
-    // The site's call is throttled: the account is at its limit, so the API yields; the site's 429 IS logged.
+    // The site's call is throttled: the account is at its limit, so the API yields.
     const siteSide = mockBudget({ site: 200, api: 60 });
     const site = await checkDomains(["throttledsite.dev"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "await", quoteCaller: "site", quoteBudget: siteSide.budget, registrarSells: () => true });
     assertEquals([site[0].available, site[0].price, site[0].priceUnverified], [true, undefined, true], "no quote, no price — never the standard one");
     assertEquals(siteSide.log, ["spend site 1", "backOff api 45000"]);
-    assertEquals(warnings.filter((w) => w.includes("porkbun HTTP 429")).length, 1);
+    assertEquals(errors, ['{"src":"porkbun","status":429,"retryAfter":45}', '{"src":"porkbun","status":429,"retryAfter":45}'], "the same line whoever tripped it");
+    assertEquals(warnings.filter((w) => w.includes("porkbun")), [], "and only that line");
   } finally {
     globalThis.fetch = realFetch;
     console.warn = realWarn;
+    console.error = realError;
+  }
+}) });
+
+// ---- A refusal is remembered as a registrar fact (owner's decision, 2026-11-21)
+// An uncertain verdict is never cached. A registrar's refusal is not a verdict:
+// it is a fact about the name, as stable as a premium quote, and the verdict is
+// derived from it on every read — so the FIRST answer for such a name already
+// says uncertain instead of "available" until the next quote.
+Deno.test({ name: "refusal: once a registrar has refused a name, the next request says uncertain at once — no 'available', no price, no second call", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = stubNetwork((domains) =>
+    domains.length === 1
+      ? json200({ status: "SUCCESS", response: { avail: "no", premium: "no" } })
+      : json200({ status: "SUCCESS", domains: Object.fromEntries(domains.map((d) => [d, { avail: "no", premium: "no" }])) }), calls);
+  // The shared cache: starts empty, keeps what the pipeline writes, and also holds
+  // one fact row written "by another isolate" for a name this isolate never saw.
+  const shared = new Map<string, unknown>([[
+    "refusedelsewhere.store",
+    { domain: "refusedelsewhere.store", available: true, checked_via: "rdap", rdap_data: { cache_version: 6, reg_price: null, registrar_refused: true } },
+  ]]);
+  const { supabase, written } = recordingSupabase(async (table) => {
+    for (const w of written) shared.set(w.domain, w);
+    return { data: table === "domain_cache" ? [...shared.values()] : table === "registrar_prices" ? PRICE_TABLE : [], error: null };
+  });
+  try {
+    // 1. The search wave: the registry lists no registration → available, price unknown.
+    const wave = await checkDomains(["refusedhere.store"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, registrarSells: () => true });
+    assertEquals([wave[0].available, wave[0].priceUnverified], [true, true]);
+    // 2. The price follow-up: the registrar refuses.
+    const followUp = await checkDomains(["refusedhere.store"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "await", registrarSells: () => true });
+    assertEquals([followUp[0].available, followUp[0].uncertain, followUp[0].uncertainReason], [false, true, "not_sold_at_registrar"]);
+    assertEquals(calls.length, 1);
+
+    // 3. Anyone asking again within the day — a plain wave, no quote requested —
+    //    gets the uncertain verdict in that first response. Same for the name
+    //    whose refusal another isolate recorded.
+    const sink = new Map<string, DomainCheckResult>();
+    const again = await checkDomains(["refusedhere.store", "refusedelsewhere.store"], { supabase, partialSink: sink, thirdSignalDeadlineAt: Date.now() + 1000, registrarSells: () => true });
+    for (const r of again) {
+      assertEquals([r.available, r.uncertain, r.uncertainReason, r.price, r.priceUnverified ?? false], [false, true, "not_sold_at_registrar", undefined, false], r.domain);
+      assertEquals(sink.get(r.domain)?.available, false, `${r.domain}: what a caller with an expired budget would read`);
+    }
+    assertEquals(calls.length, 1, "the registrar is not asked again");
+
+    // The API's shape of the same thing: quoting in the background changes nothing here.
+    const api = await checkDomains(["refusedelsewhere.store"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "background", quoteCaller: "api", registrarSells: () => true });
+    assertEquals([api[0].available, api[0].uncertain, api[0].uncertainReason], [false, true, "not_sold_at_registrar"]);
+    assertEquals(calls.length, 1);
+  } finally {
+    globalThis.fetch = realFetch;
   }
 }) });
 

@@ -14,9 +14,9 @@
 // A script walking the API must not leave a visitor without prices, so the API
 // may use at most `apiShare` of a window (30 %), and never what the site has
 // already taken: at least 70 % is always the site's. When the registrar itself
-// says "slow down" (429) the API stops asking for as long as it was told to,
-// without a word in the logs — a missing background quote costs nothing but a
-// price that arrives later.
+// says "slow down" (429) the API stops asking for as long as it was told to —
+// a missing background quote costs nothing but a price that arrives later. The
+// 429 itself is logged by the pipeline as one error line, whoever tripped it.
 //
 // Honest limit of this file: the ledger lives in one isolate. `check-domains`
 // and `public-api` are separate functions with separate isolates, so what this

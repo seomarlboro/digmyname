@@ -89,6 +89,13 @@ export interface DomainCheckResult {
    *  without the premium mark. Cleared by a registrar quote (standard price, a
    *  premium price, or "not available"). Cached for 10 minutes at most. */
   priceUnverified?: boolean;
+  /** A registrar FACT, not a verdict: asked for a price, the registrar would not
+   *  sell this name although the registry lists no registration. It is cached
+   *  like any other registrar fact (24 h, beside the premium flag) and the
+   *  verdict is derived from it on every read: uncertain,
+   *  `not_sold_at_registrar` — so the first answer already says so instead of
+   *  "available" until the next quote. See registrarRefusal(). */
+  registrarRefused?: boolean;
   /** The registry holds the name back: no registration exists, and it cannot be
    *  registered (its RDAP 404 says so — interpretRdap404). Travels with
    *  available:false; lets a card say "Reserved by the registry" instead of
@@ -710,12 +717,19 @@ export function porkbunRenewalPrice(renewal: unknown): number | undefined {
   return Number.isFinite(n) && n > 0 ? n : undefined;
 }
 
-/** How a registrar call reports that it was told to slow down, and whether to log it. */
+/** How a registrar call reports that it was told to slow down. */
 interface RegistrarCallOpts {
   /** The registrar answered 429; `ms` is how long it asked us to wait. */
   onThrottle?: (ms: number) => void;
-  /** Do not log a 429 (background work backs off without a word). */
-  quiet?: boolean;
+}
+
+/** The registrar's 429 is the account's real limit, so it is always visible:
+ *  one machine-readable error line, the same for every caller. No name, no key. */
+function reportRegistrarThrottle(resp: Response, opts: RegistrarCallOpts): void {
+  const header = resp.headers.get("retry-after");
+  const seconds = header != null && /^\d+$/.test(header.trim()) ? Number(header.trim()) : null;
+  console.error(JSON.stringify({ src: "porkbun", status: 429, retryAfter: seconds }));
+  opts.onThrottle?.(retryAfterMs(header));
 }
 
 async function checkPorkbun(domain: string, apiKey: string, secretKey: string, opts: RegistrarCallOpts = {}): Promise<PorkbunResult | null> {
@@ -731,8 +745,8 @@ async function checkPorkbun(domain: string, apiKey: string, secretKey: string, o
     );
     if (!resp.ok) {
       const txt = await resp.text().catch(() => "");
-      if (resp.status === 429) opts.onThrottle?.(retryAfterMs(resp.headers.get("retry-after")));
-      if (!(resp.status === 429 && opts.quiet)) console.warn(`porkbun HTTP ${resp.status} for ${domain}: ${txt.slice(0, 200)}`);
+      if (resp.status === 429) reportRegistrarThrottle(resp, opts);
+      else console.warn(`porkbun HTTP ${resp.status} for ${domain}: ${txt.slice(0, 200)}`);
       return null;
     }
     const data = await resp.json();
@@ -779,8 +793,8 @@ async function checkPorkbunBulk(
     });
     if (!resp.ok) {
       const txt = await resp.text().catch(() => "");
-      if (resp.status === 429) opts.onThrottle?.(retryAfterMs(resp.headers.get("retry-after")));
-      if (!(resp.status === 429 && opts.quiet)) console.warn(`porkbun bulk HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+      if (resp.status === 429) reportRegistrarThrottle(resp, opts);
+      else console.warn(`porkbun bulk HTTP ${resp.status}: ${txt.slice(0, 200)}`);
       return out;
     }
     const data = await resp.json();
@@ -1219,6 +1233,32 @@ async function registrarQuotes(domains: string[], key: string, secret: string, o
   return checkPorkbunBulk(domains, key, secret, opts);
 }
 
+/** How long a registrar's refusal is remembered — as long as a premium quote. */
+const REGISTRAR_REFUSAL_TTL_S = 24 * 60 * 60;
+
+/**
+ * The verdict for a name the registry lists as free and a registrar will not
+ * sell: uncertain, never available, never priced. `registrarRefused` marks it
+ * as derived from a cached registrar fact — the one uncertain result that has
+ * something stable behind it, which is why the fact (not this verdict) is
+ * cached. Owner's decision, 2026-11-21: without it the search wave and the API
+ * answered "available" first and the refusal only showed after the next quote.
+ */
+function registrarRefusal(r: DomainCheckResult): DomainCheckResult {
+  return {
+    ...r,
+    available: false,
+    uncertain: true,
+    uncertainReason: "not_sold_at_registrar",
+    registrarRefused: true,
+    price: undefined,
+    premium: undefined,
+    premiumRenewPrice: undefined,
+    premiumUnverified: undefined,
+    priceUnverified: undefined,
+  };
+}
+
 /**
  * What a registrar's answer makes of a name the base pass read as available.
  *
@@ -1227,9 +1267,10 @@ async function registrarQuotes(domains: string[], key: string, secret: string, o
  *   • "available, premium"       → the registrar's own figure;
  *   • "not available"            → the registry says nobody holds the name and a
  *     registrar will not sell it. Those two do not agree, so the result is
- *     uncertain (`not_sold_at_registrar`) — never available, never priced, never
- *     cached, and never "taken": no registration exists that we know of. Until
- *     2026-11-21 this read as taken and the card said "Registered".
+ *     uncertain (`not_sold_at_registrar`) — never available, never priced, and
+ *     never "taken": no registration exists that we know of. The refusal itself
+ *     is cached as a registrar fact (registrarRefusal). Until 2026-11-21 this
+ *     read as taken and the card said "Registered".
  *
  * `plainName`: the name was waiting only for a price (`priceUnverified`) — not a
  * premium suspect and not the name the visitor typed. A standard quote for such
@@ -1242,19 +1283,7 @@ function applyRegistrarQuote(
   catalogStandard: number | undefined,
   plainName: boolean,
 ): DomainCheckResult {
-  if (!pb.available) {
-    return {
-      ...r,
-      available: false,
-      uncertain: true,
-      uncertainReason: "not_sold_at_registrar",
-      price: undefined,
-      premium: undefined,
-      premiumRenewPrice: undefined,
-      premiumUnverified: undefined,
-      priceUnverified: undefined,
-    };
-  }
+  if (!pb.available) return registrarRefusal(r);
   const isPremium =
     pb.premium ||
     (pb.price != null && catalogStandard != null && pb.price > catalogStandard * 2) ||
@@ -1300,7 +1329,9 @@ export function getServiceClient(): SupabaseClient {
 function buildCacheRow(r: DomainCheckResult, ttl: number) {
   return {
     domain: r.domain,
-    available: r.available,
+    // A refused name is stored as what the REGISTRY said (no registration) plus
+    // the registrar's fact; the uncertain verdict is derived on read, never stored.
+    available: r.registrarRefused ? true : r.available,
     checked_via: r.checkedVia,
     rdap_data: {
       cache_version: CACHE_VERSION,
@@ -1310,6 +1341,7 @@ function buildCacheRow(r: DomainCheckResult, ttl: number) {
       likely_premium: r.likelyPremium ?? false,
       premium_unverified: r.premiumUnverified ?? false,
       price_unverified: r.priceUnverified ?? false,
+      registrar_refused: r.registrarRefused ?? false,
       reserved: r.reserved ?? false,
       for_sale: r.forSale ?? false,
       for_sale_via: r.forSaleVia ?? null,
@@ -1424,11 +1456,8 @@ export async function checkDomains(
   const budget = deps.quoteBudget ?? registrarBudget;
   // A 429 from the registrar is the account's limit, whoever tripped it: the API
   // stands back for as long as the registrar asked, so the site is first in line
-  // when the window reopens. The API's own 429s are not logged.
-  const registrarCall: RegistrarCallOpts = {
-    onThrottle: (ms) => budget.backOff("api", ms),
-    quiet: quoteCaller === "api",
-  };
+  // when the window reopens. Every 429 is logged (reportRegistrarThrottle).
+  const registrarCall: RegistrarCallOpts = { onThrottle: (ms) => budget.backOff("api", ms) };
 
   const porkbunKey = Deno.env.get("PORKBUN_API_KEY");
   const porkbunSecret = Deno.env.get("PORKBUN_SECRET_KEY");
@@ -1532,10 +1561,12 @@ export async function checkDomains(
         forSaleVia: meta.for_sale_via as string | undefined,
         listingUrl: meta.listing_url as string | undefined,
       };
-      cachedMap.set(c.domain, result);
+      // The row holds facts; the verdict for a refused name is derived here.
+      const derived = meta.registrar_refused === true && c.available ? registrarRefusal(result) : result;
+      cachedMap.set(c.domain, derived);
       pruneHotCache();
       hotCache.delete(c.domain);
-      hotCache.set(c.domain, { result, expiresAt: nowMs + HOT_CACHE_TTL_MS });
+      hotCache.set(c.domain, { result: derived, expiresAt: nowMs + HOT_CACHE_TTL_MS });
     }
   }
   l2Settled = true;
@@ -1833,7 +1864,9 @@ export async function checkDomains(
   // Cache only trustworthy results, with tiered TTL.
   const cacheable = fresh
     .map((r) => {
-      let ttl = ttlSecondsFor(r.checkedVia, r.uncertain === true, r.available);
+      let ttl = r.registrarRefused
+        ? REGISTRAR_REFUSAL_TTL_S // the fact is cached; the uncertain verdict is derived on read
+        : ttlSecondsFor(r.checkedVia, r.uncertain === true, r.available);
       // premium-unverified "available" has no confirmed price — don't lock it in
       // for hours; re-check soon so a real price can attach on a warmer isolate.
       if (r.premiumUnverified) ttl = Math.min(ttl, 600);
@@ -1888,9 +1921,11 @@ export async function checkDomains(
               const p = standardPriceFor(r.domain, pb.price);
               if (p != null) quoted = { ...quoted, price: p };
             }
-            // A refusal is an uncertain result: it is not cached. The row written
-            // with the answer (available, no price, ten minutes) is left to expire.
-            const ttl = ttlSecondsFor(quoted.checkedVia, quoted.uncertain === true, quoted.available);
+            // A refusal is stored as the registrar fact it is, for a day; the
+            // next request derives the uncertain verdict from it at once.
+            const ttl = quoted.registrarRefused
+              ? REGISTRAR_REFUSAL_TTL_S
+              : ttlSecondsFor(quoted.checkedVia, quoted.uncertain === true, quoted.available);
             if (ttl <= 0) continue;
             const capped = quoted.available && quoted.price == null ? Math.min(ttl, 600) : ttl;
             hotCache.delete(r.domain);
