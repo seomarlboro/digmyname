@@ -728,7 +728,7 @@ Deno.test({ name: "price: the follow-up request quotes waiting names in ONE regi
     error: null,
   }));
   try {
-    const results = await checkDomains(names, { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "await" });
+    const results = await checkDomains(names, { supabase, thirdSignalDeadlineAt: Date.now() + 1000, quotePrices: "await", registrarSells: () => true });
     const by = new Map(results.map((r) => [r.domain, r]));
     assertEquals(calls.length, 1, "four names, one bulk call");
 
@@ -1108,4 +1108,117 @@ Deno.test({ name: "registrar: a premium quote of $1,000 or more keeps its figure
     globalThis.fetch = realFetch;
   }
 }) });
+
+// ---- Premium is what the registrar says, or what a KNOWN standard price proves --
+// Production, 2026-11-21: of 16 registrar-checked `.ai` names cached at $82.70 —
+// the extension's standard price — 9 were flagged premium. The catalog takes
+// 9–14 s to load, and with the standard price unknown any quote of $50 or more
+// read as premium.
+const COLD_CATALOG = new Map<string, { registration?: number; renewal?: number }>();
+const aiQuote = (price: string, premium: "yes" | "no") => ({ avail: "yes", type: "registration", price, regularPrice: price, premium, additional: { renewal: { type: "renewal", price, regularPrice: price } } });
+const quoteStub = (answers: Record<string, unknown>, calls: string[] = []) =>
+  stubNetwork((domains) =>
+    domains.length === 1
+      ? json200({ status: "SUCCESS", response: answers[domains[0]] })
+      : json200({ status: "SUCCESS", domains: Object.fromEntries(domains.map((d) => [d, answers[d]])) }), calls);
+const withoutThirdSignal = async (fn: () => Promise<void>) => {
+  const before = Deno.env.get("THIRD_SIGNAL");
+  Deno.env.set("THIRD_SIGNAL", "off");
+  try { await fn(); } finally { if (before == null) Deno.env.delete("THIRD_SIGNAL"); else Deno.env.set("THIRD_SIGNAL", before); }
+};
+
+Deno.test({ name: "premium: with a cold catalog, .ai at its standard $82.70 is NOT premium — an explicit premium answer still is", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(() => withoutThirdSignal(async () => {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = quoteStub({
+    "abcd.ai": aiQuote("82.70", "no"),      // a standard name on an expensive extension
+    "wxyz.ai": aiQuote("2,500.00", "yes"),  // the registrar says premium
+  });
+  // No catalog, and nothing about .ai in our price table: the standard price is unknown.
+  const { supabase, written } = recordingSupabase(async () => ({ data: [], error: null }));
+  try {
+    const results = await checkDomains(["abcd.ai", "wxyz.ai"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, registrarCatalog: COLD_CATALOG, registrarSells: () => true });
+    const by = new Map(results.map((r) => [r.domain, r]));
+
+    const standard = by.get("abcd.ai")!;
+    assertEquals([standard.available, standard.premium ?? false, standard.price, standard.checkedVia], [true, false, 82.7, "porkbun"], "$82.70 is this extension's ordinary price, not a premium");
+    assertEquals(written.find((w) => w.domain === "abcd.ai")!.rdap_data.premium, false, "and it is not cached as premium for a day");
+
+    const premium = by.get("wxyz.ai")!;
+    assertEquals([premium.available, premium.premium, premium.price, premium.premiumRenewPrice], [true, true, 2500, 2500]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+})) });
+
+Deno.test({ name: "premium: a price far above a KNOWN standard price still reads as premium — from the catalog, or from the registrar's row in our price table", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(() => withoutThirdSignal(async () => {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = quoteStub({
+    "efgh.ai": aiQuote("82.70", "no"),
+    "ijkl.ai": aiQuote("400.00", "no"), // priced like a premium, flagged as none
+    "mnop.ai": aiQuote("82.70", "no"),
+    "qrst.ai": aiQuote("400.00", "no"),
+  });
+  try {
+    // (a) The catalog is cold, but our price table holds the registrar's own row for the extension.
+    const table = recordingSupabase(async (t) => ({
+      data: t === "registrar_prices" ? [{ tld: "ai", registrar: "Porkbun", reg_price: 82.7 }, { tld: "ai", registrar: "Spaceship", reg_price: 69.98 }] : [],
+      error: null,
+    }));
+    const viaTable = await checkDomains(["efgh.ai", "ijkl.ai"], { supabase: table.supabase, thirdSignalDeadlineAt: Date.now() + 1000, registrarCatalog: COLD_CATALOG, registrarSells: () => true });
+    assertEquals(viaTable.map((r) => [r.domain, r.premium ?? false, r.price]), [["efgh.ai", false, 82.7], ["ijkl.ai", true, 400]]);
+
+    // (b) The catalog is loaded; the price table says nothing.
+    const none = recordingSupabase(async () => ({ data: [], error: null }));
+    const viaCatalog = await checkDomains(["mnop.ai", "qrst.ai"], { supabase: none.supabase, thirdSignalDeadlineAt: Date.now() + 1000, registrarCatalog: new Map([["ai", { registration: 82.7, renewal: 82.7 }]]) });
+    assertEquals(viaCatalog.map((r) => [r.domain, r.premium ?? false, r.price]), [["mnop.ai", false, 82.7], ["qrst.ai", true, 400]]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+})) });
+
+// ---- A refusal is a fact only when we know the registrar sells the extension --
+Deno.test({ name: "refusal: with a cold catalog it is uncertain but NOT remembered — the next request asks again; with the extension listed it is remembered", sanitizeOps: false, sanitizeResources: false, fn: () => withRegistrarKeys(async () => {
+  const realFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = stubNetwork((domains) =>
+    domains.length === 1
+      ? json200({ status: "SUCCESS", response: { avail: "no", premium: "no" } })
+      : json200({ status: "SUCCESS", domains: Object.fromEntries(domains.map((d) => [d, { avail: "no", premium: "no" }])) }), calls);
+  const { supabase, written } = recordingSupabase(async (table) => ({ data: table === "registrar_prices" ? PRICE_TABLE : [], error: null }));
+  try {
+    // Cold catalog: we do not know whether the registrar carries .store at all.
+    for (const round of [1, 2]) {
+      const cold = await checkDomains(["coldrefused.store"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, verifyPremium: new Set(["coldrefused.store"]), registrarCatalog: COLD_CATALOG });
+      assertEquals([cold[0].available, cold[0].uncertain, cold[0].uncertainReason], [false, true, "not_sold_at_registrar"], `round ${round}: still never available`);
+      assertEquals(calls.length, round, `round ${round}: nothing was remembered, so the registrar is asked again`);
+    }
+    assertEquals(written.filter((w) => w.domain === "coldrefused.store").length, 0, "no row: not as a fact, not as anything");
+
+    // Loaded catalog that lists the extension: now the refusal is about the name, and it is kept.
+    const warm = await checkDomains(["warmrefused.store"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000, verifyPremium: new Set(["warmrefused.store"]), registrarCatalog: new Map([["store", { registration: 2.57 }]]) });
+    assertEquals([warm[0].available, warm[0].uncertain, warm[0].uncertainReason], [false, true, "not_sold_at_registrar"]);
+    assertEquals(written.filter((w) => w.domain === "warmrefused.store").map((w) => w.rdap_data.registrar_refused), [true]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}) });
+
+// ---- Rows written before this logic are not served ---------------------------
+Deno.test({ name: "cache version: a row written by the previous version (5) is ignored and replaced — its 'premium at $82.70' never reaches a visitor", sanitizeOps: false, sanitizeResources: false, fn: async () => {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = stubNetwork(() => json200({ status: "SUCCESS", domains: {} }), []);
+  // What production holds today for a standard .ai name checked on a cold isolate.
+  const stale = { domain: "stalefive.ai", available: true, checked_via: "porkbun", rdap_data: { cache_version: 5, reg_price: 82.7, premium: true, likely_premium: true } };
+  const { supabase, written } = recordingSupabase(async (table) => ({ data: table === "domain_cache" ? [stale] : [], error: null }));
+  try {
+    const results = await checkDomains(["stalefive.ai"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000 });
+    // Re-resolved from the registry: available, price not yet confirmed — nothing of the old row.
+    assertEquals([results[0].available, results[0].premium ?? false, results[0].price, results[0].priceUnverified, results[0].checkedVia], [true, false, undefined, true, "rdap"]);
+    // And the row is overwritten (upsert on `domain`) with the current version.
+    const row = written.find((w) => w.domain === "stalefive.ai")!;
+    assertEquals([row.rdap_data.cache_version, row.rdap_data.premium, row.rdap_data.reg_price], [6, false, null]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+} });
 

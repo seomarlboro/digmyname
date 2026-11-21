@@ -887,14 +887,13 @@ export function getWarmTldPricingOnly(): Map<string, TldPrice> {
   return pricingCache?.map ?? new Map();
 }
 
-// The first attempt is hard-capped at 4s so nothing that could ever end up on
-// a request path pays a long tail. Porkbun's catalog endpoint measurably takes
-// ~14s to serve its ~80KB payload, so the retries (which only ever run in the
-// background via getTldPricing()/waitUntil) get a realistic budget — otherwise
-// pricing would never load at all and every available domain would lose its
-// price.
-const PRICING_FIRST_TIMEOUT_MS = 4000;
-const PRICING_RETRY_TIMEOUT_MS = 20000;
+// The catalog is ~260 KB and the registrar takes 9–14 s to serve it (measured
+// 2026-11-21: 8.6 s in one request, 12–13 s through this loader). It is only
+// ever loaded in the background — no request awaits it — so every attempt gets
+// the same realistic budget. The first attempt used to be capped at 4 s, from
+// the time the load could sit on a request path; it timed out every time and
+// cost each cold isolate four more seconds without a catalog.
+const PRICING_TIMEOUT_MS = 20000;
 const PRICING_ATTEMPTS = 3;
 
 export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
@@ -908,7 +907,7 @@ export async function loadTldPricing(): Promise<Map<string, TldPrice>> {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: "{}",
-        signal: AbortSignal.timeout(attempt === 1 ? PRICING_FIRST_TIMEOUT_MS : PRICING_RETRY_TIMEOUT_MS),
+        signal: AbortSignal.timeout(PRICING_TIMEOUT_MS),
       });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
@@ -1257,13 +1256,17 @@ const REGISTRAR_REFUSAL_TTL_S = 24 * 60 * 60;
  * cached. Owner's decision, 2026-11-21: without it the search wave and the API
  * answered "available" first and the refusal only showed after the next quote.
  */
-function registrarRefusal(r: DomainCheckResult): DomainCheckResult {
+function registrarRefusal(r: DomainCheckResult, isFact = true): DomainCheckResult {
   return {
     ...r,
     available: false,
     uncertain: true,
     uncertainReason: "not_sold_at_registrar",
-    registrarRefused: true,
+    // Only a fact is remembered. A refusal from a registrar we do not KNOW to
+    // sell this extension (its catalog is not loaded yet) may mean nothing more
+    // than "we do not carry it": the answer is still uncertain, but it is not
+    // stored — the next request asks again, with the catalog loaded.
+    registrarRefused: isFact ? true : undefined,
     price: undefined,
     premium: undefined,
     premiumRenewPrice: undefined,
@@ -1293,16 +1296,22 @@ function registrarRefusal(r: DomainCheckResult): DomainCheckResult {
 function applyRegistrarQuote(
   r: DomainCheckResult,
   pb: PorkbunResult,
-  catalogStandard: number | undefined,
+  /** The registrar's own standard first-year price for this extension, when it is
+   *  KNOWN (loaded catalog, else its row in our price table). `undefined` = not known. */
+  registrarStandard: number | undefined,
   plainName: boolean,
+  /** The registrar is known to sell this extension, so a refusal is about the name. */
+  refusalIsFact: boolean,
 ): DomainCheckResult {
-  if (!pb.available) return registrarRefusal(r);
-  const isPremium =
-    pb.premium ||
-    (pb.price != null && catalogStandard != null && pb.price > catalogStandard * 2) ||
-    (pb.price != null && catalogStandard == null && pb.price >= 50);
+  if (!pb.available) return registrarRefusal(r, refusalIsFact);
+  // Premium is what the registrar SAYS is premium. A price can add to that only
+  // against a standard price we actually know (more than twice it). When the
+  // standard price is unknown the price proves nothing: until 2026-11-21 any
+  // quote of $50 or more then read as premium, and with the catalog still
+  // loading that made standard `.ai` names ($82.70) premium about half the time.
+  const isPremium = pb.premium || (pb.price != null && registrarStandard != null && pb.price > registrarStandard * 2);
   if (plainName && !isPremium) return { ...r, priceUnverified: undefined };
-  const price = isPremium ? pb.price : (pb.price ?? catalogStandard ?? r.price);
+  const price = isPremium ? pb.price : (pb.price ?? registrarStandard ?? r.price);
   return {
     ...r,
     checkedVia: "porkbun",
@@ -1449,6 +1458,9 @@ export async function checkDomains(
     /** Does the registrar sell this extension at all? `undefined` = not known
      *  (its catalog is not loaded yet). Defaults to the loaded catalog. */
     registrarSells?: (tld: string) => boolean | undefined;
+    /** The registrar's price catalog; the isolate's own unless a test or a
+     *  local run supplies one. An empty map is a catalog that has not loaded. */
+    registrarCatalog?: ReadonlyMap<string, { registration?: number; renewal?: number }>;
   } = {}
 ): Promise<DomainCheckResult[]> {
   const supabase = deps.supabase ?? getServiceClient();
@@ -1760,7 +1772,7 @@ export async function checkDomains(
   // The verdict above is final. What follows only decides the price, and it is
   // strict: on an extension whose registry may price one name as premium, the
   // standard price is printed only for a name a registrar has quoted.
-  const pricing = getWarmTldPricingOnly();
+  const pricing: ReadonlyMap<string, TldPrice> = deps.registrarCatalog ?? getWarmTldPricingOnly();
 
   // This request is the follow-up for names that were answered without a price:
   // the cached ones still waiting join the quote pass below.
@@ -1791,10 +1803,12 @@ export async function checkDomains(
   const tldOf = (domain: string) => domain.split(".").slice(1).join(".");
   const neededTlds = [...new Set(fresh.filter((r) => r.available && r.price == null).map((r) => tldOf(r.domain)))];
   const dbPrice = new Map<string, number>();
+  /** The quoting registrar's own row in our price table, per extension. */
+  const dbRegistrarPrice = new Map<string, number>();
   if (neededTlds.length > 0) {
     const { data: priceRows } = await supabase
       .from("registrar_prices")
-      .select("tld, reg_price")
+      .select("tld, registrar, reg_price")
       .eq("supported", true)
       .in("tld", neededTlds);
     for (const row of priceRows ?? []) {
@@ -1802,8 +1816,15 @@ export async function checkDomains(
       if (!Number.isFinite(v)) continue;
       const cur = dbPrice.get(row.tld);
       if (cur == null || v < cur) dbPrice.set(row.tld, v);
+      if (row.registrar === "Porkbun") dbRegistrarPrice.set(row.tld, v);
     }
   }
+  /** What the registrar itself charges for a standard name on this extension:
+   *  its loaded catalog, else its row in our price table (the site's extensions
+   *  are all there, so a catalog still loading does not leave them unknown),
+   *  else unknown. */
+  const registrarStandardFor = (domain: string) =>
+    pricing.get(tldOf(domain))?.registration ?? dbRegistrarPrice.get(tldOf(domain));
   /** The extension's standard first-year price: the cheapest registrar we track,
    *  else the registrar catalog, else what the registrar just quoted. */
   const standardPriceFor = (domain: string, quoted?: number) =>
@@ -1849,7 +1870,7 @@ export async function checkDomains(
       if (idx < 0) continue;
       const plainName = target.priceUnverified === true && !isSuspect(target) && !forced.has(target.domain);
       if (pb.price != null) quotedStandard.set(target.domain, pb.price);
-      fresh[idx] = applyRegistrarQuote(fresh[idx], pb, pricing.get(tldOf(target.domain))?.registration, plainName);
+      fresh[idx] = applyRegistrarQuote(fresh[idx], pb, registrarStandardFor(target.domain), plainName, registrarSells(tldOf(target.domain)) === true);
     }
   }
 
@@ -1929,7 +1950,7 @@ export async function checkDomains(
           for (const r of later) {
             const pb = quotes.get(r.domain.toLowerCase());
             if (!pb) continue;
-            let quoted = applyRegistrarQuote(r, pb, pricing.get(tldOf(r.domain))?.registration, true);
+            let quoted = applyRegistrarQuote(r, pb, registrarStandardFor(r.domain), true, registrarSells(tldOf(r.domain)) === true);
             if (quoted.available && quoted.price == null && !quoted.priceUnverified) {
               const p = standardPriceFor(r.domain, pb.price);
               if (p != null) quoted = { ...quoted, price: p };
