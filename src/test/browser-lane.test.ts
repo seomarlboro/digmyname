@@ -106,6 +106,32 @@ describe("browser lane: verdicts", () => {
     expect((await checkInBrowser("acmeforge.com")).state).toBe("available");
   });
 
+  // Regression, 2026-11-21: `garden.tech` has no registration and no DNS, and the
+  // registry answers 404 — with a body that says the name is reserved. Bodies are
+  // the registry's own (rdap.radix.host), captured that day.
+  it("a 404 whose body says the registry reserves the name is never available; a plain 404 in the same TLD still is", async () => {
+    const reserved = {
+      errorCode: 404,
+      title: "Not Found",
+      description: ["Domain Name: garden.tech", "This name is not available for registration:", "Domain name is registry reserved"],
+    };
+    const free = {
+      errorCode: 404,
+      title: "Not Found",
+      description: ["Domain gardenplot.tech is available for registration", "Please visit https://rdap.radix.host/registrars/ for a list of accredited registrars"],
+    };
+    routeFetch([
+      ["rdap.radix.host/rdap/domain/garden.tech", () => json(reserved, 404)],
+      ["rdap.radix.host/rdap/domain/gardenplot.tech", () => json(free, 404)],
+      ["cloudflare-dns.com", () => json(NXDOMAIN)],
+      ["dns.google", () => json(NXDOMAIN)],
+    ]);
+    // Not available — and not taken either: the browser only calls a name taken
+    // on a registration or DNS records. The edge verdict fills this card.
+    expect(await checkInBrowser("garden.tech")).toEqual({ domain: "garden.tech", state: "unknown", checkedVia: "none" });
+    expect(await checkInBrowser("gardenplot.tech")).toEqual({ domain: "gardenplot.tech", state: "available", checkedVia: "rdap" });
+  });
+
   it("no decisive pair → unknown: RDAP error, DNS error, or a disagreement", async () => {
     routeFetch([["rdap.verisign.com", () => new Response("", { status: 500 })], ["cloudflare-dns.com", () => json(NXDOMAIN)], ["dns.google", () => json(NXDOMAIN)]]);
     expect((await checkInBrowser("acmeforge.com")).state).toBe("unknown");

@@ -144,3 +144,50 @@ export function shouldEscalateToDomainr(r: {
 }): boolean {
   return r.uncertain === true || (r.available && r.likelyPremium === true);
 }
+
+// ---------------------------------------------------------------------------
+// What a registry's RDAP 404 actually says
+//
+// A 404 is the registry's answer to "show me this registration", and "there is
+// none" has more than one cause. Most registries say only that ("Object not
+// found"); some also say the name can never be registered. Measured 2026-11-21
+// against rdap.radix.host (.tech, .store, .site, .online, .space and six more),
+// two names with no registration and no DNS:
+//
+//   qqzzxxjjkkvv.tech  404  "Domain qqzzxxjjkkvv.tech is available for registration"
+//   garden.tech        404  "This name is not available for registration:"
+//                           "Domain name is registry reserved"
+//
+// Until then every 404 read as "not registered", so `garden.tech` was reported
+// available at the extension's standard price — a name nobody can buy.
+//
+// Only the error's own top-level `description` is read (RFC 9083 §6). The
+// `notices` beside it carry terms-of-service prose ("reserves the right",
+// "all rights reserved") that says nothing about the name.
+// ---------------------------------------------------------------------------
+
+/** `not_registered`: no registration, and the registry does not say the name
+ *  is off limits. `reserved`: the registry holds the name back.
+ *  `not_registerable`: the registry says it cannot be registered and the reason
+ *  is not one we recognise — not proof of anything, and never "free". */
+export type Rdap404Meaning = "not_registered" | "reserved" | "not_registerable";
+
+/** A 404 body larger than this is not an RDAP error object; do not parse it. */
+const RDAP_404_MAX_BODY = 200_000;
+
+export function interpretRdap404(body: string | null | undefined): Rdap404Meaning {
+  if (!body || body.length > RDAP_404_MAX_BODY) return "not_registered";
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    return "not_registered";
+  }
+  const description = (parsed as { description?: unknown } | null)?.description;
+  const lines = Array.isArray(description) ? description : [description];
+  const text = lines.filter((l): l is string => typeof l === "string").join(" ").toLowerCase();
+  if (!text) return "not_registered";
+  if (/\breserved\b/.test(text) && !/\brights reserved\b/.test(text)) return "reserved";
+  if (/\bnot available\b|\bunavailable\b|\bcannot be registered\b|\bblocked\b/.test(text)) return "not_registerable";
+  return "not_registered";
+}

@@ -1,7 +1,7 @@
 // Pure unit tests for the availability safeguards — NO network.
 // Run with: deno test supabase/functions/_shared/pipeline_test.ts
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { interpretDomainr, isLikelyBlocked } from "./availability-rules.ts";
+import { interpretDomainr, interpretRdap404, isLikelyBlocked } from "./availability-rules.ts";
 import { checkDomains, isLikelyPremium, porkbunRenewalPrice, trustsAggregator404, willEscalateToThirdSignal, type DomainCheckResult } from "./pipeline.ts";
 
 // ---- interpretDomainr -------------------------------------------------------
@@ -361,7 +361,7 @@ Deno.test({ name: "checkDomains: probes leave before the DB cache answers; a cac
       await cacheGate;
       cacheSettled = true;
       return {
-        data: [{ domain: "cachedname.com", available: true, checked_via: "domainr", rdap_data: { cache_version: 4, reg_price: 9.99, premium: false } }],
+        data: [{ domain: "cachedname.com", available: true, checked_via: "domainr", rdap_data: { cache_version: 5, reg_price: 9.99, premium: false } }],
         error: null,
       };
     }
@@ -519,3 +519,101 @@ Deno.test("porkbunRenewalPrice: object form, bare number, strings — and nothin
   assertEquals(porkbunRenewalPrice({ price: "n/a" }), undefined);
   assertEquals(porkbunRenewalPrice(0), undefined);
 });
+
+// ---- A registry 404 that says "reserved" is not a free name -----------------
+// Regression for 2026-11-21: `garden.tech` has no registration and no DNS, the
+// registry answers 404 — and says in the body that the name is reserved. Every
+// 404 used to read as "not registered", so the API reported it available at the
+// extension's standard price. Bodies below are the registry's own, captured
+// that day from rdap.radix.host.
+const RADIX_404_RESERVED = JSON.stringify({
+  rdapConformance: ["rdap_level_0", "icann_rdap_response_profile_1", "icann_rdap_technical_implementation_guide_1", "redacted"],
+  errorCode: 404,
+  title: "Not Found",
+  description: ["Domain Name: garden.tech", "This name is not available for registration:", "Domain name is registry reserved"],
+});
+const radix404Free = (domain: string) => JSON.stringify({
+  rdapConformance: ["rdap_level_0", "icann_rdap_response_profile_1", "icann_rdap_technical_implementation_guide_1", "redacted"],
+  errorCode: 404,
+  title: "Not Found",
+  description: [`Domain ${domain} is available for registration`, "Please visit https://rdap.radix.host/registrars/ for a list of accredited registrars"],
+});
+const RADIX_404_WRONG_TLD = JSON.stringify({
+  errorCode: 404,
+  title: "Not Found",
+  description: ["Domain Name: coffee.xyz", "This name is not available for registration:", "Tld not supported by this registry interface"],
+});
+
+Deno.test("interpretRdap404: the registry's own wording decides, and only its error description is read", () => {
+  assertEquals(interpretRdap404(RADIX_404_RESERVED), "reserved");
+  assertEquals(interpretRdap404(radix404Free("qqzzxxjjkkvv.tech")), "not_registered");
+  assertEquals(interpretRdap404(RADIX_404_WRONG_TLD), "not_registerable");
+  // The other registries' plain 404s: empty (Verisign), "Object not found", "<name> not found".
+  assertEquals(interpretRdap404(""), "not_registered");
+  assertEquals(interpretRdap404(JSON.stringify({ errorCode: 404, title: "Object not found", description: ["Object not found"] })), "not_registered");
+  assertEquals(interpretRdap404(JSON.stringify({ errorCode: 404, description: ["qqzzxxjjkkvv.dev not found"] })), "not_registered");
+  // Terms-of-service prose in `notices` says nothing about the name.
+  assertEquals(
+    interpretRdap404(JSON.stringify({ errorCode: 404, description: ["Object not found"], notices: [{ description: ["The registry reserves the right to restrict access. All rights reserved."] }] })),
+    "not_registered",
+  );
+  // Not an RDAP error object at all (an HTML error page): nothing to read.
+  assertEquals(interpretRdap404("<html><body>404 — all rights reserved</body></html>"), "not_registered");
+});
+
+Deno.test({ name: "checkDomains: a registry-reserved name (404 + 'registry reserved') is never available; a plain 404 in the same TLD still is", sanitizeOps: false, sanitizeResources: false, fn: async () => {
+  const realFetch = globalThis.fetch;
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  const rdap404 = (body: string) => new Response(body, { status: 404, headers: { "content-type": "application/rdap+json" } });
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input);
+    // The registry and the aggregator (which redirects to it) give the same body.
+    if (url.endsWith("/domain/garden.tech")) return rdap404(RADIX_404_RESERVED);
+    if (url.endsWith("/domain/gardenplot.tech")) return rdap404(radix404Free("gardenplot.tech"));
+    if (url.endsWith("/domain/gardenwall.tech")) return rdap404(RADIX_404_WRONG_TLD);
+    if (url.includes("dns-query") || url.includes("dns.google") || url.includes("adguard")) return json({ Status: 3, Answer: [] }); // NXDOMAIN for all three
+    if (url.includes("data.iana.org")) return json({ services: [] });
+    if (url.includes("porkbun.com")) return json({ status: "SUCCESS", pricing: { tech: { registration: "6.99", renewal: "50.98" } } });
+    return new Response("", { status: 404 });
+  }) as typeof fetch;
+
+  // Capture what would be written to the shared cache.
+  const written: Array<{ domain: string; available: boolean }> = [];
+  const base = stubSupabase(async () => ({ data: [], error: null })) as unknown as { from: (t: string) => Record<string, unknown>; rpc: unknown };
+  const supabase = {
+    rpc: base.rpc,
+    from: (table: string) => {
+      const q = base.from(table);
+      const upsert = q.upsert as (rows: unknown) => unknown;
+      q.upsert = (rows: unknown) => {
+        if (table === "domain_cache") written.push(...(Array.isArray(rows) ? rows : [rows]) as Array<{ domain: string; available: boolean }>);
+        return upsert(rows);
+      };
+      return q;
+    },
+  } as unknown as NonNullable<Parameters<typeof checkDomains>[1]>["supabase"];
+
+  try {
+    const results = await checkDomains(["garden.tech", "gardenplot.tech", "gardenwall.tech"], { supabase, thirdSignalDeadlineAt: Date.now() + 1000 });
+    const by = new Map(results.map((r) => [r.domain, r]));
+
+    // Reserved by the registry: not available, and not "couldn't verify" either — the registry was explicit.
+    const reserved = by.get("garden.tech")!;
+    assertEquals([reserved.available, reserved.uncertain ?? false, reserved.checkedVia], [false, false, "rdap"]);
+    assertEquals(reserved.price, undefined, "a reserved name carries no price");
+
+    // The ordinary free name in the same TLD is untouched by the fix.
+    const free = by.get("gardenplot.tech")!;
+    assertEquals([free.available, free.uncertain ?? false, free.checkedVia], [true, false, "rdap"]);
+
+    // "Not available for registration" for a reason we do not recognise: never available, honestly uncertain.
+    const refused = by.get("gardenwall.tech")!;
+    assertEquals([refused.available, refused.uncertain], [false, true]);
+
+    // Nothing but the free name may reach the cache as available.
+    assertEquals(written.filter((w) => w.available).map((w) => w.domain), ["gardenplot.tech"]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+} });
+

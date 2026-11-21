@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   interpretDomainr,
+  interpretRdap404,
   isLikelyBlocked,
   shouldEscalateToDomainr,
 } from "../../supabase/functions/_shared/availability-rules.ts";
@@ -93,5 +94,45 @@ describe("isLikelyBlocked", () => {
     expect(isLikelyBlocked("kvarturbo2748.digital")).toBe(false);
     expect(isLikelyBlocked("acmecoffee.shop")).toBe(false);
     expect(isLikelyBlocked("googleplex.com")).toBe(false);
+  });
+});
+
+
+// What a registry's RDAP 404 says about the name. Bodies are real ones, captured
+// 2026-11-21 (rdap.radix.host for the first three).
+describe("interpretRdap404", () => {
+  const body = (description: string[], extra: Record<string, unknown> = {}) =>
+    JSON.stringify({ errorCode: 404, title: "Not Found", description, ...extra });
+
+  it("registry reserved → reserved (garden.tech)", () => {
+    expect(
+      interpretRdap404(body(["Domain Name: garden.tech", "This name is not available for registration:", "Domain name is registry reserved"])),
+    ).toBe("reserved");
+  });
+
+  it("a plain unregistered name in the same TLD → not_registered", () => {
+    expect(
+      interpretRdap404(body(["Domain qqzzxxjjkkvv.tech is available for registration", "Please visit https://rdap.radix.host/registrars/ for a list of accredited registrars"])),
+    ).toBe("not_registered");
+  });
+
+  it("'not available for registration' for another reason → not_registerable, never free", () => {
+    expect(
+      interpretRdap404(body(["Domain Name: coffee.xyz", "This name is not available for registration:", "Tld not supported by this registry interface"])),
+    ).toBe("not_registerable");
+  });
+
+  it("the other registries' ordinary 404s stay not_registered", () => {
+    expect(interpretRdap404("")).toBe("not_registered"); // Verisign: empty body
+    expect(interpretRdap404(undefined)).toBe("not_registered");
+    expect(interpretRdap404(body(["Object not found"]))).toBe("not_registered"); // Identity Digital, PIR
+    expect(interpretRdap404(body(["qqzzxxjjkkvv.dev not found"]))).toBe("not_registered"); // Google Registry
+  });
+
+  it("reads only the error's own description — not terms-of-service notices, not HTML", () => {
+    const notices = [{ title: "Terms of Service", description: ["The registry reserves the right to restrict access. All rights reserved."] }];
+    expect(interpretRdap404(body(["Object not found"], { notices }))).toBe("not_registered");
+    expect(interpretRdap404("<html><body>404 — all rights reserved, name reserved</body></html>")).toBe("not_registered");
+    expect(interpretRdap404(body(["Copyright 2026. All rights reserved."]))).toBe("not_registered");
   });
 });

@@ -46,7 +46,8 @@ All availability/pricing logic lives in `supabase/functions/_shared/pipeline.ts`
 ### Trust hierarchy (the honesty core)
 
 - AVAILABLE only when >=1 authoritative "yes": RDAP 404 AND DNS NXDOMAIN agree, OR Fastly says inactive/unregistered.
-- TAKEN when RDAP returns a registration, OR DNS has A/NS/MX records, OR Fastly says active/parked.
+- TAKEN when RDAP returns a registration, OR DNS has A/NS/MX records, OR Fastly says active/parked, OR the registry's RDAP 404 says in its body that the name is reserved.
+- **A 404 is read, not just counted (2026-11-21, `interpretRdap404` in `_shared/availability-rules.ts`).** Some registries answer 404 for a name they will never hand out and say so in the error's `description`: `garden.tech` returned "This name is not available for registration: Domain name is registry reserved" while the pipeline, which discarded the body, reported it available at the extension's standard price. Now: "reserved" → taken; "not available / cannot be registered" for any other stated reason → uncertain; anything else → the ordinary "not registered". Only the error's own top-level `description` is read — the `notices` beside it are terms-of-service prose. The browser lane applies the same reading but never calls such a name taken: it stays unknown and the edge verdict fills the card. Seen on the Radix registry (.tech, .store, .site, .online, .space and six more); Google Registry gives no such marker (`test.dev` and a random name answer alike), so this does not cover reserved names there. It also does not touch premium pricing: a registry-premium name still answers a plain 404.
 - UNCERTAIN otherwise (API failure, non-definitive answer, or signals conflict) -> returns available:false + uncertain:true. NEVER falsely "available".
 
 This is the single most important invariant. An uncertain result is NEVER cached and NEVER shown as available.

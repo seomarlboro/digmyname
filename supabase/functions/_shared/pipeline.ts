@@ -13,6 +13,7 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   interpretDomainr,
+  interpretRdap404,
   isLikelyBlocked,
   shouldEscalateToDomainr,
   type DomainrStatusEntry,
@@ -31,7 +32,8 @@ import {
 // Trust hierarchy (P0):
 //   AVAILABLE only when ≥1 authoritative "yes" exists:
 //     • GoDaddy { available: true, definitive: true }, OR
-//     • RDAP 404 AND no DNS records.
+//     • RDAP 404 AND no DNS records — and the 404's body does not say the
+//       registry reserves the name (interpretRdap404, 2026-11-21).
 //   TAKEN when:
 //     • GoDaddy { available: false, definitive: true }, OR
 //     • RDAP returns a registration object, OR
@@ -45,7 +47,10 @@ import {
 // 4 (2026-08-15): aggregator-404 trust, DoH NXDOMAIN-only and the narrowed
 // block list all change what a verdict MEANS, and the false available:true rows
 // they produced were cached for 6h. Old rows must be re-resolved, not reused.
-const CACHE_VERSION = 4;
+// 5 (2026-11-21): a registry RDAP 404 whose body says the name is reserved is
+// no longer read as "not registered" (interpretRdap404). Rows cached as
+// available under the old reading (`garden.tech`, 6 h) must not be served.
+const CACHE_VERSION = 5;
 
 
 export interface DomainCheckResult {
@@ -395,7 +400,13 @@ export async function loadRdapBootstrap(): Promise<Map<string, string[]>> {
 // .shop registry, starts answering 429 in ~90 ms after 3-4 requests from one IP
 // and recovers after ~5 s of quiet — that is what made 82 % of .shop verdicts
 // fall through to the PAID third signal).
-type RdapAnswer = { state: RdapState; sinceYear?: number; throttled?: boolean };
+// `reserved`: the registry answered 404 and said in the body that it holds the
+// name back — not registered, and not registerable. It travels as `taken`,
+// the same reading the third signal's `reserved` token gets.
+// `refused`: the 404 body says the name cannot be registered for a reason we do
+// not recognise. The state stays `unknown` (it proves neither verdict), but the
+// answer is decisive — nothing weaker may turn it into "available".
+type RdapAnswer = { state: RdapState; sinceYear?: number; throttled?: boolean; reserved?: boolean; refused?: boolean };
 
 /** Extract the registration YEAR from an RDAP response body. Mirrors the
  *  `domain-age` function's event parsing and the MCP's `yearFromIso` guard
@@ -417,7 +428,11 @@ async function rdapQueryOnce(url: string, timeoutMs: number, signal?: AbortSigna
   try {
     const resp = await fetch(url, { signal: probeSignal(timeoutMs, signal) });
     if (resp.status === 404) {
-      await resp.text().catch(() => {});
+      // A 404 is not always "nobody holds this name": the registry may say in
+      // the body that it is reserved. The body was already being downloaded.
+      const meaning = interpretRdap404(await resp.text().catch(() => ""));
+      if (meaning === "reserved") return { state: "taken", reserved: true };
+      if (meaning === "not_registerable") return { state: "unknown", refused: true };
       return { state: "available" };
     }
     if (resp.ok) {
@@ -589,8 +604,11 @@ async function checkRdap(domain: string, signal?: AbortSignal, deadlineAt?: numb
 
   // Query the registry endpoint(s) and hedge with the public aggregator after
   // RDAP_HEDGE_DELAY_MS instead of waiting out a full 3s timeout before falling back.
+  // A registry that says "this name cannot be registered" has answered, even
+  // though the state is `unknown`: it ends the race so a later 404 from another
+  // endpoint cannot be read as "free".
   const decisive = (p: Promise<RdapAnswer>) =>
-    p.then((a) => (a.state === "unknown" ? PENDING_FOREVER<RdapAnswer>() : a));
+    p.then((a) => (a.state === "unknown" && !a.refused ? PENDING_FOREVER<RdapAnswer>() : a));
 
   // Cancel the losing RDAP probes as soon as one is decisive.
   const ctl = new AbortController();
@@ -616,6 +634,10 @@ async function checkRdap(domain: string, signal?: AbortSignal, deadlineAt?: numb
     const answer = await Promise.race([
       ...all.map(decisive),
       Promise.all(all).then((answers) =>
+        // A registration found anywhere wins; then a registry's refusal; only
+        // then a plain "not registered".
+        answers.find((a) => a.state === "taken") ??
+        answers.find((a) => a.refused) ??
         answers.find((a) => a.state !== "unknown") ??
         ({ state: "unknown" as RdapState, throttled: answers.some((a) => a.throttled) })
       ),

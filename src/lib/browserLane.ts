@@ -12,13 +12,14 @@
  *   - taken: registry RDAP 200, or DNS has records (either alone is decisive);
  *   - available: RDAP 404 AND NXDOMAIN, and only when the edge would not
  *     escalate the name (premium suspects and brand-blocked labels stay with
- *     the server and its paid third signal);
+ *     the server and its paid third signal) — and never when the 404's own
+ *     body says the registry reserves the name (`interpretRdap404`);
  *   - anything else is `unknown` and changes nothing on screen.
  * A browser verdict is provisional: the authoritative wave overwrites it, it is
  * never cached, and a row that already has a verdict is never touched.
  */
 import type { DomainResult } from "./domainData";
-import { isLikelyBlocked } from "../../supabase/functions/_shared/availability-rules";
+import { interpretRdap404, isLikelyBlocked } from "../../supabase/functions/_shared/availability-rules";
 import { isPremiumSuspectSld, sldOf } from "./searchLanes";
 
 /** Registry RDAP bases with CORS verified (2026-09-10), a subset of the edge's FAST_RDAP table. */
@@ -146,7 +147,10 @@ function timeoutSignal(ms: number, parent: AbortSignal): AbortSignal {
 async function rdapOnce(url: string, signal: AbortSignal): Promise<RdapState> {
   try {
     const resp = await fetch(url, { headers: { accept: "application/rdap+json" }, signal: timeoutSignal(RDAP_TIMEOUT_MS, signal) });
-    if (resp.status === 404) return "available";
+    // A 404 whose body says the registry holds the name back is not a free name.
+    // The browser never calls it taken either (that takes a registration or DNS
+    // records): it stays `unknown` and the edge verdict fills the card.
+    if (resp.status === 404) return interpretRdap404(await resp.text().catch(() => "")) === "not_registered" ? "available" : "unknown";
     if (resp.ok) return "taken";
     return "unknown";
   } catch {

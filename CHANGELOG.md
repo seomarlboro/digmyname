@@ -2,6 +2,22 @@
 
 All notable changes to DigMyName.
 
+## 2026-11-21 — A name the registry reserves is not a free name (edge + frontend)
+
+### Fixed
+- **A registry-reserved name was reported available.** `garden.tech` has no registration and no DNS, so the registry's RDAP answers 404 — and says in the body "This name is not available for registration: Domain name is registry reserved". The pipeline discarded the body of every 404 and read it as "not registered", so the API and the site showed the name available at the extension's standard price ($6.99). The 404's own error description is now read (`interpretRdap404`, `_shared/availability-rules.ts`): "reserved" is a taken name; "not available / cannot be registered" for another stated reason is an honest uncertain; everything else is the ordinary "not registered", as before.
+- **The browser lane applies the same reading** (`src/lib/browserLane.ts`): such a 404 no longer flips a card to a provisional "available". It stays unknown until the edge answers; the browser still calls a name taken only on a registration or DNS records.
+
+### Changed
+- **`CACHE_VERSION` 4 → 5**, so rows cached as available under the old reading (6 h) are re-resolved instead of served.
+
+### Scope, stated plainly
+- Seen on one registry, Radix (.tech, .store, .site, .online, .space and six more TLDs). Other registries were checked for their plain 404s only; Google Registry gives a reserved name and a random name the same answer, so reserved names there are not caught by this.
+- This does not fix premium pricing. A registry-premium name (`online.store`: $6,823 for the first year at a registrar) still answers a plain 404 and still gets the extension's standard price unless its label is short enough to be checked. Written up in `docs/perf-cache-audit-2026-11.md` §8.
+
+### Tests
+- Regression in both runners with the registry's own bodies: `garden.tech` (reserved) is never available, a plain unregistered name in the same TLD still is, and a "not available" for an unrecognised reason is uncertain (`_shared/pipeline_test.ts`, `src/test/browser-lane.test.ts`, `src/test/availability-rules.test.ts`). The pipeline test fails on the previous code.
+
 ## 2026-10-11 — The daily quota counts the visitor, not the edge (edge + Worker + migration)
 
 ### Fixed
