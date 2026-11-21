@@ -289,7 +289,7 @@ Goal: know about breakage before a visitor does — especially the one failure m
 
 1. **Home page and `/tld` return 200.**
 2. **A no-auth `GET .../public-api/check?domain=` on reference names**, run through the public edge (`api.digmyname.com`, the same host real visitors and the MCP hit) so the check exercises the real pipeline, cache included:
-   - Known-taken: `example.com` / `.org` / `.net` — IANA-reserved (RFC 2606), permanently registered, not a brand SLD, already used by this repo's own `edge-cache-prewarm` list. Must never come back `available`.
+   - Known-taken: `example.com` / `.org` / `.net` — IANA-reserved (RFC 2606), permanently registered, not a brand SLD, also on the `edge-cache-prewarm` list (that job is disabled since 2026-11-21, see the end of this section). Must never come back `available`.
    - Known-free: generated fresh each run, `"qz" + 9 random letters` (same shape as `scripts/bench/first-answer.mjs`'s `freshLabel()`) on `.com`/`.net`/`.org`. Must come back `available` or an honest `uncertain` — never a fabricated `taken`.
    - **Why these never trigger the paid Fastly third signal:** `willEscalateToThirdSignal()` (`_shared/pipeline.ts`) only escalates when a result is `uncertain`, or `available` AND (`isLikelyPremium`: SLD ≤ 5 chars on most TLDs, ≤ 3 on any TLD) or (`isLikelyBlocked`: curated brand list). A taken name is never `available`, so the known-taken set can never escalate regardless of length or brand-list membership. The known-free labels are 11 characters, well past every length gate `isLikelyPremium` checks, and random letters never collide with the brand list. `.co`/`.me` are deliberately excluded — they always escalate by design (§4, no public RDAP for either), so probing them here would just be a paid, noisy re-confirmation of an already-accepted constraint.
    - Response time of every request is logged to the step summary (not gated — that's what `bench-first-answer` is for).
@@ -300,6 +300,18 @@ Goal: know about breakage before a visitor does — especially the one failure m
 
 **Secrets used:** `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (repo secrets, GitHub Actions) — the same anon key already public in the deployed frontend bundle and used by `scripts/generate-tld-prices.ts`; RLS-scoped, read-only for this workflow's purposes. Checks 1–2 need no secret at all. Checks 3–4 fall back to the same two values in the tracked `.env` when the repo secrets are not set (since 2026-10-11 — until then every scheduled run had reported them `⚠️ skipped`, i.e. they had never run in CI), and skip themselves only if neither source has them. A failed reference-name check reports the API's own error code next to the status, e.g. `HTTP 429 (daily_quota)`. No service-role key, no Fastly token, no new write access anywhere. Issue creation uses the default `GITHUB_TOKEN` (`permissions: issues: write`), also no new secret.
 
+
+### `edge-cache-prewarm` is disabled (2026-11-21)
+
+The pg_cron job that asked the edge for 25 popular names every 5 minutes was switched off on 2026-11-21 at 10:47 UTC — disabled, not deleted: `select cron.alter_job(15, active := false);` (`jobid = 15`). To bring it back: `select cron.alter_job(15, active := true);`. If the job row is ever lost, migration `20261011120000_prewarm_internal_key.sql` recreates it. `public-api-keepwarm` (`jobid = 2`, one `/ping` a minute to the direct origin) is a different job and stays on.
+
+Why, measured over 2026-11-14 → 2026-11-21 (`docs/perf-cache-audit-2026-11.md`):
+
+- **It never produced a cache hit.** 0 of 50,371 prewarm requests were served from the edge cache. The Worker caches with the Cache API, whose entries live 60 s and ignore `stale-while-revalidate`; the job came back every 300 s, so each run found its own entries expired and went to the origin — 7,200 Worker invocations, 7,200 edge-function invocations and 7,200 quota writes a day.
+- **It warmed one data center, the wrong one.** The Cache API is local to a data center. 99.7 % of the job's requests entered at DUB (next to the database), where 3 other requests arrived in the whole week.
+- **Its bursts coincided with keep-warm timeouts.** 15 % of the job's own requests got no answer within 5 s, and the keep-warm ping that fell on the same 5-minute mark timed out 35 times out of 66, against 3 of 263 off the mark. In the first 48 minutes after the job was disabled the on-mark rate was 3 of 10 and the off-mark rate 1 of 38 — lower, not gone, on a small sample. So the burst was at most part of the cause; what else slows `/ping` on round minutes is not known yet.
+
+Nothing depends on the job: the 25 names are held by `domain_cache` for 24 h like any taken name. A cache worth warming needs hits first — that is a longer edge TTL for taken names, not a job (audit, R4).
 
 ## 14. Cost of the paid signal, and the three brakes (shipped 2026-09-16)
 
@@ -377,7 +389,7 @@ August's invoice was **$45.05** (~45,000 calls) and September had already reache
 
 Benchmarks, the health monitor, scripts and tests must never send a name through the real pipeline that can reach the paid third signal. Concretely, a probe name must be a **fresh label of 6+ characters** (5 or fewer is a premium suspect on 31 of our TLDs, 3 or fewer on every TLD), **not on the brand block list**, and **not in a zone whose registry cannot answer us** (today: `.shop`). A registered reference name (`example.com`) can never escalate whatever its shape, because it is never `available`.
 
-Pinned by `_shared/our-runs-are-free_test.ts`, which reads the actual scripts. `edge-cache-prewarm` is held to the same rule — two short available names in its list were quietly buying one paid call each per day until migration `20260916170000_prewarm_no_paid_signal.sql` replaced them.
+Pinned by `_shared/our-runs-are-free_test.ts`, which reads the actual scripts. `edge-cache-prewarm` is held to the same rule — two short available names in its list were quietly buying one paid call each per day until migration `20260916170000_prewarm_no_paid_signal.sql` replaced them. (The job is disabled since 2026-11-21, §13; the rule stands for whenever it runs. One name on its list, `online.store`, is not registered today, contrary to that migration's comment.)
 
 ## 15. The daily quota on the public API (shipped 2026-10-05)
 
@@ -403,7 +415,7 @@ What is in place now (`_shared/trusted-caller.ts`, tests in `trusted-caller_test
 - **The Worker vouches for the visitor.** It sends `x-dmn-client-ip` (Cloudflare's `CF-Connecting-IP`) together with `x-dmn-edge-key`. The origin believes the address only when the key checks out. The Worker builds its request headers from scratch, so a visitor cannot inject either one through it.
 - **A claimed address without the key is ignored.** A caller talking to the origin directly is charged to the address the platform reports, as before. A client must never be able to pick its own bucket.
 - **Keys are compared by digest.** This repository is public: the keys live only where they are used (a Worker secret; the database vault) and the code holds their SHA-256. Each is 256 random bits. `EDGE_KEY_SHA256` / `INTERNAL_KEY_SHA256` in the edge environment override the constants, so a key can be rotated without a deploy.
-- **Our own prewarm is counted apart and not capped.** The job reads `edge_internal_key` from the vault when it runs and sends it as `x-dmn-internal-key` (migration `20261011120000_prewarm_internal_key.sql`); the Worker passes it through; the origin counts those requests in the row `caller = 'internal'`. Without this the job would exhaust its own allowance at ~16:40 UTC and warm nothing until midnight.
+- **Our own prewarm is counted apart and not capped.** The job reads `edge_internal_key` from the vault when it runs and sends it as `x-dmn-internal-key` (migration `20261011120000_prewarm_internal_key.sql`); the Worker passes it through; the origin counts those requests in the row `caller = 'internal'`. Without this the job would exhaust its own allowance at ~16:40 UTC and warm nothing until midnight. The job is disabled since 2026-11-21 (§13); the `internal` path stays in the code for it or any other scheduled job of ours.
 - **IPv6 is counted per /64.** One subscriber is handed a /64; counting per address would give them 2^64 allowances.
 - **The Worker passes `Retry-After` on.** It used to drop every origin header, so the refusal described above reached API users without it.
 

@@ -2,6 +2,22 @@
 
 All notable changes to DigMyName.
 
+## 2026-11-21 — The edge cache prewarm is switched off (database cron, no code)
+
+### Changed
+- **`edge-cache-prewarm` is disabled** since 2026-11-21 10:47 UTC: `select cron.alter_job(15, active := false);` (`jobid = 15`). Disabled, not deleted. **Rollback:** `select cron.alter_job(15, active := true);`. The keep-warm ping (`public-api-keepwarm`) is untouched.
+
+### Why
+- **0 cache hits in 50,371 requests** over 2026-11-14 → 2026-11-21. Edge entries live 60 s (the Workers Cache API ignores `stale-while-revalidate`) and the job ran every 300 s, so every run went to the origin: 7,200 Worker invocations, 7,200 edge-function invocations and 7,200 quota writes a day — 40 % of the Worker's traffic.
+- **It warmed only DUB**, where 3 other requests arrived that week; the Cache API is local to a data center.
+- **Its bursts coincided with keep-warm timeouts** (35 of 66 pings on the 5-minute mark, against 3 of 263 off it).
+
+### Checked after
+- 31 minutes later: no `pg_net` requests at the edge, no cache lookups at DUB, no runs in `cron.job_run_details`.
+- Keep-warm timeouts did **not** return to the ~1 % baseline in the first 48 minutes: 3 of 10 on the 5-minute mark, 1 of 38 off it. Lower than before on a small sample; the prewarm was not the only thing slowing `/ping` on round minutes. Still open.
+
+Full measurements: `docs/perf-cache-audit-2026-11.md`.
+
 ## 2026-11-21 — A name the registry reserves is not a free name (edge + frontend)
 
 ### Fixed

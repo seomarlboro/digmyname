@@ -333,7 +333,9 @@ where created > '2026-11-21 10:47:23+00'
 group by 1;
 ```
 
-Not done as part of this step (repo untouched): `docs/DIGMYNAME_ARCHITECTURE.md` §13–§15 and the migration comments still describe the job as running, and there is no CHANGELOG entry. The repo's migrations would also re-enable nothing on their own — they are already applied — but a fresh environment built from them would have the job active.
+Later reading, 48 minutes after the change (11:35Z): on the mark 7 OK / **3 timed out** (11:00, 11:20, 11:30Z); off the mark 37 OK / 1 timed out. The on-mark rate fell from 53 % to 3 of 10 but did not disappear, so the prewarm burst was at most part of the cause of those timeouts. What else slows `/ping` on round minutes was not investigated.
+
+Recorded since in `CHANGELOG.md` and `docs/DIGMYNAME_ARCHITECTURE.md` §13–§15. The migration comments still describe the job as running. The repo's migrations would also re-enable nothing on their own — they are already applied — but a fresh environment built from them would have the job active.
 
 ---
 
